@@ -54,8 +54,8 @@ class DiagnosticTest(object):
                 return False
             else:
                 self.log_msg("-- PASSED -- compressed file sizes changed by {}% (<{}%)".format(fchange,
-			     fchange_threshold * 100))
-		return True
+                                                                                               fchange_threshold * 100))
+        return True
 
     def test_snapshots_dryrun(self):
         tmp_test_file = "/tmp/voteshield_head_{}_{}.csv".format(uuid.uuid4(), self.preproc_obj.download_date)
