@@ -6,6 +6,12 @@ file_class: voter_file
 voter_id: SOS_VOTERID
 county_identifier: County_Code
 birthday_identifier: Birth_Date
+voter_status: County_Status
+voter_status_active: ACTIVE
+voter_status_inactive: INACTIVE
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation: Non-Partisan
 party_identifier: Party_Affiliation
 numeric_county: true
 primary_key:

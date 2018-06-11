@@ -8,6 +8,12 @@ file_class: voter_file
 voter_id: VoterID
 county_identifier: County
 birthday_identifier: Birth_Date
+voter_status: County_Status
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation: Non-Partisan
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
