@@ -5,7 +5,7 @@ file_class: voter_file
 voter_id: SOS_VOTERID
 county_identifier: COUNTY_NUMBER
 birthday_identifier: DATE_OF_BIRTH
-voter_status: County_Status
+voter_status: VOTER_STATUS
 voter_status_active: ACTIVE
 voter_status_inactive: CONFIRMATION
 democratic_party: D
