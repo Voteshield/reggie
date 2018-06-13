@@ -130,7 +130,8 @@ class Loader(object):
             logging.info("compressing")
             p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
             p.communicate()
-            self.main_file += ".gz"
+            if self.main_file[-3:] != ".gz":
+                self.main_file += ".gz"
             self.is_compressed = True
 
     def decompress(self, compression_type="gunzip"):
@@ -209,9 +210,6 @@ class Preprocessor(Loader):
                     output.append('n')
 
             return output
-
-        def fast_dummy(g):
-            return list(g.date)
 
         voting_histories = df_hist.groupby(self.config["voter_id"]).apply(place_vote_hist)
         df_voters = df_voters.set_index(self.config["voter_id"])
