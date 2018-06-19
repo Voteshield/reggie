@@ -64,6 +64,16 @@ additional_snapshot_columns:
   general_history: text[]
   special_history: text[]
   primary_history: text[]
+generated_columns:
+  all_history: text[]
+  general_history: text[]
+  special_history: text[]
+  primary_history: text[]
+ordered_generated_columns:
+  - all_history
+  - general_history
+  - special_history
+  - primary_history
 columns:
   COUNTY_NUMBER: text
   COUNTY_ID: text
