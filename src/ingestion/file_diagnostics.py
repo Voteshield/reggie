@@ -32,11 +32,12 @@ class TestFileBuilder(Preprocessor):
         else:
             df = pd.read_csv(self.main_file)
             counties = df[self.config["county_identifier"]].value_counts()
-            small_county = counties.values[-1][0]
-            filtered_data = df[df[self.config["county_identifier"]] == small_county]
+            two_small_counties = counties.values[-2:, 0]
+            filtered_data = df[(df[self.config["county_identifier"]] == two_small_counties[0]) |
+                               (df[self.config["county_identifier"]] == two_small_counties[1])]
             filtered_data.reset_index(inplace=True)
             filtered_data.to_csv(self.main_file)
-            logging.info("using '{}' county".format(small_county))
+            logging.info("using '{}' counties".format(" and ".join(two_small_counties.tolist())))
             self.compress()
 
             if save_remote:
