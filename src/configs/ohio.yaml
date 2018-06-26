@@ -10,7 +10,7 @@ voter_status_active: ACTIVE
 voter_status_inactive: CONFIRMATION
 democratic_party: D
 republican_party: R
-no_party_affiliation: NULL
+no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
 numeric_county: true
 party_identifier: PARTY_AFFILIATION
