@@ -159,7 +159,6 @@ class Loader(object):
             self.download_date = ohio_get_last_updated().isoformat()
     
         with open(self.main_file) as f:
-            self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
                 .put(Body=f, Metadata={"last_updated": self.download_date})
 

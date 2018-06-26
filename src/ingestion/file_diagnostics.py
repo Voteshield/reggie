@@ -3,10 +3,61 @@ import json
 import os
 import uuid
 from os import stat
-
+import pandas as pd
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
-from storage import load_configs_from_file
+from storage import load_configs_from_file, state_from_str
+from ingestion.download import Preprocessor
+from constants import logging, S3_BUCKET, RAW_FILE_PREFIX
+from storage.connections import s3
+
+
+class TestFileBuilder(Preprocessor):
+    def __init__(self, s3_key, state=None):
+        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key)
+        if state is not None:
+            self.state = state_from_str(s3_key)
+        else:
+            self.state = state
+        self.config = load_configs_from_file(state=self.state)
+
+    def test_key(self, name):
+        return "{}/{}/testing/{}".format(RAW_FILE_PREFIX, self.state, name)
+
+    def build(self, file_name, save_local=False, save_remote=True):
+        self.decompress()
+        if self.config["format"]["separate_hist"]:
+            pass
+            #Todo
+        else:
+            df = pd.read_csv(self.main_file)
+            counties = df[self.config["county_identifier"]].value_counts()
+            small_county = counties.values[-1][0]
+            filtered_data = df[df[self.config["county_identifier"]] == small_county]
+            filtered_data.reset_index(inplace=True)
+            filtered_data.to_csv(self.main_file)
+            logging.info("using '{}' county".format(small_county))
+            self.compress()
+
+            if save_remote:
+                with open(self.main_file) as f:
+                    s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f, Metadata={"last_updated": self.download_date})
+            if save_local:
+                os.rename(self.main_file, file_name)
+
+
+class ProcessedTestFileBuilder(object):
+    def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
+        self.df = Snapshot.load_from_s3(s3_key, compression=compression)
+        self.randomize = randomize
+        self.size = size
+
+    def build(self, file_name):
+        if self.randomize:
+            df = self.df.sample(n=self.size)
+        else:
+            df = self.df.head(n=self.size)
+        df.to_csv(file_name, compression='gzip')
 
 
 class DiagnosticTest(object):

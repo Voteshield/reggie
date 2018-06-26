@@ -74,6 +74,12 @@ ordered_generated_columns:
   - general_history
   - special_history
   - primary_history
+format:
+  separate_hist: false
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: false
+  columnar_elections: true
 columns:
   COUNTY_NUMBER: text
   COUNTY_ID: text

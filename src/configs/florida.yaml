@@ -64,6 +64,12 @@ summary_types:
   - int
   - int
   - int
+format:
+  separate_hist: true
+  separate_counties_voter_file: true
+  separate_counties_hist_file: true
+  hist_election_rows: true
+  columnar_elections: false
 columns:
   County_Code: text
   Voter_ID: text
