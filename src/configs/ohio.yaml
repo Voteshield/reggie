@@ -157,87 +157,92 @@ data_chunk_links:
   - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:365
   - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:366
 county_names:
-  adams: 1
-  allen: 2
-  ashland: 3
-  ashtabula: 4
-  athens: 5
-  auglaize: 6
+  adams: 1,
+  allen: 2,
+  ashland: 3,
+  ashtabula: 4,
+  athens: 5,
+  auglaize: 6,
   belmont: 7,
-  brown: 8
-  butler: 9
-  carroll: 10
-  champaign: 11
-  clark: 12
-  clermont: 13
+  brown: 8,
+  butler: 9,
+  carroll: 10,
+  champaign: 11,
+  clark: 12,
+  clermont: 13,
   clinton: 14,
-  columbiana: 15
-  coshocton: 16
-  crawford: 17
-  cuyahoga: 18
-  darke: 19
+  columbiana: 15,
+  coshocton: 16,
+  crawford: 17,
+  cuyahoga: 18,
+  darke: 19,
   defiance: 20,
-  delaware: 21
-  erie: 22
-  fairfield: 23
-  fayette: 24
-  franklin: 25
-  fulton: 26
+  delaware: 21,
+  erie: 22,
+  fairfield: 23,
+  fayette: 24,
+  franklin: 25,
+  fulton: 26,
   gallia: 27,
-  geauga: 28
-  greene: 29
-  guernsey: 30
-  hamilton: 31
-  hancock: 32
-  hardin: 33
+  geauga: 28,
+  greene: 29,
+  guernsey: 30,
+  hamilton: 31,
+  hancock: 32,
+  hardin: 33,
   harrison: 34,
-  henry: 35
-  highland: 36
-  hocking: 37
-  holmes: 38
-  huron: 39
-  jackson: 40
+  henry: 35,
+  highland: 36,
+  hocking: 37,
+  holmes: 38,
+  huron: 39,
+  jackson: 40,
   jefferson: 41,
-  knox: 42
-  lake: 43
-  lawrence: 44
-  licking: 45
-  logan: 46
-  lorain: 47
+  knox: 42,
+  lake: 43,
+  lawrence: 44,
+  licking: 45,
+  logan: 46,
+  lorain: 47,
   lucas: 48,
-  madison: 49
-  mahoning: 50
-  marion: 51
-  medina: 52
-  meigs: 53
-  mercer: 54
+  madison: 49,
+  mahoning: 50,
+  marion: 51,
+  medina: 52,
+  meigs: 53,
+  mercer: 54,
   miami: 55,
-  monroe: 56
-  montgomery: 57
-  morgan: 58
-  morrow: 59
-  muskingum: 60
-  noble: 61
+  monroe: 56,
+  montgomery: 57,
+  morgan: 58,
+  morrow: 59,
+  muskingum: 60,
+  noble: 61,
   ottawa: 62,
-  paulding: 63
-  perry: 64
-  pickaway: 65
-  pike: 66
-  portage: 67
-  preble: 68
+  paulding: 63,
+  perry: 64,
+  pickaway: 65,
+  pike: 66,
+  portage: 67,
+  preble: 68,
   putnam: 69,
-  richland: 70
-  ross: 71
-  sandusky: 72
-  scioto: 73
-  seneca: 74
-  shelby: 75
+  richland: 70,
+  ross: 71,
+  sandusky: 72,
+  scioto: 73,
+  seneca: 74,
+  shelby: 75,
   stark: 76,
-  summit: 77
-  trumbull: 78
-  tuscarawas: 79
-  union: 80
-  vanwert: 81
-  vinton: 82
+  summit: 77,
+  trumbull: 78,
+  tuscarawas: 79,
+  union: 80,
+  vanwert: 81,
+  vinton: 82,
   warren: 83,
-  washington: 84
+  washington: 84,
+  wayne: 85,
+  williams: 86,
+  wood: 87,
+  wyandot: 88
+
