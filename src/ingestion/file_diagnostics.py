@@ -14,6 +14,7 @@ from storage.connections import s3
 
 class TestFileBuilder(Preprocessor):
     def __init__(self, s3_key, state=None):
+
         super(TestFileBuilder, self).__init__(raw_s3_file=s3_key)
         if state is None:
             self.state = state_from_str(s3_key)
@@ -42,11 +43,10 @@ class TestFileBuilder(Preprocessor):
                                (df[self.config["county_identifier"]] == two_small_counties[1])]
             filtered_data.reset_index(inplace=True, drop=True)
             filtered_data.to_csv(self.main_file, compression='gzip')
-            logging.info("using '{}' counties".format(" and ".join([str(a) for a  in two_small_counties.tolist()])))
+            logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
             if save_remote:
                 with open(self.main_file) as f:
-                    print(self.test_key(file_name))
                     s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
                                                                        Metadata={"last_updated": self.download_date})
             if save_local:
