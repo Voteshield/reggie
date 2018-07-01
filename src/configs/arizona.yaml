@@ -1,5 +1,6 @@
 # Arizona voter file/history will upload as a single .zip file with the date of creation as the filename- for instance
-# "20180319.zip". History is included in these files, also columns for each election plus party primary the voter participated in and method of voting.
+# "20180319.zip". History is included in these files, also columns for each election plus party primary the voter 
+# participated in and method of voting.
 #File also contain occupations! No idea what to do with this.
 #This zip contains 14 xlsx files:
 #13 COUNTIES - ACTIVE.xlsx
