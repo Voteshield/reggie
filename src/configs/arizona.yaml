@@ -37,6 +37,11 @@ no_party_affiliation: OTHER
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: desc_party
+format:
+  separate_hist: false
+  segmented_files: true
+  ignore_substr:
+    - LEGEND
 primary_key:
   - pre_date
   - post_date
