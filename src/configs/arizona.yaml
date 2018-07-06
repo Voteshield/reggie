@@ -18,7 +18,7 @@
 #PIMA - CANCELED.xlsx
 #PIMA - INACTIVE.xlsx
 file_type: xlsx
-state: Arizona
+state: arizona
 source: boe
 file_class: voter_file
 voter_id: text_registrant_id

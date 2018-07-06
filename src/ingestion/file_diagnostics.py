@@ -8,7 +8,7 @@ from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
 from storage import load_configs_from_file, state_from_str
 from ingestion.download import Preprocessor
-from constants import logging, S3_BUCKET, RAW_FILE_PREFIX
+from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
 
 
@@ -23,7 +23,7 @@ class TestFileBuilder(Preprocessor):
         self.config = load_configs_from_file(state=self.state)
 
     def test_key(self, name):
-        return "{}/{}/testing/{}".format(RAW_FILE_PREFIX, self.state, name)
+        return "/testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
@@ -56,8 +56,12 @@ class TestFileBuilder(Preprocessor):
 class ProcessedTestFileBuilder(object):
     def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
         self.df = Snapshot.load_from_s3(s3_key, compression=compression)
+        self.state = state_from_str(s3_key)
         self.randomize = randomize
         self.size = size
+
+    def test_key(self, name):
+        return "/testing/{}/{}/{}".format(PROCESSED_FILE_PREFIX, self.state, name)
 
     def build(self, file_name):
         if self.randomize:

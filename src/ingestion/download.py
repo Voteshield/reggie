@@ -174,18 +174,21 @@ class Preprocessor(Loader):
     def s3_download(self):
         get_object(self.raw_s3_file, self.main_file)
 
+    def unpack_files(self, compression="unzip"):
+        dir_path = os.path.dirname(self.main_file)
+        before = set(os.listdir(dir_path))
+        self.decompress(compression_type=compression)
+        after = set(os.listdir(dir_path))
+        new_files = list(after.difference(before))
+        new_files = ["{}/{}".format(dir_path, n) for n in new_files]
+        return new_files
+
     def preprocess_generic(self):
         logging.info("preprocessing generic")
         self.decompress()
 
     def preprocess_nevada(self):
-        logging.info("preprocessing nevada")
-        dir_path = os.path.dirname(self.main_file)
-        before = set(os.listdir(dir_path))
-        self.decompress(compression_type="unzip")
-        after = set(os.listdir(dir_path))
-        new_files = list(after.difference(before))
-        new_files = ["{}/{}".format(dir_path, n) for n in new_files]
+        new_files = self.unpack_files(compression='unzip')
         voter_file = new_files[0] if "ElgbVtr" in new_files[0] else new_files[1]
         hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
         self.temp_files.extend([hist_file, voter_file])
@@ -219,13 +222,22 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_arizona(self):
+        new_files = self.unpack_files(compression="unzip")
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
+
+
     def execute(self):
         self.state_router()
 
     def state_router(self):
-        routes = {'nevada': self.preprocess_nevada}
+        routes = {
+            'nevada': self.preprocess_nevada,
+            'arizona': self.preprocess_arizona
+        }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
+            logging.info("preprocessing {}".format(self.config["state"]))
             f()
         else:
             self.preprocess_generic()
