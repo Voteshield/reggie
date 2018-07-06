@@ -40,8 +40,8 @@ party_identifier: desc_party
 format:
   separate_hist: false
   segmented_files: true
-  ignore_substr:
-    - LEGEND
+  ignore_files:
+    - LEGEND.xlsx
 primary_key:
   - pre_date
   - post_date

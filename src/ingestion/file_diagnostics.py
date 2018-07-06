@@ -41,8 +41,16 @@ class TestFileBuilder(Preprocessor):
             pass
         else:
             if self.config["format"]["segmented_files"]:
-                df = pd.read_csv(self.main_file, compression='zip')
-
+                new_files = self.unpack_files()
+                to_use = new_files[0]
+                current_size = os.fstat(to_use)
+                for f in new_files:
+                    sz = os.fstat(f)
+                    if sz > current_size:
+                        current_size = sz
+                        to_use = f
+                if self.config["file_type"] == "xlsx":
+                    df = pd.read_excel
                 two_small_counties = self.get_smallest_counties(df, count=2)
 
             else:

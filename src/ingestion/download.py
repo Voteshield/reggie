@@ -164,7 +164,7 @@ class Loader(object):
 
 
 class Preprocessor(Loader):
-    def __init__(self, raw_s3_file, config_file=CONFIG_OHIO_FILE, clean_up_tmp_files=True):
+    def __init__(self, raw_s3_file, config_file, clean_up_tmp_files=True):
         super(Preprocessor, self).__init__(config_file=config_file,
                                            force_date=date_from_str(raw_s3_file),
                                            clean_up_tmp_files=clean_up_tmp_files)
@@ -180,7 +180,10 @@ class Preprocessor(Loader):
         self.decompress(compression_type=compression)
         after = set(os.listdir(dir_path))
         new_files = list(after.difference(before))
-        new_files = ["{}/{}".format(dir_path, n) for n in new_files]
+        if "ignore_files" in self.config["format"]:
+            new_files = ["{}/{}".format(dir_path, n) for n in new_files if n not in self.config["format"]["ignore_files"]]
+        else:
+            new_files = ["{}/{}".format(dir_path, n) for n in new_files]
         return new_files
 
     def preprocess_generic(self):
