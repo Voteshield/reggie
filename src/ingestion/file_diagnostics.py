@@ -22,6 +22,14 @@ class TestFileBuilder(Preprocessor):
             self.state = state
         self.config = load_configs_from_file(state=self.state)
 
+    def get_smallest_counties(self, df, count=2):
+        counties = df[self.config["county_identifier"]].value_counts().reset_index()
+        counties["county"] = counties[counties.columns[0]]
+        counties["count"] = counties[self.config["county_identifier"]]
+        counties.drop(columns=[counties.columns[0], self.config["county_identifier"]], inplace=True)
+        small_counties = counties.values[-count:, 0]
+        return small_counties
+
     def test_key(self, name):
         return "/testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
@@ -29,28 +37,29 @@ class TestFileBuilder(Preprocessor):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1]
         if self.config["format"]["separate_hist"]:
-            pass
             # Todo
+            pass
         else:
-            df = pd.read_csv(self.main_file, compression='gzip')
-            counties = df[self.config["county_identifier"]].value_counts().reset_index()
-            counties["county"] = counties[counties.columns[0]]
-            counties["count"] = counties[self.config["county_identifier"]]
-            counties.drop(columns=[counties.columns[0], self.config["county_identifier"]], inplace=True)
+            if self.config["format"]["segmented_files"]:
+                df = pd.read_csv(self.main_file, compression='zip')
 
-            two_small_counties = counties.values[-2:, 0]
-            filtered_data = df[(df[self.config["county_identifier"]] == two_small_counties[0]) |
-                               (df[self.config["county_identifier"]] == two_small_counties[1])]
-            filtered_data.reset_index(inplace=True, drop=True)
-            filtered_data.to_csv(self.main_file, compression='gzip')
-            logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+                two_small_counties = self.get_smallest_counties(df, count=2)
 
-            if save_remote:
-                with open(self.main_file) as f:
-                    s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
-                                                                       Metadata={"last_updated": self.download_date})
-            if save_local:
-                os.rename(self.main_file, file_name)
+            else:
+                df = pd.read_csv(self.main_file, compression='gzip')
+                two_small_counties = self.get_smallest_counties(df, count=2)
+                filtered_data = df[(df[self.config["county_identifier"]] == two_small_counties[0]) |
+                                   (df[self.config["county_identifier"]] == two_small_counties[1])]
+                filtered_data.reset_index(inplace=True, drop=True)
+                filtered_data.to_csv(self.main_file, compression='gzip')
+                logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+
+                if save_remote:
+                    with open(self.main_file) as f:
+                        s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
+                                                                           Metadata={"last_updated": self.download_date})
+                if save_local:
+                    os.rename(self.main_file, file_name)
 
 
 class ProcessedTestFileBuilder(object):
