@@ -37,6 +37,11 @@ no_party_affiliation: OTHER
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: desc_party
+format:
+  separate_hist: false
+  segmented_files: true
+  ignore_files:
+    - LEGEND.xlsx
 primary_key:
   - pre_date
   - post_date
@@ -172,114 +177,114 @@ columns:
     desc_absentee_duration: varchar
 ordered_columns:
   - county
-- cde_registrant_status
-- cde_registrant_reason
-- cde_name_title
-- text_name_first
-- text_name_middle
-- text_name_last
-- cde_name_suffix
-- year_of_birth
-- date_of_registration
-- ind_absentee
-- text_registrant_id
-- occupation
-- text_res_address_nbr
-- text_res_address_nbr_suffix
-- cde_street_dir_prefix
-- text_street_name
-- cde_street_type
-- cde_street_dir_suffix
-- cde_res_unit_type
-- text_res_unit_nbr
-- text_res_city
-- cde_res_state
-- text_res_zip5
-- text_res_zip4
-- text_res_carrier_rte
-- text_res_physical_address
-- ind_res_military
-- text_mail_address1
-- text_mail_address2
-- text_mail_address3
-- text_mail_address4
-- text_mail_city
-- cde_mail_state
-- text_mail_zip5
-- text_mail_zip4
-- text_mail_carrier_rte
-- ind_mail_military
-- ind_mail_foreign
-- desc_party
-- date_of_party_affiliation
-- precinct_text_designation
-- precinct_text_name
-- precinct_part
-- precinct_part_text_name
-- text_phone_area_code
-- text_phone_exchange
-- text_phone_last_four
-- voting_method_GE2016
-- party_voted_GE2016
-- voting_method_PE2016
-- party_voted_PE2016
-- voting_method_SE2016
-- party_voted_SE2016
-- voting_method_PP2016
-- party_voted_PP2016
-- voting_method_GE2014
-- party_voted_GE2014
-- voting_method_PE2014
-- party_voted_PE2014
-- voting_method_GE2012
-- party_voted_GE2012
-- voting_method_PE2012
-- party_voted_PE2012
-- voting_method_PP2012
-- party_voted_PP2012
-- voting_method_GE2010
-- party_voted_GE2010
-- voting_method_PE2010
-- party_voted_PE2010
-- voting_method_SE2010
-- party_voted_SE2010
-- voting_method_GE2008
-- party_voted_GE2008
-- voting_method_PE2008
-- party_voted_PE2008
-- voting_method_PP2008
-- party_voted_PP2008
-- voting_method_GE06
-- party_voted_GE06
-- voting_method_PE06
-- party_voted_PE06
-- voting_method_GE04
-- party_voted_GE04
-- voting_method_PE04
-- party_voted_PE04
-- voting_method_PP04
-- party_voted_PP04
-- perm_absentee_indicator
-- desc_absentee_duration
+  - cde_registrant_status
+  - cde_registrant_reason
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+  - year_of_birth
+  - date_of_registration
+  - ind_absentee
+  - text_registrant_id
+  - occupation
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - cde_res_unit_type
+  - text_res_unit_nbr
+  - text_res_city
+  - cde_res_state
+  - text_res_zip5
+  - text_res_zip4
+  - text_res_carrier_rte
+  - text_res_physical_address
+  - ind_res_military
+  - text_mail_address1
+  - text_mail_address2
+  - text_mail_address3
+  - text_mail_address4
+  - text_mail_city
+  - cde_mail_state
+  - text_mail_zip5
+  - text_mail_zip4
+  - text_mail_carrier_rte
+  - ind_mail_military
+  - ind_mail_foreign
+  - desc_party
+  - date_of_party_affiliation
+  - precinct_text_designation
+  - precinct_text_name
+  - precinct_part
+  - precinct_part_text_name
+  - text_phone_area_code
+  - text_phone_exchange
+  - text_phone_last_four
+  - voting_method_GE2016
+  - party_voted_GE2016
+  - voting_method_PE2016
+  - party_voted_PE2016
+  - voting_method_SE2016
+  - party_voted_SE2016
+  - voting_method_PP2016
+  - party_voted_PP2016
+  - voting_method_GE2014
+  - party_voted_GE2014
+  - voting_method_PE2014
+  - party_voted_PE2014
+  - voting_method_GE2012
+  - party_voted_GE2012
+  - voting_method_PE2012
+  - party_voted_PE2012
+  - voting_method_PP2012
+  - party_voted_PP2012
+  - voting_method_GE2010
+  - party_voted_GE2010
+  - voting_method_PE2010
+  - party_voted_PE2010
+  - voting_method_SE2010
+  - party_voted_SE2010
+  - voting_method_GE2008
+  - party_voted_GE2008
+  - voting_method_PE2008
+  - party_voted_PE2008
+  - voting_method_PP2008
+  - party_voted_PP2008
+  - voting_method_GE06
+  - party_voted_GE06
+  - voting_method_PE06
+  - party_voted_PE06
+  - voting_method_GE04
+  - party_voted_GE04
+  - voting_method_PE04
+  - party_voted_PE04
+  - voting_method_PP04
+  - party_voted_PP04
+  - perm_absentee_indicator
+  - desc_absentee_duration
 hist_columns:
-- party_voted_GE04
-- party_voted_GE06
-- party_voted_GE2008
-- party_voted_GE2010
-- party_voted_GE2012
-- party_voted_GE2014
-- party_voted_GE2016
-- party_voted_PE04
-- party_voted_PE06
-- party_voted_PE2008
-- party_voted_PE2010
-- party_voted_PE2012
-- party_voted_PE2014
-- party_voted_PE2016
-- party_voted_PP04
-- party_voted_PP2008
-- party_voted_PP2012
-- party_voted_PP2016
-- party_voted_SE2010
-- party_voted_SE2016
+  - party_voted_GE04
+  - party_voted_GE06
+  - party_voted_GE2008
+  - party_voted_GE2010
+  - party_voted_GE2012
+  - party_voted_GE2014
+  - party_voted_GE2016
+  - party_voted_PE04
+  - party_voted_PE06
+  - party_voted_PE2008
+  - party_voted_PE2010
+  - party_voted_PE2012
+  - party_voted_PE2014
+  - party_voted_PE2016
+  - party_voted_PP04
+  - party_voted_PP2008
+  - party_voted_PP2012
+  - party_voted_PP2016
+  - party_voted_SE2010
+  - party_voted_SE2016
 #county_names:

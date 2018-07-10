@@ -6,49 +6,95 @@ from os import stat
 import pandas as pd
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
-from storage import load_configs_from_file, state_from_str
+from storage import load_configs_from_file, state_from_str, config_file_from_state
 from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 class TestFileBuilder(Preprocessor):
     def __init__(self, s3_key, state=None):
-
-        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key)
+        config_file = config_file_from_state(state)
+        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key, config_file=config_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
             self.state = state
         self.config = load_configs_from_file(state=self.state)
 
+    def get_smallest_counties(self, df, count=2):
+        counties = df[self.config["county_identifier"]].value_counts().reset_index()
+        counties["county"] = counties[counties.columns[0]]
+        counties["count"] = counties[self.config["county_identifier"]]
+        counties.drop(columns=[counties.columns[0], self.config["county_identifier"]], inplace=True)
+        small_counties = counties.values[-count:, 0]
+        return small_counties
+
+    def filter_counties(self, df, counties):
+        filtered_data = df[(df[self.config["county_identifier"]] == counties[0]) |
+                           (df[self.config["county_identifier"]] == counties[1])]
+        filtered_data.reset_index(inplace=True, drop=True)
+        return filtered_data
+
+    def sample_randomly(self, df, frac=0.01):
+        sampled_data = df.sample(frac=frac)
+        sampled_data.reset_index(inplace=True, drop=True)
+        return sampled_data
+
     def test_key(self, name):
-        return "/testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
+        return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1]
         if self.config["format"]["separate_hist"]:
-            pass
             # Todo
+            pass
         else:
-            df = pd.read_csv(self.main_file, compression='gzip')
-            counties = df[self.config["county_identifier"]].value_counts().reset_index()
-            counties["county"] = counties[counties.columns[0]]
-            counties["count"] = counties[self.config["county_identifier"]]
-            counties.drop(columns=[counties.columns[0], self.config["county_identifier"]], inplace=True)
+            if self.config["format"]["segmented_files"]:
+                new_files = self.unpack_files()
+                self.temp_files.extend(new_files)
+                for f in new_files:
+                    logging.info("reading {}".format(f))
+                    if self.config["file_type"] == "xlsx":
+                        df = pd.read_excel(f)
+                    else:
+                        df = pd.read_csv(f)
+                    if df.shape[0] > 1000:
+                        logging.info("sampling {}".format(f))
+                        sampled = self.sample_randomly(df)
+                        sampled.to_excel(f)
+                        # trytwo_small_counties = self.get_smallest_counties(df, count=2)
+                        # logging.info("using '{}' counties from file {}"
+                        #              .format(" and ".join([str(a) for a in two_small_counties.tolist()]), f))
+                        #
+                        # if len(two_small_counties) == 1:
+                        #     pass
+                        # elif len(two_small_counties) >= 2:
+                        #     filtered_by_county = self.filter_counties(df, counties=two_small_counties)
+                    #
+                    # except KeyError as e:
+                    #     print(e)
+                    else:
+                        logging.info("skipping...")
+                with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+                    for f in new_files:
+                        zf.write(f)
 
-            two_small_counties = counties.values[-2:, 0]
-            filtered_data = df[(df[self.config["county_identifier"]] == two_small_counties[0]) |
-                               (df[self.config["county_identifier"]] == two_small_counties[1])]
-            filtered_data.reset_index(inplace=True, drop=True)
-            filtered_data.to_csv(self.main_file, compression='gzip')
-            logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+            else:
+                df = pd.read_csv(self.main_file, compression='gzip')
+                two_small_counties = self.get_smallest_counties(df, count=2)
+                filtered_data = self.filter_counties(df, counties=two_small_counties)
+                filtered_data.to_csv(self.main_file, compression='gzip')
+                logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
             if save_remote:
                 with open(self.main_file) as f:
                     s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
-                                                                       Metadata={"last_updated": self.download_date})
+                                                                       Metadata={
+                                                                           "last_updated": self.download_date
+                                                                       })
             if save_local:
                 os.rename(self.main_file, file_name)
 
@@ -136,3 +182,9 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
+
+
+if __name__ == '__main__':
+    import sys
+    with TestFileBuilder(s3_key=sys.argv[2], state=sys.argv[1]) as tf:
+        tf.build()
