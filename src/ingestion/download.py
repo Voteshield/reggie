@@ -8,7 +8,7 @@ import requests
 from dateutil import parser
 
 from constants import *
-from storage import generate_s3_key, date_from_str, load_configs_from_file
+from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
 from storage import s3
 
 
@@ -139,12 +139,14 @@ class Loader(object):
             logging.info("decompressing {}".format(self.main_file))
             if compression_type == "unzip":
                 logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
+                print([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)])
                 p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
-                          stdout=PIPE, stderr=PIPE)
+                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                p.communicate("A")
             else:
                 logging.info("decompressing gunzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
-            p.communicate("A")
+                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                p.communicate()
             logging.info("decompressing done".format(self.main_file))
             if self.main_file[-3:] == ".gz":
                 self.main_file = self.main_file[:-3]
@@ -175,16 +177,52 @@ class Preprocessor(Loader):
         get_object(self.raw_s3_file, self.main_file)
 
     def unpack_files(self, compression="unzip"):
+        self.is_compressed = True
         dir_path = os.path.dirname(self.main_file)
         before = set(os.listdir(dir_path))
+        print(before)
         self.decompress(compression_type=compression)
         after = set(os.listdir(dir_path))
+        print(after)
         new_files = list(after.difference(before))
         if "ignore_files" in self.config["format"]:
-            new_files = ["{}/{}".format(dir_path, n) for n in new_files if n not in self.config["format"]["ignore_files"]]
+            new_files = ["{}/{}".format(dir_path, n) for n in new_files if n not in
+                         self.config["format"]["ignore_files"]]
         else:
             new_files = ["{}/{}".format(dir_path, n) for n in new_files]
         return new_files
+
+    def concat_file_segments(self, file_names):
+        """
+        Serially concatenates the "file segments" into a single csv file. Should use this method when
+        config["segmented_files"] is true. Should NOT be used to deal with files separated by column. Concatenates the
+        files into self.main_file
+        :param file_names: files to concatenate
+        """
+        if os.path.isfile(self.main_file):
+            os.remove(self.main_file)
+        first_success = False
+        last_headers = None
+
+        def list_compare(a, b):
+            for j, k in zip(a, b):
+                if j != k:
+                    return False
+            return True
+
+        for f in file_names:
+            if self.config["file_type"] == 'xlsx':
+                df = pd.read_excel(f)
+            else:
+                df = pd.read_csv(f)
+            s = df.to_csv(header=not first_success)
+            if last_headers is not None and not list_compare(last_headers, df.columns):
+                raise ValueError("file chunks contained different or misaligned headers")
+            if not first_success:
+                last_headers = df.columns
+            first_success = True
+            with open(self.main_file, "a+") as fo:
+                fo.write(s)
 
     def preprocess_generic(self):
         logging.info("preprocessing generic")
@@ -227,8 +265,23 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
-
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and ""]
+        self.concat_file_segments(new_files)
+        main_df = pd.read_csv(self.main_file)
+        voting_method_prefix = "voting_method"
+        voting_party_prefix = "voting_party"
+        all_voting_history_cols = filter(lambda x: any([pre in x for pre in
+                                                        (voting_party_prefix, voting_method_prefix)]),
+                                         main_df.columns.values)
+        voting_action_cols = filter(lambda x: "party_voted" in x, main_df.columns.values)
+        voting_method_cols = filter(lambda x: "voting_method" in x, main_df.columns.values)
+        main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
+        main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
+        main_df.drop(all_voting_history_cols, axis=1, inplace=True)
+        main_df.to_csv(self.main_file)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
 
     def execute(self):
         self.state_router()
