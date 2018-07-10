@@ -140,11 +140,12 @@ class Loader(object):
             if compression_type == "unzip":
                 logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
                 p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
-                          stdout=PIPE, stderr=PIPE)
+                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                p.communicate("A")
             else:
                 logging.info("decompressing gunzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
                 p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
-            p.communicate("A")
+                p.communicate()
             logging.info("decompressing done".format(self.main_file))
             if self.main_file[-3:] == ".gz":
                 self.main_file = self.main_file[:-3]
