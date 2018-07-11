@@ -9,7 +9,7 @@ from dateutil import parser
 
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
-from storage import s3
+from storage import s3, normalize_columns, describe_insertion
 
 
 def ohio_get_last_updated():
@@ -39,7 +39,8 @@ class Loader(object):
     ```
     """
 
-    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None, force_file=None, clean_up_tmp_files=True):
+    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None, force_file=None, clean_up_tmp_files=True,
+                 testing=False):
         self.config_file_path = config_file
         self.clean_up_tmp_files = clean_up_tmp_files
         config = load_configs_from_file(config_file=config_file)
@@ -53,7 +54,7 @@ class Loader(object):
         self.checksum = None
         self.state = config["state"]
         self.obj_will_download = False
-
+        self.testing = testing
         if force_date is not None:
             self.download_date = parser.parse(force_date).isoformat()
         else:
@@ -153,23 +154,25 @@ class Loader(object):
             self.is_compressed = False
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        return generate_s3_key(file_class, self.state, self.source,
-                               self.download_date, self.file_type, self.is_compressed)
+        k = generate_s3_key(file_class, self.state, self.source,
+                            self.download_date, "csv", self.is_compressed)
+        return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
         if self.config["state"] == 'ohio' and self.obj_will_download:
             self.download_date = ohio_get_last_updated().isoformat()
-    
+        print(self.generate_key(file_class=file_class))
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
                 .put(Body=f, Metadata={"last_updated": self.download_date})
 
 
 class Preprocessor(Loader):
-    def __init__(self, raw_s3_file, config_file, clean_up_tmp_files=True):
+    def __init__(self, raw_s3_file, config_file, **kwargs):
         super(Preprocessor, self).__init__(config_file=config_file,
-                                           force_date=date_from_str(raw_s3_file),
-                                           clean_up_tmp_files=clean_up_tmp_files)
+                                           force_date=date_from_str(raw_s3_file), **kwargs)
+        print(raw_s3_file, config_file)
+        print(kwargs)
         self.raw_s3_file = raw_s3_file
         self.s3_download()
 
@@ -180,10 +183,8 @@ class Preprocessor(Loader):
         self.is_compressed = True
         dir_path = os.path.dirname(self.main_file)
         before = set(os.listdir(dir_path))
-        print(before)
         self.decompress(compression_type=compression)
         after = set(os.listdir(dir_path))
-        print(after)
         new_files = list(after.difference(before))
         if "ignore_files" in self.config["format"]:
             new_files = ["{}/{}".format(dir_path, n) for n in new_files if n not in
@@ -205,21 +206,28 @@ class Preprocessor(Loader):
         last_headers = None
 
         def list_compare(a, b):
+            i = 0
             for j, k in zip(a, b):
                 if j != k:
-                    return False
-            return True
+                    return j, k, i
+                i += 1
+            return False
 
+        file_names = sorted(file_names, key=lambda x: os.stat(x).st_size, reverse=True)
         for f in file_names:
             if self.config["file_type"] == 'xlsx':
                 df = pd.read_excel(f)
             else:
                 df = pd.read_csv(f)
-            s = df.to_csv(header=not first_success)
-            if last_headers is not None and not list_compare(last_headers, df.columns):
-                raise ValueError("file chunks contained different or misaligned headers")
             if not first_success:
-                last_headers = df.columns
+                last_headers = sorted(df.columns)
+            df, _ = normalize_columns(df, last_headers)
+            if list_compare(last_headers, sorted(df.columns)):
+                mismatched_headers = list_compare(last_headers, df.columns)
+                raise ValueError("file chunks contained different or misaligned headers:"
+                                 "  {} != {} at index {}".format(*mismatched_headers))
+
+            s = df.to_csv(header=not first_success)
             first_success = True
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
@@ -265,16 +273,13 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and ""]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
         self.concat_file_segments(new_files)
         main_df = pd.read_csv(self.main_file)
-        voting_method_prefix = "voting_method"
-        voting_party_prefix = "voting_party"
-        all_voting_history_cols = filter(lambda x: any([pre in x for pre in
-                                                        (voting_party_prefix, voting_method_prefix)]),
-                                         main_df.columns.values)
-        voting_action_cols = filter(lambda x: "party_voted" in x, main_df.columns.values)
-        voting_method_cols = filter(lambda x: "voting_method" in x, main_df.columns.values)
+
+        voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
+        voting_method_cols = list(filter(lambda x: "voting_method" in x, main_df.columns.values))
+        all_voting_history_cols = voting_action_cols + voting_method_cols
         main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
         main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)

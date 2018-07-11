@@ -6,7 +6,7 @@ from os import stat
 import pandas as pd
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
-from storage import load_configs_from_file, state_from_str, config_file_from_state
+from storage import get_raw_s3_uploads, load_configs_from_file, state_from_str, config_file_from_state
 from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
@@ -14,7 +14,20 @@ from zipfile import ZipFile, ZIP_DEFLATED
 
 
 class TestFileBuilder(Preprocessor):
-    def __init__(self, s3_key, state=None):
+    def __init__(self, state=None, s3_key=None):
+        if s3_key is not None and state is not None and state_from_str(s3_key) != state:
+            raise ValueError("state and s3 must be in agreement if both are set")
+        elif s3_key is None and state is not None:
+            s3_keys = get_raw_s3_uploads(state=state, testing=False)
+            if len(s3_keys) == 0:
+                raise ValueError("no raw uploads available to create test file")
+            else:
+                s3_key = s3_keys[-1].key
+        elif s3_key is not None and state is None:
+            state = state_from_str(s3_key)
+        else:
+            raise ValueError("TestFileBuilder must be initialized with either 'state' or 's3_key'")
+        print(s3_key)
         config_file = config_file_from_state(state)
         super(TestFileBuilder, self).__init__(raw_s3_file=s3_key, config_file=config_file)
         if state is None:
@@ -63,7 +76,7 @@ class TestFileBuilder(Preprocessor):
                         df = pd.read_csv(f)
                     if df.shape[0] > 1000:
                         logging.info("sampling {}".format(f))
-                        sampled = self.sample_randomly(df)
+                        sampled = self.sample_randomly(df, frac=0.001)
                         sampled.to_excel(f)
                         # trytwo_small_counties = self.get_smallest_counties(df, count=2)
                         # logging.info("using '{}' counties from file {}"
@@ -80,7 +93,7 @@ class TestFileBuilder(Preprocessor):
                         logging.info("skipping...")
                 with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
                     for f in new_files:
-                        zf.write(f)
+                        zf.write(f, os.path.basename(f))
 
             else:
                 df = pd.read_csv(self.main_file, compression='gzip')
