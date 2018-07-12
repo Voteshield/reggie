@@ -141,7 +141,6 @@ class Loader(object):
             logging.info("decompressing {}".format(self.main_file))
             if compression_type == "unzip":
                 logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                print([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)])
                 p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
                           stdout=PIPE, stderr=PIPE, stdin=PIPE)
                 p.communicate("A")
@@ -195,7 +194,7 @@ class Preprocessor(Loader):
             new_files = ["{}/{}".format(dir_path, n) for n in new_files]
         return new_files
 
-    def     concat_file_segments(self, file_names):
+    def concat_file_segments(self, file_names):
         """
         Serially concatenates the "file segments" into a single csv file. Should use this method when
         config["segmented_files"] is true. Should NOT be used to deal with files separated by column. Concatenates the
@@ -229,7 +228,7 @@ class Preprocessor(Loader):
                 raise ValueError("file chunks contained different or misaligned headers:"
                                  "  {} != {} at index {}".format(*mismatched_headers))
 
-            s = df.to_csv(header=not first_success)
+            s = df.to_csv(header=not first_success, encoding='utf-8')
             first_success = True
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
@@ -287,7 +286,7 @@ class Preprocessor(Loader):
         main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
-        main_df.to_csv(self.main_file)
+        main_df.to_csv(self.main_file, encoding='utf-8')
         write_meta(self.main_file, message="arizona_{}".format(datetime.now().isoformat()), array_dates=elections_key)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
