@@ -50,8 +50,8 @@ class TestFileBuilder(Preprocessor):
         filtered_data.reset_index(inplace=True, drop=True)
         return filtered_data
 
-    def sample_randomly(self, df, frac=0.01):
-        sampled_data = df.sample(frac=frac)
+    def sample(self, df, frac=0.01):
+        sampled_data = df.head(n=int(frac * len(df)))
         sampled_data.reset_index(inplace=True, drop=True)
         return sampled_data
 
@@ -73,10 +73,10 @@ class TestFileBuilder(Preprocessor):
                     if self.config["file_type"] == "xlsx":
                         df = pd.read_excel(f)
                     else:
-                        df = pd.read_csv(f)
+                        df = pd.read_csv(f, comment="#")
                     if df.shape[0] > 1000:
                         logging.info("sampling {}".format(f))
-                        sampled = self.sample_randomly(df, frac=0.001)
+                        sampled = self.sample(df, frac=0.001)
                         sampled.to_excel(f)
                         # trytwo_small_counties = self.get_smallest_counties(df, count=2)
                         # logging.info("using '{}' counties from file {}"
@@ -96,7 +96,7 @@ class TestFileBuilder(Preprocessor):
                         zf.write(f, os.path.basename(f))
 
             else:
-                df = pd.read_csv(self.main_file, compression='gzip')
+                df = pd.read_csv(self.main_file, compression='gzip', comment="#")
                 two_small_counties = self.get_smallest_counties(df, count=2)
                 filtered_data = self.filter_counties(df, counties=two_small_counties)
                 filtered_data.to_csv(self.main_file, compression='gzip')
@@ -114,7 +114,7 @@ class TestFileBuilder(Preprocessor):
 
 class ProcessedTestFileBuilder(object):
     def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
-        self.df = Snapshot.load_from_s3(s3_key, compression=compression)
+        self.df, self.meta = Snapshot.load_from_s3(s3_key, compression=compression)
         self.state = state_from_str(s3_key)
         self.randomize = randomize
         self.size = size

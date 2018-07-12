@@ -35,7 +35,7 @@ democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
 no_party_affiliation: OTHER
 numeric_county: false
-date_format: '%m/%d/%Y'
+date_format: '%Y.0'
 party_identifier: desc_party
 format:
   separate_hist: false
@@ -50,7 +50,7 @@ primary_key:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  text_registrant_id: varchar
   change_type: text
   pre_value: text
   post_value: text
@@ -93,7 +93,7 @@ columns:
     text_name_middle: varchar
     text_name_last: varchar
     cde_name_suffix: varchar
-    year_of_birth: int
+    year_of_birth: varchar
     date_of_registration: date
     ind_absentee: varchar
     text_registrant_id: varchar
@@ -125,7 +125,7 @@ columns:
     ind_mail_military: varchar
     ind_mail_foreign: varchar
     desc_party: varchar
-    date_of_party_affiliation: varchar
+    date_of_party_affiliation: date
     precinct_text_designation: varchar
     precinct_text_name: varchar
     precinct_part: varchar

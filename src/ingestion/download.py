@@ -6,10 +6,10 @@ import bs4
 import pandas as pd
 import requests
 from dateutil import parser
-
+import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
-from storage import s3, normalize_columns, describe_insertion
+from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
 
 
 def ohio_get_last_updated():
@@ -54,6 +54,7 @@ class Loader(object):
         self.checksum = None
         self.state = config["state"]
         self.obj_will_download = False
+        self.meta = None
         self.testing = testing
         if force_date is not None:
             self.download_date = parser.parse(force_date).isoformat()
@@ -102,7 +103,7 @@ class Loader(object):
             p.wait()
             decompressed_chunk = ".".join(chunk_storage.split(".")[:-1])
             try:
-                df = pd.read_csv(decompressed_chunk)
+                df = pd.read_csv(decompressed_chunk, comment="#")
                 s = df.to_csv(header=not first_success)
                 first_success = True
                 logging.info("done with chunk {}".format(i))
@@ -161,10 +162,11 @@ class Loader(object):
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
         if self.config["state"] == 'ohio' and self.obj_will_download:
             self.download_date = ohio_get_last_updated().isoformat()
-        print(self.generate_key(file_class=file_class))
+        meta = self.meta if self.meta is not None else {}
+        meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f, Metadata={"last_updated": self.download_date})
+                .put(Body=f, Metadata=meta)
 
 
 class Preprocessor(Loader):
@@ -193,7 +195,7 @@ class Preprocessor(Loader):
             new_files = ["{}/{}".format(dir_path, n) for n in new_files]
         return new_files
 
-    def concat_file_segments(self, file_names):
+    def     concat_file_segments(self, file_names):
         """
         Serially concatenates the "file segments" into a single csv file. Should use this method when
         config["segmented_files"] is true. Should NOT be used to deal with files separated by column. Concatenates the
@@ -218,7 +220,7 @@ class Preprocessor(Loader):
             if self.config["file_type"] == 'xlsx':
                 df = pd.read_excel(f)
             else:
-                df = pd.read_csv(f)
+                df = pd.read_csv(f, comment="#")
             if not first_success:
                 last_headers = sorted(df.columns)
             df, _ = normalize_columns(df, last_headers)
@@ -242,10 +244,10 @@ class Preprocessor(Loader):
         hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
         self.temp_files.extend([hist_file, voter_file])
         logging.info("NEVADA: loading historical file")
-        df_hist = pd.read_csv(hist_file, header=None)
+        df_hist = pd.read_csv(hist_file, header=None, comment="#")
         df_hist.columns = self.config["hist_columns"]
         logging.info("NEVADA: loading main voter file")
-        df_voters = pd.read_csv(voter_file, header=None)
+        df_voters = pd.read_csv(voter_file, header=None, comment="#")
         df_voters.columns = self.config["ordered_columns"]
         valid_elections = df_hist.date.unique().tolist()
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
@@ -273,17 +275,24 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
         self.concat_file_segments(new_files)
-        main_df = pd.read_csv(self.main_file)
+        main_df = pd.read_csv(self.main_file, comment="#")
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
         voting_method_cols = list(filter(lambda x: "voting_method" in x, main_df.columns.values))
         all_voting_history_cols = voting_action_cols + voting_method_cols
+
         main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
         main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
+        elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file)
+        write_meta(self.main_file, message="arizona_{}".format(datetime.now().isoformat()), array_dates=elections_key)
+        self.meta = {
+            "message": "arizona_{}".format(datetime.now().isoformat()),
+            "array_dates": json.dumps(elections_key)
+        }
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
