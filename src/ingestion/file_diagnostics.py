@@ -77,18 +77,10 @@ class TestFileBuilder(Preprocessor):
                     if df.shape[0] > 1000:
                         logging.info("sampling {}".format(f))
                         sampled = self.sample(df, frac=0.001)
+
+                        # insert malformed date
+                        sampled[self.config["birthday_identifier"]].iloc[-1] = "schfiftyfive"
                         sampled.to_excel(f)
-                        # trytwo_small_counties = self.get_smallest_counties(df, count=2)
-                        # logging.info("using '{}' counties from file {}"
-                        #              .format(" and ".join([str(a) for a in two_small_counties.tolist()]), f))
-                        #
-                        # if len(two_small_counties) == 1:
-                        #     pass
-                        # elif len(two_small_counties) >= 2:
-                        #     filtered_by_county = self.filter_counties(df, counties=two_small_counties)
-                    #
-                    # except KeyError as e:
-                    #     print(e)
                     else:
                         logging.info("skipping...")
                 with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
