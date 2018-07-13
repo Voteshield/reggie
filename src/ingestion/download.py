@@ -192,6 +192,7 @@ class Preprocessor(Loader):
                          self.config["format"]["ignore_files"]]
         else:
             new_files = ["{}/{}".format(dir_path, n) for n in new_files]
+        self.temp_files
         return new_files
 
     def concat_file_segments(self, file_names):
@@ -216,6 +217,7 @@ class Preprocessor(Loader):
 
         file_names = sorted(file_names, key=lambda x: os.stat(x).st_size, reverse=True)
         for f in file_names:
+            print(f)
             if self.config["file_type"] == 'xlsx':
                 df = pd.read_excel(f)
             else:

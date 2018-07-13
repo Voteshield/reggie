@@ -57,8 +57,10 @@ base_columns:
   state: varchar
 generated_columns:
   all_history: text[]
+  all_voting_methods: text[]
 ordered_generated_columns:
   - all_history
+  - all_voting_methods
 has_headers: YES
 summary_columns:
   - totals
