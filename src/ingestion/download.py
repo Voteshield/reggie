@@ -192,7 +192,7 @@ class Preprocessor(Loader):
                          self.config["format"]["ignore_files"]]
         else:
             new_files = ["{}/{}".format(dir_path, n) for n in new_files]
-        self.temp_files
+        self.temp_files.extend(new_files)
         return new_files
 
     def concat_file_segments(self, file_names):
@@ -286,6 +286,10 @@ class Preprocessor(Loader):
 
         main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
         main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
+        main_df[self.config["birthday_identifier"]] = pd.to_datetime(main_df[self.config["birthday_identifier"]],
+                                                                     format=self.config["date_format"],
+                                                                     errors='coerce')
+        print(main_df.year_of_birth)
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8')

@@ -58,50 +58,56 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
+    def route_build(self, state):
+
+
+    def __build_nevada(self):
+        new_files = self.unpack_files()
+        self.temp_files.extend(new_files)
+        for f in new_files:
+            logging.info("reading {}".format(f))
+            df = pd.read_excel(f)
+            if df.shape[0] > 1000:
+                logging.info("sampling {}".format(f))
+                sampled = self.sample(df, frac=0.001)
+
+                # insert malformed date
+                sampled[self.config["birthday_identifier"]].iloc[-1] = "schfiftyfive"
+                sampled.to_excel(f)
+            else:
+                logging.info("skipping...")
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in new_files:
+                zf.write(f, os.path.basename(f))
+
+    def __build_ohio(self):
+        """
+        this only generates a truncated _processed_ file, no test raw file generator is written for ohio (todo)
+        :return: None
+        """
+        df = pd.read_csv(self.main_file, compression='gzip', comment="#")
+        two_small_counties = self.get_smallest_counties(df, count=2)
+        filtered_data = self.filter_counties(df, counties=two_small_counties)
+        filtered_data.to_csv(self.main_file, compression='gzip')
+        logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1]
-        if self.config["format"]["separate_hist"]:
-            # Todo
-            pass
-        else:
-            if self.config["format"]["segmented_files"]:
-                new_files = self.unpack_files()
-                self.temp_files.extend(new_files)
-                for f in new_files:
-                    logging.info("reading {}".format(f))
-                    if self.config["file_type"] == "xlsx":
-                        df = pd.read_excel(f)
-                    else:
-                        df = pd.read_csv(f, comment="#")
-                    if df.shape[0] > 1000:
-                        logging.info("sampling {}".format(f))
-                        sampled = self.sample(df, frac=0.001)
 
-                        # insert malformed date
-                        sampled[self.config["birthday_identifier"]].iloc[-1] = "schfiftyfive"
-                        sampled.to_excel(f)
-                    else:
-                        logging.info("skipping...")
-                with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-                    for f in new_files:
-                        zf.write(f, os.path.basename(f))
+        routes = {"ohio": self.__build_ohio,
+                  "nevada": self.__build_nevada}
+        f = routes[self.state]
+        f()
 
-            else:
-                df = pd.read_csv(self.main_file, compression='gzip', comment="#")
-                two_small_counties = self.get_smallest_counties(df, count=2)
-                filtered_data = self.filter_counties(df, counties=two_small_counties)
-                filtered_data.to_csv(self.main_file, compression='gzip')
-                logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
-
-            if save_remote:
-                with open(self.main_file) as f:
-                    s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
-                                                                       Metadata={
-                                                                           "last_updated": self.download_date
-                                                                       })
-            if save_local:
-                os.rename(self.main_file, file_name)
+        if save_remote:
+            with open(self.main_file) as f:
+                s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
+                                                                   Metadata={
+                                                                       "last_updated": self.download_date
+                                                                   })
+        if save_local:
+            os.rename(self.main_file, file_name)
 
 
 class ProcessedTestFileBuilder(object):

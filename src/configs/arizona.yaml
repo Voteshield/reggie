@@ -82,9 +82,9 @@ summary_types:
   - int
   - int
   - int
-  - text
-  - text
-  - text
+  - int
+  - int
+  - int
   - text
 columns:
     county: varchar
@@ -95,7 +95,7 @@ columns:
     text_name_middle: varchar
     text_name_last: varchar
     cde_name_suffix: varchar
-    year_of_birth: varchar
+    year_of_birth: timestamp
     date_of_registration: date
     ind_absentee: varchar
     text_registrant_id: varchar
