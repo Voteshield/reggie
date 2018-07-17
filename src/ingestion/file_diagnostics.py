@@ -58,8 +58,6 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
-    def route_build(self, state):
-
 
     def __build_nevada(self):
         new_files = self.unpack_files()
