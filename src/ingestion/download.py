@@ -10,7 +10,7 @@ import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
 from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
-
+import zipfile
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
@@ -136,22 +136,26 @@ class Loader(object):
                 self.main_file += ".gz"
             self.is_compressed = True
 
-    def decompress(self, compression_type="gunzip"):
+    def decompress(self, compression_type="gunzip", nested_file = "None", nested_dir = "None"):
         if self.is_compressed:
             logging.info("decompressing {}".format(self.main_file))
             if compression_type == "unzip":
                 logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
                 p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
-                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate("A")
+                          stdout=PIPE, stderr=PIPE)
             else:
                 logging.info("decompressing gunzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate()
+                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
+            p.communicate("A")
             logging.info("decompressing done".format(self.main_file))
             if self.main_file[-3:] == ".gz":
                 self.main_file = self.main_file[:-3]
             self.is_compressed = False
+        if self.is_compressed == False and nested_file != "None":
+            logging.info("decompressing {}".format(nested_file))
+            zip_ref = zipfile.ZipFile(nested_file, 'r')
+            zip_ref.extractall(nested_dir)
+            zip_ref.close()
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
@@ -274,6 +278,76 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_florida(self):
+        logging.info("preprocessing florida")
+        
+        dir_path = os.path.dirname(self.main_file)
+        before = set(os.listdir(dir_path))
+        self.decompress(compression_type="unzip")
+        
+        after = set(os.listdir(dir_path)) 
+
+        new_files = list(after - before)
+        my_file_name = new_files[0]
+        file_name_decomp = "/tmp/" + my_file_name + "/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail.zip"
+        file_dir_decomp = '/tmp'
+        self.decompress(compression_type="unzip", nested_file = file_name_decomp, nested_dir = file_dir_decomp)
+        file_h_name_decomp = "/tmp/" + my_file_name + "/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory.zip"
+        self.decompress(compression_type="unzip", nested_file = file_h_name_decomp, nested_dir = file_dir_decomp)
+        voter_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail_sm")
+        voter_history_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory_sm")
+
+        #next steps
+        #voter files is a list of files, need to concatenate each of those in the list
+        voter_detail_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail_sm"
+        files_voter_detail = os.listdir(voter_detail_folder)
+        filenames = [voter_detail_folder + "/" + i for i in files_voter_detail]
+        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
+
+        voter_history_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory_sm"
+        files_voter_history = os.listdir(voter_history_folder)
+        filenames = [voter_history_folder + "/" + i for i in files_voter_history]
+        with open('/tmp/concat_voter_history.txt', 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
+        self.temp_files.extend([files_voter_history, files_voter_detail])
+        logging.info("FLORIDA: loading voter history file")
+        df_hist = pd.read_fwf('/tmp/concat_voter_history.txt', header = None)
+        df_hist.columns = self.config["hist_columns"]
+        logging.info("FLORIDA: loading main voter file")
+        df_voters = pd.read_csv('/tmp/concat_voter_file.txt', header = None, sep = "\t")
+        df_voters.columns = self.config["ordered_columns"]
+        valid_elections = df_hist.date.unique().tolist()
+        valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
+
+        def place_vote_hist(g):
+            group_idx = 0
+            output = []
+            for d in valid_elections[::-1]:
+                if group_idx < len(g.date.values) and d == g.date.values[group_idx]:
+                    output.append(g.vote_type.values[group_idx])
+                    group_idx += 1
+                else:
+                    output.append('n')
+            return output
+        def fast_dummy(g):
+            return list(g.date)
+        
+        voting_histories = df_hist.groupby("VoterID").apply(place_vote_hist)
+        df_voters = df_voters.set_index(self.config["voter_id"])
+        df_voters["all_history"] = voting_histories
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        df_voters.to_csv(self.main_file)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
@@ -308,7 +382,8 @@ class Preprocessor(Loader):
     def state_router(self):
         routes = {
             'nevada': self.preprocess_nevada,
-            'arizona': self.preprocess_arizona
+            'arizona': self.preprocess_arizona,
+            'florida':self.preprocess_florida
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

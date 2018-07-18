@@ -58,8 +58,6 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
-    def route_build(self, state):
-
 
     def __build_nevada(self):
         new_files = self.unpack_files()
@@ -90,6 +88,10 @@ class TestFileBuilder(Preprocessor):
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+
+    def __build_florida(self):
+        pass
+
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:

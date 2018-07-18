@@ -3,7 +3,7 @@ file_type: csv
 state: florida
 source: boe
 file_class: voter_file
-voter_id: SOS_VOTERID
+voter_id: Voter_ID
 county_identifier: County_Code
 birthday_identifier: Birth_Date
 voter_status: County_Status
@@ -14,10 +14,13 @@ republican_party: Republican
 no_party_affiliation: Non-Partisan
 party_identifier: Party_Affiliation
 numeric_county: true
+generated_columns:
+  all_history: text[]
+has_headers: NO
 primary_key:
   - pre_date
   - post_date
-  - SOS_VOTERID
+  - Voter_ID
   - change_type
 base_columns:
   pre_date: timestamp
@@ -48,6 +51,12 @@ summary_columns:
   - c
   - n
   - county
+hist_columns:
+  - county
+  - VoterID
+  - date
+  - election_type
+  - vote_type
 summary_types:
   - int
   - timestamp
@@ -64,22 +73,17 @@ summary_types:
   - int
   - int
   - int
-format:
-  separate_hist: true
-  separate_counties_voter_file: true
-  separate_counties_hist_file: true
-  hist_election_rows: true
-  columnar_elections: false
 columns:
   County_Code: text
   Voter_ID: text
-  Name_List: text
+  Name_Last: text
   Name_Suffix: text
   Name_First: text
   Name_Middle: text
   Requested_public_records_exemption: text
   Residence_Address_Line_1: text
   Residence_Address_Line_2: text
+  Residence_City: text
   Residence_State: text
   Residence_Zipecode: text
   Mailing_Address_Line_1: text
@@ -105,10 +109,50 @@ columns:
   County_Commission_District: text
   School_Board_District: text
   Daytime_Area_Code: text
+  Daytime_Phone_Number: text
   Daytime_Phone_Extension: text
   Email_address: text
 data_chunk_links:
   'insert chunks, in file names'
+ordered_columns:
+  - County_Code
+  - Voter_ID
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
+  - Requested_public_records_exemption
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+  - Gender
+  - Race
+  - Birth_Date
+  - Registration_Date
+  - Party_Affiliation
+  - Precinct
+  - Precinct_Group
+  - Precinct_Split
+  - Precinct_Suffix
+  - Voter_Status
+  - Congressional_District
+  - House_District
+  - Senate_District
+  - County_Commission_District
+  - School_Board_District
+  - Daytime_Area_Code
+  - Daytime_Phone_Number
+  - Daytime_Phone_Extension
+  - Email_address
 county_names:
   Alachua: 1
   Baker: 2
