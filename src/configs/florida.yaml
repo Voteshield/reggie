@@ -14,6 +14,24 @@ republican_party: Republican
 no_party_affiliation: Non-Partisan
 party_identifier: Party_Affiliation
 numeric_county: true
+name_fields:
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+address_fields:
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_State
+  - Residence_Zipecode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
 primary_key:
   - pre_date
   - post_date
