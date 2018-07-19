@@ -295,7 +295,6 @@ class Preprocessor(Loader):
         main_df[self.config["birthday_identifier"]] = pd.to_datetime(main_df[self.config["birthday_identifier"]],
                                                                      format=self.config["date_format"],
                                                                      errors='coerce')
-        print(main_df.year_of_birth)
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8')
