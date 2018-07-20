@@ -17,6 +17,16 @@ no_party_affiliation: Non-Partisan
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
+name_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+address_fields:
+  - Address_1
+  - Address_2
+  - City
+  - state
+  - Zip
 primary_key:
   - pre_date
   - post_date

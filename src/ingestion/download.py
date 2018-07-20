@@ -10,7 +10,13 @@ import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
 from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
+<<<<<<< HEAD
 import zipfile
+=======
+from xlrd.book import XLRDError
+from pandas.io.parsers import ParserError
+
+>>>>>>> 219d6301d64c54d602656058ea32c44084009ad9
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
@@ -222,10 +228,14 @@ class Preprocessor(Loader):
         file_names = sorted(file_names, key=lambda x: os.stat(x).st_size, reverse=True)
         for f in file_names:
             print(f)
-            if self.config["file_type"] == 'xlsx':
-                df = pd.read_excel(f)
-            else:
-                df = pd.read_csv(f, comment="#")
+            try:
+                if self.config["file_type"] == 'xlsx':
+                    df = pd.read_excel(f)
+                else:
+                    df = pd.read_csv(f, comment="#")
+            except (XLRDError, ParserError):
+                print("Skipping {} ... Unsupported format, or corrupt file".format(f))
+                continue
             if not first_success:
                 last_headers = sorted(df.columns)
             df, _ = normalize_columns(df, last_headers)
@@ -363,7 +373,6 @@ class Preprocessor(Loader):
         main_df[self.config["birthday_identifier"]] = pd.to_datetime(main_df[self.config["birthday_identifier"]],
                                                                      format=self.config["date_format"],
                                                                      errors='coerce')
-        print(main_df.year_of_birth)
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8')

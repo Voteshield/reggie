@@ -1,9 +1,9 @@
 # Arizona voter file/history will upload as a single .zip file with the date of creation as the filename- for instance
 # "20180319.zip". History is included in these files, also columns for each election plus party primary the voter 
 # participated in and method of voting.
-#File also contain occupations! No idea what to do with this.
-#This zip contains 14 xlsx files:
-#13 COUNTIES - ACTIVE.xlsx
+# File also contain occupations! No idea what to do with this.
+# This zip contains 14 xlsx files:
+# 13 COUNTIES - ACTIVE.xlsx
 #13 COUNTIES - CANCELED.xlsx
 #13 COUNTIES - INACTIVE.xlsx
 #13 COUNTIES - SUSPENSE.xlsx
@@ -37,11 +37,43 @@ no_party_affiliation: OTHER
 numeric_county: false
 date_format: '%Y.0'
 party_identifier: desc_party
+name_fields:
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+address_fields:
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - cde_res_unit_type
+  - text_res_unit_nbr
+  - text_res_city
+  - cde_res_state
+  - text_res_zip5
+  - text_res_zip4
+  - text_res_carrier_rte
+  - text_res_physical_address
+  - ind_res_military
+  - text_mail_address1
+  - text_mail_address2
+  - text_mail_address3
+  - text_mail_address4
+  - text_mail_city
+  - cde_mail_state
+  - text_mail_zip5
+  - text_mail_zip4
+  - text_mail_carrier_rte
+  - ind_mail_military
 format:
   separate_hist: false
   segmented_files: true
   ignore_files:
-    - LEGEND.xlsx
+  - LEGEND.xlsx
 primary_key:
   - pre_date
   - post_date
