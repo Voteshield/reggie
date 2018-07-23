@@ -1,0 +1,250 @@
+# The New York voter file is a single .txt compressed as a .zip. File name is "AllNYSVoters_MMDDYYYY".
+# History is a single field. Note that history formats differ across counties, and voters that have moved
+# may have heterogeneous history codes within their history field.
+file_type: CSV
+state: arizona
+source: boe
+file_class: voter_file
+voter_id: sboeid
+county_identifier: countycode
+birthday_identifier: dob
+voter_status: status
+voter_status_active: A
+voter_status_inactive: I
+voter_status_purged: purged
+voter_status_active_military: AM
+voter_status_active_special_federal: AF
+voter_status_active_special_presidential: AP
+voter_status_uocava: AU
+voter_status_preregistered: 17
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: OTHER
+independence_party: IND
+numeric_county: true
+date_format: YYYYMMDD #IS THIS RIGHT?
+party_identifier: enrollment
+name_fields:
+  - firstname
+  - middlename
+  - lastname
+  - namesuffix
+address_fields:
+-raddnumber
+-rhalfcode
+-rapartment
+-rpredirection
+-rstreetname
+-rpostdirection
+-rcity
+-rzip5
+-rzip4
+-mailadd1
+-mailadd2
+-mailadd3
+-mailadd4
+format:
+  separate_hist: false
+  segmented_files: false
+  ignore_files:
+primary_key:
+  - pre_date
+  - post_date
+  - sboeid
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  sboeid: varchar
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: varchar
+generated_columns:
+  all_history: text[]
+ordered_generated_columns:
+  - all_history
+has_headers: No
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - Republican
+  - Democratic
+  - Independence
+  - Other
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  lastname: varchar #Last name
+  firstname: varchar #First name
+  middlename: varchar #Middle Name
+  namesuffix: varchar #Name suffix
+  raddnumber: varchar #Residence House Number
+  rhalfcode: varchar #Residence Fractional Address
+  rapartment: varchar #Residence Apartment
+  rpredirection: varchar #Residence Pre Street Direction
+  rstreetname: int #Residence Street Name
+  rpostdirection: varchar #Residence Post Street Direction
+  rcity: varchar #Residence City
+  rzip5: varchar #Residence Zip Code 5
+  rzip4: varchar #Zip code plus 4
+  mailadd1: varchar #Mailing Address 1
+  mailadd2: varchar #Mailing Address 2
+  mailadd3: varchar #Mailing Address 3
+  mailadd4: varchar #Mailing Address 4
+  dob: int #Date of Birth
+  gender: varchar #Gender
+  enrollment: varchar #Political Party
+  otherparty: varchar #Name or Party if Voter Checks “Other” on registration form.
+  countycode: int #County code
+  ed: int #Election district
+  ld: int #Legislative district
+  towncity: varchar #Town/City
+  ward: varchar #Ward
+  cd: int #Congressional district
+  sd: int #Senate district
+  ad: int #Assembly district
+  lastvoteddate: varchar #Last date voted
+  prevyearvoted: varchar #Last year voted (from registration form)
+  prevcounty: varchar #Last county voted in (from registration form).
+  prevaddress: varchar #Last registered address
+  prevname: varchar #Last registered name (if different)
+  countyvrnumber: varchar #County Voter Registration Number.
+  regdate: varchar #Application Date
+  vrsource: varchar #Application Source
+  idrequired: varchar #Identification Required Flag.
+  idmet: varchar #Identification Verification Requirement Met Flag.
+  status: varchar #Voter Status Codes.
+  reasoncode: varchar #Status Reason Codes
+  inact_date: varchar #Date Voter made ”Inactive”
+  purge_date: varchar #Date voter was “Purged”
+  sboeid: varchar #Unique NYS Voter ID
+  voterhistory: varchar #Voter History
+ordered_columns:
+  - lastname
+  - firstname
+  - middlename
+  - namesuffix
+  - raddnumber
+  - rhalfcode
+  - rapartment
+  - rpredirection
+  - rstreetname
+  - rpostdirection
+  - rcity
+  - rzip5
+  - rzip4
+  - mailadd1
+  - mailadd2
+  - mailadd3
+  - mailadd4
+  - dob
+  - gender
+  - enrollment
+  - otherparty
+  - countycode
+  - ed
+  - ld
+  - towncity
+  - ward
+  - cd
+  - sd
+  - ad
+  - lastvoteddate
+  - prevyearvoted
+  - prevcounty
+  - prevaddress
+  - prevname
+  - countyvrnumber
+  - regdate
+  - vrsource
+  - idrequired
+  - idmet
+  - status
+  - reasoncode
+  - inact_date
+  - purge_date
+  - sboeid
+  - voterhistory
+hist_columns:
+  - VoterHistory
+county_names:
+  albany: 1,
+  allegany: 2,
+  bronx: 3,
+  broome: 4,
+  cattaraugus: 5,
+  cayuga: 6,
+  cha utauqua: 7,
+  chemung: 8,
+  chenango: 9,
+  clinton: 10,
+  columbia: 11,
+  cortland: 12,
+  delaware: 13,
+  dutchess: 14,
+  erie: 15,
+  essex: 16,
+  franklin: 17,
+  fulton: 18,
+  genesee: 19,
+  greene: 20,
+  hamilton: 21,
+  herkimer: 22,
+  jefferson: 23,
+  kings: 24,
+  lewis: 25,
+  livingston: 26,
+  madison: 27,
+  monro e: 28,
+  montgomery: 29,
+  nassau: 30,
+  new york: 31,
+  niagara: 32,
+  oneida: 33,
+  onondaga: 34,
+  ontario: 35,
+  orange: 36,
+  orleans: 37,
+  oswego: 38,
+  otsego: 39,
+  putnam: 40,
+  queens: 41,
+  rensselaer: 42,
+  richmond: 43,
+  rockland: 44,
+  saratoga: 45,
+  schenectady: 46,
+  schoharie: 47,
+  schuyler: 48,
+  seneca: 49,
+  st.lawrence: 50,
+  steuben: 51,
+  suffolk: 52,
+  sullivan: 53,
+  tioga: 54,
+  tompkins: 55,
+  ulster: 56,
+  warren: 57,
+  washington: 58,
+  wayne: 59,
+  westchester: 60,
+  wyoming: 61,
+  yates: 62,
