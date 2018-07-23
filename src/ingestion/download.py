@@ -10,13 +10,14 @@ import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
 from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
-<<<<<<< HEAD
+#<<<<<<< HEAD
 import zipfile
-=======
+#=======
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 
->>>>>>> 219d6301d64c54d602656058ea32c44084009ad9
+
+#>>>>>>> 219d6301d64c54d602656058ea32c44084009ad9
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text

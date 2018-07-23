@@ -14,11 +14,9 @@ republican_party: Republican
 no_party_affiliation: Non-Partisan
 party_identifier: Party_Affiliation
 numeric_county: true
-<<<<<<< HEAD
 generated_columns:
   all_history: text[]
 has_headers: NO
-=======
 name_fields:
   - cde_name_title
   - text_name_first
@@ -29,7 +27,7 @@ address_fields:
   - Residence_Address_Line_1
   - Residence_Address_Line_2
   - Residence_State
-  - Residence_Zipecode
+  - Residence_Zipcode
   - Mailing_Address_Line_1
   - Mailing_Address_Line_2
   - Mailing_Address_Line_3
@@ -37,7 +35,6 @@ address_fields:
   - Mailing_State
   - Mailing_Zipcode
   - Mailing_Country
->>>>>>> 219d6301d64c54d602656058ea32c44084009ad9
 primary_key:
   - pre_date
   - post_date
@@ -106,7 +103,7 @@ columns:
   Residence_Address_Line_2: text
   Residence_City: text
   Residence_State: text
-  Residence_Zipecode: text
+  Residence_Zipcode: text
   Mailing_Address_Line_1: text
   Mailing_Address_Line_2: text
   Mailing_Address_Line_3: text
