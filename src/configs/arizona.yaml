@@ -241,4 +241,7 @@ hist_columns:
   - party_voted_PP2016
   - party_voted_SE2010
   - party_voted_SE2016
+equivalent_columns:
+  occupation:
+    - occupational
 #county_names:
