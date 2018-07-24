@@ -2,7 +2,7 @@
 # History is a single field. Note that history formats differ across counties, and voters that have moved
 # may have heterogeneous history codes within their history field.
 file_type: CSV
-state: arizona
+state: new york
 source: boe
 file_class: voter_file
 voter_id: sboeid
