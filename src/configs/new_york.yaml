@@ -30,19 +30,19 @@ name_fields:
   - lastname
   - namesuffix
 address_fields:
--raddnumber
--rhalfcode
--rapartment
--rpredirection
--rstreetname
--rpostdirection
--rcity
--rzip5
--rzip4
--mailadd1
--mailadd2
--mailadd3
--mailadd4
+- raddnumber
+- rhalfcode
+- rapartment
+- rpredirection
+- rstreetname
+- rpostdirection
+- rcity
+- rzip5
+- rzip4
+- mailadd1
+- mailadd2
+- mailadd3
+- mailadd4
 format:
   separate_hist: false
   segmented_files: false
