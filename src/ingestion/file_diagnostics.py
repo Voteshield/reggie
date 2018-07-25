@@ -11,13 +11,14 @@ from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
+import subprocess
 
 
 class TestFileBuilder(Preprocessor):
-    def __init__(self, state=None, s3_key=None):
+    def __init__(self, state=None, s3_key=None, local_file=None):
         if s3_key is not None and state is not None and state_from_str(s3_key) != state:
             raise ValueError("state and s3 must be in agreement if both are set")
-        elif s3_key is None and state is not None:
+        elif s3_key is None and state is not None and local_file is None:
             s3_keys = get_raw_s3_uploads(state=state, testing=False)
             if len(s3_keys) == 0:
                 raise ValueError("no raw uploads available to create test file")
@@ -25,16 +26,17 @@ class TestFileBuilder(Preprocessor):
                 s3_key = s3_keys[-1].key
         elif s3_key is not None and state is None:
             state = state_from_str(s3_key)
-        else:
-            raise ValueError("TestFileBuilder must be initialized with either 'state' or 's3_key'")
+        elif local_file is None:
+            raise ValueError("TestFileBuilder must be initialized with either 'state' or 's3_key' or 'local_file'")
         print(s3_key)
         config_file = config_file_from_state(state)
-        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key, config_file=config_file)
+        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key, config_file=config_file, force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
             self.state = state
         self.config = load_configs_from_file(state=self.state)
+        self.local_file = local_file
 
     def get_smallest_counties(self, df, count=2):
         counties = df[self.config["county_identifier"]].value_counts().reset_index()
@@ -58,6 +60,23 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
+    def __build_new_york(self):
+        new_files = self.unpack_files()
+        ny_file = new_files[0]
+        truncated_file = ny_file + ".head"
+        # self.temp_files.append(truncated_file)
+        config = load_configs_from_file(state="new_york")
+        os.system("head -4000 {0} > {1}".format(ny_file, truncated_file))
+
+        df = pd.read_csv(truncated_file, names=config["ordered_columns"], header=None)
+        two_small_counties = self.get_smallest_counties(df, count=2)
+        filtered_data = self.filter_counties(df, counties=two_small_counties)
+        filtered_data.to_csv(ny_file, header=False)
+        filtered_data.to_csv("test.csv", header=False)
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write(ny_file, os.path.basename(ny_file))
+        self.temp_files.append(ny_file)
+        self.temp_files.append(truncated_file)
 
     def __build_nevada(self):
         new_files = self.unpack_files()
@@ -91,10 +110,12 @@ class TestFileBuilder(Preprocessor):
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
-            file_name = self.raw_s3_file.split("/")[-1]
+            file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \
+                self.local_file.split("/")[-1]
 
         routes = {"ohio": self.__build_ohio,
-                  "nevada": self.__build_nevada}
+                  "nevada": self.__build_nevada,
+                  "new_york": self.__build_new_york}
         f = routes[self.state]
         f()
 
@@ -149,7 +170,9 @@ class DiagnosticTest(object):
 
     def test_file_size(self):
         fchange_threshold = 0.15
+
         df = get_preceding_upload(self.configs["state"], self.preproc_obj.download_date)
+
         preceding_upload = json.loads(df.to_json(orient="records"))
         if len(preceding_upload) == 0:
             self.log_msg("-- PASSED -- since there is no preceding file, there is no filesize check")
@@ -158,6 +181,7 @@ class DiagnosticTest(object):
             preceding_upload = preceding_upload[0]
             last_fs = preceding_upload["size"]
             this_fs = stat(self.file_path).st_size
+            print(preceding_upload)
             bigger_file = last_fs if last_fs > this_fs else this_fs
             smaller_file = last_fs if last_fs <= this_fs else this_fs
             fchange = (bigger_file - smaller_file) / bigger_file
@@ -195,5 +219,5 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    with TestFileBuilder(s3_key=sys.argv[2], state=sys.argv[1]) as tf:
+    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
         tf.build()
