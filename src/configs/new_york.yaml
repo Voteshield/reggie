@@ -2,7 +2,7 @@
 # History is a single field. Note that history formats differ across counties, and voters that have moved
 # may have heterogeneous history codes within their history field.
 file_type: CSV
-state: new york
+state: new_york
 source: boe
 file_class: voter_file
 voter_id: sboeid
@@ -30,23 +30,24 @@ name_fields:
   - lastname
   - namesuffix
 address_fields:
-- raddnumber
-- rhalfcode
-- rapartment
-- rpredirection
-- rstreetname
-- rpostdirection
-- rcity
-- rzip5
-- rzip4
-- mailadd1
-- mailadd2
-- mailadd3
-- mailadd4
+  - raddnumber
+  - rhalfcode
+  - rapartment
+  - rpredirection
+  - rstreetname
+  - rpostdirection
+  - rcity
+  - rzip5
+  - rzip4
+  - mailadd1
+  - mailadd2
+  - mailadd3
+  - mailadd4
 format:
   separate_hist: false
   segmented_files: false
   ignore_files:
+   - FOIL_VOTER_LIST_LAYOUT.pdf
 primary_key:
   - pre_date
   - post_date
@@ -61,7 +62,7 @@ base_columns:
   post_value: text
   state: varchar
 generated_columns:
-  all_history: text[]
+  all_history: int[]
 ordered_generated_columns:
   - all_history
 has_headers: No
@@ -109,7 +110,7 @@ columns:
   mailadd2: varchar #Mailing Address 2
   mailadd3: varchar #Mailing Address 3
   mailadd4: varchar #Mailing Address 4
-  dob: int #Date of Birth
+  dob: date #Date of Birth
   gender: varchar #Gender
   enrollment: varchar #Political Party
   otherparty: varchar #Name or Party if Voter Checks “Other” on registration form.
@@ -127,14 +128,14 @@ columns:
   prevaddress: varchar #Last registered address
   prevname: varchar #Last registered name (if different)
   countyvrnumber: varchar #County Voter Registration Number.
-  regdate: varchar #Application Date
+  regdate: date #Application Date
   vrsource: varchar #Application Source
   idrequired: varchar #Identification Required Flag.
   idmet: varchar #Identification Verification Requirement Met Flag.
   status: varchar #Voter Status Codes.
   reasoncode: varchar #Status Reason Codes
-  inact_date: varchar #Date Voter made ”Inactive”
-  purge_date: varchar #Date voter was “Purged”
+  inact_date: date #Date Voter made ”Inactive”
+  purge_date: date #Date voter was “Purged”
   sboeid: varchar #Unique NYS Voter ID
   voterhistory: varchar #Voter History
 ordered_columns:
@@ -184,7 +185,7 @@ ordered_columns:
   - sboeid
   - voterhistory
 hist_columns:
-  - VoterHistory
+  - voterhistory
 county_names:
   albany: 1,
   allegany: 2,
@@ -213,7 +214,7 @@ county_names:
   lewis: 25,
   livingston: 26,
   madison: 27,
-  monro e: 28,
+  monroe: 28,
   montgomery: 29,
   nassau: 30,
   new york: 31,

@@ -4,17 +4,21 @@ from subprocess import Popen, PIPE
 
 import bs4
 import pandas as pd
+import re
 import requests
 from dateutil import parser
 import json
 from constants import *
-from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string
+from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string, \
+    strcol_to_postgres_array_str, strcol_to_array, listcol_tonumpy
 from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
 #<<<<<<< HEAD
 import zipfile
 #=======
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
+import shutil
+import numpy as np
 
 
 #>>>>>>> 219d6301d64c54d602656058ea32c44084009ad9
@@ -69,7 +73,10 @@ class Loader(object):
             self.download_date = datetime.now().isoformat()
 
         if force_file is not None:
-            self.main_file = force_file
+            working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+            logging.info("copying {} to {}".format(force_file, working_file))
+            shutil.copy2(force_file, working_file)
+            self.main_file = working_file
         else:
             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
@@ -183,10 +190,9 @@ class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
         super(Preprocessor, self).__init__(config_file=config_file,
                                            force_date=date_from_str(raw_s3_file), **kwargs)
-        print(raw_s3_file, config_file)
-        print(kwargs)
         self.raw_s3_file = raw_s3_file
-        self.s3_download()
+        if self.raw_s3_file is not None:
+            self.s3_download()
 
     def s3_download(self):
         get_object(self.raw_s3_file, self.main_file)
@@ -284,7 +290,7 @@ class Preprocessor(Loader):
         df_voters = df_voters.set_index(self.config["voter_id"])
         df_voters["all_history"] = voting_histories
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        df_voters.to_csv(self.main_file)
+        df_voters.to_csv(self.main_file, index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
@@ -376,7 +382,7 @@ class Preprocessor(Loader):
                                                                      errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
-        main_df.to_csv(self.main_file, encoding='utf-8')
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         write_meta(self.main_file, message="arizona_{}".format(datetime.now().isoformat()), array_dates=elections_key)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
@@ -386,6 +392,50 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_new_york(self):
+        config = load_configs_from_file("new_york")
+        new_files = self.unpack_files(compression="unzip")
+        main_file = new_files[0]
+        main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
+        main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
+        all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
+        all_codes = all_codes.str.cat(sep=";")
+        all_codes = np.array(all_codes.split(";"))
+        main_df["all_history"] = strcol_to_array(main_df.voterhistory, delim=";")
+        unique_codes, counts = np.unique(all_codes, return_counts=True)
+        beginning_of_time = datetime(1979, 1, 1)
+
+        def extract_date(s):
+            date = date_from_str(s)
+            year = [w for w in s.split("_") if w.isdigit()]
+            if date is not None:
+                output = parser.parse(date)
+            elif len(year) > 0:
+                output = datetime(year=int(year[0]), month=1, day=1)
+            else:
+                output = beginning_of_time
+            return output
+        sorted_codes = list(sorted(unique_codes, key=lambda c: extract_date(c), reverse=True))
+        sorted_codes_dict = {k: i for i, k in enumerate(sorted_codes)}
+
+        def insert_code_bin(arr):
+            new_arr = [0] * len(sorted_codes)
+            for item in arr:
+                new_arr[sorted_codes_dict[item]] = 1
+            return new_arr
+
+        main_df.all_history = main_df.all_history.apply(insert_code_bin)
+
+        self.meta = {
+            "message": "new_york_{}".format(datetime.now().isoformat()),
+            "array_dates": json.dumps(sorted_codes)
+        }
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
+
     def execute(self):
         self.state_router()
 
@@ -394,6 +444,7 @@ class Preprocessor(Loader):
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
             'florida':self.preprocess_florida
+            'new_york': self.preprocess_new_york
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
