@@ -7,11 +7,11 @@ voter_id: Voter_ID
 county_identifier: County_Code
 birthday_identifier: Birth_Date
 voter_status: Voter_Status
-voter_status_active: ACTIVE
-voter_status_inactive: INACTIVE
-democratic_party: Democrat
-republican_party: Republican
-no_party_affiliation: Non-Partisan
+voter_status_active: ACT
+voter_status_inactive: INA
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: NPA
 party_identifier: Party_Affiliation
 numeric_county: false
 generated_columns:
@@ -52,9 +52,6 @@ base_columns:
   state: text
 additional_snapshot_columns:
   all_history: text[]
-  general_history: text[]
-  special_history: text[]
-  primary_history: text[]
 summary_columns:
   - totals
   - date
@@ -180,27 +177,27 @@ county_names:
   Bradford: 4
   Brevard: 5
   Broward: 6
-  Calhoun: 7,
+  Calhoun: 7
   Charlotte: 8
   Citrus: 9
   Clay: 10
   Collier: 11
   Columbia: 12
   Miami-Dade: 13
-  Desoto: 14,
+  Desoto: 14
   Dixie: 15
   Duval: 16
   Escambia: 17
   Flagler: 18
   Franklin: 19
-  Gadsden: 20,
+  Gadsden: 20
   Gilchrist: 21
   Glades: 22
   Gulf: 23
   Hamilton: 24
   Hardee: 25
   Hendry: 26
-  Hernando: 27,
+  Hernando: 27
   Highlands: 28
   Hillsborough: 29
   Holmes: 30
@@ -214,28 +211,28 @@ county_names:
   Levy: 38
   Liberty: 39
   Madison: 40
-  Manatee: 41,
+  Manatee: 41
   Marion: 42
   Martin: 43
   Monroe: 44
   Nassau: 45
   Okaloosa: 46
   Okeechobee: 47
-  Orange: 48,
+  Orange: 48
   Osceola: 49
   Palm_Beach: 50
   Pasco: 51
   Pinellas: 52
   Polk: 53
   Putnam: 54
-  Santa_Rosa: 55,
+  Santa_Rosa: 55
   Sarasota: 56
   Seminole: 57
   St._Johns: 58
   St._Lucie: 59
   Sumter: 60
   Suwannee: 61
-  Taylor: 62,
+  Taylor: 62
   Union: 63
   Volusia: 64
   Wakulla: 65

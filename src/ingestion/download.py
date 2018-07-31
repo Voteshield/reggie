@@ -305,12 +305,12 @@ class Preprocessor(Loader):
         self.decompress(compression_type="unzip", nested_file = file_name_decomp, nested_dir = file_dir_decomp)
         file_h_name_decomp = "/tmp/" + my_file_name + "/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory.zip"
         self.decompress(compression_type="unzip", nested_file = file_h_name_decomp, nested_dir = file_dir_decomp)
-        voter_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail_sm")
-        voter_history_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory_sm")
+        voter_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail")
+        voter_history_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory")
 
         #next steps
         #voter files is a list of files, need to concatenate each of those in the list
-        voter_detail_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail_sm"
+        voter_detail_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail"
         files_voter_detail = os.listdir(voter_detail_folder)
         filenames = [voter_detail_folder + "/" + i for i in files_voter_detail]
         with open('/tmp/concat_voter_file.txt', 'w') as outfile:
@@ -319,7 +319,7 @@ class Preprocessor(Loader):
                     for line in infile:
                         outfile.write(line)
 
-        voter_history_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory_sm"
+        voter_history_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory"
         files_voter_history = os.listdir(voter_history_folder)
         filenames = [voter_history_folder + "/" + i for i in files_voter_history]
         with open('/tmp/concat_voter_history.txt', 'w') as outfile:
