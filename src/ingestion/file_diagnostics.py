@@ -108,6 +108,10 @@ class TestFileBuilder(Preprocessor):
         filtered_data.to_csv(self.main_file, compression='gzip')
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
+    def __build_florida(self):
+        pass
+
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \

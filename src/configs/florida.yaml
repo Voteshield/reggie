@@ -3,28 +3,33 @@ file_type: csv
 state: florida
 source: boe
 file_class: voter_file
-voter_id: SOS_VOTERID
+voter_id: Voter_ID
 county_identifier: County_Code
 birthday_identifier: Birth_Date
-voter_status: County_Status
-voter_status_active: ACTIVE
-voter_status_inactive: INACTIVE
-democratic_party: Democrat
-republican_party: Republican
-no_party_affiliation: Non-Partisan
+voter_status: Voter_Status
+voter_status_active: ACT
+voter_status_inactive: INA
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: NPA
 party_identifier: Party_Affiliation
-numeric_county: true
+numeric_county: false
+generated_columns:
+  all_history: text[]
+has_headers: NO
 name_fields:
   - cde_name_title
   - text_name_first
   - text_name_middle
   - text_name_last
   - cde_name_suffix
+ordered_generated_columns:
+  - all_history
 address_fields:
   - Residence_Address_Line_1
   - Residence_Address_Line_2
   - Residence_State
-  - Residence_Zipecode
+  - Residence_Zipcode
   - Mailing_Address_Line_1
   - Mailing_Address_Line_2
   - Mailing_Address_Line_3
@@ -35,7 +40,7 @@ address_fields:
 primary_key:
   - pre_date
   - post_date
-  - SOS_VOTERID
+  - Voter_ID
   - change_type
 base_columns:
   pre_date: timestamp
@@ -47,9 +52,6 @@ base_columns:
   state: text
 additional_snapshot_columns:
   all_history: text[]
-  general_history: text[]
-  special_history: text[]
-  primary_history: text[]
 summary_columns:
   - totals
   - date
@@ -66,6 +68,12 @@ summary_columns:
   - c
   - n
   - county
+hist_columns:
+  - county
+  - VoterID
+  - date
+  - election_type
+  - vote_type
 summary_types:
   - int
   - timestamp
@@ -81,25 +89,20 @@ summary_types:
   - int
   - int
   - int
-  - int
-format:
-  separate_hist: true
-  separate_counties_voter_file: true
-  separate_counties_hist_file: true
-  hist_election_rows: true
-  columnar_elections: false
+  - text
 columns:
   County_Code: text
   Voter_ID: text
-  Name_List: text
+  Name_Last: text
   Name_Suffix: text
   Name_First: text
   Name_Middle: text
   Requested_public_records_exemption: text
   Residence_Address_Line_1: text
   Residence_Address_Line_2: text
+  Residence_City: text
   Residence_State: text
-  Residence_Zipecode: text
+  Residence_Zipcode: text
   Mailing_Address_Line_1: text
   Mailing_Address_Line_2: text
   Mailing_Address_Line_3: text
@@ -123,10 +126,50 @@ columns:
   County_Commission_District: text
   School_Board_District: text
   Daytime_Area_Code: text
+  Daytime_Phone_Number: text
   Daytime_Phone_Extension: text
   Email_address: text
 data_chunk_links:
   'insert chunks, in file names'
+ordered_columns:
+  - County_Code
+  - Voter_ID
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
+  - Requested_public_records_exemption
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+  - Gender
+  - Race
+  - Birth_Date
+  - Registration_Date
+  - Party_Affiliation
+  - Precinct
+  - Precinct_Group
+  - Precinct_Split
+  - Precinct_Suffix
+  - Voter_Status
+  - Congressional_District
+  - House_District
+  - Senate_District
+  - County_Commission_District
+  - School_Board_District
+  - Daytime_Area_Code
+  - Daytime_Phone_Number
+  - Daytime_Phone_Extension
+  - Email_address
 county_names:
   Alachua: 1
   Baker: 2
@@ -134,27 +177,27 @@ county_names:
   Bradford: 4
   Brevard: 5
   Broward: 6
-  Calhoun: 7,
+  Calhoun: 7
   Charlotte: 8
   Citrus: 9
   Clay: 10
   Collier: 11
   Columbia: 12
   Miami-Dade: 13
-  Desoto: 14,
+  Desoto: 14
   Dixie: 15
   Duval: 16
   Escambia: 17
   Flagler: 18
   Franklin: 19
-  Gadsden: 20,
+  Gadsden: 20
   Gilchrist: 21
   Glades: 22
   Gulf: 23
   Hamilton: 24
   Hardee: 25
   Hendry: 26
-  Hernando: 27,
+  Hernando: 27
   Highlands: 28
   Hillsborough: 29
   Holmes: 30
@@ -168,28 +211,28 @@ county_names:
   Levy: 38
   Liberty: 39
   Madison: 40
-  Manatee: 41,
+  Manatee: 41
   Marion: 42
   Martin: 43
   Monroe: 44
   Nassau: 45
   Okaloosa: 46
   Okeechobee: 47
-  Orange: 48,
+  Orange: 48
   Osceola: 49
   Palm_Beach: 50
   Pasco: 51
   Pinellas: 52
   Polk: 53
   Putnam: 54
-  Santa_Rosa: 55,
+  Santa_Rosa: 55
   Sarasota: 56
   Seminole: 57
   St._Johns: 58
   St._Lucie: 59
   Sumter: 60
   Suwannee: 61
-  Taylor: 62,
+  Taylor: 62
   Union: 63
   Volusia: 64
   Wakulla: 65
