@@ -232,7 +232,7 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(file_name):
-            decompressed_result, success = self.decompress(file_name, compression_type=compression)
+            decompressed_result, success = self.decompress(file_name, compression_pe=compression)
 
             if os.path.isdir(decompressed_result):
                 # is dir
