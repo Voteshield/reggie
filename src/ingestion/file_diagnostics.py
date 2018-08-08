@@ -60,6 +60,29 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
+    def __build_florida(self):
+        new_files = self.unpack_files()
+        #insert code to get the 
+        #method 1
+        smallest_counties = []
+        for i in new_files:
+            if "Liberty" in i or "Lafayette":
+                smallest_counties.append(i)
+
+        #method 2
+        self.temp_files.extend(new_files)
+        for i in new_files:
+            df_voters = pd.read_csv(i, header = None, sep = "\t")
+            if df_voters.shape[0] > 1000:
+                sampled = self.sample(df_voters, frac=0.001)
+                sampled.to_csv(i)
+
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for i in new_files:
+                zf.write(i, os.path.basename(i))
+
+
+
     def __build_new_york(self):
         new_files = self.unpack_files()
         ny_file = new_files[0]
@@ -107,9 +130,6 @@ class TestFileBuilder(Preprocessor):
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
-
-    def __build_florida(self):
-        pass
 
 
     def build(self, file_name=None, save_local=False, save_remote=True):

@@ -338,39 +338,21 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
-        
-        dir_path = os.path.dirname(self.main_file)
-        before = set(os.listdir(dir_path))
-        self.decompress(compression_type="unzip")
-        
-        after = set(os.listdir(dir_path)) 
-
-        new_files = list(after - before)
-        my_file_name = new_files[0]
-        file_name_decomp = "/tmp/" + my_file_name + "/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail.zip"
-        file_dir_decomp = '/tmp'
-        self.decompress(compression_type="unzip", nested_file = file_name_decomp, nested_dir = file_dir_decomp)
-        file_h_name_decomp = "/tmp/" + my_file_name + "/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory.zip"
-        self.decompress(compression_type="unzip", nested_file = file_h_name_decomp, nested_dir = file_dir_decomp)
-        voter_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail")
-        voter_history_files = os.listdir("/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory")
-
-        #next steps
-        #voter files is a list of files, need to concatenate each of those in the list
-        voter_detail_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterDetail"
-        files_voter_detail = os.listdir(voter_detail_folder)
-        filenames = [voter_detail_folder + "/" + i for i in files_voter_detail]
+        new_files = self.unpack_files()
+        vote_history_files = []
+        voter_files = []
+        for i in new_files:
+            if "_H_" in i:
+                vote_history_files.append(i)
+            else:
+                voter_files.append(i)
         with open('/tmp/concat_voter_file.txt', 'w') as outfile:
-            for fname in filenames:
+            for fname in voter_files:
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
-
-        voter_history_folder = "/tmp/" + my_file_name[0:4] + my_file_name[5:7] + my_file_name[8:10] + "_VoterHistory"
-        files_voter_history = os.listdir(voter_history_folder)
-        filenames = [voter_history_folder + "/" + i for i in files_voter_history]
         with open('/tmp/concat_voter_history.txt', 'w') as outfile:
-            for fname in filenames:
+            for fname in vote_history_files:
                 with open(fname) as infile:
                     for line in infile:
                         outfile.write(line)
