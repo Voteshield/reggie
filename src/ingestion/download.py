@@ -346,16 +346,16 @@ class Preprocessor(Loader):
                 vote_history_files.append(i)
             else:
                 voter_files.append(i)
-        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
+        with open('/tmp/concat_voter_file.txt', 'w+') as outfile:
             for fname in voter_files:
                 with open(fname) as infile:
-                    for line in infile:
-                        outfile.write(line)
-        with open('/tmp/concat_voter_history.txt', 'w') as outfile:
+                    outfile.write(infile)
+
+        with open('/tmp/concat_voter_history.txt', 'w+') as outfile:
             for fname in vote_history_files:
                 with open(fname) as infile:
-                    for line in infile:
-                        outfile.write(line)
+                    outfile.write(infile)
+                    
         self.temp_files.extend([files_voter_history, files_voter_detail])
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf('/tmp/concat_voter_history.txt', header = None)
