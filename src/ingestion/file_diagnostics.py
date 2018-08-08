@@ -101,7 +101,7 @@ class TestFileBuilder(Preprocessor):
         self.temp_files.append(ny_file)
         self.temp_files.append(truncated_file)
 
-    def __build_nevada(self):
+    def __build_arizona(self):
         new_files = self.unpack_files()
         self.temp_files.extend(new_files)
         for f in new_files:
@@ -138,7 +138,7 @@ class TestFileBuilder(Preprocessor):
                 self.local_file.split("/")[-1]
 
         routes = {"ohio": self.__build_ohio,
-                  "nevada": self.__build_nevada,
+                  "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york}
         f = routes[self.state]
         f()
