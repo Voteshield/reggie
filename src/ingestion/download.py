@@ -224,7 +224,7 @@ class Preprocessor(Loader):
 
         expand_recurse(self.main_file)
 
-        if "ignore_files" in self.config["format"]:
+        if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n not in
                          self.config["format"]["ignore_files"]]
         else:
