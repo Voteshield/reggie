@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 import bs4
 import pandas as pd
 import re
+import sys
 import requests
 from dateutil import parser
 import json
@@ -88,6 +89,8 @@ class Loader(object):
         for fn in self.temp_files:
             if os.path.isfile(fn):
                 os.remove(fn)
+            else:
+                shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
 
     def download_src_chunks(self):
@@ -137,6 +140,11 @@ class Loader(object):
         return self.checksum
 
     def compress(self, compression_type="gzip"):
+        """
+        intended to be called after the consolidated (processed) file has been created and saved in self.main_file
+        :param compression_type: gzip is default
+        :return: None
+        """
         if not self.is_compressed:
             logging.info("compressing")
             p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
@@ -145,22 +153,33 @@ class Loader(object):
                 self.main_file += ".gz"
             self.is_compressed = True
 
-    def decompress(self, compression_type="gunzip"):
-        if self.is_compressed:
-            logging.info("decompressing {}".format(self.main_file))
-            if compression_type == "unzip":
-                logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
-                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate("A")
+    def decompress(self, file_name, compression_type="gunzip"):
+        logging.info("decompressing {}".format(file_name))
+        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
+        if compression_type == "unzip":
+            logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
+            os.mkdir(new_loc)
+            p = Popen([compression_type, file_name, "-d", new_loc],
+                      stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            p.communicate("A")
+        else:
+            logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
+            p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            p.communicate()
+            if file_name[-3:] == ".gz":
+                new_loc = file_name[:-3]
             else:
-                logging.info("decompressing gunzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate()
-            logging.info("decompressing done".format(self.main_file))
-            if self.main_file[-3:] == ".gz":
-                self.main_file = self.main_file[:-3]
-            self.is_compressed = False
+                new_loc = file_name
+        if p.returncode == 0:
+            logging.info("decompressing done: {}".format(file_name))
+            self.temp_files.append(new_loc)
+        else:
+            logging.info("did not decompress {}".format(file_name))
+            shutil.rmtree(new_loc, ignore_errors=True)
+            new_loc = file_name
+
+        self.is_compressed = False
+        return new_loc, p.returncode == 0
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
@@ -189,19 +208,29 @@ class Preprocessor(Loader):
         get_object(self.raw_s3_file, self.main_file)
 
     def unpack_files(self, compression="unzip"):
-        self.is_compressed = True
-        dir_path = os.path.dirname(self.main_file)
-        before = set(os.listdir(dir_path))
-        self.decompress(compression_type=compression)
-        after = set(os.listdir(dir_path))
-        new_files = list(after.difference(before))
-        if "ignore_files" in self.config["format"]:
-            new_files = ["{}/{}".format(dir_path, n) for n in new_files if n not in
+        all_files = []
+
+        def expand_recurse(file_name):
+            decompressed_result, success = self.decompress(file_name, compression_type=compression)
+
+            if os.path.isdir(decompressed_result):
+                # is dir
+                for f in os.listdir(decompressed_result):
+                    d = decompressed_result + "/" + f
+                    expand_recurse(d)
+            else:
+                # was file
+                all_files.append(decompressed_result)
+
+        expand_recurse(self.main_file)
+
+        if "format" in self.config and "ignore_files" in self.config["format"]:
+            all_files = [n for n in all_files if n not in
                          self.config["format"]["ignore_files"]]
         else:
-            new_files = ["{}/{}".format(dir_path, n) for n in new_files]
-        self.temp_files.extend(new_files)
-        return new_files
+            all_files = [n for n in all_files]
+        self.temp_files.extend(all_files)
+        return all_files
 
     def concat_file_segments(self, file_names):
         """
@@ -249,7 +278,7 @@ class Preprocessor(Loader):
 
     def preprocess_generic(self):
         logging.info("preprocessing generic")
-        self.decompress()
+        self.decompress(self.main_file)
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
@@ -278,7 +307,8 @@ class Preprocessor(Loader):
             return output
 
         voting_histories = df_hist.groupby(self.config["voter_id"]).apply(place_vote_hist)
-        df_voters = df_voters.set_index(self.config["voter_id"])
+        df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
+        df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file, index=False)
@@ -355,7 +385,6 @@ class Preprocessor(Loader):
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
-
 
     def execute(self):
         self.state_router()
