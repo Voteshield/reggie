@@ -32,6 +32,12 @@ primary_key:
   - post_date
   - VoterID
   - change_type
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
 base_columns:
   pre_date: timestamp
   post_date: timestamp

@@ -245,7 +245,7 @@ class Preprocessor(Loader):
 
         expand_recurse(self.main_file)
 
-        if "ignore_files" in self.config["format"]:
+        if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n not in
                          self.config["format"]["ignore_files"]]
         else:
@@ -328,7 +328,8 @@ class Preprocessor(Loader):
             return output
 
         voting_histories = df_hist.groupby(self.config["voter_id"]).apply(place_vote_hist)
-        df_voters = df_voters.set_index(self.config["voter_id"])
+        df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
+        df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file, index=False)
