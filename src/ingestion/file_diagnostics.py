@@ -179,23 +179,25 @@ class DiagnosticTest(object):
             return True
         else:
             preceding_upload = preceding_upload[0]
-            last_fs = preceding_upload["size"]
-            this_fs = stat(self.file_path).st_size
-            print(preceding_upload)
-            bigger_file = last_fs if last_fs > this_fs else this_fs
-            smaller_file = last_fs if last_fs <= this_fs else this_fs
-            fchange = (bigger_file - smaller_file) / bigger_file
-            if fchange > fchange_threshold:
-                if bigger_file == last_fs:
-                    self.log_msg("-- FAILED -- compressed file shrank by {}% (>{}%) since last upload"
-                                 .format(fchange, fchange_threshold * 100))
+            if preceding_upload["size"] is not None:
+                last_fs = preceding_upload["size"]
+                this_fs = stat(self.file_path).st_size
+                print(preceding_upload)
+                bigger_file = last_fs if last_fs > this_fs else this_fs
+                smaller_file = last_fs if last_fs <= this_fs else this_fs
+                fchange = (bigger_file - smaller_file) / bigger_file
+                if fchange > fchange_threshold:
+                    if bigger_file == last_fs:
+                        self.log_msg("-- FAILED -- compressed file shrank by {}% (>{}%) since last upload"
+                                     .format(fchange, fchange_threshold * 100))
+                    else:
+                        self.log_msg("-- FAILED -- compressed file grew by {}% (>{}%) since last upload"
+                                     .format(fchange, fchange_threshold * 100))
+                    return False
                 else:
-                    self.log_msg("-- FAILED -- compressed file grew by {}% (>{}%) since last upload"
-                                 .format(fchange, fchange_threshold * 100))
-                return False
+                    self.log_msg("-- PASSED -- compressed file sizes changed by {}% (<{}%)".format(fchange, fchange_threshold * 100))
             else:
-                self.log_msg("-- PASSED -- compressed file sizes changed by {}% (<{}%)".format(fchange,
-                                                                                               fchange_threshold * 100))
+                self.log_msg("-- PASSED -- no preceding file size")
         return True
 
     def test_snapshots_dryrun(self):
