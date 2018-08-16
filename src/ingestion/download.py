@@ -154,32 +154,49 @@ class Loader(object):
             self.is_compressed = True
 
     def decompress(self, file_name, compression_type="gunzip"):
+        """
+        decompress a file using either unzip or gunzip, unless the file is an .xlsx file, in which case it is returned
+        as is (these files are compressed by default, and are unreadable in their unpacked form by pandas)
+        :param file_name: the path of the file to be decompressed
+        :param compression_type: available options - ["unzip", "gunzip"]
+        :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
+        decompressed
+        """
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
-        if compression_type == "unzip":
-            logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
-            os.mkdir(new_loc)
-            p = Popen([compression_type, file_name, "-d", new_loc],
-                      stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            p.communicate("A")
-        else:
-            logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
-            p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            p.communicate()
-            if file_name[-3:] == ".gz":
-                new_loc = file_name[:-3]
-            else:
-                new_loc = file_name
-        if p.returncode == 0:
-            logging.info("decompressing done: {}".format(file_name))
-            self.temp_files.append(new_loc)
-        else:
+        success = False
+
+        if file_name.split(".")[-1] == "xlsx":
             logging.info("did not decompress {}".format(file_name))
             shutil.rmtree(new_loc, ignore_errors=True)
             new_loc = file_name
+            success = True
+        else:
+            if compression_type == "unzip":
+                logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
+                os.mkdir(new_loc)
+                p = Popen([compression_type, file_name, "-d", new_loc],
+                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                p.communicate("A")
+            else:
+                logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
+                p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                p.communicate()
+                if file_name[-3:] == ".gz":
+                    new_loc = file_name[:-3]
+                else:
+                    new_loc = file_name
+            if p.returncode == 0:
+                logging.info("decompressing done: {}".format(file_name))
+                self.temp_files.append(new_loc)
+                success = True
+            else:
+                logging.info("did not decompress {}".format(file_name))
+                shutil.rmtree(new_loc, ignore_errors=True)
+                new_loc = file_name
 
         self.is_compressed = False
-        return new_loc, p.returncode == 0
+        return new_loc, success
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
@@ -276,9 +293,6 @@ class Preprocessor(Loader):
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
 
-    def preprocess_generic(self):
-        logging.info("preprocessing generic")
-        self.decompress(self.main_file)
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
@@ -400,8 +414,8 @@ class Preprocessor(Loader):
             logging.info("preprocessing {}".format(self.config["state"]))
             f()
         else:
-            self.preprocess_generic()
-
+            raise NotImplementedError("preprocess_{} has not yet been implemented for the Preprocessor object"
+                                      .format(self.config["state"]))
 
 if __name__ == '__main__':
     print(ohio_get_last_updated())
