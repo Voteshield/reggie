@@ -466,7 +466,7 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'florida':self.preprocess_florida
+            'florida':self.preprocess_florida,
             'new_york': self.preprocess_new_york
         }
         if self.config["state"] in routes:
