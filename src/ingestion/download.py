@@ -181,26 +181,33 @@ class Loader(object):
 
         self.is_compressed = False
         return new_loc, p.returncode == 0
-    def decompress(self, compression_type="gunzip", nested_file = "None", nested_dir = "None"):
-        if self.is_compressed:
-            logging.info("decompressing {}".format(self.main_file))
-            if compression_type == "unzip":
-                logging.info("decompressing unzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file, "-d", os.path.dirname(self.main_file)],
-                          stdout=PIPE, stderr=PIPE)
-            else:
-                logging.info("decompressing gunzip {} to {}".format(self.main_file, os.path.dirname(self.main_file)))
-                p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
+    def decompress(self, file_name, compression_type="gunzip"):
+        logging.info("decompressing {}".format(file_name))
+        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
+        if compression_type == "unzip":
+            logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
+            os.mkdir(new_loc)
+            p = Popen([compression_type, file_name, "-d", new_loc],
+                      stdout=PIPE, stderr=PIPE, stdin=PIPE)
             p.communicate("A")
-            logging.info("decompressing done".format(self.main_file))
-            if self.main_file[-3:] == ".gz":
-                self.main_file = self.main_file[:-3]
-            self.is_compressed = False
-        if self.is_compressed == False and nested_file != "None":
-            logging.info("decompressing {}".format(nested_file))
-            zip_ref = zipfile.ZipFile(nested_file, 'r')
-            zip_ref.extractall(nested_dir)
-            zip_ref.close()
+        else:
+            logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
+            p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+            p.communicate()
+            if file_name[-3:] == ".gz":
+                new_loc = file_name[:-3]
+            else:
+                new_loc = file_name
+        if p.returncode == 0:
+            logging.info("decompressing done: {}".format(file_name))
+            self.temp_files.append(new_loc)
+        else:
+            logging.info("did not decompress {}".format(file_name))
+            shutil.rmtree(new_loc, ignore_errors=True)
+            new_loc = file_name
+
+        self.is_compressed = False
+        return new_loc, p.returncode == 0
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
@@ -232,7 +239,8 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(file_name):
-            decompressed_result, success = self.decompress(file_name, compression_pe=compression)
+            
+            decompressed_result, success = self.decompress(file_name, compression_type=compression)
 
             if os.path.isdir(decompressed_result):
                 # is dir
@@ -340,6 +348,8 @@ class Preprocessor(Loader):
     def preprocess_florida(self):
         logging.info("preprocessing florida")
         new_files = self.unpack_files()
+        print("hey look here")
+        print(new_files)
         vote_history_files = []
         voter_files = []
         for i in new_files:
@@ -347,24 +357,32 @@ class Preprocessor(Loader):
                 vote_history_files.append(i)
             else:
                 voter_files.append(i)
-        with open('/tmp/concat_voter_file.txt', 'w+') as outfile:
+        
+        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
             for fname in voter_files:
                 with open(fname) as infile:
-                    outfile.write(infile)
+                    
+                    outfile.write(infile.read())
 
-        with open('/tmp/concat_voter_history.txt', 'w+') as outfile:
+        with open('/tmp/concat_voter_history.txt', 'w') as outfile:
             for fname in vote_history_files:
                 with open(fname) as infile:
-                    outfile.write(infile)
+                    outfile.write(infile.read())
                     
-        self.temp_files.extend([files_voter_history, files_voter_detail])
+        #self.temp_files.extend([vote_history_files,  files_voter_detail])
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf('/tmp/concat_voter_history.txt', header = None)
         df_hist.columns = self.config["hist_columns"]
         logging.info("FLORIDA: loading main voter file")
         df_voters = pd.read_csv('/tmp/concat_voter_file.txt', header = None, sep = "\t")
         df_voters.columns = self.config["ordered_columns"]
-        valid_elections = df_hist.date.unique().tolist()
+        all_elections = df_hist.date.unique().tolist()
+        valid_elections = []
+        for i in all_elections:
+            if len(i) > 5:
+                valid_elections.append(i)
+
+        print(valid_elections)
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
 
         def place_vote_hist(g):
