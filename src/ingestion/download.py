@@ -152,6 +152,7 @@ class Loader(object):
             if self.main_file[-3:] != ".gz":
                 self.main_file += ".gz"
             self.is_compressed = True
+            self.temp_files.append(self.main_file)
 
     def decompress(self, file_name, compression_type="gunzip"):
         """
