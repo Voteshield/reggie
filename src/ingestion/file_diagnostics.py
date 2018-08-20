@@ -66,21 +66,23 @@ class TestFileBuilder(Preprocessor):
         #method 1
         smallest_counties = []
         for i in new_files:
-            if "Liberty" in i or "Lafayette":
+            if ("Liberty" in i) or ("Lafayette" in i):
                 smallest_counties.append(i)
-
-        #method 2
-        self.temp_files.extend(new_files)
+        vote_history_files = []
+        voter_files = []
         for i in new_files:
-            df_voters = pd.read_csv(i, header = None, sep = "\t")
-            if df_voters.shape[0] > 1000:
-                sampled = self.sample(df_voters, frac=0.001)
-                sampled.to_csv(i)
-
+            if "_H_" in i:
+                vote_history_files.append(i)
+            elif ".txt" in i:
+                print("new voter file")
+                print(i)
+                voter_files.append(i)
+        #florida files are composed as nested zip files, but because of the recursive file structure and because of how preprocess florida is made it shouldn't matter
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            for i in new_files:
-                zf.write(i, os.path.basename(i))
+            for f in new_files:
+                zf.write(f, os.path.basename(f))
 
+        
 
 
     def __build_new_york(self):
