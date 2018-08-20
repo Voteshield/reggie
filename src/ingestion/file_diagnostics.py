@@ -149,8 +149,10 @@ class ProcessedTestFileBuilder(object):
 
 class DiagnosticTest(object):
     """
-    This class gets used to ensure that each uploaded snapshot is consistent with it's configuration file and with past
-    snapshots. We run this check before inserting the new changes into the modifications table and it's descendants.
+    This class gets used to ensure that each uploaded snapshot is consistent
+    with it's configuration file and with past snapshots. We run this check
+    before inserting the new changes into the modifications table and it's
+    descendants.
     """
     def __init__(self, file_path, config_file, preproc_obj):
         self.file_path = file_path
@@ -171,11 +173,13 @@ class DiagnosticTest(object):
     def test_file_size(self):
         fchange_threshold = 0.15
 
-        df = get_preceding_upload(self.configs["state"], self.preproc_obj.download_date)
+        df = get_preceding_upload(self.configs["state"],
+                                  self.preproc_obj.download_date)
 
         preceding_upload = json.loads(df.to_json(orient="records"))
         if len(preceding_upload) == 0:
-            self.log_msg("-- PASSED -- since there is no preceding file, there is no filesize check")
+            self.log_msg("-- PASSED -- since there is no preceding file, there"
+                         " is no filesize check")
             return True
         else:
             preceding_upload = preceding_upload[0]
@@ -188,25 +192,31 @@ class DiagnosticTest(object):
                 fchange = (bigger_file - smaller_file) / bigger_file
                 if fchange > fchange_threshold:
                     if bigger_file == last_fs:
-                        self.log_msg("-- FAILED -- compressed file shrank by {}% (>{}%) since last upload"
+                        self.log_msg("-- FAILED -- compressed file shrank by "
+                                     "{}% (>{}%) since last upload"
                                      .format(fchange, fchange_threshold * 100))
                     else:
-                        self.log_msg("-- FAILED -- compressed file grew by {}% (>{}%) since last upload"
+                        self.log_msg("-- FAILED -- compressed file grew by "
+                                     "{}% (>{}%) since last upload"
                                      .format(fchange, fchange_threshold * 100))
                     return False
                 else:
-                    self.log_msg("-- PASSED -- compressed file sizes changed by {}% (<{}%)".format(fchange, fchange_threshold * 100))
+                    self.log_msg("-- PASSED -- compressed file sizes changed "
+                                 "by {}% (<{}%)"
+                                 .format(fchange, fchange_threshold * 100))
             else:
                 self.log_msg("-- PASSED -- no preceding file size")
         return True
 
     def test_snapshots_dryrun(self):
-        tmp_test_file = "/tmp/voteshield_head_{}_{}.csv".format(uuid.uuid4(), self.preproc_obj.download_date)
+        tmp_test_file = "/tmp/voteshield_head_{}_{}.csv"\
+            .format(uuid.uuid4(), self.preproc_obj.download_date)
         self.preproc_obj.temp_files.append(tmp_test_file)
         os.system("head -1000 {} > {}".format(self.file_path, tmp_test_file))
         print(self.file_path)
         try:
-            test_s = Snapshot(config_file=self.config_file, file_name=tmp_test_file)
+            test_s = Snapshot(config_file=self.config_file,
+                              file_name=tmp_test_file)
             self.log_msg("-- PASSED --")
             return True
         except SnapshotConsistencyError as e:
