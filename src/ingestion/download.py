@@ -224,6 +224,19 @@ class Preprocessor(Loader):
     def s3_download(self):
         get_object(self.raw_s3_file, self.main_file)
 
+    def coerce_dates(self, df):
+        """
+        takes all columns with timestamp or date labels in the config file and forces the corresponding entries in the
+        raw file into datetime objects
+        :param df: dataframe to modify
+        :return: modified dataframe
+        """
+        date_fields = [c for c, v in self.config["columns"].items() if v == "date" or v == "timestamp"]
+        for field in date_fields:
+            df[field] = df[field].apply(str)
+            df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
+        return df
+
     def unpack_files(self, compression="unzip"):
         all_files = []
 
@@ -293,7 +306,6 @@ class Preprocessor(Loader):
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
 
-
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
         voter_file = new_files[0] if "ElgbVtr" in new_files[0] else new_files[1]
@@ -361,6 +373,7 @@ class Preprocessor(Loader):
         config = load_configs_from_file("new_york")
         new_files = self.unpack_files(compression="unzip")
         main_file = new_files[0]
+
         main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
         all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
@@ -390,11 +403,12 @@ class Preprocessor(Loader):
             return new_arr
 
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
-
+        main_df = self.coerce_dates(main_df)
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
             "array_dates": json.dumps(sorted_codes)
         }
+
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
