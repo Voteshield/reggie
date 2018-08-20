@@ -347,7 +347,7 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
-        new_files = self.unpack_files()
+        new_files = self.unpack_files(compression = 'unzip')
         
         vote_history_files = []
         voter_files = []
@@ -355,11 +355,9 @@ class Preprocessor(Loader):
             if "_H_" in i:
                 vote_history_files.append(i)
             elif ".txt" in i:
-                print("new file to check")
+                print("new voter file")
                 print(i)
                 voter_files.append(i)
-        
-        
 
         with open('/tmp/concat_voter_file.txt', 'w') as outfile:
             for fname in voter_files:
