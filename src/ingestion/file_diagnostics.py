@@ -16,21 +16,31 @@ import subprocess
 
 class TestFileBuilder(Preprocessor):
     def __init__(self, state=None, s3_key=None, local_file=None):
-        if s3_key is not None and state is not None and state_from_str(s3_key) != state:
-            raise ValueError("state and s3 must be in agreement if both are set")
+        if s3_key is not None and state is not None and state_from_str(
+                s3_key) != state:
+            raise ValueError(
+                "state and s3 must be in agreement if both are set")
         elif s3_key is None and state is not None and local_file is None:
             s3_keys = get_raw_s3_uploads(state=state, testing=False)
             if len(s3_keys) == 0:
-                raise ValueError("no raw uploads available to create test file")
+                raise ValueError(
+                    "no raw uploads available to create test file")
             else:
                 s3_key = s3_keys[-1].key
         elif s3_key is not None and state is None:
             state = state_from_str(s3_key)
         elif local_file is None:
-            raise ValueError("TestFileBuilder must be initialized with either 'state' or 's3_key' or 'local_file'")
+            raise ValueError(
+                "TestFileBuilder must be initialized with either 'state' or "
+                "'s3_key' or 'local_file'")
         print(s3_key)
         config_file = config_file_from_state(state)
-        super(TestFileBuilder, self).__init__(raw_s3_file=s3_key, config_file=config_file, force_file=local_file)
+        super(
+            TestFileBuilder,
+            self).__init__(
+            raw_s3_file=s3_key,
+            config_file=config_file,
+            force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
@@ -39,16 +49,22 @@ class TestFileBuilder(Preprocessor):
         self.local_file = local_file
 
     def get_smallest_counties(self, df, count=2):
-        counties = df[self.config["county_identifier"]].value_counts().reset_index()
+        counties = df[self.config["county_identifier"]
+                      ].value_counts().reset_index()
         counties["county"] = counties[counties.columns[0]]
         counties["count"] = counties[self.config["county_identifier"]]
-        counties.drop(columns=[counties.columns[0], self.config["county_identifier"]], inplace=True)
+        counties.drop(
+            columns=[
+                counties.columns[0],
+                self.config["county_identifier"]],
+            inplace=True)
         small_counties = counties.values[-count:, 0]
         return small_counties
 
     def filter_counties(self, df, counties):
-        filtered_data = df[(df[self.config["county_identifier"]] == counties[0]) |
-                           (df[self.config["county_identifier"]] == counties[1])]
+        county_col = df[self.config["county_identifier"]]
+        filtered_data = df[(df[county_col] == counties[0]) |
+                           (df[county_col] == counties[1])]
         filtered_data.reset_index(inplace=True, drop=True)
         return filtered_data
 
@@ -64,11 +80,13 @@ class TestFileBuilder(Preprocessor):
         new_files = self.unpack_files()
         ny_file = new_files[0]
         truncated_file = ny_file + ".head"
-        # self.temp_files.append(truncated_file)
         config = load_configs_from_file(state="new_york")
         os.system("head -4000 {0} > {1}".format(ny_file, truncated_file))
 
-        df = pd.read_csv(truncated_file, names=config["ordered_columns"], header=None)
+        df = pd.read_csv(
+            truncated_file,
+            names=config["ordered_columns"],
+            header=None)
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(ny_file, header=False)
@@ -88,8 +106,8 @@ class TestFileBuilder(Preprocessor):
                 logging.info("sampling {}".format(f))
                 sampled = self.sample(df, frac=0.001)
 
-                # insert malformed date
-                sampled[self.config["birthday_identifier"]].iloc[-1] = "schfiftyfive"
+                sampled[self.config["birthday_identifier"]
+                        ].iloc[-1] = "schfiftyfive"
                 sampled.to_excel(f)
             else:
                 logging.info("skipping...")
@@ -99,18 +117,21 @@ class TestFileBuilder(Preprocessor):
 
     def __build_ohio(self):
         """
-        this only generates a truncated _processed_ file, no test raw file generator is written for ohio (todo)
+        this only generates a truncated _processed_ file, no test raw file
+        generator is written for ohio (todo)
         :return: None
         """
         df = pd.read_csv(self.main_file, compression='gzip', comment="#")
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
-        logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
+        logging.info("using '{}' counties".format(
+            " and ".join([str(a) for a in two_small_counties.tolist()])))
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
-            file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \
+            file_name = self.raw_s3_file.split("/")[-1] \
+                if self.raw_s3_file is not None else \
                 self.local_file.split("/")[-1]
 
         routes = {"ohio": self.__build_ohio,
@@ -121,23 +142,25 @@ class TestFileBuilder(Preprocessor):
 
         if save_remote:
             with open(self.main_file) as f:
-                s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
-                                                                   Metadata={
-                                                                       "last_updated": self.download_date
-                                                                   })
+                s3.Object(
+                    S3_BUCKET, self.test_key(file_name)).put(
+                    Body=f.read(), Metadata={
+                        "last_updated": self.download_date})
         if save_local:
             os.rename(self.main_file, file_name)
 
 
 class ProcessedTestFileBuilder(object):
     def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
-        self.df, self.meta = Snapshot.load_from_s3(s3_key, compression=compression)
+        self.df, self.meta = Snapshot.load_from_s3(
+            s3_key, compression=compression)
         self.state = state_from_str(s3_key)
         self.randomize = randomize
         self.size = size
 
     def test_key(self, name):
-        return "/testing/{}/{}/{}".format(PROCESSED_FILE_PREFIX, self.state, name)
+        return "/testing/{}/{}/{}".format(PROCESSED_FILE_PREFIX,
+                                          self.state, name)
 
     def build(self, file_name):
         if self.randomize:
@@ -154,6 +177,7 @@ class DiagnosticTest(object):
     before inserting the new changes into the modifications table and it's
     descendants.
     """
+
     def __init__(self, file_path, config_file, preproc_obj):
         self.file_path = file_path
         self.configs = load_configs_from_file(config_file=config_file)
