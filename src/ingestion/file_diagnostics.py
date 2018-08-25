@@ -141,7 +141,8 @@ class TestFileBuilder(Preprocessor):
 
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
-                  "new_york": self.__build_new_york}
+                  "new_york": self.__build_new_york,
+                  "florida": self.__build_florida}
         f = routes[self.state]
         f()
 
@@ -247,5 +248,11 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
+    local_file=sys.argv[1]
+    state=sys.argv[2]
+    if local_file == "None":
+        local_file = None
+    if state == "None":
+        state = None
+    with TestFileBuilder(local_file=local_file, state=state) as tf:
         tf.build()
