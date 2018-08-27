@@ -154,7 +154,7 @@ class Loader(object):
                 self.main_file += ".gz"
             self.is_compressed = True
 
-    def decompress(self, file_name, compression_type="gunzip"):
+    def decompress(self, file_name, compression_type="unzip"):
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
         if compression_type == "unzip":
@@ -355,8 +355,6 @@ class Preprocessor(Loader):
             if "_H_" in i:
                 vote_history_files.append(i)
             elif ".txt" in i:
-                print("new voter file")
-                print(i)
                 voter_files.append(i)
 
         with open('/tmp/concat_voter_file.txt', 'w') as outfile:
@@ -381,8 +379,6 @@ class Preprocessor(Loader):
         for i in all_elections:
             if len(i) > 5:
                 valid_elections.append(i)
-
-        print(valid_elections)
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
 
         def place_vote_hist(g):

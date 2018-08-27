@@ -66,7 +66,7 @@ class TestFileBuilder(Preprocessor):
         #method 1
         smallest_counties = []
         for i in new_files:
-            if ("Liberty" in i) or ("Lafayette" in i):
+            if ("LIB" in i) or ("LAF" in i):
                 smallest_counties.append(i)
         vote_history_files = []
         voter_files = []
@@ -74,8 +74,6 @@ class TestFileBuilder(Preprocessor):
             if "_H_" in i:
                 vote_history_files.append(i)
             elif ".txt" in i:
-                print("new voter file")
-                print(i)
                 voter_files.append(i)
         #florida files are composed as nested zip files, but because of the recursive file structure and because of how preprocess florida is made it shouldn't matter
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
@@ -134,7 +132,7 @@ class TestFileBuilder(Preprocessor):
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
 
-    def build(self, file_name=None, save_local=False, save_remote=True):
+    def build(self, file_name=None, save_local=True, save_remote=False):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \
                 self.local_file.split("/")[-1]
@@ -148,6 +146,8 @@ class TestFileBuilder(Preprocessor):
 
         if save_remote:
             with open(self.main_file) as f:
+                print("hey tyler look at the S3 bucket below")
+                print(S3_BUCKET)
                 s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
                                                                    Metadata={
                                                                        "last_updated": self.download_date
