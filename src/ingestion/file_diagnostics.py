@@ -152,8 +152,6 @@ class TestFileBuilder(Preprocessor):
                                                                        "last_updated": self.download_date
                                                                    })
         if save_local:
-            print("this is the file name, does it get here?")
-            print(file_name)
             os.rename(self.main_file, file_name)
 
 
