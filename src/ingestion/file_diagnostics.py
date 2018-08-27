@@ -70,14 +70,14 @@ class TestFileBuilder(Preprocessor):
                 smallest_counties.append(i)
         vote_history_files = []
         voter_files = []
-        for i in new_files:
+        for i in smallest_counties:
             if "_H_" in i:
                 vote_history_files.append(i)
             elif ".txt" in i:
                 voter_files.append(i)
         #florida files are composed as nested zip files, but because of the recursive file structure and because of how preprocess florida is made it shouldn't matter
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            for f in new_files:
+            for f in smallest_counties:
                 zf.write(f, os.path.basename(f))
 
         
@@ -146,13 +146,14 @@ class TestFileBuilder(Preprocessor):
 
         if save_remote:
             with open(self.main_file) as f:
-                print("hey tyler look at the S3 bucket below")
-                print(S3_BUCKET)
+                
                 s3.Object(S3_BUCKET, self.test_key(file_name)).put(Body=f.read(),
                                                                    Metadata={
                                                                        "last_updated": self.download_date
                                                                    })
         if save_local:
+            print("this is the file name, does it get here?")
+            print(file_name)
             os.rename(self.main_file, file_name)
 
 
