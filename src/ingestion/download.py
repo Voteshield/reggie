@@ -316,6 +316,12 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_iowa(self):
+        new_files = self.unpack_files(compression='unzip')
+
+
+        return chksum
+
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
@@ -393,7 +399,8 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'new_york': self.preprocess_new_york
+            'new_york': self.preprocess_new_york,
+            'iowa': self.preprocess_iowa
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
