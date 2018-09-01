@@ -21,7 +21,7 @@ democratic_party: DEM
 republican_party: REP
 no_party_affiliation: OTHER
 independence_party: IND
-numeric_county: true
+numeric_county: false
 date_format: YYYYMMDD #IS THIS RIGHT?
 party_identifier: enrollment
 name_fields:

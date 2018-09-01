@@ -293,7 +293,6 @@ class Preprocessor(Loader):
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
 
-
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
         voter_file = new_files[0] if "ElgbVtr" in new_files[0] else new_files[1]
