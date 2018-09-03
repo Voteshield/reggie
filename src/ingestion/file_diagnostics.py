@@ -97,6 +97,18 @@ class TestFileBuilder(Preprocessor):
             for f in new_files:
                 zf.write(f, os.path.basename(f))
 
+    def __build_iowa(self):
+        new_files = self.unpack_files()
+
+        #read in dataframe here, haven't figured this out yet
+
+        df = old_df.sample(n = 10000)
+
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write(df, os.path.basename(new_file[0]))
+        self.temp_files.append()
+
+
     def __build_ohio(self):
         """
         this only generates a truncated _processed_ file, no test raw file generator is written for ohio (todo)
@@ -115,7 +127,8 @@ class TestFileBuilder(Preprocessor):
 
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
-                  "new_york": self.__build_new_york}
+                  "new_york": self.__build_new_york,
+                  "iowa": self.__build_iowa}
         f = routes[self.state]
         f()
 
