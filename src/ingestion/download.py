@@ -390,6 +390,8 @@ class Preprocessor(Loader):
             if date is not None:
                 output = parser.parse(date)
             elif len(year) > 0:
+                print(year)
+                print(year[0])
                 output = datetime(year=int(year[0]), month=1, day=1)
             else:
                 output = beginning_of_time
