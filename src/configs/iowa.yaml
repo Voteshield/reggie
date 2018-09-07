@@ -1,0 +1,214 @@
+#Florida provides two .zip files: Voter Extract and Voter History. Depending on the vintage they will have different naming conventions (most recently the files are "Voter_Registration_20180510.zip" and "Voter_History_20180510.zip". Both zips contain 67 separate .txt files, one for each county. "ALA_20061010.txt" would be for Alachua county from Oct 10 2006. These files DO NOT have headers.
+file_type: txt
+state: iowa
+source: boe
+file_class: voter_file
+voter_id: REGN_NUM
+county_identifier: COUNTY
+birthday_identifier: BIRTHDATE
+voter_status: VOTERSTATUS
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: NP
+party_identifier: PARTY
+numeric_county: false
+name_fields:
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+address_fields:
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - UNIT_TYPE
+  - UNIT_NUM
+  - ADDRESS_NON_STD
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - ZIP_PLUS
+primary_key:
+  - pre_date
+  - post_date
+  - REGN_NUM
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  Voter_ID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+additional_snapshot_columns:
+  all_history: text[]
+  general_history: text[]
+  special_history: text[]
+  primary_history: text[]
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - r
+  - npa
+  - d
+  - g
+  - l
+  - c
+  - n
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+format:
+  separate_hist: false
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+columns:
+  REGN_NUM: text
+  FIRST_NAME: text
+  MIDDLE_NAME: text
+  LAST_NAME: text
+  NAME_SUFFIX: text
+  EFF_REGN_DATE: date
+  LAST_UPDATED_DATE: date
+  PHONENO: text
+  HOUSE_NUM: text
+  HOUSE_SUFFIX: text
+  PRE_DIR: text
+  STREET_NAME: text
+  STREET_TYPE: text
+  POST_DIR: text
+  UNIT_TYPE: text
+  UNIT_NUM: text
+  ADDRESS_NON_STD: text
+  CITY: text
+  STATE: text
+  ZIP_CODE: text
+  ZIP_PLUS: text
+  MAILING_ADDRESS: text
+  CITY: text
+  STATE: text
+  ZIP_CODE: text
+  ZIP_PLUS: text
+  VOTERSTATUS: text
+  PARTY: text
+  POLITICAL_ORGANIZATION: text
+  GENDER: text
+  BIRTHDATE: text
+  COUNTY: text
+  FEDERAL: text
+  CONGRESSIONAL: text
+  STATEWIDE: text
+  STATE SENATE: text
+  STATE HOUSE: text
+  JUDICIAL: text
+  PRECINCT: text
+  COUNTY SUPERVISOR: text
+  COUNTYWIDE: text
+  TOWNSHIP: text
+  CITY COUNCIL WARD: text
+  CITY: text
+  COMMUNITY COLLEGE DIRECTOR: text
+  COMMUNITY COLLEGE: text
+  SCHOOL DIRECTOR: text
+  SCHOOL: text
+  SANITARY: text
+  AGRICULTURAL EXTENSION: text
+  SOIL AND WATER: text
+  WATER: text
+  FIRE: text
+  LAND: text
+  LAKE: text
+  LOSST - CONTIGUOUS CITIES: text
+  RECREATIONAL: text
+  RURAL IMPROVEMENT ZONE: text
+  SEWER: text
+  LIGHT: text
+  MISCELLANEOUS: text
+  GENERAL_ELECTION_DATE: date
+  GENERAL_VOTERVOTEMETHOD: text
+  GENERAL_ELECTION_DATE: date
+  GENERAL_VOTERVOTEMETHOD: text
+  GENERAL_ELECTION_DATE: date
+  GENERAL_VOTERVOTEMETHOD: text
+  GENERAL_ELECTION_DATE: date
+  GENERAL_VOTERVOTEMETHOD: text
+  GENERAL_ELECTION_DATE: date
+  GENERAL_VOTERVOTEMETHOD: text
+  PRIMARY_ELECTION_DATE: date
+  PRIMARY_VOTERVOTEMETHOD: text
+  POLITICAL_PARTY: text
+  POLITICAL_ORGANIZATION: text
+  PRIMARY_ELECTION_DATE: date
+  PRIMARY_VOTERVOTEMETHOD: text
+  POLITICAL_PARTY: text
+  POLITICAL_ORGANIZATION: text
+  PRIMARY_ELECTION_DATE: date
+  PRIMARY_VOTERVOTEMETHOD: text
+  POLITICAL_PARTY: text
+  POLITICAL_ORGANIZATION: text
+  PRIMARY_ELECTION_DATE: date
+  PRIMARY_VOTERVOTEMETHOD: text
+  POLITICAL_PARTY: text
+  POLITICAL_ORGANIZATION: text
+  PRIMARY_ELECTION_DATE: date
+  PRIMARY_VOTERVOTEMETHOD: text
+  POLITICAL_PARTY: text
+  POLITICAL_ORGANIZATION: text
+  SCHOOL_ELECTION_DATE: date
+  SCHOOL_VOTERVOTEMETHOD: text
+  SCHOOL_ELECTION_DATE: date
+  SCHOOL_VOTERVOTEMETHOD: text
+  SCHOOL_ELECTION_DATE: date
+  SCHOOL_VOTERVOTEMETHOD: text
+  SCHOOL_ELECTION_DATE: date
+  SCHOOL_VOTERVOTEMETHOD: text
+  SCHOOL_ELECTION_DATE: date
+  SCHOOL_VOTERVOTEMETHOD: text
+  CITY_ELECTION_DATE: date
+  CITY_VOTERVOTEMETHOD: text
+  CITY_ELECTION_DATE: date
+  CITY_VOTERVOTEMETHOD: text
+  CITY_ELECTION_DATE: date
+  CITY_VOTERVOTEMETHOD: text
+  CITY_ELECTION_DATE: date
+  CITY_VOTERVOTEMETHOD: text
+  CITY_ELECTION_DATE: date
+  CITY_VOTERVOTEMETHOD: text
+  SPECIAL_ELECTION_DATE: date
+  SPECIAL_VOTERVOTEMETHOD: text
+  SPECIAL_ELECTION_DATE: date
+  SPECIAL_VOTERVOTEMETHOD: text
+  SPECIAL_ELECTION_DATE: date
+  SPECIAL_VOTERVOTEMETHOD: text
+  SPECIAL_ELECTION_DATE: date
+  SPECIAL_VOTERVOTEMETHOD: text
+  SPECIAL_ELECTION_DATE: date
+  SPECIAL_VOTERVOTEMETHOD: text
