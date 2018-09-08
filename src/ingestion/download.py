@@ -374,7 +374,7 @@ class Preprocessor(Loader):
         config = load_configs_from_file("new_york")
         new_files = self.unpack_files(compression="unzip")
         main_file = new_files[0]
-
+        print(main_file)
         main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
         all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
