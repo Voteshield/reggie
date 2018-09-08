@@ -373,7 +373,7 @@ class Preprocessor(Loader):
     def preprocess_new_york(self):
         config = load_configs_from_file("new_york")
         new_files = self.unpack_files(compression="unzip")
-        main_file = new_files[0]
+        main_file = filter(lambda x: x[:-4] != ".pdf", new_files)[0]
         print(main_file)
         main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
@@ -398,6 +398,8 @@ class Preprocessor(Loader):
             else:
                 output = beginning_of_time
             return output
+
+        print(unique_codes)
         sorted_codes = list(sorted(unique_codes, key=lambda c: extract_date(c),
                                    reverse=True))
         sorted_codes_dict = {k: i for i, k in enumerate(sorted_codes)}
