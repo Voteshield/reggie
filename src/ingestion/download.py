@@ -5,6 +5,7 @@ from subprocess import Popen, PIPE
 import bs4
 import pandas as pd
 import re
+import chardet
 import sys
 import requests
 from dateutil import parser
@@ -211,7 +212,10 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f, Metadata=meta)
+                .put(Body=f)
+        s3.Object(S3_BUCKET,
+                  self.generate_key(file_class=file_class) + ".meta")\
+            .put(Body=json.dumps(meta))
 
 
 class Preprocessor(Loader):
@@ -373,51 +377,42 @@ class Preprocessor(Loader):
     def preprocess_new_york(self):
         config = load_configs_from_file("new_york")
         new_files = self.unpack_files(compression="unzip")
-        main_file = filter(lambda x: x[:-4] != ".pdf", new_files)[0]
-        print(main_file)
-        main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
+        print(new_files)
+        main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        main_df = pd.read_csv(main_file, encoding='utf-8', comment="#",
+                              header=None,
+                              names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
-        all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
+        all_codes = main_df.voterhistory.str.replace(" ", "_")\
+            .str.replace("[", "")\
+            .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
-        main_df["all_history"] = strcol_to_array(main_df.voterhistory, delim=";")
+        main_df["all_history"] = strcol_to_array(main_df.voterhistory,
+                                                 delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
-        beginning_of_time = datetime(1979, 1, 1)
+        count_order = counts.argsort()
+        unique_codes = unique_codes[count_order]
+        counts = counts[count_order]
 
-        def extract_date(s):
-            date = date_from_str(s)
-            year = [w for w in s.split("_") if w.isdigit()]
-            if date is not None:
-                output = parser.parse(date)
-            elif len(year) > 0:
-                print(s)
-                print(date)
-                print(year)
-                print(year[0])
-                output = datetime(year=int(year[0]), month=1, day=1)
-            else:
-                output = beginning_of_time
-            return output
-
-        print(unique_codes)
-        sorted_codes = list(sorted(unique_codes, key=lambda c: extract_date(c),
-                                   reverse=True))
-        sorted_codes_dict = {k: i for i, k in enumerate(sorted_codes)}
-
+        sorted_codes = unique_codes.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+                             enumerate(sorted_codes)}
+        print(sorted_codes_dict)
         def insert_code_bin(arr):
-            new_arr = [0] * len(sorted_codes)
-            for item in arr:
-                new_arr[sorted_codes_dict[item]] = 1
-            return new_arr
+            return [sorted_codes_dict[k]["index"] for k in arr]
 
+        # in this case we save ny as sparse array since so many elections are
+        # stored
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.coerce_dates(main_df)
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
-            "array_dates": json.dumps(sorted_codes)
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
 
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        main_df.to_csv(self.main_file, index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
@@ -438,6 +433,7 @@ class Preprocessor(Loader):
         else:
             raise NotImplementedError("preprocess_{} has not yet been implemented for the Preprocessor object"
                                       .format(self.config["state"]))
+
 
 if __name__ == '__main__':
     print(ohio_get_last_updated())
