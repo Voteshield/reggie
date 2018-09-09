@@ -379,7 +379,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(compression="unzip")
         print(new_files)
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
-        main_df = pd.read_csv(main_file, encoding='utf-8', comment="#",
+        main_df = pd.read_csv(main_file, comment="#",
                               header=None,
                               names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
