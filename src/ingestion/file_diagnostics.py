@@ -12,6 +12,7 @@ from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
 import subprocess
+from datetime import datetime
 
 
 class TestFileBuilder(Preprocessor):
@@ -241,6 +242,13 @@ class DiagnosticTest(object):
         try:
             test_s = Snapshot(config_file=self.config_file,
                               file_name=tmp_test_file)
+            self.log_msg("-- PASSED --")
+            return True
+        except pd.errors.ParserError as e:
+            test_s = Snapshot(config_file=self.config_file,
+                              file_name=self.file_path,
+                              s3_compression="gzip",
+                              date=datetime.now().isoformat())
             self.log_msg("-- PASSED --")
             return True
         except SnapshotConsistencyError as e:

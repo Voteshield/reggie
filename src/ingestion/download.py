@@ -5,7 +5,9 @@ from subprocess import Popen, PIPE
 import bs4
 import pandas as pd
 import re
+import chardet
 import sys
+import filetype
 import requests
 from dateutil import parser
 import json
@@ -154,18 +156,103 @@ class Loader(object):
             self.is_compressed = True
             self.temp_files.append(self.main_file)
 
+    def unzip_decompress(self, file_name):
+        """
+        handles decompression for .zip files
+        :param file_name: .zip file
+        :return: name of new directory containing contents of file_name
+        """
+        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
+        logging.info("decompressing unzip {} to {}".format(file_name,
+                                                           new_loc))
+        os.mkdir(new_loc)
+        p = Popen(["unzip", file_name, "-d", new_loc],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p.communicate("A")
+        return new_loc, p
+
+    def gunzip_decompress(self, file_name):
+        """
+        handles decompression for .gz files
+        :param file_name: .gz file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("gunzip",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["gunzip", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-3:] == ".gz":
+            new_loc = file_name[:-3]
+        else:
+            new_loc = file_name
+        return new_loc, p
+
+    def bunzip2_decompress(self, file_name):
+        """
+        handles decompression for .bz2 files
+        :param file_name: .bz2 file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("bunzip2",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["bunzip2", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-4:] == ".bz2":
+            new_loc = file_name[:-4]
+        else:
+            new_loc = file_name + ".out"
+        return new_loc, p
+
+    def infer_compression(self, file_name):
+        """
+        infer file type and map to compression type
+        :param file_name: file in question
+        :return: string (de)compression type or None
+        """
+        guess = filetype.guess(file_name)
+        compression_type = None
+        if guess is not None:
+            options = {"application/x-bzip2": "bunzip2",
+                       "application/gzip": "gunzip",
+                       "application/zip": "unzip"}
+            compression_type = options.get(guess.mime, None)
+            if compression_type is None:
+                logging.info("unsupported file format: {}".format(guess.mime))
+        else:
+            logging.info(
+                "could not infer the file type of {}".format(file_name))
+        return compression_type
+
     def decompress(self, file_name, compression_type="gunzip"):
         """
-        decompress a file using either unzip or gunzip, unless the file is an .xlsx file, in which case it is returned
-        as is (these files are compressed by default, and are unreadable in their unpacked form by pandas)
+        decompress a file using either unzip or gunzip, unless the file is an
+        .xlsx file, in which case it is returned as is (these files are
+        compressed by default, and are unreadable in their unpacked form by
+        pandas)
         :param file_name: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
         :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
         decompressed
         """
+
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
         success = False
+
+        if compression_type is "infer":
+            compression_type = self.infer_compression(file_name)
 
         if file_name.split(".")[-1] == "xlsx":
             logging.info("did not decompress {}".format(file_name))
@@ -174,21 +261,14 @@ class Loader(object):
             success = True
         else:
             if compression_type == "unzip":
-                logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
-                os.mkdir(new_loc)
-                p = Popen([compression_type, file_name, "-d", new_loc],
-                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate("A")
+                new_loc, p = self.unzip_decompress(file_name)
+            elif compression_type == "bunzip2":
+                new_loc, p = self.bunzip2_decompress(file_name)
             else:
-                logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
-                p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate()
-                if file_name[-3:] == ".gz":
-                    new_loc = file_name[:-3]
-                else:
-                    new_loc = file_name
-            if p.returncode == 0:
-                logging.info("decompressing done: {}".format(file_name))
+                new_loc, p = self.gunzip_decompress(file_name)
+
+            if compression_type is not None and p.returncode == 0:
+                logging.info("decompression done: {}".format(file_name))
                 self.temp_files.append(new_loc)
                 success = True
             else:
@@ -201,7 +281,7 @@ class Loader(object):
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
-                            self.download_date, "csv", self.is_compressed)
+                            self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
@@ -211,7 +291,10 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f, Metadata=meta)
+                .put(Body=f)
+        s3.Object(S3_BUCKET,
+                  self.generate_key(file_class=file_class) + ".meta")\
+            .put(Body=json.dumps(meta))
 
 
 class Preprocessor(Loader):
@@ -223,7 +306,10 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
+        self.main_file = "/tmp/voteshield_{}"\
+            .format(self.raw_s3_file.split("/")[-1])
         get_object(self.raw_s3_file, self.main_file)
+        self.temp_files.append(self.main_file)
 
     def coerce_dates(self, df):
         """
@@ -261,6 +347,7 @@ class Preprocessor(Loader):
         else:
             all_files = [n for n in all_files]
         self.temp_files.extend(all_files)
+        logging.info("unpacked: - {}".format(all_files))
         return all_files
 
     def concat_file_segments(self, file_names):
@@ -372,49 +459,44 @@ class Preprocessor(Loader):
 
     def preprocess_new_york(self):
         config = load_configs_from_file("new_york")
-        new_files = self.unpack_files(compression="unzip")
-        main_file = new_files[0]
-
-        main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
+        new_files = self.unpack_files(compression="infer")
+        main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        main_df = pd.read_csv(main_file, comment="#",
+                              header=None,
+                              names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
-        all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
+        all_codes = main_df.voterhistory.str.replace(" ", "_")\
+            .str.replace("[", "")\
+            .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
-        main_df["all_history"] = strcol_to_array(main_df.voterhistory, delim=";")
+        main_df["all_history"] = strcol_to_array(main_df.voterhistory,
+                                                 delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
-        beginning_of_time = datetime(1979, 1, 1)
 
-        def extract_date(s):
-            date = date_from_str(s)
-            year = [w for w in s.split("_") if w.isdigit()]
-            if date is not None:
-                output = parser.parse(date)
-            elif len(year) > 0:
-                print(s)
-                print(date)
-                print(year)
-                print(year[0])
-                output = datetime(year=int(year[0]), month=1, day=1)
-            else:
-                output = beginning_of_time
-            return output
-        sorted_codes = list(sorted(unique_codes, key=lambda c: extract_date(c), reverse=True))
-        sorted_codes_dict = {k: i for i, k in enumerate(sorted_codes)}
+        count_order = counts.argsort()
+        unique_codes = unique_codes[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = unique_codes.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+                             enumerate(sorted_codes)}
 
         def insert_code_bin(arr):
-            new_arr = [0] * len(sorted_codes)
-            for item in arr:
-                new_arr[sorted_codes_dict[item]] = 1
-            return new_arr
+            return [sorted_codes_dict[k]["index"] for k in arr]
 
+        # in this case we save ny as sparse array since so many elections are
+        # stored
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.coerce_dates(main_df)
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
-            "array_dates": json.dumps(sorted_codes)
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
 
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        self.is_compressed = True
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
@@ -435,6 +517,7 @@ class Preprocessor(Loader):
         else:
             raise NotImplementedError("preprocess_{} has not yet been implemented for the Preprocessor object"
                                       .format(self.config["state"]))
+
 
 if __name__ == '__main__':
     print(ohio_get_last_updated())
