@@ -7,6 +7,7 @@ import pandas as pd
 import re
 import chardet
 import sys
+import filetype
 import requests
 from dateutil import parser
 import json
@@ -164,6 +165,12 @@ class Loader(object):
         :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
         decompressed
         """
+        guess = filetype.guess(file_name)
+        if guess is not None and compression_type is "infer":
+            options = {"application/x-bzip2": "bunzip2",
+                       "application/gzip": "gunzip",
+                       "application/zip": "unzip"}
+            compression_type = options.get(guess.mime, None)
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
         success = False
@@ -175,20 +182,26 @@ class Loader(object):
             success = True
         else:
             if compression_type == "unzip":
-                logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
+                logging.info("decompressing unzip {} to {}".format(file_name,
+                                                                   new_loc))
                 os.mkdir(new_loc)
                 p = Popen([compression_type, file_name, "-d", new_loc],
                           stdout=PIPE, stderr=PIPE, stdin=PIPE)
                 p.communicate("A")
             else:
-                logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
-                p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+                logging.info("decompressing {} {} to {}"
+                             .format(compression_type,
+                                     file_name,
+                                     os.path.dirname(file_name)))
+
+                p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE,
+                          stdin=PIPE)
                 p.communicate()
-                if file_name[-3:] == ".gz":
+                if file_name[-3:] == ".gz" or file_name[-3:] == ".bz":
                     new_loc = file_name[:-3]
                 else:
                     new_loc = file_name
-            if p.returncode == 0:
+            if compression_type is not None and p.returncode == 0:
                 logging.info("decompressing done: {}".format(file_name))
                 self.temp_files.append(new_loc)
                 success = True
@@ -202,7 +215,7 @@ class Loader(object):
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
-                            self.download_date, "csv", self.is_compressed)
+                            self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
@@ -376,8 +389,7 @@ class Preprocessor(Loader):
 
     def preprocess_new_york(self):
         config = load_configs_from_file("new_york")
-        new_files = self.unpack_files(compression="unzip")
-        print(new_files)
+        new_files = self.unpack_files(compression="infer")
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
         main_df = pd.read_csv(main_file, comment="#",
                               header=None,
@@ -398,7 +410,7 @@ class Preprocessor(Loader):
         sorted_codes = unique_codes.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
                              enumerate(sorted_codes)}
-        print(sorted_codes_dict)
+
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
 
@@ -412,7 +424,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
 
-        main_df.to_csv(self.main_file, index=False)
+        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        self.is_compressed = True
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
