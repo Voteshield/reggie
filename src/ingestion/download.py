@@ -156,24 +156,103 @@ class Loader(object):
             self.is_compressed = True
             self.temp_files.append(self.main_file)
 
+    def unzip_decompress(self, file_name):
+        """
+        handles decompression for .zip files
+        :param file_name: .zip file
+        :return: name of new directory containing contents of file_name
+        """
+        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
+        logging.info("decompressing unzip {} to {}".format(file_name,
+                                                           new_loc))
+        os.mkdir(new_loc)
+        p = Popen(["unzip", file_name, "-d", new_loc],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p.communicate("A")
+        return new_loc, p
+
+    def gunzip_decompress(self, file_name):
+        """
+        handles decompression for .gz files
+        :param file_name: .gz file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("gunzip",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["gunzip", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-3:] == ".gz":
+            new_loc = file_name[:-3]
+        else:
+            new_loc = file_name
+        return new_loc, p
+
+    def bunzip2_decompress(self, file_name):
+        """
+        handles decompression for .bz2 files
+        :param file_name: .bz2 file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("bunzip2",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["bunzip2", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-4:] == ".bz2":
+            new_loc = file_name[:-4]
+        else:
+            new_loc = file_name + ".out"
+        return new_loc, p
+
+    def infer_compression(self, file_name):
+        """
+        infer file type and map to compression type
+        :param file_name: file in question
+        :return: string (de)compression type or None
+        """
+        guess = filetype.guess(file_name)
+        compression_type = None
+        if guess is not None:
+            options = {"application/x-bzip2": "bunzip2",
+                       "application/gzip": "gunzip",
+                       "application/zip": "unzip"}
+            compression_type = options.get(guess.mime, None)
+            if compression_type is None:
+                logging.info("unsupported file format: {}".format(guess.mime))
+        else:
+            logging.info(
+                "could not infer the file type of {}".format(file_name))
+        return compression_type
+
     def decompress(self, file_name, compression_type="gunzip"):
         """
-        decompress a file using either unzip or gunzip, unless the file is an .xlsx file, in which case it is returned
-        as is (these files are compressed by default, and are unreadable in their unpacked form by pandas)
+        decompress a file using either unzip or gunzip, unless the file is an
+        .xlsx file, in which case it is returned as is (these files are
+        compressed by default, and are unreadable in their unpacked form by
+        pandas)
         :param file_name: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
         :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
         decompressed
         """
-        guess = filetype.guess(file_name)
-        if guess is not None and compression_type is "infer":
-            options = {"application/x-bzip2": "bunzip2",
-                       "application/gzip": "gunzip",
-                       "application/zip": "unzip"}
-            compression_type = options.get(guess.mime, None)
+
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
         success = False
+
+        if compression_type is "infer":
+            compression_type = self.infer_compression(file_name)
 
         if file_name.split(".")[-1] == "xlsx":
             logging.info("did not decompress {}".format(file_name))
@@ -182,27 +261,14 @@ class Loader(object):
             success = True
         else:
             if compression_type == "unzip":
-                logging.info("decompressing unzip {} to {}".format(file_name,
-                                                                   new_loc))
-                os.mkdir(new_loc)
-                p = Popen([compression_type, file_name, "-d", new_loc],
-                          stdout=PIPE, stderr=PIPE, stdin=PIPE)
-                p.communicate("A")
+                new_loc, p = self.unzip_decompress(file_name)
+            elif compression_type == "bunzip2":
+                new_loc, p = self.bunzip2_decompress(file_name)
             else:
-                logging.info("decompressing {} {} to {}"
-                             .format(compression_type,
-                                     file_name,
-                                     os.path.dirname(file_name)))
+                new_loc, p = self.gunzip_decompress(file_name)
 
-                p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE,
-                          stdin=PIPE)
-                p.communicate()
-                if file_name[-3:] == ".gz" or file_name[-3:] == ".bz":
-                    new_loc = file_name[:-3]
-                else:
-                    new_loc = file_name
             if compression_type is not None and p.returncode == 0:
-                logging.info("decompressing done: {}".format(file_name))
+                logging.info("decompression done: {}".format(file_name))
                 self.temp_files.append(new_loc)
                 success = True
             else:
@@ -240,7 +306,10 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
+        self.main_file = "/tmp/voteshield_{}"\
+            .format(self.raw_s3_file.split("/")[-1])
         get_object(self.raw_s3_file, self.main_file)
+        self.temp_files.append(self.main_file)
 
     def coerce_dates(self, df):
         """
@@ -278,6 +347,7 @@ class Preprocessor(Loader):
         else:
             all_files = [n for n in all_files]
         self.temp_files.extend(all_files)
+        logging.info("unpacked: - {}".format(all_files))
         return all_files
 
     def concat_file_segments(self, file_names):
