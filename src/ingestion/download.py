@@ -4,17 +4,15 @@ from subprocess import Popen, PIPE
 
 import bs4
 import pandas as pd
-import re
-import chardet
-import sys
 import filetype
 import requests
 from dateutil import parser
 import json
 from constants import *
-from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string, \
-    strcol_to_postgres_array_str, strcol_to_array, listcol_tonumpy
-from storage import s3, normalize_columns, read_meta
+from storage import generate_s3_key, date_from_str, load_configs_from_file, \
+    df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
+    listcol_tonumpy
+from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
