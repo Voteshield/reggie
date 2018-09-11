@@ -14,7 +14,7 @@ import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string, \
     strcol_to_postgres_array_str, strcol_to_array, listcol_tonumpy
-from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
+from storage import s3, normalize_columns, read_meta
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -293,7 +293,7 @@ class Loader(object):
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
                 .put(Body=f)
         s3.Object(S3_BUCKET,
-                  self.generate_key(file_class=file_class) + ".meta")\
+                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta))
 
 
@@ -448,7 +448,6 @@ class Preprocessor(Loader):
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
-        write_meta(self.main_file, message="arizona_{}".format(datetime.now().isoformat()), array_dates=elections_key)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
             "array_dates": json.dumps(elections_key)
