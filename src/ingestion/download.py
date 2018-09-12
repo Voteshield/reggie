@@ -213,6 +213,39 @@ class Loader(object):
             new_loc = file_name + ".out"
         return new_loc, p
 
+    def sevenzip_decompress(self, file_name):
+        """
+        handles decompression for 7zip files
+        :param file_name: 7zip compressed file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("7zip",
+                             file_name,
+                             os.path.dirname(file_name)))
+        if file_name[-4:] == ".zip":
+            new_loc = file_name[:-4] + ".out"
+        else:
+            new_loc = file_name + ".out"
+        # have to grab and rename internal file before extraction
+        p = Popen(["7z", "l", file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        out, err = p.communicate()
+        internal_name = out.split('  ')[17].split('\n')[0]
+        logging.info("renaming internal pkg: {} to {}"
+                     .format(internal_name,
+                             os.path.basename(new_loc)))
+        p = Popen(["7z", "rn", file_name, internal_name,
+                  os.path.basename(new_loc)], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        out, err = p.communicate()
+        # finally extract it
+        p = Popen(["7z", "x", "-o" + os.path.dirname(file_name), file_name],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        return new_loc, p
+
     def infer_compression(self, file_name):
         """
         infer file type and map to compression type
@@ -262,6 +295,8 @@ class Loader(object):
                 new_loc, p = self.unzip_decompress(file_name)
             elif compression_type == "bunzip2":
                 new_loc, p = self.bunzip2_decompress(file_name)
+            elif compression_type == "7zip":
+                new_loc, p = self.sevenzip_decompress(file_name)
             else:
                 new_loc, p = self.gunzip_decompress(file_name)
 
@@ -498,6 +533,38 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_missouri(self):
+        new_file = self.unpack_files(compression="7zip")
+        new_file = new_file[0]
+        print('new file = {}'.format(new_file))
+        main_df = pd.read_csv(new_file, sep='\t', comment="#")
+
+        def add_history(main_df):
+            election_keys = set()
+            for hist in self.config['hist_columns']:
+                election_keys = election_keys.union(
+                    set(main_df[hist].dropna()))
+            election_keys = list(election_keys)
+            election_dict = {key: value for (value, key) in
+                             enumerate(election_keys)}
+            main_df['all_history'] = main_df[self.config[
+                'hist_columns']].applymap(lambda x: election_dict[x] if x in
+                                          election_dict else np.nan).apply(
+                    lambda x: list(x.dropna()), axis=1)
+            return election_keys
+
+        election_keys = add_history(main_df)
+        main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
+
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.meta = {
+            "message": "missouri_{}".format(datetime.now().isoformat()),
+            "array_dates": json.dumps(election_keys)
+        }
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
     def execute(self):
         self.state_router()
 
@@ -505,7 +572,8 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'new_york': self.preprocess_new_york
+            'new_york': self.preprocess_new_york,
+            'missouri': self.preprocess_missouri
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

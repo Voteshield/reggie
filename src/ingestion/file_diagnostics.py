@@ -63,9 +63,9 @@ class TestFileBuilder(Preprocessor):
         return small_counties
 
     def filter_counties(self, df, counties):
-        county_col = df[self.config["county_identifier"]]
-        filtered_data = df[(df[county_col] == counties[0]) |
-                           (df[county_col] == counties[1])]
+        filtered_data = df[(
+            df[self.config["county_identifier"]] == counties[0]) |
+            (df[self.config["county_identifier"]] == counties[1])]
         filtered_data.reset_index(inplace=True, drop=True)
         return filtered_data
 
@@ -129,6 +129,17 @@ class TestFileBuilder(Preprocessor):
         logging.info("using '{}' counties".format(
             " and ".join([str(a) for a in two_small_counties.tolist()])))
 
+    def __build_missouri(self):
+        new_file = self.unpack_files(compression="7zip")
+        new_file = new_file[0]
+        df = pd.read_csv(new_file, sep='\t')
+        two_small_counties = self.get_smallest_counties(df, count=2)
+        filtered_data = self.filter_counties(df, counties=two_small_counties)
+        filtered_data.to_csv(new_file)  # header=False)
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write(new_file, os.path.basename(new_file))
+        self.temp_files.append(new_file)
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
@@ -137,7 +148,8 @@ class TestFileBuilder(Preprocessor):
 
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
-                  "new_york": self.__build_new_york}
+                  "new_york": self.__build_new_york,
+                  "missouri": self.__build_missouri}
         f = routes[self.state]
         f()
 
