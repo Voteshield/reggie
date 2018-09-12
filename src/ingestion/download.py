@@ -451,10 +451,23 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
-        
+        logging.info("IOWA: concatenating files")
+        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
+            for fname in new_files:
+                with open(fname) as infile:
+                    outfile.write(infile.read())
+        logging.info("IOWA: reading in voter file")
 
+        temp = pd.read_csv('/tmp/concat_voter_file.txt',sep='^',header=None,prefix='X')
+        temp2=temp.X0.str.split(',',expand=True)
+        del temp['X0']
+        df_voters=pd.concat([temp,temp2],axis=1)
+        df_voters[pd.isnull(df_voters[122])].ix[:, : 121]
+
+        df_voters.columns = self.config["ordered_columns"]
         return chksum
 
     def preprocess_arizona(self):
