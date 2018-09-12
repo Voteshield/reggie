@@ -13,6 +13,7 @@ from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
 import subprocess
 from datetime import datetime
+from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
@@ -135,10 +136,12 @@ class TestFileBuilder(Preprocessor):
         df = pd.read_csv(new_file, sep='\t')
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
-        filtered_data.to_csv(new_file)  # header=False)
-        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            zf.write(new_file, os.path.basename(new_file))
+        filtered_data.to_csv(new_file, index=False, sep='\t')
+        p = Popen(["7z", "a", "-tzip", new_file + ".zip", new_file],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        out, err = p.communicate()
         self.temp_files.append(new_file)
+        self.temp_files.append(new_file + ".zip")
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:

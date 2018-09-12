@@ -229,20 +229,8 @@ class Loader(object):
             new_loc = file_name[:-4] + ".out"
         else:
             new_loc = file_name + ".out"
-        # have to grab and rename internal file before extraction
-        p = Popen(["7z", "l", file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-        out, err = p.communicate()
-        internal_name = out.split('  ')[17].split('\n')[0]
-        logging.info("renaming internal pkg: {} to {}"
-                     .format(internal_name,
-                             os.path.basename(new_loc)))
-        p = Popen(["7z", "rn", file_name, internal_name,
-                  os.path.basename(new_loc)], stdout=PIPE,
-                  stderr=PIPE, stdin=PIPE)
-        out, err = p.communicate()
-        # finally extract it
-        p = Popen(["7z", "x", "-o" + os.path.dirname(file_name), file_name],
-                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p = Popen(["7z", "e", "-so", file_name],
+                  stdout=open(new_loc, "w"), stderr=PIPE, stdin=PIPE)
         p.communicate()
         return new_loc, p
 
@@ -537,7 +525,7 @@ class Preprocessor(Loader):
         new_file = self.unpack_files(compression="7zip")
         new_file = new_file[0]
         print('new file = {}'.format(new_file))
-        main_df = pd.read_csv(new_file, sep='\t', comment="#")
+        main_df = pd.read_csv(new_file, sep='\t')
 
         def add_history(main_df):
             election_keys = set()
