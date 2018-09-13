@@ -4,6 +4,7 @@ import os
 import uuid
 from os import stat
 import pandas as pd
+import numpy as np
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
 from storage import get_raw_s3_uploads, load_configs_from_file, state_from_str, config_file_from_state
@@ -108,6 +109,32 @@ class TestFileBuilder(Preprocessor):
         filtered_data.to_csv(self.main_file, compression='gzip')
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
+    def __build_michigan(self):
+        new_files = self.unpack_files()
+        voter_file = new_files[0]
+        hist_file = new_files[1]
+        config = load_configs_from_file(state='michigan')
+
+        vcolspecs=[[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
+                  [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
+                  [141, 143], [143, 156], [156, 191], [191, 193], [193, 198], [198, 248],
+                  [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
+                  [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
+                  [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519], [519,520]]
+        hcolspecs=[[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
+        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        vdf = vdf.next()
+        two_small_counties = self.get_smallest_counties(vdf, count=2)
+        filtered_data = self.filter_counties(vdf, counties=two_small_counties)
+        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        print(filtered_data)
+        with open('test_v', 'w+') as ofile:
+            fmt = '%35s %20s %20s %3s %4s %1s %8s %1s %7s %4s %2s %30s %6s %2s %13s %35s %2s %5s %50s %50s %50s %50s %50s' \
+                  '%13s %2s %5s %6s %5s %5s %5s %5s %5s %5s %6s %6s %1s %2s %1s'
+            np.savetxt(ofile, filtered_data.values, fmt=fmt)
+
+
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \
@@ -115,7 +142,8 @@ class TestFileBuilder(Preprocessor):
 
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
-                  "new_york": self.__build_new_york}
+                  "new_york": self.__build_new_york,
+                  "michigan": self.__build_michigan}
         f = routes[self.state]
         f()
 
