@@ -9,6 +9,13 @@ birthday_identifier: Birth_Date
 voter_status: Voter_Status
 voter_status_active: ACT
 voter_status_inactive: INA
+voter_status_active_special_presidential: NA
+voter_status_active_military: NA
+voter_status_uocava: NA
+voter_status_purged: NA
+voter_status_preregistered: NA
+independence_party: NA
+voter_status_active_special_federal: NA
 democratic_party: DEM
 republican_party: REP
 no_party_affiliation: NPA
