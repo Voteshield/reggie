@@ -528,27 +528,41 @@ class Preprocessor(Loader):
         main_df = pd.read_csv(new_file, sep='\t')
 
         def add_history(main_df):
-            election_keys = set()
+            # also save as sparse array since so many elections are stored
+            all_codes = pd.Series()
             for hist in self.config['hist_columns']:
-                election_keys = election_keys.union(
-                    set(main_df[hist].dropna()))
-            election_keys = list(election_keys)
-            election_dict = {key: value for (value, key) in
-                             enumerate(election_keys)}
-            main_df['all_history'] = main_df[self.config[
-                'hist_columns']].applymap(lambda x: election_dict[x] if x in
-                                          election_dict else np.nan).apply(
-                    lambda x: list(x.dropna()), axis=1)
-            return election_keys
+                all_codes = all_codes.append(
+                    main_df[hist].str.replace(" ", "_").dropna())
+            all_codes = all_codes.values
+            unique_codes, counts = np.unique(all_codes, return_counts=True)
+            count_order = counts.argsort()
+            unique_codes = unique_codes[count_order]
+            counts = counts[count_order]
+            sorted_codes = unique_codes.tolist()
+            sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+                                 for i, k in enumerate(sorted_codes)}
 
-        election_keys = add_history(main_df)
+            def insert_code_bin(arr):
+                return [sorted_codes_dict[k]["index"] for k in arr]
+
+            main_df['all_history'] = main_df[
+                self.config['hist_columns']].apply(
+                lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
+            main_df.all_history = main_df.all_history.apply(insert_code_bin)
+            return sorted_codes, sorted_codes_dict
+
+        sorted_codes, sorted_codes_dict = add_history(main_df)
+
+        print('sorted_codes_dict = {}'.format(sorted_codes_dict))
+
         main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
-
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        main_df = self.coerce_dates(main_df)
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),
-            "array_dates": json.dumps(election_keys)
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
