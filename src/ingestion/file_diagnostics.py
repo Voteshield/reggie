@@ -2,7 +2,7 @@ import inspect
 import json
 import os
 import uuid
-from os import stat
+from os import stat, remove
 import pandas as pd
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
@@ -137,11 +137,13 @@ class TestFileBuilder(Preprocessor):
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(new_file, index=False, sep='\t')
-        p = Popen(["7z", "a", "-tzip", new_file + ".zip", new_file],
+        # have to delete current main_file before
+        # we can 7zip new file to that location
+        os.remove(self.main_file)
+        p = Popen(["7z", "a", "-tzip", self.main_file, new_file],
                   stdout=PIPE, stderr=PIPE, stdin=PIPE)
         out, err = p.communicate()
         self.temp_files.append(new_file)
-        self.temp_files.append(new_file + ".zip")
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:

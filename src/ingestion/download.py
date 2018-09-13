@@ -524,7 +524,6 @@ class Preprocessor(Loader):
     def preprocess_missouri(self):
         new_file = self.unpack_files(compression="7zip")
         new_file = new_file[0]
-        print('new file = {}'.format(new_file))
         main_df = pd.read_csv(new_file, sep='\t')
 
         def add_history(main_df):
@@ -552,8 +551,6 @@ class Preprocessor(Loader):
             return sorted_codes, sorted_codes_dict
 
         sorted_codes, sorted_codes_dict = add_history(main_df)
-
-        print('sorted_codes_dict = {}'.format(sorted_codes_dict))
 
         main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
         main_df = self.coerce_dates(main_df)
