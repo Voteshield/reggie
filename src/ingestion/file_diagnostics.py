@@ -12,6 +12,7 @@ from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
+from pathlib import Path
 import subprocess
 
 
@@ -112,7 +113,7 @@ class TestFileBuilder(Preprocessor):
     def __build_michigan(self):
         new_files = self.unpack_files()
         voter_file = new_files[0]
-        hist_file = new_files[1]
+        hist_file = new_files[13]
         config = load_configs_from_file(state='michigan')
 
         vcolspecs=[[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
@@ -122,16 +123,29 @@ class TestFileBuilder(Preprocessor):
                   [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
                   [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519], [519,520]]
         hcolspecs=[[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        vdf = pd.read_fwf(voter_file, chunksize=100000, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
         vdf = vdf.next()
         two_small_counties = self.get_smallest_counties(vdf, count=2)
         filtered_data = self.filter_counties(vdf, counties=two_small_counties)
-        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
-        print(filtered_data)
-        with open('test_v', 'w+') as ofile:
+        hdf = pd.read_fwf(hist_file, chunksize=100000, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf = hdf.next()
+        hdf = self.sample(hdf, frac=0.001)
+        with open(new_files[0], 'w+') as vfile:
             fmt = '%35s %20s %20s %3s %4s %1s %8s %1s %7s %4s %2s %30s %6s %2s %13s %35s %2s %5s %50s %50s %50s %50s %50s' \
                   '%13s %2s %5s %6s %5s %5s %5s %5s %5s %5s %6s %6s %1s %2s %1s'
-            np.savetxt(ofile, filtered_data.values, fmt=fmt)
+            np.savetxt(vfile, filtered_data.values, fmt=fmt)
+        os.remove(Path(new_files[0]).parent.name[:-13])
+        with ZipFile(Path(new_files[0]).parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
+            zf.write(new_files[0], os.path.basename(new_files[0]))
+        with open(new_files[13], 'w+') as hfile:
+            fmt = '%13s %2s %5s %5s %13s %1s'
+            np.savetxt(hfile, hdf.values, fmt=fmt)
+        os.remove(Path(new_files[13]).parent.name[:-13])
+        with ZipFile(Path(new_files[13]).parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
+            zf.write(new_files[13], os.path.basename(new_files[13]))
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in new_files:
+                zf.write(f, os.path.basename(f))
 
 
 
