@@ -388,12 +388,54 @@ class Preprocessor(Loader):
 
     def preprocess_michigan(self):
         config = load_configs_from_file("michigan")
-        colspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
-                    [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
-                    [141, 143], [143, 156], [156, 191], [191, 193], [193, 198], [198, 248],
-                    [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
-                    [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
-                    [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519]]
+        all_files = self.unpack_files(compression="unzip")
+        new_files = []
+        for f in all_files:
+            if f not in config["format"]["ignore_files"]:
+                new_files.append(f)
+        if "Voters" in new_files[0]:
+            voter_file = new_files[0]
+            if "History" in new_files[1]:
+                hist_file = new_files[1]
+                elec_codes = new_files[2]
+            else:
+                elec_codes = new_files[1]
+                hist_file = new_files[2]
+        elif "Voters" in new_files[1]:
+            voter_file = new_files[1]
+            if "History" in new_files[0]:
+                hist_file = new_files[0]
+                elec_codes = new_files[2]
+            else:
+                elec_codes = new_files[0]
+                hist_file = new_files[2]
+        else:
+            voter_file = new_files[2]
+            if "History" in new_files[0]:
+                hist_file = new_files[0]
+                elec_codes = new_files[1]
+            else:
+                elec_codes = new_files[0]
+                hist_file = new_files[1]
+
+        vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
+                     [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
+                     [141, 143], [143, 156], [156, 191], [191, 193], [193, 198], [198, 248],
+                     [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
+                     [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
+                     [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519]]
+        hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
+        ecolspecs = [[0, 13], [13, 21], [21, 46]]
+        self.temp_files.extend([voter_file, hist_file])
+        logging.info("MICHIGAN: Loading voter file")
+        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        logging.info("MICHIGAN: Loading historical file")
+        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config("elec_code_columns"), na_filter=False)
+        edf.set_index("Election_Code", inplace=True)
+        valid_elections = hdf.Date.unique().tolist()
+        print(new_files)
+
 
     def execute(self):
         self.state_router()

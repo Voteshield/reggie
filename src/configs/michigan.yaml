@@ -42,7 +42,6 @@ format:
     - .DS_Store
     - codefile_layouts.pdf
     - countycd.lst
-    - electionscd.lst
     - History_File_Layout.pdf
     - jurisdcd.lst
     - List_Of_All_Counties_And_Codes.lst
@@ -143,6 +142,10 @@ hist_columns:
   - School_Code
   - Election_Code
   - Absentee_Voter_Indicator
+elec_code_columns:
+  - Election_Code
+  - Date
+  - Title
 county_names:
   Alcona_County: 01
   Alger_County: 02
