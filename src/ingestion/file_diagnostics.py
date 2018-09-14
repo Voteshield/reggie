@@ -102,12 +102,17 @@ class TestFileBuilder(Preprocessor):
 
         #read in dataframe here, haven't figured this out yet
 
-        df = old_df.sample(n = 10000)
-
+        print(new_files)
+        smaller_files = []
+        for x in new_files:
+            if "CD1" in x AND "Part1" in x:
+                smaller_files.append(x)
+        
+        """
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             zf.write(df, os.path.basename(new_file[0]))
         self.temp_files.append()
-
+        """
 
     def __build_ohio(self):
         """
@@ -120,7 +125,7 @@ class TestFileBuilder(Preprocessor):
         filtered_data.to_csv(self.main_file, compression='gzip')
         logging.info("using '{}' counties".format(" and ".join([str(a) for a in two_small_counties.tolist()])))
 
-    def build(self, file_name=None, save_local=False, save_remote=True):
+    def build(self, file_name=None, save_local=True, save_remote=False):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] if self.raw_s3_file is not None else \
                 self.local_file.split("/")[-1]
@@ -234,5 +239,14 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
+    local_file=sys.argv[1]
+    state=sys.argv[2]
+    s3 = sys.argv[3]
+    if local_file == "None":
+        local_file = None
+    if state == "None":
+        state = None
+    if s3 == "None":
+        s3 = None
+    with TestFileBuilder(local_file=local_file, state=state, s3_key = s3) as tf:
         tf.build()
