@@ -461,13 +461,15 @@ class Preprocessor(Loader):
                     outfile.write(infile.read())
         logging.info("IOWA: reading in voter file")
 
-        temp = pd.read_csv('/tmp/concat_voter_file.txt',sep='^',header=None,prefix='X')
-        temp2=temp.X0.str.split(',',expand=True)
-        del temp['X0']
-        df_voters=pd.concat([temp,temp2],axis=1)
-        df_voters[pd.isnull(df_voters[122])].ix[:, : 121]
+        df_voters = pd.read_csv('/tmp/concat_voter_file.txt', sep='","', engine = 'python')
+        df_voters=df_voters.rename(columns = {'"REGN_NUM':'REGN_NUM', 'SPECIAL_VOTERVOTEMETHOD"':'SPECIAL_VOTERVOTEMETHOD.4'})
+        df_voters['REGN_NUM'] = df_voters['REGN_NUM'].str[1:]
 
-        df_voters.columns = self.config["ordered_columns"]
+        print("shape")
+        print(df_voters.shape)
+        df_voters.columns = self.config["columns"]
+        print(df_voters.columns)
+
         return chksum
 
     def preprocess_arizona(self):
