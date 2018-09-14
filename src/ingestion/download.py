@@ -467,7 +467,7 @@ class Preprocessor(Loader):
 
         print("shape")
         print(df_voters.shape)
-        df_voters.columns = self.config["columns"]
+        df_voters.columns = self.config["ordered_columns"]
         print(df_voters.columns)
 
         return chksum
