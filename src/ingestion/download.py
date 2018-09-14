@@ -393,17 +393,17 @@ class Preprocessor(Loader):
         for f in all_files:
             if f not in config["format"]["ignore_files"]:
                 new_files.append(f)
-        if "Voters" in new_files[0]:
+        if "v" in new_files[0]:
             voter_file = new_files[0]
-            if "History" in new_files[1]:
+            if "h" in new_files[1]:
                 hist_file = new_files[1]
                 elec_codes = new_files[2]
             else:
                 elec_codes = new_files[1]
                 hist_file = new_files[2]
-        elif "Voters" in new_files[1]:
+        elif "v" in new_files[1]:
             voter_file = new_files[1]
-            if "History" in new_files[0]:
+            if "h" in new_files[0]:
                 hist_file = new_files[0]
                 elec_codes = new_files[2]
             else:
@@ -411,7 +411,7 @@ class Preprocessor(Loader):
                 hist_file = new_files[2]
         else:
             voter_file = new_files[2]
-            if "History" in new_files[0]:
+            if "h" in new_files[0]:
                 hist_file = new_files[0]
                 elec_codes = new_files[1]
             else:
@@ -431,10 +431,57 @@ class Preprocessor(Loader):
         vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
         logging.info("MICHIGAN: Loading historical file")
         hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter ID", "Data"], na_filter=False)
         edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config("elec_code_columns"), na_filter=False)
         edf.set_index("Election_Code", inplace=True)
-        valid_elections = hdf.Date.unique().tolist()
-        print(new_files)
+
+        def intToDatetime(i):
+            s = str(i)
+            if len(s) == 8:
+                date = datetime(year=s[4:8], month=s[0:2], day=s[2:4])
+            else:
+                date = datetime(year=s[3:7], month=s[0], day=s[1:3])
+
+            return date
+
+        edf["Date"] = edf["Date"].apply(intToDatetime)
+        edf.sort_values(by=["Date"])
+        valid_elections = edf.Election_Code.unique().tolist()
+
+        def get_binary_history(row):
+            hist = []
+            voted_in = hdf[hdf["Voter_ID"].equals(row["Voter_ID"])]
+            for ecode in valid_elections["Election_Code"]:
+                if ecode in voted_in["Election_Code"]:
+                    hist.append(1)
+                else:
+                    hist.append(0)
+
+            return hist
+
+        vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
+
+        def polish_vote_hist(row):
+            row["Date"] = edf["Date"].loc[row["Election_Code"]]
+            row["Election_Title"] = edf["Title"].loc[row["Election_Code"]]
+
+        hdf.apply(polish_vote_hist, axis=1)
+        vdf["tmp_id"] = vdf[config["voter_id"]]
+        vdf = vdf.set_index("tmp_id")
+        hdf2.sort_values(by=["Voter_ID"], inplace=True)
+
+        def get_history(row):
+            hist = hdf2[hdf2["Voter_ID"].equals(row["Voter_ID"])]["Data"].values
+
+            return hist
+
+        vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
+        vdf.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+
+        return chksum
+
 
 
     def execute(self):
