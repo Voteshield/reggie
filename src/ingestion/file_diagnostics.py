@@ -105,14 +105,13 @@ class TestFileBuilder(Preprocessor):
         print(new_files)
         smaller_files = []
         for x in new_files:
-            if "CD1" in x AND "Part1" in x:
+            if "CD1" in x and "Part1" in x:
                 smaller_files.append(x)
-        
-        """
+
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            zf.write(df, os.path.basename(new_file[0]))
-        self.temp_files.append()
-        """
+            for f in smaller_files:
+                zf.write(f, os.path.basename(f))
+        
 
     def __build_ohio(self):
         """
