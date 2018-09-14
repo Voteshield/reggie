@@ -9,10 +9,10 @@ county_identifier: County
 birthday_identifier: Birthdate
 numeric_county: false
 date_format: '%m/%d/%Y'
-voter_status: None
+voter_status: voter_status
 voter_status_active: None
 voter_status_inactive: None
-party_identifier: None
+party_identifier: party_identifier
 democratic_party: None
 republican_party: None
 no_party_affiliation: None
@@ -52,7 +52,7 @@ format:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  Voter ID: int
   change_type: text
   pre_value: text
   post_value: text
@@ -70,14 +70,6 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Independent_American_Party
-  - Republican
-  - Democrat
-  - Non_Partisan
-  - Libertarian_Party
-  - Other_All_Others
-  - Green_Party
-  - Natural_Law_Party
   - county
 summary_types:
   - int
@@ -129,26 +121,6 @@ columns:
   Congressional- New: varchar
   Legislative- New: varchar
   State Senate- New: varchar
-  Voter History 1: varchar
-  Voter History 2: varchar
-  Voter History 3: varchar
-  Voter History 4: varchar
-  Voter History 5: varchar
-  Voter History 6: varchar
-  Voter History 7: varchar
-  Voter History 8: varchar
-  Voter History 9: varchar
-  Voter History 10: varchar
-  Voter History 11: varchar
-  Voter History 12: varchar
-  Voter History 13: varchar
-  Voter History 14: varchar
-  Voter History 15: varchar
-  Voter History 16: varchar
-  Voter History 17: varchar
-  Voter History 18: varchar
-  Voter History 19: varchar
-  Voter History 20: varchar
 ordered_columns:
   - County
   - Voter ID
@@ -182,26 +154,6 @@ ordered_columns:
   - Congressional- New
   - Legislative- New
   - State Senate- New
-  - Voter History 1
-  - Voter History 2
-  - Voter History 3
-  - Voter History 4
-  - Voter History 5
-  - Voter History 6
-  - Voter History 7
-  - Voter History 8
-  - Voter History 9
-  - Voter History 10
-  - Voter History 11
-  - Voter History 12
-  - Voter History 13
-  - Voter History 14
-  - Voter History 15
-  - Voter History 16
-  - Voter History 17
-  - Voter History 18
-  - Voter History 19
-  - Voter History 20
 hist_columns:
   - Voter History 1
   - Voter History 2

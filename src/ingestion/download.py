@@ -526,6 +526,10 @@ class Preprocessor(Loader):
         new_file = new_file[0]
         main_df = pd.read_csv(new_file, sep='\t')
 
+        # add empty columns for voter_status and party_identifier
+        main_df[self.config["voter_status"]] = np.nan
+        main_df[self.config["party_identifier"]] = np.nan
+
         def add_history(main_df):
             # also save as sparse array since so many elections are stored
             all_codes = pd.Series()
@@ -551,9 +555,10 @@ class Preprocessor(Loader):
             return sorted_codes, sorted_codes_dict
 
         sorted_codes, sorted_codes_dict = add_history(main_df)
-
         main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
+
         main_df = self.coerce_dates(main_df)
+
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
