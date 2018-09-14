@@ -70,18 +70,12 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
+  - npa
   - county
 summary_types:
   - int
   - timestamp
   - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
   - int
   - int
   - int
@@ -121,6 +115,8 @@ columns:
   Congressional- New: varchar
   Legislative- New: varchar
   State Senate- New: varchar
+  voter_status: text
+  party_identifier: text
 ordered_columns:
   - County
   - Voter ID
@@ -154,6 +150,8 @@ ordered_columns:
   - Congressional- New
   - Legislative- New
   - State Senate- New
+  - voter_status
+  - party_identifier
 hist_columns:
   - Voter History 1
   - Voter History 2
