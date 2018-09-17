@@ -22,7 +22,7 @@ republican_party: REP
 no_party_affiliation: OTHER
 independence_party: IND
 numeric_county: true
-date_format: YYYYMMDD #IS THIS RIGHT?
+date_format: '%Y%m%d'
 party_identifier: enrollment
 name_fields:
   - firstname
@@ -101,7 +101,7 @@ columns:
   rhalfcode: varchar #Residence Fractional Address
   rapartment: varchar #Residence Apartment
   rpredirection: varchar #Residence Pre Street Direction
-  rstreetname: int #Residence Street Name
+  rstreetname: varchar #Residence Street Name
   rpostdirection: varchar #Residence Post Street Direction
   rcity: varchar #Residence City
   rzip5: varchar #Residence Zip Code 5
