@@ -2,7 +2,7 @@ file_type: ascii
 state: michigan
 source: boe
 file_class: voter_file
-voter_id: voter_id
+voter_id: Voter_ID
 county_identifier: County_Code
 birthday_identifier: birthyear
 voter_status: status_type
@@ -42,15 +42,15 @@ format:
     - .DS_Store
     - codefile_layouts.pdf
     - countycd.lst
-    - History_File_Layout.pdf
+    - "History File Layout.pdf"
     - jurisdcd.lst
     - List_Of_All_Counties_And_Codes.lst
     - List_Of_All_Jurisdictions_And_Codes.lst
     - List_Of_All_SchoolDistricts_And_Codes.lst
     - schoolcd.lst
     - villagecd.lst
-    - Voter_File_Layout.DOC
-    - Voter_File_Layout.pdf
+    - "Voter File Layout.DOC"
+    - "Voter File Layout.pdf"
     - .~lock.Voter_File_Layout.DOC#
 base_columns:
   pre_date: timestamp
