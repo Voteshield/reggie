@@ -532,12 +532,16 @@ class Preprocessor(Loader):
 
         def add_history(main_df):
             # also save as sparse array since so many elections are stored
-            all_codes = pd.Series()
-            for hist in self.config['hist_columns']:
-                all_codes = all_codes.append(
-                    main_df[hist].str.replace(" ", "_").dropna())
-            all_codes = all_codes.values
-            unique_codes, counts = np.unique(all_codes, return_counts=True)
+            count_df = pd.DataFrame()
+            for idx, hist in enumerate(self.config['hist_columns']):
+                unique_codes, counts = np.unique(main_df[hist].str.replace(
+                    " ", "_").dropna().values, return_counts=True)
+                count_df_new = pd.DataFrame(index=unique_codes, data=counts,
+                                            columns=['counts_' + hist])
+                count_df = pd.concat([count_df, count_df_new], axis=1)
+            count_df['total_counts'] = count_df.sum(axis=1)
+            unique_codes = count_df.index.values
+            counts = count_df['total_counts']
             count_order = counts.argsort()
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
