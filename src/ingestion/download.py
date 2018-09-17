@@ -320,20 +320,23 @@ class Preprocessor(Loader):
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: concatenating files")
-        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
-            for fname in new_files:
-                with open(fname) as infile:
-                    outfile.write(infile.read())
-        logging.info("IOWA: reading in voter file")
+        for i in new_files:
+            if "CD1" in i and "Part1" in i:
+                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1, header=None)
+        for i in new_files:
+            if "CD1" not in i and "Part1" not in i: #I do this because need to initialize dataframe
+                new_df = pd.read_csv(i, sep = '","', header=None)
+                df_voters = pd.concat([df_voters, new_df], axis = 0)
+        df_voters[61] = df_voters[61].str.split(",", n = 1)
+        df_voters[[61,'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(), index= df_voters.index)
+        df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
+        df_voters[self.config['election_columns']] = pd.DataFrame(df_voters['HISTORY'].values.tolist(), index = df_voters.index).iloc[:,0:60]
 
-        df_voters = pd.read_csv('/tmp/concat_voter_file.txt', sep='","', engine = 'python')
-        df_voters=df_voters.rename(columns = {'"REGN_NUM':'REGN_NUM', 'SPECIAL_VOTERVOTEMETHOD"':'SPECIAL_VOTERVOTEMETHOD.4'})
-        df_voters['REGN_NUM'] = df_voters['REGN_NUM'].str[1:]
-
-        print("shape")
-        print(df_voters.shape)
-        df_voters.columns = self.config["ordered_columns"]
+        print("columns")
         print(df_voters.columns)
+        print(df_voters.shape)
+
+        logging.info("IOWA: reading in voter file")
 
         return chksum
 
