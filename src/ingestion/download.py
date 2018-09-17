@@ -650,6 +650,7 @@ class Preprocessor(Loader):
             hdf = pd.read_fwf(hist_file, colspecs=testhcolspecs, names=config["hist_columns"], na_filter=False)
         else:
             hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+
         hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter_ID", "Data"], na_filter=False)
         edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
 
