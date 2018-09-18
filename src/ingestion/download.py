@@ -555,7 +555,7 @@ class Preprocessor(Loader):
             main_df['all_history'] = main_df[
                 self.config['hist_columns']].apply(
                 lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
-            main_df.all_history = main_df.all_history.apply(insert_code_bin)
+            main_df.all_history = main_df.all_history.map(insert_code_bin)
             return sorted_codes, sorted_codes_dict
 
         sorted_codes, sorted_codes_dict = add_history(main_df)
