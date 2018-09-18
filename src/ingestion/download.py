@@ -541,7 +541,7 @@ class Preprocessor(Loader):
                 count_df = pd.concat([count_df, count_df_new], axis=1)
             count_df['total_counts'] = count_df.sum(axis=1)
             unique_codes = count_df.index.values
-            counts = count_df['total_counts']
+            counts = count_df['total_counts'].values
             count_order = counts.argsort()
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
