@@ -176,6 +176,8 @@ class TestFileBuilder(Preprocessor):
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
         with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
             zf.write(new_files[0], os.path.basename(new_files[0]))
+        Path(new_files[0]).unlink()
+        Path(new_files[0]).parent.rmdir()
         with open(new_files[13], 'w+') as hfile:
             fmt = '%13s %2s %5s %5s %13s %1s'
             np.savetxt(hfile, hdf.values, fmt=fmt)
@@ -183,9 +185,16 @@ class TestFileBuilder(Preprocessor):
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
         with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
             zf.write(new_files[13], os.path.basename(new_files[13]))
+        Path(new_files[13]).unlink()
+        Path(new_files[13]).parent.rmdir()
+
+        def zipper(path, zf):
+            for root, dirs, files in os.walk(path):
+                for f in files:
+                    zf.write(os.path.join(root, f))
+
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            for f in new_files:
-                zf.write(f, os.path.basename(f))
+            zipper(self.main_file + '_decompressed', zf)
 
 
 
