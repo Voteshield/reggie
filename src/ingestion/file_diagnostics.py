@@ -149,9 +149,15 @@ class TestFileBuilder(Preprocessor):
 
     def __build_michigan(self):
         new_files = self.unpack_files()
-        voter_file = new_files[0]
-        hist_file = new_files[13]
+        for file in new_files:
+            if 'state_h' in file:
+                hist_file = file
+            if 'state_v' in file:
+                voter_file = file
         config = load_configs_from_file(state='michigan')
+        logging.info("Detected voter file: " + voter_file)
+        logging.info("Detected history file: " + hist_file)
+        print(self.download_date)
 
         vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
                   [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
@@ -171,32 +177,31 @@ class TestFileBuilder(Preprocessor):
             fmt = '%35s %20s %20s %3s %4s %1s %8s %1s %7s %4s %2s %30s %6s %2s %13s %35s %2s %5s %50s %50s %50s %50s %50s' \
                   '%13s %2s %5s %6s %5s %5s %5s %5s %5s %5s %6s %6s %1s %2s %1s'
             np.savetxt(vfile, filtered_data.values, fmt=fmt)
-        p = Path(new_files[0])
-        temp_dir = Path(self.temp_files[2]).parent
+        p = Path(voter_file)
+        temp_dir = Path(voter_file).parent.parent
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
         with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
-            zf.write(new_files[0], os.path.basename(new_files[0]))
-        Path(new_files[0]).unlink()
-        Path(new_files[0]).parent.rmdir()
-        with open(new_files[13], 'w+') as hfile:
+            zf.write(voter_file, os.path.basename(new_files[0]))
+        Path(voter_file).unlink()
+        Path(voter_file).parent.rmdir()
+        with open(hist_file, 'w+') as hfile:
             fmt = '%13s %2s %5s %5s %13s %1s'
             np.savetxt(hfile, hdf.values, fmt=fmt)
-        p = Path(new_files[13])
+        p = Path(hist_file)
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
         with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
-            zf.write(new_files[13], os.path.basename(new_files[13]))
-        Path(new_files[13]).unlink()
-        Path(new_files[13]).parent.rmdir()
+            zf.write(hist_file, os.path.basename(hist_file))
+        Path(hist_file).unlink()
+        Path(hist_file).parent.rmdir()
 
         def zipper(path, zf):
             for root, dirs, files in os.walk(path):
                 for f in files:
-                    zf.write(os.path.join(root, f))
+                    zf.write(os.path.join(str(temp_dir), f))
 
+        logging.info("Main file: " + self.main_file)
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             zipper(self.main_file + '_decompressed', zf)
-
-
 
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
@@ -214,6 +219,7 @@ class TestFileBuilder(Preprocessor):
         f()
 
         if save_remote:
+            logging.info(self.test_key(file_name))
             with open(self.main_file) as f:
                 s3.Object(
                     S3_BUCKET, self.test_key(file_name)).put(
