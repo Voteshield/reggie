@@ -431,32 +431,48 @@ class Preprocessor(Loader):
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
-        logging.info("IOWA: concatenating files")
+        logging.info("IOWA: reading in voter file")
         for i in new_files:
             if "CD1" in i and "Part1" in i:
-                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1, header=None)
+                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1, header=None, engine = 'python')
         for i in new_files:
             if "CD1" not in i and "Part1" not in i: #I do this because need to initialize dataframe
-                new_df = pd.read_csv(i, sep = '","', header=None)
+                new_df = pd.read_csv(i, sep = '","', header=None, engine = 'python')
                 df_voters = pd.concat([df_voters, new_df], axis = 0)
         df_voters[61] = df_voters[61].str.split(",", n = 1)
         df_voters[[61,'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(), index= df_voters.index)
         df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
         history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(), index = df_voters.index).iloc[:,0:60]
         history_df.columns = self.config['election_columns']
-        print('here are columns ')
-        print(history_df.columns)
-        print(history_df.shape)
+        
         df_voters = pd.concat([df_voters.iloc[:,0:62], history_df], axis = 1)
         df_voters.columns = self.config['ordered_columns']
-        
+        df_voters[self.config['voter_id']] = df_voters[self.config['voter_id']].str[1:]
 
-        print("columns")
-        print(df_voters.columns)
-        print(df_voters.shape)
+        #now we need to move it to getting a list of unique elections, and we also need to edit each election
+        def get_unique_elections(election_type, iowa_voters=df_voters):
+            flattened_values = iowa_voters[self.config[election_type]].values.ravel('K')
+            flattened_values = flattened_values[pd.notnull(flattened_values)]
+            flattened_values = [x.strip(' ') for x in flattened_values]
+            flattened_values = [election_type[0:3] + "_" + s for s in flattened_values]
+            unique_elections, counts = np.unique(flattened_values, return_counts = True)
+            return(unique_elections, counts)
+
+        unique_elections, counts = get_unique_elections('general_elections')
 
 
-        logging.info("IOWA: reading in voter file")
+        count_order = counts.argsort()
+        unique_elections = unique_elections[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = unique_elections.tolist()
+
+
+        print("look here tyler")
+        print(unique_elections)
+        print("sorted_codes")
+        print(sorted_codes)
+
 
         return chksum
 
