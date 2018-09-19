@@ -11,6 +11,8 @@ birthday_identifier: Birth_Date
 voter_status: County_Status
 voter_status_active: Active
 voter_status_inactive: Inactive
+voter_status_waitlist: P-17
+voter_status_null:
 democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: Non-Partisan
