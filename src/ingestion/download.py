@@ -465,11 +465,19 @@ class Preprocessor(Loader):
         df_voters[61] = df_voters[61].str.split(",", n = 1)
         df_voters[[61,'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(), index= df_voters.index)
         df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
-        df_voters[self.config['election_columns']] = pd.DataFrame(df_voters['HISTORY'].values.tolist(), index = df_voters.index).iloc[:,0:60]
+        history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(), index = df_voters.index).iloc[:,0:60]
+        history_df.columns = self.config['election_columns']
+        print('here are columns ')
+        print(history_df.columns)
+        print(history_df.shape)
+        df_voters = pd.concat([df_voters.iloc[:,0:62], history_df], axis = 1)
+        df_voters.columns = self.config['ordered_columns']
+        
 
         print("columns")
         print(df_voters.columns)
         print(df_voters.shape)
+
 
         logging.info("IOWA: reading in voter file")
 
