@@ -64,6 +64,7 @@ generated_columns:
   all_history: int[]
 ordered_generated_columns:
   - all_history
+has_headers: No
 summary_columns:
   - totals
   - date

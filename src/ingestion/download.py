@@ -604,20 +604,28 @@ class Preprocessor(Loader):
                 new_files.append(f)
         if "v" in new_files[0]:
             voter_file = new_files[0]
-            if "electionscd" in new_files[1]:
-                elec_codes = new_files[1]
-                hist_file = new_files[2]
+            if len(new_files) > 2:
+                if "electionscd" in new_files[1]:
+                    elec_codes = new_files[1]
+                    hist_file = new_files[2]
+                else:
+                    hist_file = new_files[1]
+                    elec_codes = new_files[2]
             else:
                 hist_file = new_files[1]
-                elec_codes = new_files[2]
+                elec_codes = None
         elif "v" in new_files[1]:
             voter_file = new_files[1]
-            if "electionscd" in new_files[0]:
-                elec_codes = new_files[0]
-                hist_file = new_files[2]
+            if len(new_files) > 2:
+                if "electionscd" in new_files[0]:
+                    elec_codes = new_files[0]
+                    hist_file = new_files[2]
+                else:
+                    hist_file = new_files[0]
+                    elec_codes = new_files[2]
             else:
                 hist_file = new_files[0]
-                elec_codes = new_files[2]
+                elec_codes = None
         else:
             voter_file = new_files[2]
             if "electionscd" in new_files[0]:
@@ -628,7 +636,8 @@ class Preprocessor(Loader):
                 elec_codes = new_files[1]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
-        logging.info("Detected election code file: " + elec_codes)
+        if elec_codes is not None:
+            logging.info("Detected election code file: " + elec_codes)
 
         vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
                      [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
@@ -636,23 +645,27 @@ class Preprocessor(Loader):
                      [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
                      [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
                      [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519]]
+        testcolspecs = [[0, 35], [35, 55], [55, 75], [75, 79], [79, 83], [83, 85], [85, 94],
+                         [94, 96], [96, 103], [103, 107], [107, 109], [109, 139], [139, 145],
+                         [145, 147], [147, 160], [160, 194], [194, 197], [197, 203], [203, 253],
+                        [253, 303], [303, 353], [353, 403], [403, 453], [453, 465], [465, 468],
+                        [468, 473], [474, 479], [480, 485], [485, 491], [491, 497], [498, 503],
+                        [503, 508], [508, 513], [513, 519], [519, 523], [525, 526], [526, 527], [527, 528]]
         testhcolspecs = [[0, 13], [13, 16], [16, 22], [22, 28], [28, 41], [41, 44]]
         hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
         ecolspecs = [[0, 13], [13, 21], [21, 46]]
         self.temp_files.extend([voter_file, hist_file])
         logging.info("MICHIGAN: Loading voter file")
-        if self.testing is True:
-            vdf = pd.read_fwf(voter_file, colspecs='infer', names=config["ordered_columns"], na_filter=False)
-        else:
-            vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        logging.info("Testing: " + str(self.testing))
+        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
         logging.info("MICHIGAN: Loading historical file")
-        if self.testing is True:
-            hdf = pd.read_fwf(hist_file, colspecs=testhcolspecs, names=config["hist_columns"], na_filter=False)
-        else:
-            hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
 
         hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter_ID", "Data"], na_filter=False)
-        edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
+        if elec_codes is not None:
+            edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
+        else:
+            edf = None
 
         def intToDatetime(i):
             s = str(i)
@@ -663,14 +676,22 @@ class Preprocessor(Loader):
 
             return date
 
-        edf["Date"] = edf["Date"].apply(intToDatetime)
-        edf.sort_values(by=["Date"])
-        valid_elections = edf["Election_Code"].unique().tolist()
+        if edf is not None:
+            edf["Date"] = edf["Date"].apply(intToDatetime)
+            edf.sort_values(by=["Date"])
+
+        num_voters = hdf['Election_Code'].value_counts()
+        def assign_num_voters(r):
+            return num_voters[r['Election_Code']]
+        hdf['Num_Voters'] = hdf.apply(assign_num_voters, axis=1)
+        hdf.sort_values('Num_Voters', inplace=True, ascending=False)
+        with pd.option_context('display.max_rows', None):
+            print(hdf)
 
         def get_binary_history(row):
             hist = []
             voted_in = hdf.loc[hdf["Voter_ID"] == row["Voter_ID"]]
-            for ecode in valid_elections:
+            for ecode in hdf['Election_Code'].unique():
                 if ecode in voted_in["Election_Code"]:
                     hist.append(1)
                 else:
@@ -678,6 +699,7 @@ class Preprocessor(Loader):
 
             return hist
 
+        vdf['Voter_ID'] = pd.to_numeric(vdf['Voter_ID'], errors='ignore')
         vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
 
         #def polish_vote_hist(row):
@@ -712,7 +734,11 @@ class Preprocessor(Loader):
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
             'new_york': self.preprocess_new_york,
+<<<<<<< 8178c22729aeea3fdc48833a1027e35f8a42e36c
             'missouri': self.preprocess_missouri
+=======
+            'michigan': self.preprocess_michigan
+>>>>>>> build_michigan
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

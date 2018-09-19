@@ -203,6 +203,9 @@ class TestFileBuilder(Preprocessor):
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             zipper(self.main_file + '_decompressed', zf)
 
+    def __upload_michigan(self):
+        return
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
@@ -212,9 +215,8 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
-                  "michigan": self.__build_michigan,
                   "missouri": self.__build_missouri
-        }
+                  "michigan": self.__upload_michigan}
         f = routes[self.state]
         f()
 
