@@ -60,11 +60,10 @@ primary_key:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  voter_id: varchar
+  Voter_ID: varchar
   change_type: text
   pre_value: text
   post_value: text
-  state: varchar
 generated_columns:
   all_history: int[]
   verbose_history: varchar
@@ -97,18 +96,18 @@ summary_types:
   - int
   - text
 columns:
-  VoterID: varchar
+  Voter_ID: varchar
   First_Name: varchar
   Middle_Name: varchar
   Last_Name: varchar
-  Suffix: varchar
+  Name_Suffix: varchar
   Registration_Date: date
   Birthyear: varchar
   Gender: char
   House_Number_Character: char
   Residence_Street_Number: varchar
   House_Suffix: varchar
-  Pre-direction: char
+  Pre_direction: char
   Street_Name: varchar
   Street_Type: varchar
   Suffix_Direction: char
@@ -142,11 +141,11 @@ ordered_columns:
   - Name_Suffix
   - Birthyear
   - Gender
-  - Date_of_Registration
+  - Registration_Date
   - House_Number_Character
   - Residence_Street_Number
   - House_Suffix
-  - Pre-direction
+  - Pre_direction
   - Street_Name
   - Street_Type
   - Suffix_Direction
