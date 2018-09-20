@@ -10,12 +10,12 @@ birthday_identifier: Birthdate
 numeric_county: false
 date_format: '%m/%d/%Y'
 voter_status: voter_status
-voter_status_active: None
-voter_status_inactive: None
+voter_status_active: Active
+voter_status_inactive: Inactive
 party_identifier: party_identifier
-democratic_party: None
-republican_party: None
-no_party_affiliation: None
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation: Non-Partisan
 name_fields:
   - First Name
   - Middle Name
