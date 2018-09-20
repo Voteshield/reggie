@@ -70,7 +70,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - npa
+  - Non_Partisan
   - county
 summary_types:
   - int
