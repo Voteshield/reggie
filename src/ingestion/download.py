@@ -588,7 +588,8 @@ class Preprocessor(Loader):
             logging.info("preprocessing {}".format(self.config["state"]))
             f()
         else:
-            raise NotImplementedError("preprocess_{} has not yet been implemented for the Preprocessor object"
+            raise NotImplementedError("preprocess_{} has not yet been "
+                                      "implemented for the Preprocessor object"
                                       .format(self.config["state"]))
 
 
