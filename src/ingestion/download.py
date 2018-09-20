@@ -679,6 +679,9 @@ class Preprocessor(Loader):
         if edf is not None:
             edf["Date"] = edf["Date"].apply(intToDatetime)
             edf.sort_values(by=["Date"])
+            self.meta = {
+                "Election Dates" : edf
+            }
 
         num_voters = hdf['Election_Code'].value_counts()
         def assign_num_voters(r):

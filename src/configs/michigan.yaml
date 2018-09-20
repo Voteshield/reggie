@@ -1,10 +1,10 @@
-file_type: ascii
+file_type: fwf
 state: michigan
 source: boe
 file_class: voter_file
 voter_id: Voter_ID
 county_identifier: County_Code
-birthday_identifier: birthyear
+birthday_identifier: Birthyear
 voter_status: status_type
 voter_status_active: A
 voter_status_inactive: V
@@ -52,6 +52,11 @@ format:
     - "Voter File Layout.DOC"
     - "Voter File Layout.pdf"
     - .~lock.Voter_File_Layout.DOC#
+primary_key:
+  - pre_date
+  - post_date
+  - Voter_ID
+  - change_type
 base_columns:
   pre_date: timestamp
   post_date: timestamp
@@ -62,8 +67,10 @@ base_columns:
   state: varchar
 generated_columns:
   all_history: int[]
+  verbose_history: varchar
 ordered_generated_columns:
   - all_history
+  - verbose_history
 has_headers: No
 summary_columns:
   - totals
@@ -90,13 +97,44 @@ summary_types:
   - int
   - text
 columns:
-  VoterID: int
-  County: varchar
+  VoterID: varchar
   First_Name: varchar
   Middle_Name: varchar
   Last_Name: varchar
   Suffix: varchar
   Registration_Date: date
+  Birthyear: varchar
+  Gender: char
+  House_Number_Character: char
+  Residence_Street_Number: varchar
+  House_Suffix: varchar
+  Pre-direction: char
+  Street_Name: varchar
+  Street_Type: varchar
+  Suffix_Direction: char
+  Residence_Extension: varchar
+  City: varchar
+  State: varchar
+  Zip: varchar
+  Mail_Address_1: varchar
+  Mail_Address_2: varchar
+  Mail_Address_3: varchar
+  Mail_Address_4: varchar
+  Mail_Address_5: varchar
+  County_Code: varchar
+  Jurisdiction: varchar
+  Ward_Precinct: varchar
+  School_Code: varchar
+  State_House: varchar
+  State_Senate: varchar
+  US_Congress: varchar
+  County_Commissioner: varchar
+  Village_Code: varchar
+  Village_Precinct: varchar
+  School_Precinct: varchar
+  Permanent_Absentee_Ind: char
+  Status_Type: char
+  UOCAVA_Status: char
 ordered_columns:
   - Last_Name
   - First_Name
@@ -136,6 +174,119 @@ ordered_columns:
   - Permanent_Absentee_Ind
   - Status_Type
   - UOCAVA_Status
+voter_col_specs:
+  -
+    - 0
+    - 35
+  -
+    - 35
+    - 55
+  -
+    - 55
+    - 75
+  -
+    - 75
+    - 78
+  -
+    - 78
+    - 82
+  -
+    - 82
+    - 83
+  -
+    - 83
+    - 91
+
+  -
+    - 91
+    - 92
+  -
+    - 92
+    - 99
+  -
+    - 99
+    - 103
+  -
+    - 103
+    - 105
+  -
+    - 105
+    - 135
+  -
+    - 135
+    - 141
+  -
+    - 141
+    - 143
+  -
+    - 143
+    - 156
+  -
+    - 156
+    - 191
+  -
+    - 191
+    - 193
+  -
+    - 193
+    - 198
+  -
+    - 198
+    - 248
+  -
+    - 248
+    - 298
+  -
+    - 298
+    - 348
+  -
+    - 348
+    - 398
+  -
+    - 398
+    - 448
+  -
+    - 448
+    - 461
+  -
+    - 461
+    - 463
+  -
+    - 463
+    - 468
+  -
+    - 468
+    - 474
+  -
+    - 474
+    - 479
+  -
+    - 479
+    - 484
+  -
+    - 484
+    - 489
+  -
+    - 489
+    - 494
+  -
+    - 494
+    - 499
+  -
+    - 499
+    - 504
+  -
+    - 504
+    - 510
+  -
+    - 510
+    - 516
+  -
+    - 516
+    - 517
+  -
+    - 517
+    - 519
 hist_columns:
   - Voter_ID
   - County_Code
