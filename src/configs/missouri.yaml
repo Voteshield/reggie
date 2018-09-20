@@ -1,0 +1,175 @@
+# Missouri voter file comes as a single .zip file with the date of creation in the filename,
+# for instance "PSR_VotersList_04022018_7-46-27 AM.zip". These files contain headers.
+file_type: csv
+state: missouri
+source: boe
+file_class: voter_file
+voter_id: Voter ID
+county_identifier: County
+birthday_identifier: Birthdate
+numeric_county: false
+date_format: '%m/%d/%Y'
+voter_status: voter_status
+voter_status_active: None
+voter_status_inactive: None
+party_identifier: party_identifier
+democratic_party: None
+republican_party: None
+no_party_affiliation: None
+name_fields:
+  - First Name
+  - Middle Name
+  - Last Name
+  - Suffix
+address_fields:
+  - House Number
+  - House Suffix
+  - Pre Direction
+  - Street Name
+  - Street Type
+  - Post Direction
+  - Unit Type
+  - Unit Number
+  - Non Standard Address
+  - Residential City
+  - Residential State
+  - Residential ZipCode
+  - Mailing Address
+  - Mailing City
+  - Mailing State
+  - Mailing ZipCode
+primary_key:
+  - pre_date
+  - post_date
+  - Voter ID
+  - change_type
+format:
+  separate_hist: false
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: false
+  columnar_elections: true
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  Voter ID: int
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: varchar
+generated_columns:
+  all_history: int[]
+ordered_generated_columns:
+  - all_history
+has_headers: YES
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - npa
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  County: varchar
+  Voter ID: int
+  First Name: varchar
+  Middle Name: varchar
+  Last Name: varchar
+  Suffix: varchar
+  House Number: varchar
+  House Suffix: varchar
+  Pre Direction: varchar
+  Street Name: varchar
+  Street Type: varchar
+  Post Direction: varchar
+  Unit Type: varchar
+  Unit Number: varchar
+  Non Standard Address: varchar
+  Residential City: varchar
+  Residential State: varchar
+  Residential ZipCode: varchar
+  Mailing Address: varchar
+  Mailing City: varchar
+  Mailing State: varchar
+  Mailing ZipCode: varchar
+  Birthdate: date
+  Registration Date: date
+  Precinct: varchar
+  Precinct Name: varchar
+  Split: varchar
+  Township: varchar
+  Ward: varchar
+  Congressional- New: varchar
+  Legislative- New: varchar
+  State Senate- New: varchar
+  voter_status: text
+  party_identifier: text
+ordered_columns:
+  - County
+  - Voter ID
+  - First Name
+  - Middle Name
+  - Last Name
+  - Suffix
+  - House Number
+  - House Suffix
+  - Pre Direction
+  - Street Name
+  - Street Type
+  - Post Direction
+  - Unit Type
+  - Unit Number
+  - Non Standard Address
+  - Residential City
+  - Residential State
+  - Residential ZipCode
+  - Mailing Address
+  - Mailing City
+  - Mailing State
+  - Mailing ZipCode
+  - Birthdate
+  - Registration Date
+  - Precinct
+  - Precinct Name
+  - Split
+  - Township
+  - Ward
+  - Congressional- New
+  - Legislative- New
+  - State Senate- New
+  - voter_status
+  - party_identifier
+hist_columns:
+  - Voter History 1
+  - Voter History 2
+  - Voter History 3
+  - Voter History 4
+  - Voter History 5
+  - Voter History 6
+  - Voter History 7
+  - Voter History 8
+  - Voter History 9
+  - Voter History 10
+  - Voter History 11
+  - Voter History 12
+  - Voter History 13
+  - Voter History 14
+  - Voter History 15
+  - Voter History 16
+  - Voter History 17
+  - Voter History 18
+  - Voter History 19
+  - Voter History 20
