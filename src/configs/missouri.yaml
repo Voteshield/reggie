@@ -15,7 +15,7 @@ voter_status_inactive: Inactive
 party_identifier: party_identifier
 democratic_party: Democrat
 republican_party: Republican
-no_party_affiliation: Non-Partisan
+no_party_affiliation: npa
 name_fields:
   - First Name
   - Middle Name
@@ -70,7 +70,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Non_Partisan
+  - npa
   - county
 summary_types:
   - int
