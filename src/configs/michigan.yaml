@@ -3,7 +3,7 @@ state: michigan
 source: boe
 file_class: voter_file
 voter_id: Voter_ID
-county_identifier: County_Code
+county_identifier: county_code
 birthday_identifier: Birthyear
 voter_status: status_type
 voter_status_active: A
@@ -11,6 +11,9 @@ voter_status_inactive: V
 voter_status_cancelled: C
 voter_status_rejected: R
 voter_status_challenged: CH
+party_identifier: party_identifier
+numeric_county: true
+birthday_format: "%Y"
 date_format: "%m%d%Y"
 name_fields:
   - First_Name
@@ -67,9 +70,11 @@ base_columns:
 generated_columns:
   all_history: int[]
   verbose_history: varchar
+  party_identifier: varchar
 ordered_generated_columns:
   - all_history
   - verbose_history
+  - party_identifier
 has_headers: No
 summary_columns:
   - totals
@@ -101,26 +106,26 @@ columns:
   Middle_Name: varchar
   Last_Name: varchar
   Name_Suffix: varchar
-  Registration_Date: date
+  registration_date: date
   Birthyear: varchar
-  Gender: char
-  House_Number_Character: char
+  Gender: varchar
+  House_Number_Character: varchar
   Residence_Street_Number: varchar
   House_Suffix: varchar
-  Pre_direction: char
+  Pre_direction: varchar
   Street_Name: varchar
   Street_Type: varchar
-  Suffix_Direction: char
+  Suffix_Direction: varchar
   Residence_Extension: varchar
   City: varchar
-  State: varchar
+  Address_State: varchar
   Zip: varchar
   Mail_Address_1: varchar
   Mail_Address_2: varchar
   Mail_Address_3: varchar
   Mail_Address_4: varchar
   Mail_Address_5: varchar
-  County_Code: varchar
+  county_code: varchar
   Jurisdiction: varchar
   Ward_Precinct: varchar
   School_Code: varchar
@@ -132,8 +137,8 @@ columns:
   Village_Precinct: varchar
   School_Precinct: varchar
   Permanent_Absentee_Ind: char
-  Status_Type: char
-  UOCAVA_Status: char
+  status_type: varchar
+  UOCAVA_Status: varchar
 ordered_columns:
   - Last_Name
   - First_Name
@@ -141,7 +146,7 @@ ordered_columns:
   - Name_Suffix
   - Birthyear
   - Gender
-  - Registration_Date
+  - registration_date
   - House_Number_Character
   - Residence_Street_Number
   - House_Suffix
@@ -151,7 +156,7 @@ ordered_columns:
   - Suffix_Direction
   - Residence_Extension
   - City
-  - State
+  - Address_State
   - Zip
   - Mail_Address_1
   - Mail_Address_2
@@ -159,7 +164,7 @@ ordered_columns:
   - Mail_Address_4
   - Mail_Address_5
   - Voter_ID
-  - County_Code
+  - county_code
   - Jurisdiction
   - Ward_Precinct
   - School_Code
@@ -171,7 +176,7 @@ ordered_columns:
   - Village_Precinct
   - School_Precinct
   - Permanent_Absentee_Ind
-  - Status_Type
+  - status_type
   - UOCAVA_Status
 voter_col_specs:
   -
@@ -288,7 +293,7 @@ voter_col_specs:
     - 519
 hist_columns:
   - Voter_ID
-  - County_Code
+  - county_code
   - Jurisdiction
   - School_Code
   - Election_Code

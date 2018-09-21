@@ -157,7 +157,6 @@ class TestFileBuilder(Preprocessor):
         config = load_configs_from_file(state='michigan')
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
-        print(self.download_date)
 
         vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
                   [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
@@ -204,6 +203,7 @@ class TestFileBuilder(Preprocessor):
             zipper(self.main_file + '_decompressed', zf)
 
     def __upload_michigan(self):
+        #numpy doesn't want to create fixed width files without a separator, so it must be created locally
         return
 
     def build(self, file_name=None, save_local=False, save_remote=True):

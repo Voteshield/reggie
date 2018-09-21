@@ -657,9 +657,9 @@ class Preprocessor(Loader):
         self.temp_files.extend([voter_file, hist_file])
         logging.info("MICHIGAN: Loading voter file")
         logging.info("Testing: " + str(self.testing))
-        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], dtype=str, na_filter=False)
         logging.info("MICHIGAN: Loading historical file")
-        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], dtype=str, na_filter=False)
 
         hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter_ID", "Data"], na_filter=False)
         if elec_codes is not None:
@@ -688,8 +688,6 @@ class Preprocessor(Loader):
             return num_voters[r['Election_Code']]
         hdf['Num_Voters'] = hdf.apply(assign_num_voters, axis=1)
         hdf.sort_values('Num_Voters', inplace=True, ascending=False)
-        with pd.option_context('display.max_rows', None):
-            print(hdf)
 
         def get_binary_history(row):
             hist = []
@@ -703,6 +701,11 @@ class Preprocessor(Loader):
             return hist
 
         vdf['Voter_ID'] = pd.to_numeric(vdf['Voter_ID'], errors='ignore')
+        vdf[self.config["birthday_identifier"]] = pd.to_datetime(vdf[self.config["birthday_identifier"]],
+                                                                     format=self.config["birthday_format"],
+                                                                     errors='coerce')
+        vdf["registration_date"] = pd.to_datetime(vdf["registration_date"], format=self.config["date_format"],
+                                                  errors='coerce')
         vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
 
         #def polish_vote_hist(row):
@@ -721,6 +724,7 @@ class Preprocessor(Loader):
             return hist
 
         vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
+        vdf['party_identifier'] = np.nan
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
