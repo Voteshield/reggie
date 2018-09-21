@@ -13,6 +13,7 @@ democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: Non-Partisan
 party_identifier: Party_Affiliation
+missing_required_fields: false
 numeric_county: true
 name_fields:
   - cde_name_title

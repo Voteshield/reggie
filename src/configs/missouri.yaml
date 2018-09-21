@@ -16,6 +16,7 @@ party_identifier: party_identifier
 democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: npa
+missing_required_fields: true
 name_fields:
   - First Name
   - Middle Name
