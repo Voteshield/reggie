@@ -490,19 +490,22 @@ class Preprocessor(Loader):
         df_voters = pd.concat([df_voters.iloc[:,0:62], history_df], axis = 1)
         df_voters.columns = self.config['ordered_columns']
         df_voters[self.config['voter_id']] = df_voters[self.config['voter_id']].str[1:]
-        vote_types = ['A', 'P', 'Prov']
-        party_types = ['', 'DEM', 'LIB', 'NP', 'REP']
+        vote_types = [' ', 'A', 'P', 'Prov']
+        party_types = [' ', 'DEM', 'LIB', 'NP', 'REP']
         party_org = [' ','Iowa Green']
         def get_unique_elections(election_type, iowa_voters=df_voters):
             flattened_values = iowa_voters[self.config[election_type]].values.ravel('K')
+           
             flattened_values = flattened_values[pd.notnull(flattened_values)]
             flattened_values = [x.strip(' ') for x in flattened_values]
             flattened_values = [election_type[0:3] + "_" + s + "_" + j for s in flattened_values for j in vote_types if s if j]
             if election_type == 'primary_elections':
-                flattened_values = [x + "_" + y + "_" + z for x in flattened_values for y in party_types for z in party_org if z if y if x]
-            flattened_values = [f[:-2] for f in flattened_values if f[-2:] == "_ "]
+                flattened_values = [x + "_" + y + "_" + z for x in flattened_values for y in party_types for z in party_org if x]
+            flattened_values = [f[:-2] if f[-2:] == "_ " else f for f in flattened_values]
+            flattened_values = [f[:-2] if f[-2:] == "_ " else f for f in flattened_values]
             unique_elections, counts = np.unique(flattened_values, return_counts = True)
             return(unique_elections, counts)
+
         unique_elections, counts = get_unique_elections('general_elections')
         election_types = ['primary_elections', 'school_elections', 'city_elections', 'special_elections']
         for i in election_types:
@@ -514,55 +517,37 @@ class Preprocessor(Loader):
         unique_elections = unique_elections[count_order]
         counts = counts[count_order]
         sorted_codes = unique_elections.tolist()
-
-        #df.columns.get_loc("pear") + 1
-
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+                             enumerate(sorted_codes)}
+        df_voters['all_history'] = np.nan
         def get_election_array(row):
-            
             election_array = []
             for i in self.config['election_dates']:
-                if row[i] and row[i] != " ":
+                if row[i] and row[i] != " " and "/" in row[i]:
                     x = i[0:3].lower() + "_" + row[i].strip(' ') + "_" + row[df_voters.columns.get_loc(i) + 1].strip(' ')
                     if i[0:3].lower() == 'pri':
-                        if row[df_voters.columns.get_loc(i) + 2] and row[df_voters.columns.get_loc(i) + 2] != " ":
+                        if row[df_voters.columns.get_loc(i) + 2] in party_types[1:] and row[df_voters.columns.get_loc(i) + 2]:
                             x = x + "_" + row[df_voters.columns.get_loc(i) + 2].strip(' ')
-                        if row[df_voters.columns.get_loc(i) + 3] and row[df_voters.columns.get_loc(i) + 3] != " ":
+                        if row[df_voters.columns.get_loc(i) + 3] in party_org[1:] and row[df_voters.columns.get_loc(i) + 3]:
                             x = x + "_" + row[df_voters.columns.get_loc(i) + 3].strip(' ')
-
                     election_array.append(x)
-                    
-            print("here are some voters elections")
-            print(election_array)
+            election_array = [f[:-1] if f[-1:] == "_" else f for f in election_array]
+            return(election_array)
+        df_voters['all_history'] = df_voters.apply(get_election_array, axis = 1)
+        def insert_code_bin(arr):
+            return [sorted_codes_dict[k]["index"] for k in arr]
+        df_voters.all_history = df_voters.all_history.apply(insert_code_bin)
 
+        self.meta = {
+            "message": "iowa_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
 
-        df_voters.head(50).apply(get_election_array, axis = 1)
-        print("and here is the sparse matrix")
-        print(sorted_codes[0:20])
-        """
-        def calculate_area(row):
-            return row['height'] * row['width'] # this is for making the appl
-
-        rectangles_df.apply(calculate_area, axis=1)
-        """
-        """
-        for every voter:
-            go through each election they voted in (not blank)
-            if
-            create string idential to the matrix
-            dictionary entry """
-
-        #at this point, not totally sure if this is a good way of doing anything
-        #size of matrix is 4437
-        #other issues:
-            #4 / 172k have history columns in the wrong place
-            #not sure how to create the matrix from here other than writing a ton of if statements, or creating a string for each election a voter voted in 
-            #and then checking the exact way you did
-            #print out weird row, look at it and see if it is worth it
-        #metadata: have unique string, count, and date in metadata
-
-        #for every row, make list strings to iterate over and then .apply on that across the dictionary
-        #making all history column
-
+        df_voters.to_csv(self.main_file, index=False, compression="gzip")
+        self.is_compressed = True
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
         return chksum
 
     def preprocess_arizona(self):
