@@ -602,38 +602,9 @@ class Preprocessor(Loader):
         for f in all_files:
             if os.path.basename(f) not in config["format"]["ignore_files"]:
                 new_files.append(f)
-        if "v" in new_files[0]:
-            voter_file = new_files[0]
-            if len(new_files) > 2:
-                if "electionscd" in new_files[1]:
-                    elec_codes = new_files[1]
-                    hist_file = new_files[2]
-                else:
-                    hist_file = new_files[1]
-                    elec_codes = new_files[2]
-            else:
-                hist_file = new_files[1]
-                elec_codes = None
-        elif "v" in new_files[1]:
-            voter_file = new_files[1]
-            if len(new_files) > 2:
-                if "electionscd" in new_files[0]:
-                    elec_codes = new_files[0]
-                    hist_file = new_files[2]
-                else:
-                    hist_file = new_files[0]
-                    elec_codes = new_files[2]
-            else:
-                hist_file = new_files[0]
-                elec_codes = None
-        else:
-            voter_file = new_files[2]
-            if "electionscd" in new_files[0]:
-                elec_codes = new_files[0]
-                hist_file = new_files[1]
-            else:
-                hist_file = new_files[0]
-                elec_codes = new_files[1]
+        voter_file = ([n for n in new_files if 'v' in n] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n] + [None])[0]
+        elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
         if elec_codes is not None:
@@ -645,19 +616,20 @@ class Preprocessor(Loader):
                      [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
                      [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
                      [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519]]
-        testcolspecs = [[0, 35], [35, 55], [55, 75], [75, 79], [79, 83], [83, 85], [85, 94],
-                         [94, 96], [96, 103], [103, 107], [107, 109], [109, 139], [139, 145],
-                         [145, 147], [147, 160], [160, 194], [194, 197], [197, 203], [203, 253],
-                        [253, 303], [303, 353], [353, 403], [403, 453], [453, 465], [465, 468],
-                        [468, 473], [474, 479], [480, 485], [485, 491], [491, 497], [498, 503],
-                        [503, 508], [508, 513], [513, 519], [519, 523], [525, 526], [526, 527], [527, 528]]
-        testhcolspecs = [[0, 13], [13, 16], [16, 22], [22, 28], [28, 41], [41, 44]]
         hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
         ecolspecs = [[0, 13], [13, 21], [21, 46]]
+        ordered_columns = ['Last_Name', 'First_Name', 'Middle_Name', 'Name_Suffix', 'Birthyear', 'Gender',
+                           'registration_date', 'House_Number_Character', 'Residence_Street_Number', 'House_Suffix',
+                           'Pre_direction', 'Street_Name', 'Street_Type', 'Suffix_Direction', 'Residence_Extension',
+                           'City', 'Address_State', 'Zip', 'Mail_Address_1', 'Mail_Address_2', 'Mail_Address_3',
+                           'Mail_Address_4', 'Mail_Address_5', 'Voter_ID', 'county_code', 'Jurisdiction',
+                           'Ward_Precinct', 'School_Code', 'State_House', 'State_Senate', 'US_Congress',
+                           'County_Commissioner', 'Village_Code', 'Village_Precinct', 'School_Precinct',
+                           'Permanent_Absentee_Ind', 'status_type', 'UOCAVA_Status']
         self.temp_files.extend([voter_file, hist_file])
         logging.info("MICHIGAN: Loading voter file")
         logging.info("Testing: " + str(self.testing))
-        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], dtype=str, na_filter=False)
+        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=ordered_columns, dtype=str, na_filter=False)
         logging.info("MICHIGAN: Loading historical file")
         hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], dtype=str, na_filter=False)
 
@@ -679,9 +651,11 @@ class Preprocessor(Loader):
         if edf is not None:
             edf["Date"] = edf["Date"].apply(intToDatetime)
             edf.sort_values(by=["Date"])
+            edf.set_index("Date", inplace=True)
             self.meta = {
-                "Election Dates" : edf
             }
+            for d in edf.index:
+                self.meta[str(d)] = str(edf.loc[d].loc["Election_Code"]) + ' ' + edf.loc[d].loc["Title"]
 
         num_voters = hdf['Election_Code'].value_counts()
         def assign_num_voters(r):
@@ -707,12 +681,6 @@ class Preprocessor(Loader):
         vdf["registration_date"] = pd.to_datetime(vdf["registration_date"], format=self.config["date_format"],
                                                   errors='coerce')
         vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
-
-        #def polish_vote_hist(row):
-        #    row["Date"] = edf["Date"].loc[row["Election_Code"]]
-        #    row["Election_Title"] = edf["Title"].loc[row["Election_Code"]]
-
-        #hdf.apply(polish_vote_hist, axis=1)
 
         vdf["tmp_id"] = vdf[config["voter_id"]]
         vdf = vdf.set_index("tmp_id")
