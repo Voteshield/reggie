@@ -2,7 +2,7 @@ import inspect
 import json
 import os
 import uuid
-from os import stat
+from os import stat, remove
 import pandas as pd
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
@@ -13,6 +13,7 @@ from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
 import subprocess
 from datetime import datetime
+from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
@@ -63,9 +64,9 @@ class TestFileBuilder(Preprocessor):
         return small_counties
 
     def filter_counties(self, df, counties):
-        county_col = df[self.config["county_identifier"]]
-        filtered_data = df[(df[county_col] == counties[0]) |
-                           (df[county_col] == counties[1])]
+        filtered_data = df[(
+            df[self.config["county_identifier"]] == counties[0]) |
+            (df[self.config["county_identifier"]] == counties[1])]
         filtered_data.reset_index(inplace=True, drop=True)
         return filtered_data
 
@@ -145,7 +146,26 @@ class TestFileBuilder(Preprocessor):
         logging.info("using '{}' counties".format(
             " and ".join([str(a) for a in two_small_counties.tolist()])))
 
+<<<<<<< HEAD
     def build(self, file_name=None, save_local=True, save_remote=False):
+=======
+    def __build_missouri(self):
+        new_file = self.unpack_files(compression="7zip")
+        new_file = new_file[0]
+        df = pd.read_csv(new_file, sep='\t')
+        two_small_counties = self.get_smallest_counties(df, count=2)
+        filtered_data = self.filter_counties(df, counties=two_small_counties)
+        filtered_data.to_csv(new_file, index=False, sep='\t')
+        # have to delete current main_file before
+        # we can 7zip new file to that location
+        os.remove(self.main_file)
+        p = Popen(["7z", "a", "-tzip", self.main_file, new_file],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        out, err = p.communicate()
+        self.temp_files.append(new_file)
+
+    def build(self, file_name=None, save_local=False, save_remote=True):
+>>>>>>> 47065931f8fa91cc8290a95fe55fc483a447fc1f
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -154,7 +174,11 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
+<<<<<<< HEAD
                   "iowa": self.__build_iowa}
+=======
+                  "missouri": self.__build_missouri}
+>>>>>>> 47065931f8fa91cc8290a95fe55fc483a447fc1f
         f = routes[self.state]
         f()
 

@@ -20,6 +20,7 @@ voter_status_preregistered: 17
 democratic_party: DEM
 republican_party: REP
 no_party_affiliation: OTHER
+missing_required_fields: false
 independence_party: IND
 numeric_county: false
 date_format: '%Y%m%d'

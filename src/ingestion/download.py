@@ -213,6 +213,27 @@ class Loader(object):
             new_loc = file_name + ".out"
         return new_loc, p
 
+    def sevenzip_decompress(self, file_name):
+        """
+        handles decompression for 7zip files
+        :param file_name: 7zip compressed file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("7zip",
+                             file_name,
+                             os.path.dirname(file_name)))
+        if file_name[-4:] == ".zip":
+            new_loc = file_name[:-4] + ".out"
+        else:
+            new_loc = file_name + ".out"
+        p = Popen(["7z", "e", "-so", file_name],
+                  stdout=open(new_loc, "w"), stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        return new_loc, p
+
     def infer_compression(self, file_name):
         """
         infer file type and map to compression type
@@ -262,6 +283,8 @@ class Loader(object):
                 new_loc, p = self.unzip_decompress(file_name)
             elif compression_type == "bunzip2":
                 new_loc, p = self.bunzip2_decompress(file_name)
+            elif compression_type == "7zip":
+                new_loc, p = self.sevenzip_decompress(file_name)
             else:
                 new_loc, p = self.gunzip_decompress(file_name)
 
@@ -451,6 +474,7 @@ class Preprocessor(Loader):
         vote_types = [' ', 'A', 'P', 'Prov']
         party_types = [' ', 'DEM', 'LIB', 'NP', 'REP']
         party_org = [' ','Iowa Green']
+
         def get_unique_elections(election_type, iowa_voters=df_voters):
             flattened_values = iowa_voters[self.config[election_type]].values.ravel('K')
            
@@ -579,6 +603,58 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_missouri(self):
+        new_file = self.unpack_files(compression="7zip")
+        new_file = new_file[0]
+        main_df = pd.read_csv(new_file, sep='\t')
+
+        # add empty columns for voter_status and party_identifier
+        main_df[self.config["voter_status"]] = np.nan
+        main_df[self.config["party_identifier"]] = np.nan
+
+        def add_history(main_df):
+            # also save as sparse array since so many elections are stored
+            count_df = pd.DataFrame()
+            for idx, hist in enumerate(self.config['hist_columns']):
+                unique_codes, counts = np.unique(main_df[hist].str.replace(
+                    " ", "_").dropna().values, return_counts=True)
+                count_df_new = pd.DataFrame(index=unique_codes, data=counts,
+                                            columns=['counts_' + hist])
+                count_df = pd.concat([count_df, count_df_new], axis=1)
+            count_df['total_counts'] = count_df.sum(axis=1)
+            unique_codes = count_df.index.values
+            counts = count_df['total_counts'].values
+            count_order = counts.argsort()
+            unique_codes = unique_codes[count_order]
+            counts = counts[count_order]
+            sorted_codes = unique_codes.tolist()
+            sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+                                 for i, k in enumerate(sorted_codes)}
+
+            def insert_code_bin(arr):
+                return [sorted_codes_dict[k]["index"] for k in arr]
+
+            main_df['all_history'] = main_df[
+                self.config['hist_columns']].apply(
+                lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
+            main_df.all_history = main_df.all_history.map(insert_code_bin)
+            return sorted_codes, sorted_codes_dict
+
+        sorted_codes, sorted_codes_dict = add_history(main_df)
+        main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
+
+        main_df = self.coerce_dates(main_df)
+
+        self.meta = {
+            "message": "missouri_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
     def execute(self):
         self.state_router()
 
@@ -587,7 +663,8 @@ class Preprocessor(Loader):
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
             'new_york': self.preprocess_new_york,
-            'iowa': self.preprocess_iowa
+            'iowa': self.preprocess_iowa,
+            'missouri': self.preprocess_missouri
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
