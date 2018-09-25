@@ -90,14 +90,14 @@ columns:
   Middle Name: varchar
   Last Name: varchar
   Suffix: varchar
-  House Number: varchar
+  House Number: int
   House Suffix: varchar
   Pre Direction: varchar
   Street Name: varchar
   Street Type: varchar
   Post Direction: varchar
   Unit Type: varchar
-  Unit Number: varchar
+  Unit Number: int
   Non Standard Address: varchar
   Residential City: varchar
   Residential State: varchar
@@ -110,7 +110,7 @@ columns:
   Registration Date: date
   Precinct: varchar
   Precinct Name: varchar
-  Split: varchar
+  Split: int
   Township: varchar
   Ward: varchar
   Congressional- New: varchar
