@@ -170,7 +170,7 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
-                  "iowa": self.__build_iowa
+                  "iowa": self.__build_iowa,
                   "missouri": self.__build_missouri}
         f = routes[self.state]
         f()
