@@ -481,9 +481,10 @@ class Preprocessor(Loader):
                                         header=None, engine="python")
         for i in new_files:
             # this is not the logical complement of the statement on 460,
-            # are you sure it is right?
+            # are you sure it is what you need?
             if "CD1" not in i and "Part1" not in i:
-                #I do this because need to initialize dataframe
+
+                # I do this because need to initialize dataframe
                 new_df = pd.read_csv(i, sep = '","|",  "', header=None,
                                      engine="python")
                 df_voters = pd.concat([df_voters, new_df], axis=0)
@@ -546,6 +547,7 @@ class Preprocessor(Loader):
         elections, counts = np.unique(df_voters[self.config['election_dates']],
                                       return_counts=True)
 
+        # we want reverse order (lower indices are higher frequency)
         count_order = counts.argsort()[::-1]
 
         elections = elections[count_order]
