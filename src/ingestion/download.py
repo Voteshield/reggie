@@ -13,6 +13,7 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
     listcol_tonumpy
 from storage import s3, normalize_columns
+from profilehooks import profile, timecall, coverage, coverage_with_hotshot
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -327,7 +328,7 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
-        self.main_file = "/tmp/voteshield_{}"\
+        self.main_file = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
         get_object(self.raw_s3_file, self.main_file)
         self.temp_files.append(self.main_file)
@@ -451,80 +452,113 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-
+    @profile
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")
         for i in new_files:
             if "CD1" in i and "Part1" in i:
-                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1, header=None, engine = 'python')
+                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1,
+                                        header=None, engine="python")
         for i in new_files:
-            if "CD1" not in i and "Part1" not in i: #I do this because need to initialize dataframe
-                new_df = pd.read_csv(i, sep = '","|",  "', header=None, engine = 'python')
-                df_voters = pd.concat([df_voters, new_df], axis = 0)
-        df_voters[61] = df_voters[61].str.split(",", n = 1)
-        df_voters[[61,'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(), index= df_voters.index)
+            # this is not the logical complement of the statement on 460,
+            # are you sure it is right?
+            if "CD1" not in i and "Part1" not in i:
+                #I do this because need to initialize dataframe
+                new_df = pd.read_csv(i, sep = '","|",  "', header=None,
+                                     engine="python")
+                df_voters = pd.concat([df_voters, new_df], axis=0)
+
+        # do we really need all this? (looks like yes)
+        df_voters[61] = df_voters[61].str.split(",", n=1)
+        df_voters[[61, 'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(),
+                                                 index=df_voters.index)
         df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
-        history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(), index = df_voters.index).iloc[:,0:60]
+        history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(),
+                                  index = df_voters.index).iloc[:, 0:60]
         history_df.columns = self.config['election_columns']
-        
-        df_voters = pd.concat([df_voters.iloc[:,0:62], history_df], axis = 1)
+        df_voters = pd.concat([df_voters.iloc[:, 0:62], history_df], axis=1)
         df_voters.columns = self.config['ordered_columns']
         df_voters[self.config['voter_id']] = df_voters[self.config['voter_id']].str[1:]
-        vote_types = [' ', 'A', 'P', 'Prov']
-        party_types = [' ', 'DEM', 'LIB', 'NP', 'REP']
-        party_org = [' ','Iowa Green']
 
-        def get_unique_elections(election_type, iowa_voters=df_voters):
-            flattened_values = iowa_voters[self.config[election_type]].values.ravel('K')
-           
-            flattened_values = flattened_values[pd.notnull(flattened_values)]
-            flattened_values = [x.strip(' ') for x in flattened_values]
-            flattened_values = [election_type[0:3] + "_" + s + "_" + j for s in flattened_values for j in vote_types if s if j]
-            if election_type == 'primary_elections':
-                flattened_values = [x + "_" + y + "_" + z for x in flattened_values for y in party_types for z in party_org if x]
-            flattened_values = [f[:-2] if f[-2:] == "_ " else f for f in flattened_values]
-            flattened_values = [f[:-2] if f[-2:] == "_ " else f for f in flattened_values]
-            unique_elections, counts = np.unique(flattened_values, return_counts = True)
-            return(unique_elections, counts)
+        key_delim = "_"
+        df_voters["all_history"] = ''
 
-        unique_elections, counts = get_unique_elections('general_elections')
-        election_types = ['primary_elections', 'school_elections', 'city_elections', 'special_elections']
-        for i in election_types:
-            a, b = get_unique_elections(i)
-            unique_elections = np.concatenate([unique_elections, a])
-            counts = np.concatenate([counts, b])
+        # instead of iterating over all of the columns for each row, we should
+        # handle all this beforehand.
+        # also we should not compute the unique values until after, not before
+        for c in self.config["election_dates"]:
+            df_voters[c].loc[df_voters[c].isnull()] = ""
+            # each key contains info from the columns
+            prefix = c.split("_")[0] + key_delim
 
-        count_order = counts.argsort()
-        unique_elections = unique_elections[count_order]
+            # and the corresponding votervotemethod column
+            vote_type_col = c.replace("ELECTION_DATE", "VOTERVOTEMETHOD")
+            df_voters[vote_type_col].loc[df_voters[vote_type_col].isnull()] = ""
+            df_voters[c] = prefix + df_voters[c].str.strip()
+            df_voters[c] += key_delim + df_voters[vote_type_col].str.strip()
+
+        # the code below will format each key as
+        # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
+
+            if "PRIMARY" in prefix:
+
+                # so far so good but we need more columns in the event of a
+                # primary
+                org_col = c.replace("PRIMARY_ELECTION_DATE",
+                                    "POLITICAL_ORGANIZATION")
+                party_col = c.replace("PRIMARY_ELECTION_DATE",
+                                      "POLITICAL_PARTY")
+                df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
+                df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
+                party_info = df_voters[party_col].str.strip() + key_delim + \
+                             df_voters[org_col].str.replace(" ", "")
+                df_voters[c] += key_delim + party_info
+            else:
+                # add 'blank' values for the primary slots
+                df_voters[c] += key_delim + key_delim
+
+            df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3, '')
+            df_voters.all_history += " " + df_voters[c]
+
+        # make into an array (null values are '' so they are ignored)
+        df_voters.all_history = df_voters.all_history.str.split()
+
+        elections, counts = np.unique(df_voters[self.config['election_dates']],
+                                      return_counts=True)
+
+        count_order = counts.argsort()[::-1]
+
+        elections = elections[count_order]
         counts = counts[count_order]
-        sorted_codes = unique_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
-                             enumerate(sorted_codes)}
-        df_voters['all_history'] = np.nan
-        def get_election_array(row):
-            election_array = []
-            for i in self.config['election_dates']:
-                if row[i] and row[i] != " " and "/" in row[i]:
-                    x = i[0:3].lower() + "_" + row[i].strip(' ') + "_" + row[df_voters.columns.get_loc(i) + 1].strip(' ')
-                    if i[0:3].lower() == 'pri':
-                        if row[df_voters.columns.get_loc(i) + 2] in party_types[1:] and row[df_voters.columns.get_loc(i) + 2]:
-                            x = x + "_" + row[df_voters.columns.get_loc(i) + 2].strip(' ')
-                        if row[df_voters.columns.get_loc(i) + 3] in party_org[1:] and row[df_voters.columns.get_loc(i) + 3]:
-                            x = x + "_" + row[df_voters.columns.get_loc(i) + 3].strip(' ')
-                    election_array.append(x)
-            election_array = [f[:-1] if f[-1:] == "_" else f for f in election_array]
-            return(election_array)
-        df_voters['all_history'] = df_voters.apply(get_election_array, axis = 1)
+
+        # create meta
+        sorted_codes_dict = {j: {"index": i, "count": counts[i],
+                                 "date": date_from_str(j)}
+                             for i, j in enumerate(elections)}
+
+        # looks good
+        print(zip(elections[0:10], counts[0:10]))
+        print(sorted_codes_dict.items()[0:5])
+
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
-        df_voters.all_history = df_voters.all_history.apply(insert_code_bin)
 
+        # In an instance like this, where we've created our own systematized
+        # labels for each election I think it makes sense to also keep them
+        # in addition to the sparse history
+        df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
+        print(df_voters.sparse_history)
         self.meta = {
             "message": "iowa_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
-            "array_decoding": json.dumps(sorted_codes),
+            "array_decoding": json.dumps(elections.tolist()),
         }
+
+        # remove cruft
+        df_voters.drop(self.config["election_columns"], inplace=True, axis=1)
+
+        print(df_voters.columns)
 
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
@@ -566,8 +600,8 @@ class Preprocessor(Loader):
                               header=None,
                               names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
-        all_codes = main_df.voterhistory.str.replace(" ", "_")\
-            .str.replace("[", "")\
+        all_codes = main_df.voterhistory.str.replace(" ", "_") \
+            .str.replace("[", "") \
             .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
