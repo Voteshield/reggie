@@ -358,10 +358,11 @@ class Preprocessor(Loader):
         """
         numeric_fields = [c for c, v in self.config["columns"].items()
                           if v == "int"]
-        df[numeric_fields] = df[numeric_fields].apply(
-            lambda x: pd.to_numeric(x, errors='coerce'))
-        df[extra_cols] = df[extra_cols].apply(
-            lambda x: pd.to_numeric(x, errors='coerce').fillna(x))
+        for field in numeric_fields:
+            df[field] = pd.to_numeric(df[field], errors='coerce')
+        for field in extra_cols:
+            df[field] = pd.to_numeric(df[field],
+                                      errors='coerce').fillna(df[field])
         return df
 
     def unpack_files(self, compression="unzip"):
