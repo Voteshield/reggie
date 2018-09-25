@@ -161,7 +161,7 @@ class TestFileBuilder(Preprocessor):
         out, err = p.communicate()
         self.temp_files.append(new_file)
 
-    def build(self, file_name=None, save_local=True, save_remote=False):
+    def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -172,6 +172,7 @@ class TestFileBuilder(Preprocessor):
                   "new_york": self.__build_new_york,
                   "missouri": self.__build_missouri,
                   "iowa": self.__build_iowa}
+
         f = routes[self.state]
         f()
 
