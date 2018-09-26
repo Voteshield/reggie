@@ -14,7 +14,9 @@ democratic_party: DEM
 republican_party: REP
 no_party_affiliation: NP
 party_identifier: PARTY
+missing_required_fields: true
 numeric_county: false
+date_format: '%Y%m%d'
 generated_columns:
   all_history: text[]
   sparse_history: int[]
@@ -90,7 +92,7 @@ summary_types:
   - int
   - int
   - int
-  - int
+  - varchar
 format:
   separate_hist: false
   separate_counties_voter_file: false
