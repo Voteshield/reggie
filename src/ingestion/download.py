@@ -579,6 +579,7 @@ class Preprocessor(Loader):
         # remove cruft
         df_voters.drop(self.config["election_columns"], inplace=True, axis=1)
 
+        df_voters = self.coerce_dates(df_voters)
         print(df_voters.columns)
 
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
@@ -603,6 +604,8 @@ class Preprocessor(Loader):
                                                                      format=self.config["date_format"],
                                                                      errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
+
+
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {

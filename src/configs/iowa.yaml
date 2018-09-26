@@ -131,7 +131,7 @@ columns:
   PARTY: text
   POLITICAL_ORGANIZATION: text
   GENDER: text
-  BIRTHDATE: text
+  BIRTHDATE: date
   COUNTY: text
   FEDERAL: text
   CONGRESSIONAL: text
