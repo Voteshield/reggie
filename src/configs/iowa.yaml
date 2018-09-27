@@ -105,7 +105,7 @@ columns:
   LAST_UPDATED_DATE: date
   OLD_ID: text
   PHONENO: text
-  HOUSE_NUM: text
+  HOUSE_NUM: int
   HOUSE_SUFFIX: text
   PRE_DIR: text
   STREET_NAME: text
@@ -116,13 +116,13 @@ columns:
   ADDRESS_NON_STD: text
   CITY_1: text
   STATE_1: text
-  ZIP_CODE_1: text
-  ZIP_PLUS_1: text
+  ZIP_CODE_1: int
+  ZIP_PLUS_1: int
   MAILING_ADDRESS: text
   CITY_2: text
   STATE_2: text
-  ZIP_CODE_2: text
-  ZIP_PLUS_2: text
+  ZIP_CODE_2: int
+  ZIP_PLUS_2: int
   VOTERSTATUS: text
   PARTY: text
   POLITICAL_ORGANIZATION: text
@@ -130,14 +130,14 @@ columns:
   BIRTHDATE: date
   COUNTY: text
   FEDERAL: text
-  CONGRESSIONAL: text
+  CONGRESSIONAL: int
   STATEWIDE: text
-  STATE_SENATE: text
-  STATE_HOUSE: text
+  STATE_SENATE: int
+  STATE_HOUSE: int
   JUDICIAL: text
   PRECINCT: text
   COUNTY_SUPERVISOR: text
-  COUNTYWIDE: text
+  COUNTYWIDE: int
   TOWNSHIP: text
   CITY_COUNCIL_WARD: text
   CITY_3: text
