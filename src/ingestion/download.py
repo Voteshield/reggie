@@ -490,15 +490,14 @@ class Preprocessor(Loader):
                 df_voters = pd.concat([df_voters, new_df], axis=0)
 
         # do we really need all this? (looks like yes)
-        df_voters[61] = df_voters[61].str.split(",", n=1)
-        df_voters[[61, 'HISTORY']] = pd.DataFrame(df_voters[61].values.tolist(),
-                                                 index=df_voters.index)
+        df_voters.columns = self.config['ordered_columns']
+        df_voters['MISCELLANEOUS'] = df_voters['MISCELLANEOUS'].str.split(",", n=1)
+        df_voters[['MISCELLANEOUS', 'HISTORY']] = pd.DataFrame(
+            df_voters['MISCELLANEOUS'].values.tolist(), index=df_voters.index)
         df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
         history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(),
                                   index = df_voters.index).iloc[:, 0:60]
         history_df.columns = self.config['election_columns']
-        df_voters = pd.concat([df_voters.iloc[:, 0:62], history_df], axis=1)
-        df_voters.columns = self.config['ordered_columns']
         df_voters[self.config['voter_id']] = df_voters[self.config['voter_id']].str[1:]
 
         key_delim = "_"
@@ -508,15 +507,15 @@ class Preprocessor(Loader):
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
         for c in self.config["election_dates"]:
-            df_voters[c].loc[df_voters[c].isnull()] = ""
+            history_df[c].loc[history_df[c].isnull()] = ""
             # each key contains info from the columns
             prefix = c.split("_")[0] + key_delim
 
             # and the corresponding votervotemethod column
             vote_type_col = c.replace("ELECTION_DATE", "VOTERVOTEMETHOD")
-            df_voters[vote_type_col].loc[df_voters[vote_type_col].isnull()] = ""
-            df_voters[c] = prefix + df_voters[c].str.strip()
-            df_voters[c] += key_delim + df_voters[vote_type_col].str.strip()
+            history_df[vote_type_col].loc[history_df[vote_type_col].isnull()] = ""
+            history_df[c] = prefix + history_df[c].str.strip()
+            history_df[c] += key_delim + history_df[vote_type_col].str.strip()
 
         # the code below will format each key as
         # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
@@ -529,22 +528,23 @@ class Preprocessor(Loader):
                                     "POLITICAL_ORGANIZATION")
                 party_col = c.replace("PRIMARY_ELECTION_DATE",
                                       "POLITICAL_PARTY")
-                df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
-                df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
-                party_info = df_voters[party_col].str.strip() + key_delim + \
-                             df_voters[org_col].str.replace(" ", "")
-                df_voters[c] += key_delim + party_info
+                history_df[org_col].loc[history_df[org_col].isnull()] = ""
+                history_df[party_col].loc[history_df[party_col].isnull()] = ""
+                party_info = history_df[party_col].str.strip() + key_delim + \
+                             history_df[org_col].str.replace(" ", "")
+                history_df[c] += key_delim + party_info
             else:
                 # add 'blank' values for the primary slots
-                df_voters[c] += key_delim + key_delim
+                history_df[c] += key_delim + key_delim
 
-            df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3, '')
-            df_voters.all_history += " " + df_voters[c]
+            history_df[c] = history_df[c].str.replace(prefix + key_delim * 3, '')
+            df_voters.all_history += " " + history_df[c]
 
         # make into an array (null values are '' so they are ignored)
         df_voters.all_history = df_voters.all_history.str.split()
+        df_voters.drop("HISTORY", axis=1, inplace=True)
 
-        elections, counts = np.unique(df_voters[self.config['election_dates']],
+        elections, counts = np.unique(history_df[self.config['election_dates']],
                                       return_counts=True)
 
         # we want reverse order (lower indices are higher frequency)
@@ -569,19 +569,15 @@ class Preprocessor(Loader):
         # labels for each election I think it makes sense to also keep them
         # in addition to the sparse history
         df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
-        print(df_voters.sparse_history)
         self.meta = {
             "message": "iowa_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
 
-        # remove cruft
-        df_voters.drop(self.config["election_columns"], inplace=True, axis=1)
-
+        for c in df_voters.columns:
+            df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.coerce_dates(df_voters)
-        print(df_voters.columns)
-
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
         self.temp_files.append(self.main_file)
