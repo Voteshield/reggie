@@ -16,6 +16,7 @@ voter_status_null:
 democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: Non-Partisan
+missing_required_fields: true
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
