@@ -384,12 +384,30 @@ class Preprocessor(Loader):
         df_voters = pd.read_csv(concat_voter_file, header=None, sep="\t")
         df_voters.columns = self.config["ordered_columns"]
 
-        all_elections = df_hist.date.unique().tolist()
-        valid_elections = []
-        for i in all_elections:
-            if len(i) > 5:
-                valid_elections.append(i)
-        valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
+        logging.info("Select & sort elections")
+        df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
+        logging.info("Map election names")
+        df_hist["election_name"] = df_hist["date"] + "_" + \
+            df_hist["election_type"]
+        logging.info("Unique elections")
+        valid_elections, counts = np.unique(df_hist["election_name"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][:-4],
+                                                             "%m/%d/%Y"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+                             for i, k in enumerate(sorted_codes)}
+        logging.info("Valid elections (len = {}) = {}".format(
+            len(sorted_codes), sorted_codes))
+
+        logging.info("Map array positions")
+        df_hist["array_position"] = df_hist["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
 
         def place_vote_hist(g):
             group_idx = 0
