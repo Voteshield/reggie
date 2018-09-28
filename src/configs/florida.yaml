@@ -20,6 +20,7 @@ democratic_party: DEM
 republican_party: REP
 no_party_affiliation: NPA
 party_identifier: Party_Affiliation
+missing_required_fields: false
 date_format: '%m/%d/%Y'
 numeric_county: false
 generated_columns:
