@@ -509,12 +509,9 @@ class Preprocessor(Loader):
         df_hist = pd.read_fwf(concat_history_file, header=None)
         df_hist.columns = self.config["hist_columns"]
 
-        logging.info("Select & sort elections")
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
-        logging.info("Map election names")
         df_hist["election_name"] = df_hist["date"] + "_" + \
             df_hist["election_type"]
-        logging.info("Unique elections")
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
         date_order = [idx for idx, election in
@@ -527,17 +524,13 @@ class Preprocessor(Loader):
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i]}
                              for i, k in enumerate(sorted_codes)}
-        logging.info("Valid elections (len = {}) = {}".format(
-            len(sorted_codes), sorted_codes))
 
-        logging.info("Map array positions")
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
 
-        logging.info("Do history apply")
+        logging.info("FLORIDA: history apply")
         voter_groups = df_hist.groupby("VoterID")
         all_history = voter_groups["array_position"].apply(list)
-        logging.info("Do vote type apply")
         vote_type = voter_groups["vote_type"].apply(list)
 
         logging.info("FLORIDA: loading main voter file")
@@ -546,12 +539,11 @@ class Preprocessor(Loader):
         df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
-        logging.info("Adding history columns to main df")
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
 
-        main_df = self.coerce_dates(main_df)
-        main_df = self.coerce_numeric(main_df, extra_cols=[
+        df_voters = self.coerce_dates(df_voters)
+        df_voters = self.coerce_numeric(df_voters, extra_cols=[
             "Precinct_Split"])
 
         self.meta = {

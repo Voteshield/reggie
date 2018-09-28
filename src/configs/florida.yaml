@@ -109,7 +109,7 @@ summary_types:
   - text
 columns:
   County_Code: text
-  Voter_ID: int
+  Voter_ID: text
   Name_Last: text
   Name_Suffix: text
   Name_First: text
