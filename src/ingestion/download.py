@@ -409,22 +409,18 @@ class Preprocessor(Loader):
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
 
-        def place_vote_hist(g):
-            group_idx = 0
-            output = []
-            for d in valid_elections[::-1]:
-                if group_idx < len(g.date.values) and d == g.date.values[group_idx]:
-                    output.append(g.vote_type.values[group_idx])
-                    group_idx += 1
-                else:
-                    output.append('n')
-            return output
-        def fast_dummy(g):
-            return list(g.date)
-        
-        voting_histories = df_hist.groupby("VoterID").apply(place_vote_hist)
+        logging.info("Do history apply")
+        voter_groups = df_hist.groupby("VoterID")
+        all_history = voter_groups["array_position"].apply(list)
+        logging.info("Do vote type apply")
+        vote_type = voter_groups["vote_type"].apply(list)
+
         df_voters = df_voters.set_index(self.config["voter_id"])
-        df_voters["all_history"] = voting_histories
+
+        logging.info("Adding history columns to main df")
+        df_voters["all_history"] = all_history
+        df_voters["vote_type"] = vote_type
+
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)
