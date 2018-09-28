@@ -353,8 +353,8 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
-        new_files = self.unpack_files(compression = 'unzip')
-        
+        new_files = self.unpack_files(compression='unzip')
+
         vote_history_files = []
         voter_files = []
         for i in new_files:
@@ -363,23 +363,27 @@ class Preprocessor(Loader):
             elif ".txt" in i:
                 voter_files.append(i)
 
-        with open('/tmp/concat_voter_file.txt', 'w') as outfile:
-            for fname in voter_files:
-                with open(fname) as infile:
-                    outfile.write(infile.read())
+        def concat_and_delete(in_list, concat_file):
+            with open(concat_file, 'w') as outfile:
+                for fname in in_list:
+                    with open(fname) as infile:
+                        outfile.write(infile.read())
+                    os.remove(fname)
+            return concat_file
 
-        with open('/tmp/concat_voter_history.txt', 'w') as outfile:
-            for fname in vote_history_files:
-                with open(fname) as infile:
-                    outfile.write(infile.read())
-                    
-        #self.temp_files.extend([vote_history_files,  files_voter_detail])
+        concat_voter_file = concat_and_delete(
+            voter_files, '/tmp/concat_voter_file.txt')
+        concat_history_file = concat_and_delete(
+            vote_history_files, '/tmp/concat_voter_history.txt')
+
         logging.info("FLORIDA: loading voter history file")
-        df_hist = pd.read_fwf('/tmp/concat_voter_history.txt', header = None)
+        df_hist = pd.read_fwf(concat_history_file, header=None)
         df_hist.columns = self.config["hist_columns"]
+
         logging.info("FLORIDA: loading main voter file")
-        df_voters = pd.read_csv('/tmp/concat_voter_file.txt', header = None, sep = "\t")
+        df_voters = pd.read_csv(concat_voter_file, header=None, sep="\t")
         df_voters.columns = self.config["ordered_columns"]
+
         all_elections = df_hist.date.unique().tolist()
         valid_elections = []
         for i in all_elections:
