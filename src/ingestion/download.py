@@ -578,6 +578,7 @@ class Preprocessor(Loader):
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.coerce_dates(df_voters)
+        df_voters = self.coerce_numeric(df_voters)
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
         self.temp_files.append(self.main_file)
