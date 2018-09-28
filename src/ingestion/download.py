@@ -356,7 +356,7 @@ class Preprocessor(Loader):
         :return: modified dataframe
         """
         numeric_fields = [c for c, v in self.config["columns"].items()
-                          if v == "int"]
+                          if "int" in v or v == "float" or v == "double"]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
         for field in extra_cols:
