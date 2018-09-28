@@ -329,6 +329,8 @@ class Preprocessor(Loader):
         valid_elections = df_hist.date.unique().tolist()
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
 
+        # NOTE: this function only works correctly if
+        # df_hist is assumed to be sorted by date
         def place_vote_hist(g):
             group_idx = 0
             output = []
