@@ -181,6 +181,7 @@ class Loader(object):
 
         self.is_compressed = False
         return new_loc, p.returncode == 0
+
     def decompress(self, file_name, compression_type="gunzip"):
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
@@ -414,14 +415,14 @@ class Preprocessor(Loader):
         vote_type = voter_groups["vote_type"].apply(list)
 
         logging.info("FLORIDA: loading main voter file")
-        df_voters = pd.read_csv(concat_voter_file, header=None, sep="\t")
+        df_voters = pd.read_csv(concat_voter_file,
+                                header=None, sep="\t")
         df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
         logging.info("Adding history columns to main df")
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
-
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
         self.meta = {
@@ -437,6 +438,7 @@ class Preprocessor(Loader):
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
+
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")

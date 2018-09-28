@@ -23,7 +23,8 @@ party_identifier: Party_Affiliation
 date_format: '%m/%d/%Y'
 numeric_county: false
 generated_columns:
-  all_history: text[]
+  all_history: int[]
+  vote_type: text[]
 has_headers: NO
 format:
   separate_hist: true
@@ -39,6 +40,7 @@ name_fields:
   - cde_name_suffix
 ordered_generated_columns:
   - all_history
+  - vote_type
 address_fields:
   - Residence_Address_Line_1
   - Residence_Address_Line_2
