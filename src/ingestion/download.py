@@ -382,10 +382,6 @@ class Preprocessor(Loader):
         df_hist = pd.read_fwf(concat_history_file, header=None)
         df_hist.columns = self.config["hist_columns"]
 
-        logging.info("FLORIDA: loading main voter file")
-        df_voters = pd.read_csv(concat_voter_file, header=None, sep="\t")
-        df_voters.columns = self.config["ordered_columns"]
-
         logging.info("Select & sort elections")
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
         logging.info("Map election names")
@@ -417,6 +413,9 @@ class Preprocessor(Loader):
         logging.info("Do vote type apply")
         vote_type = voter_groups["vote_type"].apply(list)
 
+        logging.info("FLORIDA: loading main voter file")
+        df_voters = pd.read_csv(concat_voter_file, header=None, sep="\t")
+        df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
         logging.info("Adding history columns to main df")
@@ -431,6 +430,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
 
+        logging.info("FLORIDA: writing out")
         os.remove(concat_voter_file)
         os.remove(concat_history_file)
         df_voters.to_csv(self.main_file)
