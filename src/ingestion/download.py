@@ -422,6 +422,15 @@ class Preprocessor(Loader):
         df_voters["vote_type"] = vote_type
 
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+
+        self.meta = {
+            "message": "florida_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        os.remove(concat_voter_file)
+        os.remove(concat_history_file)
         df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
