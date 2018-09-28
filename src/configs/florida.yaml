@@ -109,7 +109,7 @@ summary_types:
   - text
 columns:
   County_Code: text
-  Voter_ID: text
+  Voter_ID: int
   Name_Last: text
   Name_Suffix: text
   Name_First: text
@@ -129,19 +129,19 @@ columns:
   Mailing_Country: text
   Gender: text
   Race: text
-  Birth_Date: text
-  Registration_Date: text
+  Birth_Date: date
+  Registration_Date: date
   Party_Affiliation: text
-  Precinct: text
+  Precinct: int
   Precinct_Group: text
   Precinct_Split: text
   Precinct_Suffix: text
   Voter_Status: text
-  Congressional_District: text
-  House_District: text
-  Senate_District: text
-  County_Commission_District: text
-  School_Board_District: text
+  Congressional_District: int
+  House_District: int
+  Senate_District: int
+  County_Commission_District: int
+  School_Board_District: int
   Daytime_Area_Code: text
   Daytime_Phone_Number: text
   Daytime_Phone_Extension: text

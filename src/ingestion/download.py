@@ -549,7 +549,10 @@ class Preprocessor(Loader):
         logging.info("Adding history columns to main df")
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+
+        main_df = self.coerce_dates(main_df)
+        main_df = self.coerce_numeric(main_df, extra_cols=[
+            "Precinct_Split"])
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
@@ -560,6 +563,7 @@ class Preprocessor(Loader):
         logging.info("FLORIDA: writing out")
         os.remove(concat_voter_file)
         os.remove(concat_history_file)
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
