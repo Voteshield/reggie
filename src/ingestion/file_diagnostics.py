@@ -166,8 +166,7 @@ class TestFileBuilder(Preprocessor):
         out, err = p.communicate()
         self.temp_files.append(new_file)
 
-
-    def build(self, file_name=None, save_local=True, save_remote=False):
+    def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -303,14 +302,5 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    local_file=sys.argv[1]
-    state=sys.argv[2]
-    s3 = sys.argv[3]
-    if local_file == "None":
-        local_file = None
-    if state == "None":
-        state = None
-    if s3 == "None":
-        s3 = None
-    with TestFileBuilder(local_file=local_file, state=state, s3_key = s3) as tf:
+    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
         tf.build()
