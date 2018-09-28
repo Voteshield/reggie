@@ -345,6 +345,25 @@ class Preprocessor(Loader):
             df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
         return df
 
+    def coerce_numeric(self, df, extra_cols=[]):
+        """
+        takes all columns with int labels in the config file
+        as well as any requested extra columns,
+        and forces the corresponding entries in the
+        raw file into numerics
+        :param df: dataframe to modify
+        :param extra_cols: other columns to convert
+        :return: modified dataframe
+        """
+        numeric_fields = [c for c, v in self.config["columns"].items()
+                          if "int" in v or v == "float" or v == "double"]
+        for field in numeric_fields:
+            df[field] = pd.to_numeric(df[field], errors='coerce')
+        for field in extra_cols:
+            df[field] = pd.to_numeric(df[field],
+                                      errors='coerce').fillna(df[field])
+        return df
+
     def unpack_files(self, compression="unzip"):
         all_files = []
 
@@ -562,6 +581,9 @@ class Preprocessor(Loader):
         main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
 
         main_df = self.coerce_dates(main_df)
+        main_df = self.coerce_numeric(main_df, extra_cols=[
+            "Residential ZipCode", "Mailing ZipCode", "Precinct",
+            "House Number", "Unit Number", "Split"])
 
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),
