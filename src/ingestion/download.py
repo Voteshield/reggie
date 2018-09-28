@@ -239,17 +239,23 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(file_name):
-            
-            decompressed_result, success = self.decompress(file_name, compression_type=compression)
 
-            if os.path.isdir(decompressed_result):
-                # is dir
-                for f in os.listdir(decompressed_result):
-                    d = decompressed_result + "/" + f
+            if os.path.isdir(file_name):
+                for f in os.listdir(file_name):
+                    d = file_name + "/" + f
                     expand_recurse(d)
             else:
-                # was file
-                all_files.append(decompressed_result)
+                decompressed_result, success = self.decompress(
+                    file_name, compression_type=compression)
+
+                if os.path.isdir(decompressed_result):
+                    # is dir
+                    for f in os.listdir(decompressed_result):
+                        d = decompressed_result + "/" + f
+                        expand_recurse(d)
+                else:
+                    # was file
+                    all_files.append(decompressed_result)
 
         expand_recurse(self.main_file)
 
