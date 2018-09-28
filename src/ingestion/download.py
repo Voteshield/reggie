@@ -13,7 +13,7 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
     listcol_tonumpy
 from storage import s3, normalize_columns
-from profilehooks import profile, timecall, coverage, coverage_with_hotshot
+from storage.profiling import profile_function
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -471,7 +471,6 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-    @profile
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")
