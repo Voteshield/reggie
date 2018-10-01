@@ -515,7 +515,8 @@ class Preprocessor(Loader):
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
-        for c in self.config["election_dates"]:
+        history_cols = self.config["election_dates"]
+        for c in history_cols:
             history_df[c].loc[history_df[c].isnull()] = ""
             # each key contains info from the columns
             prefix = c.split("_")[0] + key_delim
@@ -546,14 +547,15 @@ class Preprocessor(Loader):
                 # add 'blank' values for the primary slots
                 history_df[c] += key_delim + key_delim
 
-            history_df[c] = history_df[c].str.replace(prefix + key_delim * 3,                                                      '')
+            history_df[c] = history_df[c].str.replace(prefix + key_delim * 3,
+                                                      '')
             df_voters.all_history += " " + history_df[c]
 
         # make into an array (null values are '' so they are ignored)
         df_voters.all_history = df_voters.all_history.str.split()
         df_voters.drop("HISTORY", axis=1, inplace=True)
 
-        elections, counts = np.unique(history_df[self.config['election_dates']],
+        elections, counts = np.unique(history_df[history_cols],
                                       return_counts=True)
 
         # we want reverse order (lower indices are higher frequency)
