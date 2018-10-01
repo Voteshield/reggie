@@ -442,7 +442,8 @@ class Preprocessor(Loader):
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
-        voter_file = new_files[0] if "ElgbVtr" in new_files[0] else new_files[1]
+        voter_file = new_files[0] if "ElgbVtr" in new_files[0] \
+            else new_files[1]
         hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
         self.temp_files.extend([hist_file, voter_file])
         logging.info("NEVADA: loading historical file")
