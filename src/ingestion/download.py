@@ -602,30 +602,9 @@ class Preprocessor(Loader):
         for f in all_files:
             if os.path.basename(f) not in config["format"]["ignore_files"]:
                 new_files.append(f)
-        if "v" in new_files[0]:
-            voter_file = new_files[0]
-            if "electionscd" in new_files[1]:
-                elec_codes = new_files[1]
-                hist_file = new_files[2]
-            else:
-                hist_file = new_files[1]
-                elec_codes = new_files[2]
-        elif "v" in new_files[1]:
-            voter_file = new_files[1]
-            if "electionscd" in new_files[0]:
-                elec_codes = new_files[0]
-                hist_file = new_files[2]
-            else:
-                hist_file = new_files[0]
-                elec_codes = new_files[2]
-        else:
-            voter_file = new_files[2]
-            if "electionscd" in new_files[0]:
-                elec_codes = new_files[0]
-                hist_file = new_files[1]
-            else:
-                hist_file = new_files[0]
-                elec_codes = new_files[1]
+        voter_file = ([n for n in new_files if 'v' in n] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n] + [None])[0]
+        elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
         logging.info("Detected election code file: " + elec_codes)
@@ -678,12 +657,6 @@ class Preprocessor(Loader):
             return hist
 
         vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
-
-        #def polish_vote_hist(row):
-        #    row["Date"] = edf["Date"].loc[row["Election_Code"]]
-        #    row["Election_Title"] = edf["Title"].loc[row["Election_Code"]]
-
-        #hdf.apply(polish_vote_hist, axis=1)
 
         vdf["tmp_id"] = vdf[config["voter_id"]]
         vdf = vdf.set_index("tmp_id")
