@@ -9,16 +9,16 @@ birthday_identifier: Birth_Date
 voter_status: Voter_Status
 voter_status_active: ACT
 voter_status_inactive: INA
-voter_status_active_special_presidential: NA
-voter_status_active_military: NA
-voter_status_uocava: NA
-voter_status_purged: NA
-voter_status_preregistered: NA
-independence_party: NA
-voter_status_active_special_federal: NA
+voter_status_preregistered: PRE
 democratic_party: DEM
 republican_party: REP
 no_party_affiliation: NPA
+constitution_party: CPF
+ecology_party: ECO
+green_party: GRE
+libertarian_party: LPF
+socialism_and_liberation_party: PSL
+reform_party: REF
 party_identifier: Party_Affiliation
 missing_required_fields: false
 date_format: '%m/%d/%Y'
@@ -80,6 +80,12 @@ summary_columns:
   - REP
   - DEM
   - NPA
+  - CPF
+  - ECO
+  - GRE
+  - LPF
+  - PSL
+  - REF
   - county
 hist_columns:
   - county
@@ -91,6 +97,8 @@ summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
   - int
   - int
   - int
