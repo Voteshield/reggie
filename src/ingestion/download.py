@@ -621,15 +621,9 @@ class Preprocessor(Loader):
         ecolspecs = [[0, 13], [13, 21], [21, 46]]
         self.temp_files.extend([voter_file, hist_file])
         logging.info("MICHIGAN: Loading voter file")
-        if self.testing is True:
-            vdf = pd.read_fwf(voter_file, colspecs='infer', names=config["ordered_columns"], na_filter=False)
-        else:
-            vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
         logging.info("MICHIGAN: Loading historical file")
-        if self.testing is True:
-            hdf = pd.read_fwf(hist_file, colspecs=testhcolspecs, names=config["hist_columns"], na_filter=False)
-        else:
-            hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
         hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter_ID", "Data"], na_filter=False)
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
@@ -639,9 +633,11 @@ class Preprocessor(Loader):
         def intToDatetime(i):
             s = str(i)
             if len(s) == 8:
-                date = datetime(year=int(s[4:8]), month=int(s[0:2]), day=int(s[2:4]))
+                date = datetime(year=int(s[4:8]), month=int(s[0:2]),
+                                day=int(s[2:4]))
             else:
-                date = datetime(year=int(s[3:7]), month=int(s[0]), day=int(s[1:3]))
+                date = datetime(year=int(s[3:7]), month=int(s[0]),
+                                day=int(s[1:3]))
 
             return date
 
@@ -663,18 +659,21 @@ class Preprocessor(Loader):
 
         if edf is not None:
             vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
+        else:
+            vdf["All_History"] = ""
 
         vdf["tmp_id"] = vdf[config["voter_id"]]
         vdf = vdf.set_index("tmp_id")
+        vdf["party_identifier"] = ""
         hdf2.sort_values(by=["Voter_ID"], inplace=True)
 
         def get_history(row):
-            print(hdf2["Voter_ID"])
-            print(row["Voter_ID"])
             hist = hdf2.loc[hdf2["Voter_ID"] == row["Voter_ID"]]["Data"].values
 
             return hist
 
+        hdf2["Voter_ID"] = pd.to_numeric(hdf2["Voter_ID"], errors='coerce')
+        vdf["Voter_ID"] = pd.to_numeric(vdf["Voter_ID"], errors='coerce')
         vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
         for c in vdf.columns:
             vdf[c].loc[vdf[c].isnull()] = ""
