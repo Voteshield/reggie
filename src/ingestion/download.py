@@ -607,7 +607,8 @@ class Preprocessor(Loader):
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
-        logging.info("Detected election code file: " + elec_codes)
+        if(elec_codes):
+            logging.info("Detected election code file: " + elec_codes)
 
         vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
                      [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
@@ -630,7 +631,10 @@ class Preprocessor(Loader):
         else:
             hdf = pd.read_fwf(hist_file, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
         hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]], names=["Voter_ID", "Data"], na_filter=False)
-        edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
+        if elec_codes:
+            edf = pd.read_fwf(elec_codes, colspecs=ecolspecs, names=config["elec_code_columns"], na_filter=False)
+        else:
+            edf = None
 
         def intToDatetime(i):
             s = str(i)
@@ -641,9 +645,10 @@ class Preprocessor(Loader):
 
             return date
 
-        edf["Date"] = edf["Date"].apply(intToDatetime)
-        edf.sort_values(by=["Date"])
-        valid_elections = edf["Election_Code"].unique().tolist()
+        if edf is not None:
+            edf["Date"] = edf["Date"].apply(intToDatetime)
+            edf.sort_values(by=["Date"])
+            valid_elections = edf["Election_Code"].unique().tolist()
 
         def get_binary_history(row):
             hist = []
@@ -656,18 +661,25 @@ class Preprocessor(Loader):
 
             return hist
 
-        vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
+        if edf is not None:
+            vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
 
         vdf["tmp_id"] = vdf[config["voter_id"]]
         vdf = vdf.set_index("tmp_id")
         hdf2.sort_values(by=["Voter_ID"], inplace=True)
 
         def get_history(row):
-            hist = hdf2[hdf2["Voter_ID"] == row["Voter_ID"]]["Data"].values
+            print(hdf2["Voter_ID"])
+            print(row["Voter_ID"])
+            hist = hdf2.loc[hdf2["Voter_ID"] == row["Voter_ID"]]["Data"].values
 
             return hist
 
         vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
+        for c in vdf.columns:
+            vdf[c].loc[vdf[c].isnull()] = ""
+        vdf = self.coerce_dates(vdf)
+        vdf = self.coerce_numeric(vdf)
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
