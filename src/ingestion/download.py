@@ -4,15 +4,15 @@ from subprocess import Popen, PIPE
 
 import bs4
 import pandas as pd
-import re
-import sys
+import filetype
 import requests
 from dateutil import parser
 import json
 from constants import *
-from storage import generate_s3_key, date_from_str, load_configs_from_file, df_to_postgres_array_string, \
-    strcol_to_postgres_array_str, strcol_to_array, listcol_tonumpy
-from storage import s3, normalize_columns, describe_insertion, write_meta, read_meta
+from storage import generate_s3_key, date_from_str, load_configs_from_file, \
+    df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
+    listcol_tonumpy
+from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -152,38 +152,157 @@ class Loader(object):
             if self.main_file[-3:] != ".gz":
                 self.main_file += ".gz"
             self.is_compressed = True
+            self.temp_files.append(self.main_file)
+
+    def unzip_decompress(self, file_name):
+        """
+        handles decompression for .zip files
+        :param file_name: .zip file
+        :return: name of new directory containing contents of file_name
+        """
+        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
+        logging.info("decompressing unzip {} to {}".format(file_name,
+                                                           new_loc))
+        os.mkdir(new_loc)
+        p = Popen(["unzip", file_name, "-d", new_loc],
+                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        p.communicate("A")
+        return new_loc, p
+
+    def gunzip_decompress(self, file_name):
+        """
+        handles decompression for .gz files
+        :param file_name: .gz file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("gunzip",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["gunzip", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-3:] == ".gz":
+            new_loc = file_name[:-3]
+        else:
+            new_loc = file_name
+        return new_loc, p
+
+    def bunzip2_decompress(self, file_name):
+        """
+        handles decompression for .bz2 files
+        :param file_name: .bz2 file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("bunzip2",
+                             file_name,
+                             os.path.dirname(file_name)))
+
+        p = Popen(["bunzip2", file_name], stdout=PIPE,
+                  stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        if file_name[-4:] == ".bz2":
+            new_loc = file_name[:-4]
+        else:
+            new_loc = file_name + ".out"
+        return new_loc, p
+
+    def sevenzip_decompress(self, file_name):
+        """
+        handles decompression for 7zip files
+        :param file_name: 7zip compressed file
+        :return: tuple containing (name of new decompressed file if
+        successful, and a reference to the subprocess object which ran the
+        decompression)
+        """
+        logging.info("decompressing {} {} to {}"
+                     .format("7zip",
+                             file_name,
+                             os.path.dirname(file_name)))
+        if file_name[-4:] == ".zip":
+            new_loc = file_name[:-4] + ".out"
+        else:
+            new_loc = file_name + ".out"
+        p = Popen(["7z", "e", "-so", file_name],
+                  stdout=open(new_loc, "w"), stderr=PIPE, stdin=PIPE)
+        p.communicate()
+        return new_loc, p
+
+    def infer_compression(self, file_name):
+        """
+        infer file type and map to compression type
+        :param file_name: file in question
+        :return: string (de)compression type or None
+        """
+        guess = filetype.guess(file_name)
+        compression_type = None
+        if guess is not None:
+            options = {"application/x-bzip2": "bunzip2",
+                       "application/gzip": "gunzip",
+                       "application/zip": "unzip"}
+            compression_type = options.get(guess.mime, None)
+            if compression_type is None:
+                logging.info("unsupported file format: {}".format(guess.mime))
+        else:
+            logging.info(
+                "could not infer the file type of {}".format(file_name))
+        return compression_type
 
     def decompress(self, file_name, compression_type="gunzip"):
+        """
+        decompress a file using either unzip or gunzip, unless the file is an
+        .xlsx file, in which case it is returned as is (these files are
+        compressed by default, and are unreadable in their unpacked form by
+        pandas)
+        :param file_name: the path of the file to be decompressed
+        :param compression_type: available options - ["unzip", "gunzip"]
+        :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
+        decompressed
+        """
+
         logging.info("decompressing {}".format(file_name))
         new_loc = "{}_decompressed".format(os.path.abspath(file_name))
-        if compression_type == "unzip":
-            logging.info("decompressing unzip {} to {}".format(file_name, new_loc))
-            os.mkdir(new_loc)
-            p = Popen([compression_type, file_name, "-d", new_loc],
-                      stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            p.communicate("A")
-        else:
-            logging.info("decompressing gunzip {} to {}".format(file_name, os.path.dirname(file_name)))
-            p = Popen([compression_type, file_name], stdout=PIPE, stderr=PIPE, stdin=PIPE)
-            p.communicate()
-            if file_name[-3:] == ".gz":
-                new_loc = file_name[:-3]
-            else:
-                new_loc = file_name
-        if p.returncode == 0:
-            logging.info("decompressing done: {}".format(file_name))
-            self.temp_files.append(new_loc)
-        else:
+        success = False
+
+        if compression_type is "infer":
+            compression_type = self.infer_compression(file_name)
+
+        if file_name.split(".")[-1] == "xlsx":
             logging.info("did not decompress {}".format(file_name))
             shutil.rmtree(new_loc, ignore_errors=True)
             new_loc = file_name
+            success = True
+        else:
+            if compression_type == "unzip":
+                new_loc, p = self.unzip_decompress(file_name)
+            elif compression_type == "bunzip2":
+                new_loc, p = self.bunzip2_decompress(file_name)
+            elif compression_type == "7zip":
+                new_loc, p = self.sevenzip_decompress(file_name)
+            else:
+                new_loc, p = self.gunzip_decompress(file_name)
+
+            if compression_type is not None and p.returncode == 0:
+                logging.info("decompression done: {}".format(file_name))
+                self.temp_files.append(new_loc)
+                success = True
+            else:
+                logging.info("did not decompress {}".format(file_name))
+                shutil.rmtree(new_loc, ignore_errors=True)
+                new_loc = file_name
 
         self.is_compressed = False
-        return new_loc, p.returncode == 0
+        return new_loc, success
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
-                            self.download_date, "csv", self.is_compressed)
+                            self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
@@ -193,7 +312,10 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f, Metadata=meta)
+                .put(Body=f)
+        s3.Object(S3_BUCKET,
+                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
+            .put(Body=json.dumps(meta))
 
 
 class Preprocessor(Loader):
@@ -205,7 +327,42 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
+        self.main_file = "/tmp/voteshield_{}"\
+            .format(self.raw_s3_file.split("/")[-1])
         get_object(self.raw_s3_file, self.main_file)
+        self.temp_files.append(self.main_file)
+
+    def coerce_dates(self, df):
+        """
+        takes all columns with timestamp or date labels in the config file and forces the corresponding entries in the
+        raw file into datetime objects
+        :param df: dataframe to modify
+        :return: modified dataframe
+        """
+        date_fields = [c for c, v in self.config["columns"].items() if v == "date" or v == "timestamp"]
+        for field in date_fields:
+            df[field] = df[field].apply(str)
+            df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
+        return df
+
+    def coerce_numeric(self, df, extra_cols=[]):
+        """
+        takes all columns with int labels in the config file
+        as well as any requested extra columns,
+        and forces the corresponding entries in the
+        raw file into numerics
+        :param df: dataframe to modify
+        :param extra_cols: other columns to convert
+        :return: modified dataframe
+        """
+        numeric_fields = [c for c, v in self.config["columns"].items()
+                          if "int" in v or v == "float" or v == "double"]
+        for field in numeric_fields:
+            df[field] = pd.to_numeric(df[field], errors='coerce')
+        for field in extra_cols:
+            df[field] = pd.to_numeric(df[field],
+                                      errors='coerce').fillna(df[field])
+        return df
 
     def unpack_files(self, compression="unzip"):
         all_files = []
@@ -230,6 +387,7 @@ class Preprocessor(Loader):
         else:
             all_files = [n for n in all_files]
         self.temp_files.extend(all_files)
+        logging.info("unpacked: - {}".format(all_files))
         return all_files
 
     def concat_file_segments(self, file_names):
@@ -275,10 +433,6 @@ class Preprocessor(Loader):
             first_success = True
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
-
-    def preprocess_generic(self):
-        logging.info("preprocessing generic")
-        self.decompress(self.main_file)
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
@@ -334,7 +488,6 @@ class Preprocessor(Loader):
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
-        write_meta(self.main_file, message="arizona_{}".format(datetime.now().isoformat()), array_dates=elections_key)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
             "array_dates": json.dumps(elections_key)
@@ -345,41 +498,97 @@ class Preprocessor(Loader):
 
     def preprocess_new_york(self):
         config = load_configs_from_file("new_york")
-        new_files = self.unpack_files(compression="unzip")
-        main_file = new_files[0]
-        main_df = pd.read_csv(main_file, comment="#", header=None, names=config["ordered_columns"])
+        new_files = self.unpack_files(compression="infer")
+        main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        main_df = pd.read_csv(main_file, comment="#",
+                              header=None,
+                              names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
-        all_codes = main_df.voterhistory.str.replace(" ", "_").str.replace("[", "").str.replace("]", "")
+        all_codes = main_df.voterhistory.str.replace(" ", "_")\
+            .str.replace("[", "")\
+            .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
-        main_df["all_history"] = strcol_to_array(main_df.voterhistory, delim=";")
+        main_df["all_history"] = strcol_to_array(main_df.voterhistory,
+                                                 delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
-        beginning_of_time = datetime(1979, 1, 1)
 
-        def extract_date(s):
-            date = date_from_str(s)
-            year = [w for w in s.split("_") if w.isdigit()]
-            if date is not None:
-                output = parser.parse(date)
-            elif len(year) > 0:
-                output = datetime(year=int(year[0]), month=1, day=1)
-            else:
-                output = beginning_of_time
-            return output
-        sorted_codes = list(sorted(unique_codes, key=lambda c: extract_date(c), reverse=True))
-        sorted_codes_dict = {k: i for i, k in enumerate(sorted_codes)}
+        count_order = counts.argsort()
+        unique_codes = unique_codes[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = unique_codes.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+                             enumerate(sorted_codes)}
 
         def insert_code_bin(arr):
-            new_arr = [0] * len(sorted_codes)
-            for item in arr:
-                new_arr[sorted_codes_dict[item]] = 1
-            return new_arr
+            return [sorted_codes_dict[k]["index"] for k in arr]
 
+        # in this case we save ny as sparse array since so many elections are
+        # stored
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
-
+        main_df = self.coerce_dates(main_df)
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
-            "array_dates": json.dumps(sorted_codes)
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        self.is_compressed = True
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
+    def preprocess_missouri(self):
+        new_file = self.unpack_files(compression="7zip")
+        new_file = new_file[0]
+        main_df = pd.read_csv(new_file, sep='\t')
+
+        # add empty columns for voter_status and party_identifier
+        main_df[self.config["voter_status"]] = np.nan
+        main_df[self.config["party_identifier"]] = np.nan
+
+        def add_history(main_df):
+            # also save as sparse array since so many elections are stored
+            count_df = pd.DataFrame()
+            for idx, hist in enumerate(self.config['hist_columns']):
+                unique_codes, counts = np.unique(main_df[hist].str.replace(
+                    " ", "_").dropna().values, return_counts=True)
+                count_df_new = pd.DataFrame(index=unique_codes, data=counts,
+                                            columns=['counts_' + hist])
+                count_df = pd.concat([count_df, count_df_new], axis=1)
+            count_df['total_counts'] = count_df.sum(axis=1)
+            unique_codes = count_df.index.values
+            counts = count_df['total_counts'].values
+            count_order = counts.argsort()
+            unique_codes = unique_codes[count_order]
+            counts = counts[count_order]
+            sorted_codes = unique_codes.tolist()
+            sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+                                 for i, k in enumerate(sorted_codes)}
+
+            def insert_code_bin(arr):
+                return [sorted_codes_dict[k]["index"] for k in arr]
+
+            main_df['all_history'] = main_df[
+                self.config['hist_columns']].apply(
+                lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
+            main_df.all_history = main_df.all_history.map(insert_code_bin)
+            return sorted_codes, sorted_codes_dict
+
+        sorted_codes, sorted_codes_dict = add_history(main_df)
+        main_df.drop(self.config['hist_columns'], axis=1, inplace=True)
+
+        main_df = self.coerce_dates(main_df)
+        main_df = self.coerce_numeric(main_df, extra_cols=[
+            "Residential ZipCode", "Mailing ZipCode", "Precinct",
+            "House Number", "Unit Number", "Split"])
+
+        self.meta = {
+            "message": "missouri_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
@@ -501,14 +710,17 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'new_york': self.preprocess_new_york
+            'new_york': self.preprocess_new_york,
+            'missouri': self.preprocess_missouri
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
             logging.info("preprocessing {}".format(self.config["state"]))
             f()
         else:
-            self.preprocess_generic()
+            raise NotImplementedError("preprocess_{} has not yet been "
+                                      "implemented for the Preprocessor object"
+                                      .format(self.config["state"]))
 
 
 if __name__ == '__main__':
