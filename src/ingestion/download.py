@@ -14,6 +14,7 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     listcol_tonumpy
 from storage import s3, normalize_columns
 from profilehooks import profile, timecall, coverage, coverage_with_hotshot
+from storage.profiling import profile_function
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -369,7 +370,8 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(file_name):
-            decompressed_result, success = self.decompress(file_name, compression_type=compression)
+            decompressed_result, success = self.decompress(file_name,
+                                                           compression_type=compression)
 
             if os.path.isdir(decompressed_result):
                 # is dir
@@ -393,8 +395,9 @@ class Preprocessor(Loader):
 
     def concat_file_segments(self, file_names):
         """
-        Serially concatenates the "file segments" into a single csv file. Should use this method when
-        config["segmented_files"] is true. Should NOT be used to deal with files separated by column. Concatenates the
+        Serially concatenates the "file segments" into a single csv file.
+        Should use this method when config["segmented_files"] is true. Should
+        NOT be used to deal with files separated by column. Concatenates the
         files into self.main_file
         :param file_names: files to concatenate
         """
@@ -420,15 +423,17 @@ class Preprocessor(Loader):
                 else:
                     df = pd.read_csv(f, comment="#")
             except (XLRDError, ParserError):
-                print("Skipping {} ... Unsupported format, or corrupt file".format(f))
+                print("Skipping {} ... Unsupported format, or corrupt file"
+                      .format(f))
                 continue
             if not first_success:
                 last_headers = sorted(df.columns)
             df, _ = normalize_columns(df, last_headers)
             if list_compare(last_headers, sorted(df.columns)):
                 mismatched_headers = list_compare(last_headers, df.columns)
-                raise ValueError("file chunks contained different or misaligned headers:"
-                                 "  {} != {} at index {}".format(*mismatched_headers))
+                raise ValueError("file chunks contained different or "
+                                 "misaligned headers: {} != {} at index {}"
+                                 .format(*mismatched_headers))
 
             s = df.to_csv(header=not first_success, encoding='utf-8')
             first_success = True
@@ -453,7 +458,8 @@ class Preprocessor(Loader):
             group_idx = 0
             output = []
             for d in valid_elections[::-1]:
-                if group_idx < len(g.date.values) and d == g.date.values[group_idx]:
+                if group_idx < len(g.date.values) and \
+                        d == g.date.values[group_idx]:
                     output.append(g.vote_code.values[group_idx])
                     group_idx += 1
                 else:
@@ -461,7 +467,8 @@ class Preprocessor(Loader):
 
             return output
 
-        voting_histories = df_hist.groupby(self.config["voter_id"]).apply(place_vote_hist)
+        voting_histories = df_hist.groupby(self.config["voter_id"])\
+            .apply(place_vote_hist)
         df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
@@ -491,14 +498,16 @@ class Preprocessor(Loader):
 
         # do we really need all this? (looks like yes)
         df_voters.columns = self.config['ordered_columns']
-        df_voters['MISCELLANEOUS'] = df_voters['MISCELLANEOUS'].str.split(",", n=1)
+        df_voters['MISCELLANEOUS'] = df_voters['MISCELLANEOUS'].str.split(",",
+                                                                          n=1)
         df_voters[['MISCELLANEOUS', 'HISTORY']] = pd.DataFrame(
             df_voters['MISCELLANEOUS'].values.tolist(), index=df_voters.index)
         df_voters['HISTORY'] = df_voters['HISTORY'].str.split(",")
         history_df = pd.DataFrame(df_voters['HISTORY'].values.tolist(),
                                   index = df_voters.index).iloc[:, 0:60]
         history_df.columns = self.config['election_columns']
-        df_voters[self.config['voter_id']] = df_voters[self.config['voter_id']].str[1:]
+        vid_col = self.config['voter_id']
+        df_voters[vid_col] = df_voters[vid_col].str[1:]
 
         key_delim = "_"
         df_voters["all_history"] = ''
@@ -537,7 +546,7 @@ class Preprocessor(Loader):
                 # add 'blank' values for the primary slots
                 history_df[c] += key_delim + key_delim
 
-            history_df[c] = history_df[c].str.replace(prefix + key_delim * 3, '')
+            history_df[c] = history_df[c].str.replace(prefix + key_delim * 3,                                                      '')
             df_voters.all_history += " " + history_df[c]
 
         # make into an array (null values are '' so they are ignored)
@@ -620,7 +629,8 @@ class Preprocessor(Loader):
         main_df = pd.read_csv(main_file, comment="#",
                               header=None,
                               names=config["ordered_columns"])
-        main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
+        null_hists = main_df.voterhistory != main_df.voterhistory
+        main_df.voterhistory[null_hists] = NULL_CHAR
         all_codes = main_df.voterhistory.str.replace(" ", "_") \
             .str.replace("[", "") \
             .str.replace("]", "")
@@ -722,7 +732,8 @@ class Preprocessor(Loader):
             'arizona': self.preprocess_arizona,
             'new_york': self.preprocess_new_york,
             'iowa': self.preprocess_iowa,
-            'missouri': self.preprocess_missouri
+            'missouri': self.preprocess_missouri,
+            'iowa': self.preprocess_iowa
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

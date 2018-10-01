@@ -170,8 +170,14 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
+<<<<<<< HEAD
                   "iowa": self.__build_iowa,
                   "missouri": self.__build_missouri}
+=======
+                  "missouri": self.__build_missouri,
+                  "iowa": self.__build_iowa}
+
+>>>>>>> 9b9d61516179b719f24cef28d2a476c8bbfa41f4
         f = routes[self.state]
         f()
 
