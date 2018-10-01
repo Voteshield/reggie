@@ -478,7 +478,6 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-    @profile
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")
