@@ -77,13 +77,9 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - r
-  - npa
-  - d
-  - g
-  - l
-  - c
-  - n
+  - REP
+  - DEM
+  - NPA
   - county
 hist_columns:
   - county
