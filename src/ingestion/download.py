@@ -561,7 +561,6 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
