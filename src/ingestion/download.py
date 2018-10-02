@@ -17,6 +17,7 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
+from pathlib import Path
 
 
 def ohio_get_last_updated():
@@ -357,8 +358,12 @@ class Preprocessor(Loader):
         """
         numeric_fields = [c for c, v in self.config["columns"].items()
                           if "int" in v or v == "float" or v == "double"]
+        int_fields = [c for c, v in self.config["columns"].items()
+                      if "int" in v]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
+        for field in int_fields:
+            df[field] = df[field].astype(int, errors='ignore')
         for field in extra_cols:
             df[field] = pd.to_numeric(df[field],
                                       errors='coerce').fillna(df[field])
@@ -668,8 +673,8 @@ class Preprocessor(Loader):
         else:
             vdf["All_History"] = ""
 
-        vdf[config["voter_id"]] = pd.to_numeric(
-            vdf[config["voter_id"]], errors='coerce')
+        vdf[config["voter_id"]] = vdf[config["voter_id"]]\
+            .astype(int, errors='ignore')
         vdf["tmp_id"] = vdf[config["voter_id"]]
         vdf = vdf.set_index("tmp_id")
         vdf["party_identifier"] = ""
@@ -680,7 +685,7 @@ class Preprocessor(Loader):
 
             return hist
 
-        hdf2["Voter_ID"] = pd.to_numeric(hdf2["Voter_ID"], errors='coerce')
+        hdf2["Voter_ID"] = hdf2["Voter_ID"].astype(int, errors='ignore')
         vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
         for c in vdf.columns:
             vdf[c].loc[vdf[c].isnull()] = ""
