@@ -365,6 +365,23 @@ class Preprocessor(Loader):
                                       errors='coerce').fillna(df[field])
         return df
 
+    def coerce_strings(self, df):
+        """
+        takes all columns with text or varchar labels in the config,
+        strips out whitespace and converts text to all lowercase
+        NOTE: does not convert voter_status or party_identifier,
+              since those are typically defined as capitalized
+        :param df: dataframe to modify
+        :return: modified dataframe
+        """
+        text_fields = [c for c, v in self.config["columns"].items()
+                       if v == "text" or v == "varchar"]
+        for field in text_fields:
+            if (field in df) and (field != self.config["voter_status"]) \
+               and (field != self.config["party_identifier"]):
+                df[field] = df[field].astype(str).str.strip().str.lower()
+        return df
+
     def unpack_files(self, compression="unzip"):
         all_files = []
 
@@ -542,6 +559,7 @@ class Preprocessor(Loader):
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
 
+        df_voters = self.coerce_strings(df_voters)
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters, extra_cols=[
             "Precinct_Split"])
