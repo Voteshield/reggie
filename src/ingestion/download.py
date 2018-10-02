@@ -675,8 +675,6 @@ class Preprocessor(Loader):
 
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
-        vdf["tmp_id"] = vdf[config["voter_id"]]
-        vdf = vdf.set_index("tmp_id")
         vdf["party_identifier"] = ""
         hdf2.sort_values(by=["Voter_ID"], inplace=True)
 
