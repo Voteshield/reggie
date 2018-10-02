@@ -19,6 +19,9 @@ green_party: GRE
 libertarian_party: LPF
 socialism_and_liberation_party: PSL
 reform_party: REF
+independent_party: INT
+independence_party: IDP
+americas_independent_party: AIP
 party_identifier: Party_Affiliation
 missing_required_fields: false
 date_format: '%m/%d/%Y'
@@ -45,6 +48,7 @@ ordered_generated_columns:
 address_fields:
   - Residence_Address_Line_1
   - Residence_Address_Line_2
+  - Residence_City
   - Residence_State
   - Residence_Zipcode
   - Mailing_Address_Line_1
@@ -86,6 +90,9 @@ summary_columns:
   - LPF
   - PSL
   - REF
+  - INT
+  - IDP
+  - AIP
   - county
 hist_columns:
   - county
@@ -97,6 +104,9 @@ summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
+  - int
   - int
   - int
   - int
