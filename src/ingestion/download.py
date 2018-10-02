@@ -539,7 +539,8 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
         df_hist["array_position"] = df_hist["election_name"].map(
@@ -675,7 +676,8 @@ class Preprocessor(Loader):
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
             sorted_codes = unique_codes.tolist()
-            sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+            sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                     "date": date_from_str(k)}
                                  for i, k in enumerate(sorted_codes)}
 
             def insert_code_bin(arr):
