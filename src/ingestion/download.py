@@ -388,6 +388,8 @@ class Preprocessor(Loader):
 
         if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n not in
+                         self.config["format"]["ignore_files"]
+                         and os.path.basename(n) not in
                          self.config["format"]["ignore_files"]]
         else:
             all_files = [n for n in all_files]
@@ -602,11 +604,7 @@ class Preprocessor(Loader):
 
     def preprocess_michigan(self):
         config = load_configs_from_file("michigan")
-        all_files = self.unpack_files(compression="unzip")
-        new_files = []
-        for f in all_files:
-            if os.path.basename(f) not in config["format"]["ignore_files"]:
-                new_files.append(f)
+        new_files = self.unpack_files()
         voter_file = ([n for n in new_files if 'v' in n] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
