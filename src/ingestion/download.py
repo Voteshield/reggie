@@ -482,19 +482,14 @@ class Preprocessor(Loader):
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")
-        for i in new_files:
-            if "CD1" in i and "Part1" in i:
-                df_voters = pd.read_csv(i,  sep = '","|",  "', skiprows=1,
-                                        header=None, engine="python")
-        for i in new_files:
-            # this is not the logical complement of the statement on 460,
-            # are you sure it is what you need?
-            if "CD1" not in i and "Part1" not in i:
-
-                # I do this because need to initialize dataframe
-                new_df = pd.read_csv(i, sep = '","|",  "', header=None,
-                                     engine="python")
-                df_voters = pd.concat([df_voters, new_df], axis=0)
+        first_file = [f for f in new_files if "CD1" in f and "Part1" in f][0]
+        remaining_files = [f for f in new_files if "CD1" not in f or
+                           "Part1" not in f]
+        df_voters = pd.read_csv(first_file,  sep='","|",  "',  engine="python", skiprows=1,   header=None)
+        for i in remaining_files:
+            new_df = pd.read_csv(i, sep='","|",  "', header=None,
+                                 engine="python")
+            df_voters = pd.concat([df_voters, new_df], axis=0)
 
         # do we really need all this? (looks like yes)
         df_voters.columns = self.config['ordered_columns']
@@ -568,10 +563,6 @@ class Preprocessor(Loader):
         sorted_codes_dict = {j: {"index": i, "count": counts[i],
                                  "date": date_from_str(j)}
                              for i, j in enumerate(elections)}
-
-        # looks good
-        print(zip(elections[0:10], counts[0:10]))
-        print(sorted_codes_dict.items()[0:5])
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
