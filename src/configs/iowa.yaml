@@ -10,6 +10,8 @@ birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
 voter_status_active: Active
 voter_status_inactive: Inactive
+voter_status_pending: Pending
+voter_status_null:
 democratic_party: DEM
 republican_party: REP
 no_party_affiliation: NP
