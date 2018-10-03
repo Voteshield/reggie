@@ -119,6 +119,22 @@ class TestFileBuilder(Preprocessor):
             for f in new_files:
                 zf.write(f, os.path.basename(f))
 
+    def __build_iowa(self):
+        new_files = self.unpack_files()
+
+        #read in dataframe here, haven't figured this out yet
+
+        print(new_files)
+        smaller_files = []
+        for x in new_files:
+            if "CD1" in x and "Part1" in x:
+                smaller_files.append(x)
+
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in smaller_files:
+                zf.write(f, os.path.basename(f))
+        
+
     def __build_ohio(self):
         """
         this only generates a truncated _processed_ file, no test raw file
@@ -199,8 +215,8 @@ class TestFileBuilder(Preprocessor):
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
                   "michigan": self.__build_michigan,
-                  "missouri": self.__build_missouri
-        }
+                  "missouri": self.__build_missouri,
+                  "iowa": self.__build_iowa}
         f = routes[self.state]
         f()
 
@@ -326,5 +342,14 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
+    local_file=sys.argv[1]
+    state=sys.argv[2]
+    s3 = sys.argv[3]
+    if local_file == "None":
+        local_file = None
+    if state == "None":
+        state = None
+    if s3 == "None":
+        s3 = None
+    with TestFileBuilder(local_file=local_file, state=state, s3_key = s3) as tf:
         tf.build()
