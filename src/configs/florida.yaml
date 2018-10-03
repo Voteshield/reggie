@@ -146,7 +146,7 @@ columns:
   Birth_Date: date
   Registration_Date: date
   Party_Affiliation: text
-  Precinct: int
+  Precinct: text
   Precinct_Group: text
   Precinct_Split: text
   Precinct_Suffix: text
