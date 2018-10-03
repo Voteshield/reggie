@@ -203,6 +203,11 @@ class TestFileBuilder(Preprocessor):
             for f in new_files:
                 zf.write(f, os.path.basename(f))
 
+    def __build_new_jersey(self):
+        #built manually
+        return
+
+
 
 
     def build(self, file_name=None, save_local=False, save_remote=True):
@@ -216,7 +221,9 @@ class TestFileBuilder(Preprocessor):
                   "new_york": self.__build_new_york,
                   "michigan": self.__build_michigan,
                   "missouri": self.__build_missouri,
-                  "iowa": self.__build_iowa}
+                  "iowa": self.__build_iowa,
+                  "new_jersey": self.__build_new_jersey
+                  }
         f = routes[self.state]
         f()
 
@@ -342,14 +349,5 @@ class DiagnosticTest(object):
 
 if __name__ == '__main__':
     import sys
-    local_file=sys.argv[1]
-    state=sys.argv[2]
-    s3 = sys.argv[3]
-    if local_file == "None":
-        local_file = None
-    if state == "None":
-        state = None
-    if s3 == "None":
-        s3 = None
-    with TestFileBuilder(local_file=local_file, state=state, s3_key = s3) as tf:
+    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
         tf.build()

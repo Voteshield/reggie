@@ -19,6 +19,7 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
+import sys
 
 
 def ohio_get_last_updated():
@@ -831,6 +832,41 @@ class Preprocessor(Loader):
 
         return chksum
 
+    def preprocess_new_jersey(self):
+        new_files = self.unpack_files()
+        configs = load_configs_from_file(state="new_jersey")
+        for n in new_files:
+            print(os.path.dirname(n))
+        voter_files = [n for n in new_files if 'AlphaVoter' in n]
+        hist_files = [n for n in new_files if 'History' in n]
+        vdf = pd.DataFrame()
+        hdf = pd.DataFrame()
+        for f in voter_files:
+            vdf = pd.concat(
+                [vdf, pd.read_csv(f, sep='|',
+                                  names=configs['ordered_columns'])], axis=0)
+        for f in hist_files:
+            hdf = pd.concat(
+                [hdf, pd.read_csv(f, sep='|',
+                                  names=configs['hist_columns'],
+                                  index_col=False)], axis=0)
+
+        hdf['election_name'] = hdf['election_name'] + ' ' + hdf['election_date']
+        hdf = self.coerce_dates(hdf)
+        hdf = self.coerce_numeric(hdf)
+        hdf.sort_values('election_date', inplace=True)
+        vdf = self.coerce_dates(vdf)
+        vdf = self.coerce_numeric(vdf)
+        with pd.option_context('display.max_columns', None):
+            print(vdf)
+            print(hdf)
+            print(hdf['election_name'].unique())
+            print(hdf['election_date'].unique())
+            print(len(hdf['election_name'].unique()))
+            print(len(hdf['election_date'].unique()))
+        sys.exit()
+
+
 
 
     def execute(self):
@@ -843,7 +879,7 @@ class Preprocessor(Loader):
             'new_york': self.preprocess_new_york,
             'iowa': self.preprocess_iowa,
             'missouri': self.preprocess_missouri,
-            'iowa': self.preprocess_iowa
+            'new_jersey': self.preprocess_new_jersey
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

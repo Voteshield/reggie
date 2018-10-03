@@ -41,7 +41,6 @@ address_fields:
 format:
   separate_hist: true
   segmented_files: false
-  ignore_files:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
