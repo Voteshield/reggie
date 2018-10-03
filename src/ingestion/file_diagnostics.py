@@ -17,32 +17,15 @@ from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
-    def __init__(self, state=None, s3_key=None, local_file=None):
-        if s3_key is not None and state is not None and state_from_str(
-                s3_key) != state:
-            raise ValueError(
-                "state and s3 must be in agreement if both are set")
-        elif s3_key is None and state is not None and local_file is None:
-            s3_keys = get_raw_s3_uploads(state=state, testing=False)
-            if len(s3_keys) == 0:
-                raise ValueError(
-                    "no raw uploads available to create test file")
-            else:
-                s3_key = s3_keys[-1].key
-        elif s3_key is not None and state is None:
+    def __init__(self, s3_key=None, local_file=None, state=None):
+        if s3_key is not None and state is None:
             state = state_from_str(s3_key)
-        elif local_file is None:
-            raise ValueError(
-                "TestFileBuilder must be initialized with either 'state' or "
-                "'s3_key' or 'local_file'")
-        print(s3_key)
+
         config_file = config_file_from_state(state)
-        super(
-            TestFileBuilder,
-            self).__init__(
-            raw_s3_file=s3_key,
-            config_file=config_file,
-            force_file=local_file)
+        super(TestFileBuilder, self).__init__(
+              raw_s3_file=s3_key,
+              config_file=config_file,
+              force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
@@ -307,5 +290,5 @@ if __name__ == '__main__':
         state = None
     if s3 == "None":
         s3 = None
-    with TestFileBuilder(local_file=local_file, state=state, s3_key = s3) as tf:
+    with TestFileBuilder(local_file=local_file, state=state, s3_key=s3) as tf:
         tf.build()
