@@ -116,7 +116,7 @@ class Loader(object):
             p.wait()
             decompressed_chunk = ".".join(chunk_storage.split(".")[:-1])
             try:
-                df = pd.read_csv(decompressed_chunk, comment="#")
+                df = pd.read_csv(decompressed_chunk)
                 s = df.to_csv(header=not first_success)
                 first_success = True
                 logging.info("done with chunk {}".format(i))
@@ -365,6 +365,23 @@ class Preprocessor(Loader):
                                       errors='coerce').fillna(df[field])
         return df
 
+    def coerce_strings(self, df):
+        """
+        takes all columns with text or varchar labels in the config,
+        strips out whitespace and converts text to all lowercase
+        NOTE: does not convert voter_status or party_identifier,
+              since those are typically defined as capitalized
+        :param df: dataframe to modify
+        :return: modified dataframe
+        """
+        text_fields = [c for c, v in self.config["columns"].items()
+                       if v == "text" or v == "varchar"]
+        for field in text_fields:
+            if (field in df) and (field != self.config["voter_status"]) \
+               and (field != self.config["party_identifier"]):
+                df[field] = df[field].astype(str).str.strip().str.lower()
+        return df
+
     def unpack_files(self, compression="unzip"):
         all_files = []
 
@@ -425,7 +442,7 @@ class Preprocessor(Loader):
                 if self.config["file_type"] == 'xlsx':
                     df = pd.read_excel(f)
                 else:
-                    df = pd.read_csv(f, comment="#")
+                    df = pd.read_csv(f)
             except (XLRDError, ParserError):
                 print("Skipping {} ... Unsupported format, or corrupt file".format(f))
                 continue
@@ -448,10 +465,10 @@ class Preprocessor(Loader):
         hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
         self.temp_files.extend([hist_file, voter_file])
         logging.info("NEVADA: loading historical file")
-        df_hist = pd.read_csv(hist_file, header=None, comment="#")
+        df_hist = pd.read_csv(hist_file, header=None)
         df_hist.columns = self.config["hist_columns"]
         logging.info("NEVADA: loading main voter file")
-        df_voters = pd.read_csv(voter_file, header=None, comment="#")
+        df_voters = pd.read_csv(voter_file, header=None)
         df_voters.columns = self.config["ordered_columns"]
         valid_elections = df_hist.date.unique().tolist()
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
@@ -522,7 +539,8 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
         df_hist["array_position"] = df_hist["election_name"].map(
@@ -542,9 +560,10 @@ class Preprocessor(Loader):
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
 
+        df_voters = self.coerce_strings(df_voters)
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters, extra_cols=[
-            "Precinct_Split"])
+            "Precinct", "Precinct_Split"])
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
@@ -565,7 +584,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
         self.concat_file_segments(new_files)
-        main_df = pd.read_csv(self.main_file, comment="#")
+        main_df = pd.read_csv(self.main_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
         voting_method_cols = list(filter(lambda x: "voting_method" in x, main_df.columns.values))
@@ -591,7 +610,7 @@ class Preprocessor(Loader):
         config = load_configs_from_file("new_york")
         new_files = self.unpack_files(compression="infer")
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
-        main_df = pd.read_csv(main_file, comment="#",
+        main_df = pd.read_csv(main_file,
                               header=None,
                               names=config["ordered_columns"])
         main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
@@ -656,7 +675,8 @@ class Preprocessor(Loader):
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
             sorted_codes = unique_codes.tolist()
-            sorted_codes_dict = {k: {"index": i, "count": counts[i]}
+            sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                     "date": date_from_str(k)}
                                  for i, k in enumerate(sorted_codes)}
 
             def insert_code_bin(arr):

@@ -144,7 +144,7 @@ class TestFileBuilder(Preprocessor):
         generator is written for ohio (todo)
         :return: None
         """
-        df = pd.read_csv(self.main_file, compression='gzip', comment="#")
+        df = pd.read_csv(self.main_file, compression='gzip')
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
