@@ -611,7 +611,8 @@ class Preprocessor(Loader):
         main_cols = self.config['ordered_columns']
         history_cols = self.config["election_columns"]
         df_voters.columns = main_cols + history_cols
-        pd.set_option('display.max_columns', 500)
+        vid_col = self.config["voter_id"]
+        df_voters[vid_col] = df_voters[vid_col].str[1:]
         df_voters["MISCELLANEOUS"] = df_voters["MISCELLANEOUS"].str[2:]
         df_voters[history_cols] = df_voters["MISCELLANEOUS"] \
             .str.split(",", expand=True).iloc[:, :len(history_cols)]
@@ -662,7 +663,7 @@ class Preprocessor(Loader):
                                                     '')
             df_voters[c] = df_voters[c].str.replace('"', '')
             df_voters[c] = df_voters[c].str.replace("'", '')
-            
+
             df_voters.all_history += " " + df_voters[c]
 
         # make into an array (null values are '' so they are ignored)
