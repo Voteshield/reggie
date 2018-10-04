@@ -37,11 +37,10 @@ format:
   hist_election_rows: true
   columnar_elections: false
 name_fields:
-  - cde_name_title
-  - text_name_first
-  - text_name_middle
-  - text_name_last
-  - cde_name_suffix
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
 ordered_generated_columns:
   - all_history
   - vote_type
