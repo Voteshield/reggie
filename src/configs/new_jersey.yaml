@@ -1,18 +1,21 @@
-file_type: ascii
+file_type: csv
 state: new_jersey
 source: boe
 file_class: voter_file
+has_headers: False
 voter_id: voter_id
 county_identifier: county
 birthday_identifier: dob
 voter_status: status
-voter_status_active: A
-voter_status_active_need_id: AD
-voter_status_active_federal_only: AF
-voter_status_pending: P
-voter_status_inactive_need_id: ID
-voter_status_inactive_confirmation: IF
+voter_status_active: Active
+voter_status_inactive: Inactive #ID combined with IF
+voter_status_active_need_id: Active Need ID #voters need to provide ID or SS after registering
+voter_status_active_federal_only: Active-Federal Election Only #very few, to avoid violating NVRA
+voter_status_pending: Pending #minors
+voter_status_inactive_need_id: Inactive Confirmation-Need ID #funneling this and IF into I
+voter_status_inactive_confirmation: Inactive Confirmation #havent voted in several elections
 date_format: "%m/%d/%Y"
+numeric_county: False
 party_identifier: party_code
 democratic_party: DEM
 republican_party: REP
@@ -39,20 +42,29 @@ address_fields:
   - municipality
   - zip
 format:
-  separate_hist: true
+  separate_hist: True
   segmented_files: false
+primary_key:
+  - pre_date
+  - post_date
+  - voter_id
+  - change_type
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  voter_id: varchar
+  voter_id: bigint
   change_type: text
   pre_value: text
   post_value: text
   state: varchar
 generated_columns:
-  all_history: int[]
+  all_history: varchar[]
+  party_history: varchar[]
+  unabridged_status: varchar
 ordered_generated_columns:
   - all_history
+  - party_history
+  - unabridged_status
 summary_columns:
   - totals
   - date
@@ -79,7 +91,7 @@ summary_types:
   - text
 columns:
   county: varchar
-  voter_id: int
+  voter_id: bigint
   legacy_id: int
   last_name: varchar
   first_name: varchar
@@ -175,4 +187,48 @@ hist_columns:
   - election_type
   - election_category
   - ballot_type
+hist_columns_type:
+  voter_id: bigint
+  status_code: char
+  party_code: varchar
+  last_name: varchar
+  first_name: varchar
+  middle_name: varchar
+  prefix: varchar
+  suffix: varchar
+  sex: varchar
+  street_number: int
+  suffix_a: varchar
+  suffix_b: varchar
+  street_name: varchar
+  apt_no: varchar
+  address_line_1: varchar
+  address_line_2: varchar
+  city: varchar
+  state: varchar
+  zip5: int
+  zip4: int
+  mailing_street_number: int
+  mailing_suffix_a: varchar
+  mailing_suffix_b: varchar
+  mailing_street_name: varchar
+  mailing_apt_no: varchar
+  mailing_address_line_1: varchar
+  mailing_address_line_2: varchar
+  mailing_city: varchar
+  mailing_state: varchar
+  mailing_country: varchar
+  mailing_zip_code: int
+  birth_date: date
+  date_registered: date
+  county_precinct: varchar
+  municipality: varchar
+  ward: varchar
+  district: varchar
+  phone_number: int
+  election_date: date
+  election_name: varchar
+  election_type: varchar
+  election_category: varchar
+  ballot_type: char
 county_names:

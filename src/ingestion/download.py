@@ -335,20 +335,20 @@ class Preprocessor(Loader):
         get_object(self.raw_s3_file, self.main_file)
         self.temp_files.append(self.main_file)
 
-    def coerce_dates(self, df):
+    def coerce_dates(self, df, col_list="columns"):
         """
         takes all columns with timestamp or date labels in the config file and forces the corresponding entries in the
         raw file into datetime objects
         :param df: dataframe to modify
         :return: modified dataframe
         """
-        date_fields = [c for c, v in self.config["columns"].items() if v == "date" or v == "timestamp"]
+        date_fields = [c for c, v in self.config[col_list].items() if v == "date" or v == "timestamp"]
         for field in date_fields:
             df[field] = df[field].apply(str)
             df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
         return df
 
-    def coerce_numeric(self, df, extra_cols=[]):
+    def coerce_numeric(self, df, extra_cols=[], col_list="columns"):
         """
         takes all columns with int labels in the config file
         as well as any requested extra columns,
@@ -358,7 +358,7 @@ class Preprocessor(Loader):
         :param extra_cols: other columns to convert
         :return: modified dataframe
         """
-        numeric_fields = [c for c, v in self.config["columns"].items()
+        numeric_fields = [c for c, v in self.config[col_list].items()
                           if "int" in v or v == "float" or v == "double"]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
@@ -852,21 +852,27 @@ class Preprocessor(Loader):
                                   index_col=False)], axis=0)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + hdf['election_date']
-        hdf = self.coerce_dates(hdf)
-        hdf = self.coerce_numeric(hdf)
+        hdf = self.coerce_dates(hdf, col_list="hist_columns_type")
+        hdf = self.coerce_numeric(hdf, col_list="hist_columns_type")
         hdf.sort_values('election_date', inplace=True)
+        hdf = hdf.reset_index()
         vdf = self.coerce_dates(vdf)
         vdf = self.coerce_numeric(vdf)
-        with pd.option_context('display.max_columns', None):
-            print(vdf)
-            print(hdf)
-            print(hdf['election_name'].unique())
-            print(hdf['election_date'].unique())
-            print(len(hdf['election_name'].unique()))
-            print(len(hdf['election_date'].unique()))
-        sys.exit()
+        vdf['unabridged_status'] = vdf['status']
+        vdf.loc[(vdf['status'] == 'Inactive Confirmation') |
+                (vdf['status'] == 'Inactive Confirmation-Need ID'),
+                'status'] = 'Inactive'
 
 
+        vdf['all_history'] = vdf['voter_id'].apply(
+            lambda v: hdf.loc[hdf['voter_id'] == v, 'election_name'].tolist())
+        vdf['party_history'] = vdf['voter_id'].apply(
+            lambda v: hdf.loc[hdf['voter_id'] == v, 'party_code'].tolist())
+        vdf.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+
+        return chksum
 
 
     def execute(self):
