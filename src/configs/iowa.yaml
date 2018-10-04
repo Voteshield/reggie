@@ -26,11 +26,10 @@ ordered_generated_columns:
   - all_history
   - sparse_history
 name_fields:
-  - cde_name_title
-  - text_name_first
-  - text_name_middle
-  - text_name_last
-  - cde_name_suffix
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - NAME_SUFFIX
 address_fields:
   - HOUSE_NUM
   - HOUSE_SUFFIX
