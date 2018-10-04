@@ -546,6 +546,9 @@ class Preprocessor(Loader):
 
             df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3,
                                                     '')
+            df_voters[c] = df_voters[c].str.replace('"', '')
+            df_voters[c] = df_voters[c].str.replace("'", '')
+            
             df_voters.all_history += " " + df_voters[c]
 
         # make into an array (null values are '' so they are ignored)
