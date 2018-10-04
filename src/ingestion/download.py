@@ -504,7 +504,7 @@ class Preprocessor(Loader):
         df_voters["MISCELLANEOUS"] = ''
         key_delim = "_"
         df_voters["all_history"] = ''
-
+        df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before

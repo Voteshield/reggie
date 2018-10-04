@@ -278,17 +278,3 @@ class DiagnosticTest(object):
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
 
-
-if __name__ == '__main__':
-    import sys
-    local_file=sys.argv[1]
-    state=sys.argv[2]
-    s3 = sys.argv[3]
-    if local_file == "None":
-        local_file = None
-    if state == "None":
-        state = None
-    if s3 == "None":
-        s3 = None
-    with TestFileBuilder(local_file=local_file, state=state, s3_key=s3) as tf:
-        tf.build()
