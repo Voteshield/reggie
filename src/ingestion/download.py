@@ -90,7 +90,7 @@ class Loader(object):
         for fn in self.temp_files:
             if os.path.isfile(fn):
                 os.remove(fn)
-            else:
+            elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
 
