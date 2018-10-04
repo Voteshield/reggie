@@ -604,8 +604,9 @@ class Preprocessor(Loader):
                                 skiprows=1, header=None)
 
         for i in remaining_files:
+            skiprows = 1 if "Part1" in i else 0
             new_df = pd.read_csv(i, sep='","|",  "', header=None,
-                                 engine="python")
+                                 engine="python", skiprows=skiprows)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
         main_cols = self.config['ordered_columns']
