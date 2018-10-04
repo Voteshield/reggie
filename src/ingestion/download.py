@@ -562,7 +562,8 @@ class Preprocessor(Loader):
 
         df_voters = self.coerce_strings(df_voters)
         df_voters = self.coerce_dates(df_voters)
-        df_voters = self.coerce_numeric(df_voters)
+        df_voters = self.coerce_numeric(df_voters, extra_cols=[
+            "Precinct", "Precinct_Split"])
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
