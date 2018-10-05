@@ -61,6 +61,27 @@ class TestFileBuilder(Preprocessor):
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
 
+    def __build_florida(self):
+        new_files = self.unpack_files()
+        # insert code to get the method 1
+        smallest_counties = []
+        for i in new_files:
+            if ("LIB" in i) or ("LAF" in i):
+                smallest_counties.append(i)
+        vote_history_files = []
+        voter_files = []
+        for i in smallest_counties:
+            if "_H_" in i:
+                vote_history_files.append(i)
+            elif ".txt" in i:
+                voter_files.append(i)
+        # florida files are composed as nested zip files, but because of the
+        # recursive file structure and because of how preprocess florida is
+        # made it shouldn't matter
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in smallest_counties:
+                zf.write(f, os.path.basename(f))
+
     def __build_new_york(self):
         new_files = self.unpack_files()
         ny_file = new_files[0]
@@ -122,7 +143,7 @@ class TestFileBuilder(Preprocessor):
         generator is written for ohio (todo)
         :return: None
         """
-        df = pd.read_csv(self.main_file, compression='gzip', comment="#")
+        df = pd.read_csv(self.main_file, compression='gzip')
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
@@ -153,6 +174,7 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
+                  "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
                   "iowa": self.__build_iowa}
 
@@ -277,4 +299,3 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
-
