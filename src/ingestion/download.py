@@ -14,8 +14,6 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, \
     strcol_to_array, listcol_tonumpy
 from storage import s3, normalize_columns
-from profilehooks import profile, timecall, coverage, coverage_with_hotshot
-from storage.profiling import profile_function
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -600,30 +598,26 @@ class Preprocessor(Loader):
         remaining_files = [f for f in new_files if "CD1" not in f or
                            "Part1" not in f]
 
-        df_voters = pd.read_csv(first_file, sep='","|",  "', engine="python",
-                                skiprows=1, header=None)
+        history_cols = self.config["election_columns"]
+        main_cols = self.config['ordered_columns']
+        buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4"]
+        total_cols = main_cols + history_cols + buffer_cols
+        df_voters = pd.read_csv(first_file, skiprows=1, header=None,
+                                names=total_cols)
 
         for i in remaining_files:
             skiprows = 1 if "Part1" in i else 0
-            new_df = pd.read_csv(i, sep='","|",  "', header=None,
-                                 engine="python", skiprows=skiprows)
+            new_df = pd.read_csv(i, header=None, skiprows=skiprows,
+                                 names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
-        main_cols = self.config['ordered_columns']
-        history_cols = self.config["election_columns"]
-        df_voters.columns = main_cols + history_cols
-        vid_col = self.config["voter_id"]
-        df_voters[vid_col] = df_voters[vid_col].str[1:]
-        df_voters["MISCELLANEOUS"] = df_voters["MISCELLANEOUS"].str[2:]
-        df_voters[history_cols] = df_voters["MISCELLANEOUS"] \
-            .str.split(",", expand=True).iloc[:, :len(history_cols)]
-        df_voters["MISCELLANEOUS"] = ''
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
+        df_voters.drop(columns=buffer_cols, inplace=True)
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -642,7 +636,6 @@ class Preprocessor(Loader):
 
             # the code below will format each key as
             # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
-
             if "PRIMARY" in prefix:
 
                 # so far so good but we need more columns in the event of a
@@ -702,6 +695,9 @@ class Preprocessor(Loader):
             df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters)
+        pd.set_option('max_columns', 200)
+        pd.set_option('max_row', 6)
+
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
         self.temp_files.append(self.main_file)
