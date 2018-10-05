@@ -299,9 +299,3 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
-
-
-if __name__ == '__main__':
-    import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
-        tf.build()
