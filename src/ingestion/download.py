@@ -14,6 +14,8 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, \
     strcol_to_array, listcol_tonumpy
 from storage import s3, normalize_columns
+from profilehooks import profile, timecall, coverage, coverage_with_hotshot
+from storage.profiling import profile_function
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -333,7 +335,7 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
-        self.main_file = "/tmp/voteshield_{}"\
+        self.main_file = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
         get_object(self.raw_s3_file, self.main_file)
         self.temp_files.append(self.main_file)
@@ -422,8 +424,9 @@ class Preprocessor(Loader):
 
     def concat_file_segments(self, file_names):
         """
-        Serially concatenates the "file segments" into a single csv file. Should use this method when
-        config["segmented_files"] is true. Should NOT be used to deal with files separated by column. Concatenates the
+        Serially concatenates the "file segments" into a single csv file.
+        Should use this method when config["segmented_files"] is true. Should
+        NOT be used to deal with files separated by column. Concatenates the
         files into self.main_file
         :param file_names: files to concatenate
         """
@@ -449,15 +452,17 @@ class Preprocessor(Loader):
                 else:
                     df = pd.read_csv(f)
             except (XLRDError, ParserError):
-                print("Skipping {} ... Unsupported format, or corrupt file".format(f))
+                print("Skipping {} ... Unsupported format, or corrupt file"
+                      .format(f))
                 continue
             if not first_success:
                 last_headers = sorted(df.columns)
             df, _ = normalize_columns(df, last_headers)
             if list_compare(last_headers, sorted(df.columns)):
                 mismatched_headers = list_compare(last_headers, df.columns)
-                raise ValueError("file chunks contained different or misaligned headers:"
-                                 "  {} != {} at index {}".format(*mismatched_headers))
+                raise ValueError("file chunks contained different or "
+                                 "misaligned headers: {} != {} at index {}"
+                                 .format(*mismatched_headers))
 
             s = df.to_csv(header=not first_success, encoding='utf-8')
             first_success = True
@@ -466,7 +471,8 @@ class Preprocessor(Loader):
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
-        voter_file = new_files[0] if "ElgbVtr" in new_files[0] else new_files[1]
+        voter_file = new_files[0] if "ElgbVtr" in new_files[0] \
+            else new_files[1]
         hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
         self.temp_files.extend([hist_file, voter_file])
         logging.info("NEVADA: loading historical file")
@@ -484,7 +490,8 @@ class Preprocessor(Loader):
             group_idx = 0
             output = []
             for d in valid_elections[::-1]:
-                if group_idx < len(g.date.values) and d == g.date.values[group_idx]:
+                if group_idx < len(g.date.values) and \
+                        d == g.date.values[group_idx]:
                     output.append(g.vote_code.values[group_idx])
                     group_idx += 1
                 else:
@@ -492,7 +499,8 @@ class Preprocessor(Loader):
 
             return output
 
-        voting_histories = df_hist.groupby(self.config["voter_id"]).apply(place_vote_hist)
+        voting_histories = df_hist.groupby(self.config["voter_id"])\
+            .apply(place_vote_hist)
         df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
@@ -585,6 +593,119 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_iowa(self):
+        new_files = self.unpack_files(compression='unzip')
+        logging.info("IOWA: reading in voter file")
+        first_file = [f for f in new_files if "CD1" in f and "Part1" in f][0]
+        remaining_files = [f for f in new_files if "CD1" not in f or
+                           "Part1" not in f]
+
+        df_voters = pd.read_csv(first_file, sep='","|",  "', engine="python",
+                                skiprows=1, header=None)
+
+        for i in remaining_files:
+            new_df = pd.read_csv(i, sep='","|",  "', header=None,
+                                 engine="python")
+            df_voters = pd.concat([df_voters, new_df], axis=0)
+
+        main_cols = self.config['ordered_columns']
+        history_cols = self.config["election_columns"]
+        df_voters.columns = main_cols + history_cols
+        pd.set_option('display.max_columns', 500)
+        df_voters["MISCELLANEOUS"] = df_voters["MISCELLANEOUS"].str[2:]
+        df_voters[history_cols] = df_voters["MISCELLANEOUS"] \
+            .str.split(",", expand=True).iloc[:, :len(history_cols)]
+        df_voters["MISCELLANEOUS"] = ''
+        key_delim = "_"
+        df_voters["all_history"] = ''
+        df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
+        # instead of iterating over all of the columns for each row, we should
+        # handle all this beforehand.
+        # also we should not compute the unique values until after, not before
+        for c in self.config["election_dates"]:
+            null_rows = df_voters[c].isnull()
+            df_voters[c][null_rows] = ""
+
+            # each key contains info from the columns
+            prefix = c.split("_")[0] + key_delim
+
+            # and the corresponding votervotemethod column
+            vote_type_col = c.replace("ELECTION_DATE", "VOTERVOTEMETHOD")
+            null_rows = df_voters[vote_type_col].isnull()
+            df_voters[vote_type_col].loc[null_rows] = ""
+            # add election type and date
+            df_voters[c] = prefix + df_voters[c].str.strip()
+            # add voting method
+            df_voters[c] += key_delim + df_voters[vote_type_col].str.strip()
+
+            # the code below will format each key as
+            # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
+
+            if "PRIMARY" in prefix:
+
+                # so far so good but we need more columns in the event of a
+                # primary
+                org_col = c.replace("PRIMARY_ELECTION_DATE",
+                                    "POLITICAL_ORGANIZATION")
+                party_col = c.replace("PRIMARY_ELECTION_DATE",
+                                      "POLITICAL_PARTY")
+                df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
+                df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
+                party_info = df_voters[party_col].str.strip() + key_delim + \
+                             df_voters[org_col].str.replace(" ", "")
+                df_voters[c] += key_delim + party_info
+            else:
+                # add 'blank' values for the primary slots
+                df_voters[c] += key_delim + key_delim
+
+            df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3,
+                                                    '')
+            df_voters[c] = df_voters[c].str.replace('"', '')
+            df_voters[c] = df_voters[c].str.replace("'", '')
+            
+            df_voters.all_history += " " + df_voters[c]
+
+        # make into an array (null values are '' so they are ignored)
+        df_voters.all_history = df_voters.all_history.str.split()
+        elections, counts = np.unique(df_voters[self.config["election_dates"]],
+                                      return_counts=True)
+        # we want reverse order (lower indices are higher frequency)
+        count_order = counts.argsort()[::-1]
+        elections = elections[count_order]
+        counts = counts[count_order]
+
+        # create meta
+        sorted_codes_dict = {j: {"index": i, "count": counts[i],
+                                 "date": date_from_str(j)}
+                             for i, j in enumerate(elections)}
+
+        default_item = {"index": len(elections)}
+
+        def insert_code_bin(a):
+            return [sorted_codes_dict.get(k, default_item)["index"] for k in a]
+
+        # In an instance like this, where we've created our own systematized
+        # labels for each election I think it makes sense to also keep them
+        # in addition to the sparse history
+        df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
+
+        self.meta = {
+            "message": "iowa_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(elections.tolist()),
+        }
+
+        df_voters.drop(columns=history_cols, inplace=True)
+        for c in df_voters.columns:
+            df_voters[c].loc[df_voters[c].isnull()] = ""
+        df_voters = self.coerce_dates(df_voters)
+        df_voters = self.coerce_numeric(df_voters)
+        df_voters.to_csv(self.main_file, index=False, compression="gzip")
+        self.is_compressed = True
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
+
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
@@ -601,6 +722,8 @@ class Preprocessor(Loader):
                                                                      format=self.config["date_format"],
                                                                      errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
+
+
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
@@ -618,9 +741,10 @@ class Preprocessor(Loader):
         main_df = pd.read_csv(main_file,
                               header=None,
                               names=config["ordered_columns"])
-        main_df.voterhistory[main_df.voterhistory != main_df.voterhistory] = NULL_CHAR
-        all_codes = main_df.voterhistory.str.replace(" ", "_")\
-            .str.replace("[", "")\
+        null_hists = main_df.voterhistory != main_df.voterhistory
+        main_df.voterhistory[null_hists] = NULL_CHAR
+        all_codes = main_df.voterhistory.str.replace(" ", "_") \
+            .str.replace("[", "") \
             .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
@@ -641,6 +765,7 @@ class Preprocessor(Loader):
 
         # in this case we save ny as sparse array since so many elections are
         # stored
+
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.coerce_dates(main_df)
         self.meta = {
@@ -720,7 +845,9 @@ class Preprocessor(Loader):
             'arizona': self.preprocess_arizona,
             'florida':self.preprocess_florida,
             'new_york': self.preprocess_new_york,
-            'missouri': self.preprocess_missouri
+            'iowa': self.preprocess_iowa,
+            'missouri': self.preprocess_missouri,
+            'iowa': self.preprocess_iowa
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

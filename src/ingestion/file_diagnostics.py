@@ -17,32 +17,15 @@ from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
-    def __init__(self, state=None, s3_key=None, local_file=None):
-        if s3_key is not None and state is not None and state_from_str(
-                s3_key) != state:
-            raise ValueError(
-                "state and s3 must be in agreement if both are set")
-        elif s3_key is None and state is not None and local_file is None:
-            s3_keys = get_raw_s3_uploads(state=state, testing=False)
-            if len(s3_keys) == 0:
-                raise ValueError(
-                    "no raw uploads available to create test file")
-            else:
-                s3_key = s3_keys[-1].key
-        elif s3_key is not None and state is None:
+    def __init__(self, s3_key=None, local_file=None, state=None):
+        if s3_key is not None and state is None:
             state = state_from_str(s3_key)
-        elif local_file is None:
-            raise ValueError(
-                "TestFileBuilder must be initialized with either 'state' or "
-                "'s3_key' or 'local_file'")
-        print(s3_key)
+
         config_file = config_file_from_state(state)
-        super(
-            TestFileBuilder,
-            self).__init__(
-            raw_s3_file=s3_key,
-            config_file=config_file,
-            force_file=local_file)
+        super(TestFileBuilder, self).__init__(
+              raw_s3_file=s3_key,
+              config_file=config_file,
+              force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
@@ -138,6 +121,22 @@ class TestFileBuilder(Preprocessor):
             for f in new_files:
                 zf.write(f, os.path.basename(f))
 
+    def __build_iowa(self):
+        new_files = self.unpack_files()
+
+        #read in dataframe here, haven't figured this out yet
+
+        print(new_files)
+        smaller_files = []
+        for x in new_files:
+            if "CD1" in x and "Part1" in x:
+                smaller_files.append(x)
+
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in smaller_files:
+                zf.write(f, os.path.basename(f))
+        
+
     def __build_ohio(self):
         """
         this only generates a truncated _processed_ file, no test raw file
@@ -176,7 +175,9 @@ class TestFileBuilder(Preprocessor):
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
                   "florida": self.__build_florida,
-                  "missouri": self.__build_missouri}
+                  "missouri": self.__build_missouri,
+                  "iowa": self.__build_iowa}
+
         f = routes[self.state]
         f()
 
@@ -299,8 +300,3 @@ class DiagnosticTest(object):
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
 
-
-if __name__ == '__main__':
-    import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
-        tf.build()
