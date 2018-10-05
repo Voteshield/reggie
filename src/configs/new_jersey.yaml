@@ -23,10 +23,10 @@ no_party_affiliation: UNA
 green_party: GRE
 libertarian_party: LIB
 reform_party: REF
-us_constitution_party: USC
+us_constitution_party: CON
 natural_law_party: NAT
-conservative_party: CON
-socialist_party: SOC
+conservative_party: CNV
+socialist_party: SSP
 name_fields:
   - first_name
   - middle_name
@@ -73,14 +73,26 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Other
+  - REP
+  - DEM
+  - CNV
+  - CON
+  - UNA
+  - LIB
+  - GRE
+  - SSP
+  - NAT
   - county
 summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
   - int
   - int
   - int
