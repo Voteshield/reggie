@@ -89,7 +89,12 @@ class Loader(object):
     def clean_up(self):
         for fn in self.temp_files:
             if os.path.isfile(fn):
-                os.remove(fn)
+                try:
+                    os.chmod(fn, 0777)
+                    os.remove(fn)
+                except OSError:
+                    logging.warning("cannot remove {}".format(fm))
+                    continue
             elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
