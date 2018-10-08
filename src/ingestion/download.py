@@ -11,7 +11,7 @@ import json
 from constants import *
 from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
-    listcol_tonumpy
+    listcol_tonumpy, get_surrounding_dates, get_metadata_for_key
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -637,7 +637,14 @@ class Preprocessor(Loader):
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
                               names=config["elec_code_columns"], na_filter=False)
         else:
-            edf = None
+            this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
+            pre_date, post_date, pre_key, post_key = get_surrounding_dates(
+                date=this_date, state=self.state,
+                ignore_conflicting_uploads=True, testing=self.testing)
+            old_meta = get_metadata_for_key(pre_key)
+            edf = pd.read_json(old_meta["election codes"],
+                               dtype=[int, int, int, str])
+            edf["Date"] = pd.to_datetime(edf['Date'], unit='ms')
 
         def intToDatetime(i):
             s = str(i)
@@ -651,7 +658,8 @@ class Preprocessor(Loader):
             return date
 
         if edf is not None:
-            edf["Date"] = edf["Date"].apply(intToDatetime)
+            if isinstance(edf["Date"].dtype, str):
+                edf["Date"] = edf["Date"].apply(intToDatetime)
             edf.sort_values(by=["Date"])
             valid_elections = edf["Election_Code"].unique().tolist()
 
@@ -688,6 +696,10 @@ class Preprocessor(Loader):
         vdf = self.coerce_dates(vdf)
         vdf = self.coerce_numeric(vdf)
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.meta = {
+            "message": "michigan_{}".format(datetime.now().isoformat()),
+            "election codes": edf.to_json()
+        }
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
 
