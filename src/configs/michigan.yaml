@@ -71,11 +71,11 @@ base_columns:
   pre_value: text
   post_value: text
 generated_columns:
-  all_history: int[]
+  All_History: int[]
   verbose_history: varchar
   party_identifier: varchar
 ordered_generated_columns:
-  - all_history
+  - All_History
   - verbose_history
   - party_identifier
 has_headers: No
