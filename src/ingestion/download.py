@@ -663,19 +663,20 @@ class Preprocessor(Loader):
             edf.sort_values(by=["Date"])
             valid_elections = edf["Election_Code"].unique().tolist()
 
-        def get_binary_history(row):
+        def get_sparse_history(row):
             hist = []
-            voted_in = hdf.loc[hdf["Voter_ID"] == row["Voter_ID"]]
-            for ecode in valid_elections:
-                if ecode in voted_in["Election_Code"]:
-                    hist.append(1)
-                else:
-                    hist.append(0)
+            voted_in = hdf.loc[hdf["Voter_ID"] ==
+                               row["Voter_ID"]]["Election_Code"].unique()
+            for i, ecode in enumerate(valid_elections):
+                if ecode in voted_in:
+                    hist.append(i)
+            if hist is []:
+                hist.append(-1)
 
             return hist
 
         if edf is not None:
-            vdf["All_History"] = vdf.apply(get_binary_history, axis=1)
+            vdf["All_History"] = vdf.apply(get_sparse_history, axis=1)
         else:
             vdf["All_History"] = ""
 
