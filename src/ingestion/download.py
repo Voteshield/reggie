@@ -340,8 +340,8 @@ class Preprocessor(Loader):
 
     def coerce_dates(self, df):
         """
-        takes all columns with timestamp or date labels in the config file and forces the corresponding entries in the
-        raw file into datetime objects
+        takes all columns with timestamp or date labels in the config file and
+        forces the corresponding entries in the raw file into datetime objects
         :param df: dataframe to modify
         :return: modified dataframe
         """
@@ -353,9 +353,8 @@ class Preprocessor(Loader):
 
     def coerce_numeric(self, df, extra_cols=[]):
         """
-        takes all columns with int labels in the config file
-        as well as any requested extra columns,
-        and forces the corresponding entries in the
+        takes all columns with int labels in the config file as well as any
+        requested extra columns, and forces the corresponding entries in the
         raw file into numerics
         :param df: dataframe to modify
         :param extra_cols: other columns to convert
