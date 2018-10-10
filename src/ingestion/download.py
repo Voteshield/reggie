@@ -343,7 +343,14 @@ class Preprocessor(Loader):
         date_fields = [c for c, v in self.config["columns"].items() if v == "date" or v == "timestamp"]
         for field in date_fields:
             df[field] = df[field].apply(str)
-            df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
+            if not isinstance(self.config["date_format"], list):
+                df[field] = pd.to_datetime(df[field], format=self.config["date_format"], errors='coerce')
+            else:
+                for format in self.config["date_format"]:
+                    formatted = pd.to_datetime(df[field], format=format, errors='coerce')
+                    if len(formatted.unique()) > 1:
+                        df[field] = formatted
+                        break
         return df
 
     def coerce_numeric(self, df, extra_cols=[]):
