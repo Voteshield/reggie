@@ -469,6 +469,12 @@ class Preprocessor(Loader):
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
 
+    def preprocess_georgia(self):
+        GA_voterfile = self.unpack_files(compression = 'unzip')
+        print(GA_voterfile)
+        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"', quoting=3)
+        df_voters.columns = self.config["ordered_columns"]
+
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
         voter_file = new_files[0] if "ElgbVtr" in new_files[0] \
@@ -847,7 +853,8 @@ class Preprocessor(Loader):
             'new_york': self.preprocess_new_york,
             'iowa': self.preprocess_iowa,
             'missouri': self.preprocess_missouri,
-            'iowa': self.preprocess_iowa
+            'iowa': self.preprocess_iowa,
+            'georgia': self.preprocess_georgia
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

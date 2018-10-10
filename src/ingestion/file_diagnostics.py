@@ -82,6 +82,17 @@ class TestFileBuilder(Preprocessor):
             for f in smallest_counties:
                 zf.write(f, os.path.basename(f))
 
+    def __build_georgia(self):
+        print("hey")
+        new_file = self.unpack_files(compression = 'unzip')
+        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"', quoting=3, nrows = 10000)
+        df_voters.to_csv(ga_file, header= True)
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write(ga_file, os.path.basename(f))
+
+        self.temp_files.append(ga_file)
+
+
     def __build_new_york(self):
         new_files = self.unpack_files()
         ny_file = new_files[0]
