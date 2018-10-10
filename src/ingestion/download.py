@@ -689,7 +689,7 @@ class Preprocessor(Loader):
 
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
-        vdf["party_identifier"] = "NAN"
+        vdf["party_identifier"] = "npa"
         hdf2.sort_values(by=["Voter_ID"], inplace=True)
 
         def get_history(row):
