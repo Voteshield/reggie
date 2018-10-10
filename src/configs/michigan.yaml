@@ -17,7 +17,9 @@ republican_party: None
 party_identifier: party_identifier
 numeric_county: true
 birthday_format: "%Y.0"
-date_format: "%m%d%Y"
+date_format:
+  - "%m%d%Y"
+  - '%Y'
 name_fields:
   - First_Name
   - Middle_Name
@@ -74,11 +76,9 @@ base_columns:
 generated_columns:
   All_History: int[]
   verbose_history: varchar
-  party_identifier: varchar
 ordered_generated_columns:
   - All_History
   - verbose_history
-  - party_identifier
 has_headers: No
 summary_columns:
   - totals
@@ -88,16 +88,12 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Other
+  - nan
   - county
 summary_types:
   - int
   - timestamp
   - text
-  - int
-  - int
   - int
   - int
   - int
@@ -111,7 +107,7 @@ columns:
   Last_Name: varchar
   Name_Suffix: varchar
   registration_date: date
-  Birthyear: varchar
+  Birthyear: date
   Gender: varchar
   House_Number_Character: varchar
   Residence_Street_Number: varchar
@@ -143,6 +139,7 @@ columns:
   Permanent_Absentee_Ind: char
   status_type: varchar
   UOCAVA_Status: varchar
+  party_identifier: varchar
 ordered_columns:
   - Last_Name
   - First_Name
@@ -182,6 +179,7 @@ ordered_columns:
   - Permanent_Absentee_Ind
   - status_type
   - UOCAVA_Status
+  - party_identifier
 hist_columns:
   - Voter_ID
   - county_code
