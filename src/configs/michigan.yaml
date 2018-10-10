@@ -16,7 +16,7 @@ no_party_affiliation: None
 republican_party: None
 party_identifier: party_identifier
 numeric_county: true
-birthday_format: "%Y"
+birthday_format: "%Y.0"
 date_format: "%m%d%Y"
 name_fields:
   - First_Name
@@ -70,6 +70,7 @@ base_columns:
   change_type: text
   pre_value: text
   post_value: text
+  party_identifier: varchar
 generated_columns:
   All_History: int[]
   verbose_history: varchar
