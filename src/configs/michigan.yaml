@@ -12,7 +12,7 @@ voter_status_cancelled: C
 voter_status_rejected: R
 voter_status_challenged: CH
 democratic_party: None
-no_party_affiliation: None
+no_party_affiliation: npa
 republican_party: None
 party_identifier: party_identifier
 numeric_county: true
@@ -88,7 +88,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - nan
+  - npa
   - county
 summary_types:
   - int
