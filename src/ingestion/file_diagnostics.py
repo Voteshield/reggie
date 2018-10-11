@@ -15,7 +15,6 @@ import subprocess
 from datetime import datetime
 from subprocess import Popen, PIPE
 
-
 class TestFileBuilder(Preprocessor):
     def __init__(self, s3_key=None, local_file=None, state=None):
         if s3_key is not None and state is None:
@@ -83,7 +82,6 @@ class TestFileBuilder(Preprocessor):
                 zf.write(f, os.path.basename(f))
 
     def __build_georgia(self):
-        print("hey")
         new_file = self.unpack_files(compression = 'unzip')
         df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"', quoting=3, nrows = 10000)
         df_voters.to_csv(ga_file, header= True)
@@ -187,7 +185,8 @@ class TestFileBuilder(Preprocessor):
                   "new_york": self.__build_new_york,
                   "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
-                  "iowa": self.__build_iowa}
+                  "iowa": self.__build_iowa,
+                  "georgia": self.__build_georgia}
 
         f = routes[self.state]
         f()
