@@ -662,11 +662,9 @@ class Preprocessor(Loader):
         edf.sort_values(by=["Date"])
         valid_elections = edf["Election_Code"].unique().tolist()
 
-        #switch to groupby instead of voted_in
         def get_sparse_history(row):
             hist = []
-            voted_in = hdf.loc[hdf["Voter_ID"] ==
-                               row["Voter_ID"]]["Election_Code"].unique()
+            voted_in = row["Election_Code"].unique()
             for i, ecode in enumerate(valid_elections):
                 if ecode in voted_in:
                     hist.append(i)
@@ -675,19 +673,21 @@ class Preprocessor(Loader):
 
             return hist
 
-        vdf["All_History"] = vdf.apply(get_sparse_history, axis=1)
+        vdf['tmp_id'] = vdf[self.config["voter_id"]]
+        vdf = vdf.set_index('tmp_id')
+        vdf["All_History"] = hdf.groupby('Voter_ID').apply(get_sparse_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
         hdf2.sort_values(by=["Voter_ID"], inplace=True)
 
         def get_history(row):
-            hist = hdf2.loc[hdf2["Voter_ID"] == row["Voter_ID"]]["Data"].values
+            hist = row["Data"].values
 
             return hist
 
         hdf2["Voter_ID"] = hdf2["Voter_ID"].astype(int, errors='ignore')
-        vdf["Verbose_History"] = vdf.apply(get_history, axis=1)
+        vdf["Verbose_History"] = hdf2.groupby('Voter_ID').apply(get_history)
         for c in vdf.columns:
             vdf[c].loc[vdf[c].isnull()] = ""
         vdf = self.coerce_dates(vdf)
