@@ -576,7 +576,8 @@ class Preprocessor(Loader):
         df_voters = self.coerce_strings(df_voters)
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters, extra_cols=[
-            "Precinct", "Precinct_Split"])
+            "Precinct", "Precinct_Split", "Daytime_Phone_Number",
+            "Daytime_Area_Code", "Daytime_Phone_Extension"])
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
@@ -843,7 +844,7 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'florida':self.preprocess_florida,
+            'florida': self.preprocess_florida,
             'new_york': self.preprocess_new_york,
             'iowa': self.preprocess_iowa,
             'missouri': self.preprocess_missouri,
