@@ -3,7 +3,7 @@ state: michigan
 source: boe
 file_class: voter_file
 voter_id: Voter_ID
-county_identifier: county_code
+county_identifier: county_number
 birthday_identifier: Birthyear
 voter_status: status_type
 voter_status_active: A
@@ -15,8 +15,7 @@ democratic_party: None
 no_party_affiliation: npa
 republican_party: None
 party_identifier: party_identifier
-numeric_county: true
-birthday_format: "%Y.0"
+numeric_county: True
 date_format:
   - "%m%d%Y"
   - '%Y'
@@ -99,7 +98,7 @@ summary_types:
   - int
   - int
   - int
-  - text
+  - int
 columns:
   Voter_ID: bigint
   First_Name: varchar
@@ -125,7 +124,7 @@ columns:
   Mail_Address_3: varchar
   Mail_Address_4: varchar
   Mail_Address_5: varchar
-  county_code: int
+  county_number: int
   Jurisdiction: int
   Ward_Precinct: int
   School_Code: int
@@ -165,7 +164,7 @@ ordered_columns:
   - Mail_Address_4
   - Mail_Address_5
   - Voter_ID
-  - county_code
+  - county_number
   - Jurisdiction
   - Ward_Precinct
   - School_Code
@@ -182,7 +181,7 @@ ordered_columns:
   - party_identifier
 hist_columns:
   - Voter_ID
-  - county_code
+  - county_number
   - Jurisdiction
   - School_Code
   - Election_Code
