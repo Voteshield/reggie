@@ -655,20 +655,10 @@ class Preprocessor(Loader):
         if edf is None:
             raise ValueError("Could not find election codes. Aborting")
 
-        #change to pd.to_datetime
-        def intToDatetime(i):
-            s = str(i)
-            if len(s) == 8:
-                date = datetime(year=int(s[4:8]), month=int(s[0:2]),
-                                day=int(s[2:4]))
-            else:
-                date = datetime(year=int(s[3:7]), month=int(s[0]),
-                                day=int(s[1:3]))
-
-            return date
-
         if isinstance(edf["Date"].dtype, str):
-            edf["Date"] = edf["Date"].apply(intToDatetime)
+            edf["Date"] = edf["Date"].apply(
+                pd.to_datetime(format='%m%d%Y')
+            )
         edf.sort_values(by=["Date"])
         valid_elections = edf["Election_Code"].unique().tolist()
 
