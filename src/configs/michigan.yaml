@@ -73,10 +73,10 @@ base_columns:
   post_value: text
   party_identifier: varchar
 generated_columns:
-  All_History: int[]
+  all_history: int[]
   verbose_history: varchar
 ordered_generated_columns:
-  - All_History
+  - all_history
   - verbose_history
 has_headers: No
 summary_columns:

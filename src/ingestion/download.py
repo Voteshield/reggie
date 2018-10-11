@@ -675,7 +675,7 @@ class Preprocessor(Loader):
 
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
-        vdf["All_History"] = hdf.groupby('Voter_ID').apply(get_sparse_history)
+        vdf["all_history"] = hdf.groupby('Voter_ID').apply(get_sparse_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
