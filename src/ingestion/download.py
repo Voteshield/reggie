@@ -652,7 +652,10 @@ class Preprocessor(Loader):
             edf = pd.read_json(old_meta["election codes"],
                                dtype=[int, int, int, str])
             edf["Date"] = pd.to_datetime(edf['Date'], unit='ms')
+        if edf is None:
+            raise ValueError("Could not find election codes. Aborting")
 
+        #change to pd.to_datetime
         def intToDatetime(i):
             s = str(i)
             if len(s) == 8:
@@ -664,12 +667,12 @@ class Preprocessor(Loader):
 
             return date
 
-        if edf is not None:
-            if isinstance(edf["Date"].dtype, str):
-                edf["Date"] = edf["Date"].apply(intToDatetime)
-            edf.sort_values(by=["Date"])
-            valid_elections = edf["Election_Code"].unique().tolist()
+        if isinstance(edf["Date"].dtype, str):
+            edf["Date"] = edf["Date"].apply(intToDatetime)
+        edf.sort_values(by=["Date"])
+        valid_elections = edf["Election_Code"].unique().tolist()
 
+        #switch to groupby instead of voted_in
         def get_sparse_history(row):
             hist = []
             voted_in = hdf.loc[hdf["Voter_ID"] ==
@@ -682,11 +685,7 @@ class Preprocessor(Loader):
 
             return hist
 
-        if edf is not None:
-            vdf["All_History"] = vdf.apply(get_sparse_history, axis=1)
-        else:
-            vdf["All_History"] = ""
-
+        vdf["All_History"] = vdf.apply(get_sparse_history, axis=1)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
