@@ -76,10 +76,12 @@ generated_columns:
   sparse_history: int[]
   all_history: varchar[]
   verbose_history: varchar[]
+  coded_history: varchar[]
 ordered_generated_columns:
   - sparse_history
   - all_history
   - verbose_history
+  - coded_history
 has_headers: No
 summary_columns:
   - totals

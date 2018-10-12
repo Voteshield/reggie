@@ -601,8 +601,8 @@ class Preprocessor(Loader):
 
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict),
-            "array_decoding": json.dumps(sorted_codes),
+            "array_encoding": sorted_codes_dict,
+            "array_decoding": sorted_codes,
         }
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
@@ -642,40 +642,42 @@ class Preprocessor(Loader):
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
                               names=config["elec_code_columns"], na_filter=False)
+            if isinstance(edf["Date"].dtype, str):
+                edf["Date"] = edf["Date"].apply(
+                    pd.to_datetime(format='%m%d%Y')
+                )
+            edf.sort_values(by=["Date"])
+            sorted_codes = map(str, edf["Election_Code"].unique().tolist())
+            edf["Election_Code"] = edf["Election_Code"].astype(str)
+
+            edf = edf.set_index("Election_Code")
+            edf["Title"] += '_'
+            edf["Title"] = edf["Title"] + edf["Date"].map(str)
+            counts = hdf["Election_Code"].value_counts()
+            elec_dict = {
+                k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
+                'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
+                for i, k in enumerate(sorted_codes)}
         else:
             this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
             pre_date, post_date, pre_key, post_key = get_surrounding_dates(
                 date=this_date, state=self.state,
                 ignore_conflicting_uploads=True, testing=self.testing)
             old_meta = get_metadata_for_key(pre_key)
-            edf = pd.read_json(old_meta["election codes"],
-                               dtype=[int, int, int, str])
-            edf["Date"] = pd.to_datetime(edf['Date'], unit='ms')
-        if edf is None:
-            raise ValueError("Could not find election codes. Aborting")
+            sorted_codes = old_meta["array_decoding"]
+            elec_dict = old_meta["array_encoding"]
 
-        if isinstance(edf["Date"].dtype, str):
-            edf["Date"] = edf["Date"].apply(
-                pd.to_datetime(format='%m%d%Y')
-            )
-        edf.sort_values(by=["Date"])
-        valid_elections = edf["Election_Code"].unique().tolist()
-        sparse_dict = {k: i for i, k in enumerate(valid_elections)}
-        edf = edf.set_index("Election_Code")
-        edf["Title"] += '_'
-        edf["Title"] = edf["Title"] + edf["Date"].map(str)
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
                       hdf["Absentee_Voter_Indicator"] + '_' + \
                       hdf['county_number'].map(str) + '_' + \
                       hdf["Jurisdiction"].map(str) + '_' \
                       + hdf["School_Code"].map(str)
 
-
         def get_sparse_history(group):
             sparse = []
             for ecode in group["Election_Code"].values:
                 try:
-                    sparse.append(sparse_dict[ecode])
+                    sparse.append(elec_dict[str(ecode)]['index'])
                 except KeyError:
                     continue
 
@@ -685,7 +687,7 @@ class Preprocessor(Loader):
             all_hist = []
             for ecode in group["Election_Code"].values:
                 try:
-                    all_hist.append(edf.loc[ecode].loc["Title"])
+                    all_hist.append(elec_dict[str(ecode)]["title"])
                 except KeyError:
                     continue
 
@@ -698,6 +700,14 @@ class Preprocessor(Loader):
 
             return verbose
 
+        def get_coded_history(group):
+            coded = []
+            for ecode in group["Election_Code"].values:
+                coded.append(str(ecode))
+
+            return coded
+
+
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
         vdf["sparse_history"] = hdf.groupby(config['voter_id']).\
@@ -706,11 +716,11 @@ class Preprocessor(Loader):
             .apply(get_all_history)
         vdf["verbose_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_verbose_history)
+        vdf["coded_history"] = hdf.groupby(config['voter_id'])\
+            .apply(get_coded_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
-        with pd.option_context('display.max_columns', None):
-            print(vdf)
 
         for c in vdf.columns:
             vdf[c].loc[vdf[c].isnull()] = ""
@@ -719,7 +729,8 @@ class Preprocessor(Loader):
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
-            "election codes": edf.to_json()
+            "array_decoding": sorted_codes,
+            "array_encoding": elec_dict
         }
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
