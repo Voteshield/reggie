@@ -638,8 +638,7 @@ class Preprocessor(Loader):
         logging.info("MICHIGAN: Loading historical file")
         hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
                           names=config["hist_columns"], na_filter=False)
-        hdf2 = pd.read_fwf(hist_file, colspecs=[[0, 13], [13, 39]],
-                           names=["Voter_ID", "Data"], na_filter=False)
+
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
                               names=config["elec_code_columns"], na_filter=False)
@@ -661,33 +660,58 @@ class Preprocessor(Loader):
             )
         edf.sort_values(by=["Date"])
         valid_elections = edf["Election_Code"].unique().tolist()
+        sparse_dict = {k: i for i, k in enumerate(valid_elections)}
+        edf = edf.set_index("Election_Code")
+        edf["Title"] += '_'
+        edf["Title"] = edf["Title"] + edf["Date"].map(str)
+        hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
+                      hdf["Absentee_Voter_Indicator"] + '_' + \
+                      hdf['county_number'].map(str) + '_' + \
+                      hdf["Jurisdiction"].map(str) + '_' \
+                      + hdf["School_Code"].map(str)
 
-        def get_sparse_history(row):
-            hist = []
-            voted_in = row["Election_Code"].unique()
-            for i, ecode in enumerate(valid_elections):
-                if ecode in voted_in:
-                    hist.append(i)
-            if hist is []:
-                hist.append(-1)
 
-            return hist
+        def get_sparse_history(group):
+            sparse = []
+            for ecode in group["Election_Code"].values:
+                try:
+                    sparse.append(sparse_dict[ecode])
+                except KeyError:
+                    continue
+
+            return sparse
+
+        def get_all_history(group):
+            all_hist = []
+            for ecode in group["Election_Code"].values:
+                try:
+                    all_hist.append(edf.loc[ecode].loc["Title"])
+                except KeyError:
+                    continue
+
+            return all_hist
+
+        def get_verbose_history(group):
+            verbose = []
+            for i, row in group.iterrows():
+                verbose.append(row["Info"])
+
+            return verbose
 
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
-        vdf["all_history"] = hdf.groupby('Voter_ID').apply(get_sparse_history)
+        vdf["sparse_history"] = hdf.groupby(config['voter_id']).\
+            apply(get_sparse_history)
+        vdf["all_history"] = hdf.groupby(config['voter_id'])\
+            .apply(get_all_history)
+        vdf["verbose_history"] = hdf.groupby(config['voter_id'])\
+            .apply(get_verbose_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
-        hdf2.sort_values(by=["Voter_ID"], inplace=True)
+        with pd.option_context('display.max_columns', None):
+            print(vdf)
 
-        def get_history(row):
-            hist = row["Data"].values
-
-            return hist
-
-        hdf2["Voter_ID"] = hdf2["Voter_ID"].astype(int, errors='ignore')
-        vdf["Verbose_History"] = hdf2.groupby('Voter_ID').apply(get_history)
         for c in vdf.columns:
             vdf[c].loc[vdf[c].isnull()] = ""
         vdf = self.coerce_dates(vdf)
