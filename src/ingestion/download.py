@@ -642,11 +642,11 @@ class Preprocessor(Loader):
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
                               names=config["elec_code_columns"], na_filter=False)
-            if isinstance(edf["Date"].dtype, str):
-                edf["Date"] = edf["Date"].apply(
-                    pd.to_datetime(format='%m%d%Y')
-                )
+            edf["Date"] = edf["Date"].apply(
+                lambda x: pd.to_datetime(x, format='%m%d%Y')
+            )
             edf.sort_values(by=["Date"])
+            edf["Date"] = edf["Date"].apply(datetime.isoformat)
             sorted_codes = map(str, edf["Election_Code"].unique().tolist())
             edf["Election_Code"] = edf["Election_Code"].astype(str)
 
