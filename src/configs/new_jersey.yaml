@@ -61,10 +61,12 @@ generated_columns:
   all_history: varchar[]
   party_history: varchar[]
   unabridged_status: varchar
+  sparse_history: int[]
 ordered_generated_columns:
   - all_history
   - party_history
   - unabridged_status
+  - sparse_history
 summary_columns:
   - totals
   - date
@@ -243,4 +245,3 @@ hist_columns_type:
   election_type: varchar
   election_category: varchar
   ballot_type: char
-county_names:

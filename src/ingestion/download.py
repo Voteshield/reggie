@@ -962,23 +962,53 @@ class Preprocessor(Loader):
                                   names=configs['hist_columns'],
                                   index_col=False)], axis=0)
 
-        hdf['election_name'] = hdf['election_name'] + ' ' + hdf['election_date']
+        hdf['election_name'] = hdf['election_name'] + ' ' + \
+                               hdf['election_date']
         hdf = self.coerce_dates(hdf, col_list="hist_columns_type")
         hdf = self.coerce_numeric(hdf, col_list="hist_columns_type")
         hdf.sort_values('election_date', inplace=True)
+        hdf = hdf.dropna(subset=['election_name'])
         hdf = hdf.reset_index()
+        elections = hdf["election_name"].unique().tolist()
+        counts = hdf["election_name"].value_counts()
+        elec_dict = {
+            k: {'index': i, 'count': counts.loc[k] if k in counts else 0}
+            for i, k in enumerate(elections)
+        }
         vdf = self.coerce_dates(vdf)
         vdf = self.coerce_numeric(vdf)
         vdf['unabridged_status'] = vdf['status']
         vdf.loc[(vdf['status'] == 'Inactive Confirmation') |
                 (vdf['status'] == 'Inactive Confirmation-Need ID'),
                 'status'] = 'Inactive'
+        vdf['tmp_id'] = vdf['voter_id']
+        vdf = vdf.set_index('tmp_id')
 
+        logging.info("Creating all_history array")
+        vdf['all_history'] = hdf.groupby('voter_id').apply(
+            lambda x: x['election_name'].values
+        )
+        logging.info("Creating party_history array")
+        vdf['party_history'] = hdf.groupby('voter_id').apply(
+            lambda x: x['party_code'].values
+        )
 
-        vdf['all_history'] = vdf['voter_id'].apply(
-            lambda v: hdf.loc[hdf['voter_id'] == v, 'election_name'].tolist())
-        vdf['party_history'] = vdf['voter_id'].apply(
-            lambda v: hdf.loc[hdf['voter_id'] == v, 'party_code'].tolist())
+        with pd.option_context('display.max_columns', None):
+            print(vdf)
+
+        def insert_code_bin(arr):
+            if arr is np.nan:
+                return []
+            else:
+                return [elec_dict[k]['index'] for k in arr]
+
+        vdf['sparse_history'] = vdf['all_history'].apply(insert_code_bin)
+
+        self.meta = {
+            "message": "new_jersey_{}".format(datetime.now().isoformat()),
+            "array_encoding": elec_dict,
+            "array_decoding": elections
+        }
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
