@@ -19,32 +19,15 @@ from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
-    def __init__(self, state=None, s3_key=None, local_file=None):
-        if s3_key is not None and state is not None and state_from_str(
-                s3_key) != state:
-            raise ValueError(
-                "state and s3 must be in agreement if both are set")
-        elif s3_key is None and state is not None and local_file is None:
-            s3_keys = get_raw_s3_uploads(state=state, testing=False)
-            if len(s3_keys) == 0:
-                raise ValueError(
-                    "no raw uploads available to create test file")
-            else:
-                s3_key = s3_keys[-1].key
-        elif s3_key is not None and state is None:
+    def __init__(self, s3_key=None, local_file=None, state=None):
+        if s3_key is not None and state is None:
             state = state_from_str(s3_key)
-        elif local_file is None:
-            raise ValueError(
-                "TestFileBuilder must be initialized with either 'state' or "
-                "'s3_key' or 'local_file'")
-        print(s3_key)
+
         config_file = config_file_from_state(state)
-        super(
-            TestFileBuilder,
-            self).__init__(
-            raw_s3_file=s3_key,
-            config_file=config_file,
-            force_file=local_file)
+        super(TestFileBuilder, self).__init__(
+              raw_s3_file=s3_key,
+              config_file=config_file,
+              force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
@@ -79,6 +62,27 @@ class TestFileBuilder(Preprocessor):
 
     def test_key(self, name):
         return "testing/{}/{}/{}".format(RAW_FILE_PREFIX, self.state, name)
+
+    def __build_florida(self):
+        new_files = self.unpack_files()
+        # insert code to get the method 1
+        smallest_counties = []
+        for i in new_files:
+            if ("LIB" in i) or ("LAF" in i):
+                smallest_counties.append(i)
+        vote_history_files = []
+        voter_files = []
+        for i in smallest_counties:
+            if "_H_" in i:
+                vote_history_files.append(i)
+            elif ".txt" in i:
+                voter_files.append(i)
+        # florida files are composed as nested zip files, but because of the
+        # recursive file structure and because of how preprocess florida is
+        # made it shouldn't matter
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in smallest_counties:
+                zf.write(f, os.path.basename(f))
 
     def __build_new_york(self):
         new_files = self.unpack_files()
@@ -141,7 +145,7 @@ class TestFileBuilder(Preprocessor):
         generator is written for ohio (todo)
         :return: None
         """
-        df = pd.read_csv(self.main_file, compression='gzip', comment="#")
+        df = pd.read_csv(self.main_file, compression='gzip')
         two_small_counties = self.get_smallest_counties(df, count=2)
         filtered_data = self.filter_counties(df, counties=two_small_counties)
         filtered_data.to_csv(self.main_file, compression='gzip')
@@ -220,6 +224,7 @@ class TestFileBuilder(Preprocessor):
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
                   "michigan": self.__build_michigan,
+                  "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
                   "iowa": self.__build_iowa,
                   "new_jersey": self.__build_new_jersey
