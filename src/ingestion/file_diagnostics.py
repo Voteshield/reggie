@@ -310,3 +310,14 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
+
+
+
+if __name__ == '__main__':
+    import sys
+    print("hey")
+    print(sys.argv[2])
+    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2], s3_key=sys.argv[3]) as tf:
+        print(local_file)
+        print(state)
+        tf.build()
