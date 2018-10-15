@@ -175,6 +175,7 @@ class TestFileBuilder(Preprocessor):
         self.temp_files.append(new_file)
 
     def build(self, file_name=None, save_local=False, save_remote=True):
+        print("hey")
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
