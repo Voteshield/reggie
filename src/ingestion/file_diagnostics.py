@@ -11,7 +11,6 @@ from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
-import subprocess
 from datetime import datetime
 from subprocess import Popen, PIPE
 
@@ -96,7 +95,8 @@ class TestFileBuilder(Preprocessor):
 
     def __build_georgia(self):
         new_file = self.unpack_files(compression = 'unzip')
-        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"', quoting=3, nrows = 10000)
+        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"',
+                                quoting=3, nrows = 10000)
         df_voters.to_csv(ga_file, header= True)
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             zf.write(ga_file, os.path.basename(f))
