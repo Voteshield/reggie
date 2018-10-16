@@ -961,8 +961,8 @@ class Preprocessor(Loader):
         vdf["all_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_all_history)
         logging.info("Generating verbose history")
-        vdf["verbose_history"] = hdf.groupby(config['voter_id'])\
-            .apply(get_verbose_history)
+        vdf["verbose_history"] = hdf.groupby(config['voter_id']).apply(
+            lambda x: x['Info'].values)
         logging.info("Generating coded history")
         vdf["coded_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_coded_history)
