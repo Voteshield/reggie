@@ -872,13 +872,16 @@ class Preprocessor(Loader):
                      [516, 517], [517, 519]]
         hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
         ecolspecs = [[0, 13], [13, 21], [21, 46]]
-        self.temp_files.extend([voter_file, hist_file])
         logging.info("MICHIGAN: Loading voter file")
         vdf = pd.read_fwf(voter_file, colspecs=vcolspecs,
                           names=config["ordered_columns"], na_filter=False)
+        logging.info("Removing voter file")
+        os.remove(voter_file)
         logging.info("MICHIGAN: Loading historical file")
         hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
                           names=config["hist_columns"], na_filter=False)
+        logging.info("Removing historical file")
+        os.remove(hist_file)
 
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
@@ -951,12 +954,16 @@ class Preprocessor(Loader):
 
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
+        logging.info("Generating sparse history")
         vdf["sparse_history"] = hdf.groupby(config['voter_id']).\
             apply(get_sparse_history)
+        logging.info("Generating all history")
         vdf["all_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_all_history)
+        logging.info("Generating verbose history")
         vdf["verbose_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_verbose_history)
+        logging.info("Generating coded history")
         vdf["coded_history"] = hdf.groupby(config['voter_id'])\
             .apply(get_coded_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
