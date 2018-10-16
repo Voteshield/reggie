@@ -853,7 +853,7 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = load_configs_from_file("michigan")
         new_files = self.unpack_files()
-        voter_file = ([n for n in new_files if 'v' in n] + [None])[0]
+        voter_file = ([n for n in new_files if 'entire_state_v' in n] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
