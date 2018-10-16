@@ -912,10 +912,10 @@ class Preprocessor(Loader):
             elec_dict = old_meta["array_encoding"]
 
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
-                      hdf["Absentee_Voter_Indicator"] + '_' + \
+                      hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
                       hdf['county_number'].map(str) + '_' + \
-                      hdf["Jurisdiction"].map(str) + '_' \
-                      + hdf["School_Code"].map(str)
+                      hdf["Jurisdiction"].map(str) + '_' + \
+                      hdf["School_Code"].map(str)
 
         def get_sparse_history(group):
             sparse = []
