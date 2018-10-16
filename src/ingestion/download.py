@@ -970,8 +970,8 @@ class Preprocessor(Loader):
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
 
-        for c in vdf.columns:
-            vdf[c].loc[vdf[c].isnull()] = ""
+        vdf.fillna('')
+        logging.info("Coercing dates and numeric")
         vdf = self.coerce_dates(vdf)
         vdf = self.coerce_numeric(vdf)
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
