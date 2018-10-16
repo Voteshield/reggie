@@ -937,13 +937,6 @@ class Preprocessor(Loader):
 
             return all_hist
 
-        def get_verbose_history(group):
-            verbose = []
-            for i, row in group.iterrows():
-                verbose.append(row["Info"])
-
-            return verbose
-
         def get_coded_history(group):
             coded = []
             for ecode in group["Election_Code"].values:
