@@ -967,6 +967,7 @@ class Preprocessor(Loader):
         logging.info("Coercing dates and numeric")
         vdf = self.coerce_dates(vdf)
         vdf = self.coerce_numeric(vdf)
+        logging.info("Writing to csv")
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
