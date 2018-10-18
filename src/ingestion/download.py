@@ -993,9 +993,6 @@ class Preprocessor(Loader):
             lambda x: x['party_code'].values
         )
 
-        with pd.option_context('display.max_columns', None):
-            print(vdf)
-
         def insert_code_bin(arr):
             if arr is np.nan:
                 return []
