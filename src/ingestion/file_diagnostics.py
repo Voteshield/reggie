@@ -94,12 +94,13 @@ class TestFileBuilder(Preprocessor):
                 zf.write(f, os.path.basename(f))
 
     def __build_georgia(self):
-        new_file = self.unpack_files(compression = 'unzip')
-        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"',
+        new_files = self.unpack_files(compression = 'unzip')
+        ga_file = new_files[0]
+        df_voters = pd.read_csv(new_files[0], sep = "|", quotechar='"',
                                 quoting=3, nrows = 10000)
-        df_voters.to_csv(ga_file, header= True)
+        df_voters.to_csv("Georgia.csv")
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            zf.write(ga_file, os.path.basename(f))
+            zf.write("Georgia.csv", os.path.basename(ga_file))
 
         self.temp_files.append(ga_file)
 

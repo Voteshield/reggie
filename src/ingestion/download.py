@@ -470,10 +470,36 @@ class Preprocessor(Loader):
                 fo.write(s)
 
     def preprocess_georgia(self):
-        GA_voterfile = self.unpack_files(compression = 'unzip')
-        print(GA_voterfile)
-        df_voters = pd.read_csv(GA_voterfile[0], sep = "|", quotechar='"', quoting=3)
-        df_voters.columns = self.config["ordered_columns"]
+        new_files = self.unpack_files(compression = 'unzip')
+        vh_files = []
+        for i in new_files:
+            if "Georgia" in i:
+                df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
+                df_voters.columns = self.config["ordered_columns"]
+
+            elif "TXT" in i:
+                vh_files.append(i)
+        def concat_and_delete(in_list, concat_file):
+            with open(concat_file, 'w') as outfile:
+                for fname in in_list:
+                    with open(fname) as infile:
+                        outfile.write(infile.read())
+                    os.remove(fname)
+            return concat_file
+        concat_history_file = concat_and_delete(
+                vh_files, '/tmp/concat_voter_file.txt')
+
+        history['County_Number'] = history[0].str[0:3]
+        history['Regestration_Number'] = history[0].str[3:11]
+        history['Election_Date'] = history[0].str[11:19]
+        history['Election_Type'] = history[0].str[19:22]
+        history['Party'] = history[0].str[22:24]
+        history['Absentee'] = history[0].str[24]
+        history['Provisional'] = history[0].str[25]
+        history['Supplimental'] = history[0].str[26]
+        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional','Supplimental'])
+
+        
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
