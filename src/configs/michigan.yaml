@@ -1,17 +1,24 @@
-file_type: ascii
+file_type: fwf
 state: michigan
 source: boe
 file_class: voter_file
 voter_id: Voter_ID
-county_identifier: County_Code
-birthday_identifier: birthyear
+county_identifier: county_number
+birthday_identifier: Birthyear
 voter_status: status_type
 voter_status_active: A
 voter_status_inactive: V
 voter_status_cancelled: C
 voter_status_rejected: R
 voter_status_challenged: CH
-date_format: "%m%d%Y"
+democratic_party: None
+no_party_affiliation: npa
+republican_party: None
+party_identifier: party_identifier
+numeric_county: True
+date_format:
+  - "%m%d%Y"
+  - '%Y'
 name_fields:
   - First_Name
   - Middle_Name
@@ -52,18 +59,30 @@ format:
     - "Voter File Layout.DOC"
     - "Voter File Layout.pdf"
     - .~lock.Voter_File_Layout.DOC#
+primary_key:
+  - pre_date
+  - post_date
+  - Voter_ID
+  - change_type
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  voter_id: varchar
+  Voter_ID: bigint
   change_type: text
   pre_value: text
   post_value: text
-  state: varchar
+  party_identifier: varchar
 generated_columns:
-  all_history: int[]
+  sparse_history: int[]
+  all_history: varchar[]
+  verbose_history: varchar[]
+  coded_history: varchar[]
 ordered_generated_columns:
+  - sparse_history
   - all_history
+  - verbose_history
+  - coded_history
+has_headers: No
 summary_columns:
   - totals
   - date
@@ -72,9 +91,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Other
+  - npa
   - county
 summary_types:
   - int
@@ -86,16 +103,46 @@ summary_types:
   - int
   - int
   - int
-  - int
-  - text
 columns:
-  VoterID: int
-  County: varchar
+  Voter_ID: bigint
   First_Name: varchar
   Middle_Name: varchar
   Last_Name: varchar
-  Suffix: varchar
-  Registration_Date: date
+  Name_Suffix: varchar
+  registration_date: date
+  Birthyear: date
+  Gender: varchar
+  House_Number_Character: varchar
+  Residence_Street_Number: varchar
+  House_Suffix: varchar
+  Pre_direction: varchar
+  Street_Name: varchar
+  Street_Type: varchar
+  Suffix_Direction: varchar
+  Residence_Extension: varchar
+  City: varchar
+  Address_State: varchar
+  Zip: varchar
+  Mail_Address_1: varchar
+  Mail_Address_2: varchar
+  Mail_Address_3: varchar
+  Mail_Address_4: varchar
+  Mail_Address_5: varchar
+  county_number: int
+  Jurisdiction: int
+  Ward_Precinct: int
+  School_Code: int
+  State_House: int
+  State_Senate: int
+  US_Congress: int
+  County_Commissioner: int
+  Village_Code: int
+  Village_Precinct: int
+  School_Precinct: varchar
+  Permanent_Absentee_Ind: char
+  status_type: varchar
+  UOCAVA_Status: varchar
+  party_identifier: varchar
 ordered_columns:
   - Last_Name
   - First_Name
@@ -103,17 +150,17 @@ ordered_columns:
   - Name_Suffix
   - Birthyear
   - Gender
-  - Date_of_Registration
+  - registration_date
   - House_Number_Character
   - Residence_Street_Number
   - House_Suffix
-  - Pre-direction
+  - Pre_direction
   - Street_Name
   - Street_Type
   - Suffix_Direction
   - Residence_Extension
   - City
-  - State
+  - Address_State
   - Zip
   - Mail_Address_1
   - Mail_Address_2
@@ -121,7 +168,7 @@ ordered_columns:
   - Mail_Address_4
   - Mail_Address_5
   - Voter_ID
-  - County_Code
+  - county_number
   - Jurisdiction
   - Ward_Precinct
   - School_Code
@@ -133,11 +180,12 @@ ordered_columns:
   - Village_Precinct
   - School_Precinct
   - Permanent_Absentee_Ind
-  - Status_Type
+  - status_type
   - UOCAVA_Status
+  - party_identifier
 hist_columns:
   - Voter_ID
-  - County_Code
+  - county_number
   - Jurisdiction
   - School_Code
   - Election_Code

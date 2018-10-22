@@ -16,6 +16,9 @@ voter_status_null:
 democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: Non-Partisan
+absentee_ballot_code: 'PV'
+valid_voting_methods: ['PP','EV','FW','MB']
+voting_method_column: 'all_history'
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
