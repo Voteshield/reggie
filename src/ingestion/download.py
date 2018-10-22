@@ -47,8 +47,8 @@ class Loader(object):
     ```
     """
 
-    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None, force_file=None, clean_up_tmp_files=True,
-                 testing=False):
+    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
+                 force_file=None, clean_up_tmp_files=True, testing=False):
         self.config_file_path = config_file
         self.clean_up_tmp_files = clean_up_tmp_files
         config = load_configs_from_file(config_file=config_file)
@@ -502,6 +502,8 @@ class Preprocessor(Loader):
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        df_voters = self.coerce_dates(df_voters)
+        df_voters = self.coerce_numeric(df_voters)
         df_voters.to_csv(self.main_file, index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
