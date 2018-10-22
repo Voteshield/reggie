@@ -954,11 +954,13 @@ class Preprocessor(Loader):
             vdf = pd.concat(
                 [vdf, pd.read_csv(f, sep='|',
                                   names=configs['ordered_columns'])], axis=0)
+            os.remove(f)
         for f in hist_files:
             hdf = pd.concat(
                 [hdf, pd.read_csv(f, sep='|',
                                   names=configs['hist_columns'],
                                   index_col=False)], axis=0)
+            os.remove(f)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
                                hdf['election_date']
