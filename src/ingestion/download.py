@@ -948,17 +948,14 @@ class Preprocessor(Loader):
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
         logging.info("Generating sparse history")
-        vdf["sparse_history"] = hdf.groupby(config['voter_id']).\
-            apply(get_sparse_history)
+        group = hdf.groupby(config['voter_id'])
+        vdf["sparse_history"] = group.apply(get_sparse_history)
         logging.info("Generating all history")
-        vdf["all_history"] = hdf.groupby(config['voter_id'])\
-            .apply(get_all_history)
+        vdf["all_history"] = group.apply(get_all_history)
         logging.info("Generating verbose history")
-        vdf["verbose_history"] = hdf.groupby(config['voter_id']).apply(
-            lambda x: x['Info'].values)
+        vdf["verbose_history"] = group.apply(lambda x: x['Info'].values)
         logging.info("Generating coded history")
-        vdf["coded_history"] = hdf.groupby(config['voter_id'])\
-            .apply(get_coded_history)
+        vdf["coded_history"] = group.apply(get_coded_history)
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
