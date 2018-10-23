@@ -14,8 +14,6 @@ from storage import generate_s3_key, date_from_str, load_configs_from_file, \
     df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
     listcol_tonumpy, get_surrounding_dates, get_metadata_for_key
 from storage import s3, normalize_columns
-from profilehooks import profile, timecall, coverage, coverage_with_hotshot
-from storage.profiling import profile_function
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -50,8 +48,8 @@ class Loader(object):
     ```
     """
 
-    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None, force_file=None, clean_up_tmp_files=True,
-                 testing=False):
+    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
+                 force_file=None, clean_up_tmp_files=True, testing=False):
         self.config_file_path = config_file
         self.clean_up_tmp_files = clean_up_tmp_files
         config = load_configs_from_file(config_file=config_file)
@@ -343,8 +341,8 @@ class Preprocessor(Loader):
 
     def coerce_dates(self, df):
         """
-        takes all columns with timestamp or date labels in the config file and forces the corresponding entries in the
-        raw file into datetime objects
+        takes all columns with timestamp or date labels in the config file and
+        forces the corresponding entries in the raw file into datetime objects
         :param df: dataframe to modify
         :return: modified dataframe
         """
@@ -363,9 +361,8 @@ class Preprocessor(Loader):
 
     def coerce_numeric(self, df, extra_cols=[]):
         """
-        takes all columns with int labels in the config file
-        as well as any requested extra columns,
-        and forces the corresponding entries in the
+        takes all columns with int labels in the config file as well as any
+        requested extra columns, and forces the corresponding entries in the
         raw file into numerics
         :param df: dataframe to modify
         :param extra_cols: other columns to convert
@@ -519,6 +516,8 @@ class Preprocessor(Loader):
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        df_voters = self.coerce_dates(df_voters)
+        df_voters = self.coerce_numeric(df_voters)
         df_voters.to_csv(self.main_file, index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
@@ -590,7 +589,8 @@ class Preprocessor(Loader):
         df_voters = self.coerce_strings(df_voters)
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters, extra_cols=[
-            "Precinct", "Precinct_Split"])
+            "Precinct", "Precinct_Split", "Daytime_Phone_Number",
+            "Daytime_Area_Code", "Daytime_Phone_Extension"])
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
@@ -614,28 +614,26 @@ class Preprocessor(Loader):
         remaining_files = [f for f in new_files if "CD1" not in f or
                            "Part1" not in f]
 
-        df_voters = pd.read_csv(first_file, sep='","|",  "', engine="python",
-                                skiprows=1, header=None)
+        history_cols = self.config["election_columns"]
+        main_cols = self.config['ordered_columns']
+        buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4"]
+        total_cols = main_cols + history_cols + buffer_cols
+        df_voters = pd.read_csv(first_file, skiprows=1, header=None,
+                                names=total_cols)
 
         for i in remaining_files:
-            new_df = pd.read_csv(i, sep='","|",  "', header=None,
-                                 engine="python")
+            skiprows = 1 if "Part1" in i else 0
+            new_df = pd.read_csv(i, header=None, skiprows=skiprows,
+                                 names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
-        main_cols = self.config['ordered_columns']
-        history_cols = self.config["election_columns"]
-        df_voters.columns = main_cols + history_cols
-        pd.set_option('display.max_columns', 500)
-        df_voters["MISCELLANEOUS"] = df_voters["MISCELLANEOUS"].str[2:]
-        df_voters[history_cols] = df_voters["MISCELLANEOUS"] \
-            .str.split(",", expand=True).iloc[:, :len(history_cols)]
-        df_voters["MISCELLANEOUS"] = ''
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
+        df_voters.drop(columns=buffer_cols, inplace=True)
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -654,7 +652,6 @@ class Preprocessor(Loader):
 
             # the code below will format each key as
             # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
-
             if "PRIMARY" in prefix:
 
                 # so far so good but we need more columns in the event of a
@@ -676,7 +673,7 @@ class Preprocessor(Loader):
                                                     '')
             df_voters[c] = df_voters[c].str.replace('"', '')
             df_voters[c] = df_voters[c].str.replace("'", '')
-            
+
             df_voters.all_history += " " + df_voters[c]
 
         # make into an array (null values are '' so they are ignored)
@@ -714,6 +711,9 @@ class Preprocessor(Loader):
             df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.coerce_dates(df_voters)
         df_voters = self.coerce_numeric(df_voters)
+        pd.set_option('max_columns', 200)
+        pd.set_option('max_row', 6)
+
         df_voters.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
         self.temp_files.append(self.main_file)
@@ -985,7 +985,7 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
-            'florida':self.preprocess_florida,
+            'florida': self.preprocess_florida,
             'new_york': self.preprocess_new_york,
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
