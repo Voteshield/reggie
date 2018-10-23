@@ -951,21 +951,24 @@ class Preprocessor(Loader):
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         for f in voter_files:
-            vdf = pd.concat(
-                [vdf, pd.read_csv(f, sep='|',
-                                  names=configs['ordered_columns'])], axis=0)
+            new_df = pd.read_csv(f, sep='|', names=configs['ordered_columns'],
+                                 low_memory=False)
+            new_df = self.coerce_dates(new_df, col_list='columns')
+            new_df = self.coerce_numeric(new_df, col_list='columns')
+            vdf = pd.concat([vdf, new_df], axis=0)
             os.remove(f)
         for f in hist_files:
-            hdf = pd.concat(
-                [hdf, pd.read_csv(f, sep='|',
+            new_df = pd.read_csv(f, sep='|',
                                   names=configs['hist_columns'],
-                                  index_col=False)], axis=0)
+                                  index_col=False,
+                                 low_memory=False)
+            new_df = self.coerce_numeric(new_df, col_list='hist_columns_type')
+            hdf = pd.concat([hdf, new_df], axis=0)
             os.remove(f)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
                                hdf['election_date']
-        hdf = self.coerce_dates(hdf, col_list="hist_columns_type")
-        hdf = self.coerce_numeric(hdf, col_list="hist_columns_type")
+        hdf = self.coerce_dates(hdf, col_list='hist_columns_type')
         hdf.sort_values('election_date', inplace=True)
         hdf = hdf.dropna(subset=['election_name'])
         hdf = hdf.reset_index()
@@ -975,8 +978,6 @@ class Preprocessor(Loader):
             k: {'index': i, 'count': counts.loc[k] if k in counts else 0}
             for i, k in enumerate(elections)
         }
-        vdf = self.coerce_dates(vdf)
-        vdf = self.coerce_numeric(vdf)
         vdf['unabridged_status'] = vdf['status']
         vdf.loc[(vdf['status'] == 'Inactive Confirmation') |
                 (vdf['status'] == 'Inactive Confirmation-Need ID'),
