@@ -511,26 +511,30 @@ class Preprocessor(Loader):
         history['Supplimental'] = history['Other'].str[2]
         history['Combo_history'] = history[['Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']].apply(lambda x: x.str.cat(sep='_'), axis=1)
         history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional','Supplimental', 'Combo_history'])
-        elections, counts = np.unique(history['Combo_history'],
-                                      return_counts=True)
+        voter_groups = history.groupby['Registration_Number']
+        all_history = voter_groups['Combo_history'].apply(list)
 
-        count_order = counts.argsort()[::-1]
-        elections = elections[count_order]
-        counts = counts[count_order]
+        valid_elections, counts = np.unique(df_hist["Combo_history"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][0:8],
+                                                             "%Y%m%d"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": datetime.strptime(k[0:8], "%Y%m%d")}
+                             for i, k in enumerate(sorted_codes)}
 
-        sorted_codes_dict = {j: {"index": i, "count": counts[i],
-                                 "date": date_from_str(j)}
-                             for i, j in enumerate(elections)}
-
-        default_item = {"index": len(elections)}
+        history["array_position"] = history["Combo_history"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
 
         def insert_code_bin(a):
             return [sorted_codes_dict.get(k, default_item)["index"] for k in a]
 
-        # In an instance like this, where we've created our own systematized
-        # labels for each election I think it makes sense to also keep them
-        # in addition to the sparse history
-        df_voters["sparse_history"] = df_voters.Combo_history.apply(insert_code_bin)
+        history["sparse_history"] = history.Combo_history.apply(insert_code_bin)
 
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
@@ -538,9 +542,13 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(elections.tolist()),
         }
 
-        #at this point, need to push df_voters 
-
-        valid_elections = history.Combo_history.unique().tolist()
+        os.remove(concat_voter_file)
+        os.remove(concat_history_file)
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        history.to_csv(self.main_file)
+        self.temp_files.append(self.main_file)
+        chksum = self.compute_checksum()
+        return chksum
                 
 
     def preprocess_nevada(self):
