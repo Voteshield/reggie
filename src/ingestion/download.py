@@ -951,6 +951,7 @@ class Preprocessor(Loader):
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         for f in voter_files:
+            logging.info("Reading " + f)
             new_df = pd.read_csv(f, sep='|', names=configs['ordered_columns'],
                                  low_memory=False)
             new_df = self.coerce_dates(new_df, col_list='columns')
@@ -958,6 +959,7 @@ class Preprocessor(Loader):
             vdf = pd.concat([vdf, new_df], axis=0)
             os.remove(f)
         for f in hist_files:
+            logging.info("Reading " + f)
             new_df = pd.read_csv(f, sep='|',
                                   names=configs['hist_columns'],
                                   index_col=False,
