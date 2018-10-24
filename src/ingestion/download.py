@@ -474,10 +474,7 @@ class Preprocessor(Loader):
         vh_files = []
         for i in new_files:
             if "Georgia" in i:
-                print("look here tyler")
-                print(i)
                 df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
-                print(df_voters.head())
                 df_voters.columns = self.config["ordered_columns"]
 
             elif "TXT" in i:
@@ -490,11 +487,20 @@ class Preprocessor(Loader):
                     os.remove(fname)
             return concat_file
         concat_history_file = concat_and_delete(
-                vh_files, '/tmp/concat_voter_file.txt')
+                vh_files, '/tmp/concat_history_file.txt')
 
-        history = pd.read_csv('/tmp/concat_voter_file.txt', sep = "  ", names = ['Concat_str', 'Other'])
+        history = pd.read_csv(concat_history_file, sep = "  ", names = ['Concat_str', 'Other'])
         print(history.head())
 
+
+        County_Number = []
+        Regestration_Number = []
+        Election_Date = []
+        Election_Type = []
+        Party = []
+        Absentee = []
+        Provisional = []
+        Supplimental = []
         history['County_Number'] = history['Concat_str'].str[0:3]
         history['Regestration_Number'] = history['Concat_str'].str[3:11]
         history['Election_Date'] = history['Concat_str'].str[11:19]
@@ -505,14 +511,13 @@ class Preprocessor(Loader):
         history['Supplimental'] = history['Other'].str[2]
         history['Combo_history'] = history[['Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']].apply(lambda x: x.str.cat(sep='_'), axis=1)
         history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional','Supplimental', 'Combo_history'])
-
         elections, counts = np.unique(history['Combo_history'],
                                       return_counts=True)
+
         count_order = counts.argsort()[::-1]
         elections = elections[count_order]
         counts = counts[count_order]
 
-        # create meta
         sorted_codes_dict = {j: {"index": i, "count": counts[i],
                                  "date": date_from_str(j)}
                              for i, j in enumerate(elections)}
@@ -525,14 +530,15 @@ class Preprocessor(Loader):
         # In an instance like this, where we've created our own systematized
         # labels for each election I think it makes sense to also keep them
         # in addition to the sparse history
-        df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
+        df_voters["sparse_history"] = df_voters.Combo_history.apply(insert_code_bin)
 
         self.meta = {
-            "message": "iowa_{}".format(datetime.now().isoformat()),
+            "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
 
+        #at this point, need to push df_voters 
 
         valid_elections = history.Combo_history.unique().tolist()
                 
