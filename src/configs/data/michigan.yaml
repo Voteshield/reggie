@@ -1,0 +1,281 @@
+file_type: fwf
+state: michigan
+source: boe
+file_class: voter_file
+voter_id: Voter_ID
+county_identifier: county_number
+birthday_identifier: Birthyear
+voter_status: status_type
+voter_status_active: A
+voter_status_inactive: V
+voter_status_cancelled: C
+voter_status_rejected: R
+voter_status_challenged: CH
+democratic_party: None
+no_party_affiliation: npa
+republican_party: None
+party_identifier: party_identifier
+numeric_county: True
+date_format:
+  - "%m%d%Y"
+  - '%Y'
+name_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+  - Suffix
+address_fields:
+  - house_number_character
+  - residence_street_character
+  - house_suffix
+  - pre-direction
+  - street_name
+  - street_type
+  - suffix_direction
+  - residence_extension
+  - city
+  - state
+  - zip
+  - mail_address_1 #if different from residential address
+  - mail_address_2
+  - mail_address_3
+  - mail_address_4
+  - mail_address_5
+format:
+  separate_hist: true
+  segmented_files: false
+  ignore_files:
+    - ._.DS_Store
+    - .DS_Store
+    - codefile_layouts.pdf
+    - countycd.lst
+    - "History File Layout.pdf"
+    - jurisdcd.lst
+    - List_Of_All_Counties_And_Codes.lst
+    - List_Of_All_Jurisdictions_And_Codes.lst
+    - List_Of_All_SchoolDistricts_And_Codes.lst
+    - schoolcd.lst
+    - villagecd.lst
+    - "Voter File Layout.DOC"
+    - "Voter File Layout.pdf"
+    - .~lock.Voter_File_Layout.DOC#
+primary_key:
+  - pre_date
+  - post_date
+  - Voter_ID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  Voter_ID: bigint
+  change_type: text
+  pre_value: text
+  post_value: text
+  party_identifier: varchar
+generated_columns:
+  sparse_history: int[]
+  all_history: varchar[]
+  verbose_history: varchar[]
+  coded_history: varchar[]
+ordered_generated_columns:
+  - sparse_history
+  - all_history
+  - verbose_history
+  - coded_history
+has_headers: No
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - npa
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+columns:
+  Voter_ID: bigint
+  First_Name: varchar
+  Middle_Name: varchar
+  Last_Name: varchar
+  Name_Suffix: varchar
+  registration_date: date
+  Birthyear: date
+  Gender: varchar
+  House_Number_Character: varchar
+  Residence_Street_Number: varchar
+  House_Suffix: varchar
+  Pre_direction: varchar
+  Street_Name: varchar
+  Street_Type: varchar
+  Suffix_Direction: varchar
+  Residence_Extension: varchar
+  City: varchar
+  Address_State: varchar
+  Zip: varchar
+  Mail_Address_1: varchar
+  Mail_Address_2: varchar
+  Mail_Address_3: varchar
+  Mail_Address_4: varchar
+  Mail_Address_5: varchar
+  county_number: int
+  Jurisdiction: int
+  Ward_Precinct: int
+  School_Code: int
+  State_House: int
+  State_Senate: int
+  US_Congress: int
+  County_Commissioner: int
+  Village_Code: int
+  Village_Precinct: int
+  School_Precinct: varchar
+  Permanent_Absentee_Ind: char
+  status_type: varchar
+  UOCAVA_Status: varchar
+  party_identifier: varchar
+ordered_columns:
+  - Last_Name
+  - First_Name
+  - Middle_Name
+  - Name_Suffix
+  - Birthyear
+  - Gender
+  - registration_date
+  - House_Number_Character
+  - Residence_Street_Number
+  - House_Suffix
+  - Pre_direction
+  - Street_Name
+  - Street_Type
+  - Suffix_Direction
+  - Residence_Extension
+  - City
+  - Address_State
+  - Zip
+  - Mail_Address_1
+  - Mail_Address_2
+  - Mail_Address_3
+  - Mail_Address_4
+  - Mail_Address_5
+  - Voter_ID
+  - county_number
+  - Jurisdiction
+  - Ward_Precinct
+  - School_Code
+  - State_House
+  - State_Senate
+  - US_Congress
+  - County_Commissioner
+  - Village_Code
+  - Village_Precinct
+  - School_Precinct
+  - Permanent_Absentee_Ind
+  - status_type
+  - UOCAVA_Status
+  - party_identifier
+hist_columns:
+  - Voter_ID
+  - county_number
+  - Jurisdiction
+  - School_Code
+  - Election_Code
+  - Absentee_Voter_Indicator
+elec_code_columns:
+  - Election_Code
+  - Date
+  - Title
+county_names:
+  Alcona_County: 01
+  Alger_County: 02
+  Allegan_County: 03
+  Alpena_County: 04
+  Antrim_County: 05
+  Arenac_County: 06
+  Baraga_County: 07
+  Barry_County: 08
+  Bay_County: 09
+  Benzie_County: 10
+  Berrien_County: 11
+  Branch_County: 12
+  Calhoun_County: 13
+  Cass_County: 14
+  Charlevoix_County: 15
+  Cheboygan_County: 16
+  Chippewa_County: 17
+  Clare_County: 18
+  Clinton_County: 19
+  Crawford_County: 20
+  Delta_County: 21
+  Dickinson_County: 22
+  Eaton_County: 23
+  Emmet_County: 24
+  Genesee_County: 25
+  Gladwin_County: 26
+  Gogebic_County: 27
+  Grand_Traverse_County: 28
+  Gratiot_County: 29
+  Hillsdale_County: 30
+  Houghton_County: 31
+  Huron_County: 32
+  Ingham_County: 33
+  Ionia_County: 34
+  Iosco_County: 35
+  Iron_County: 36
+  Isabella_County: 37
+  Jackson_County: 38
+  Kalamazoo_County: 39
+  Kalkaska_County: 40
+  Kent_County: 41
+  Keweenaw_County: 42
+  Lake_County: 43
+  Lapeer_County: 44
+  Leelanau_County: 45
+  Lenawee_County: 46
+  Livingston_County: 47
+  Luce_County: 48
+  Mackinac_County: 49
+  Macomb_County: 50
+  Manistee_County: 51
+  Marquette_County: 52
+  Mason_County: 53
+  Mecosta_County: 54
+  Menominee_County: 55
+  Midland_County: 56
+  Missaukee_County: 57
+  Monroe_County: 58
+  Montcalm_County: 59
+  Montmorency_County: 60
+  Muskegon_County: 61
+  Newaygo_County: 62
+  Oakland_County: 63
+  Oceana_County: 64
+  Ogemaw_County: 65
+  Ontonagon_County: 66
+  Osceola_County: 67
+  Oscoda_County: 68
+  Otsego_County: 69
+  Ottawa_County: 70
+  Presque_Isle_County: 71
+  Roscommon_County: 72
+  Saginaw_County: 73
+  Sanilac_County: 74
+  Schoolcraft_County: 75
+  Shiawassee_County: 76
+  St_Clair_County: 77
+  St_Joseph_County: 78
+  Tuscola_County: 79
+  Van_Buren_County: 80
+  Washtenaw_County: 81
+  Wayne_County: 82
+  Wexford_County: 83
+missing_required_fields: true
