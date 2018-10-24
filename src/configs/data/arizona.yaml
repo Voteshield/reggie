@@ -37,7 +37,6 @@ no_party_affiliation: OTHER
 absentee_ballot_code: 'A'
 valid_voting_methods: ['E','I','Y','P','F']
 voting_method_column: 'all_voting_methods'
-missing_required_fields: false
 numeric_county: false
 date_format: '%Y.0'
 party_identifier: desc_party
