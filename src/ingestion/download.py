@@ -898,6 +898,7 @@ class Preprocessor(Loader):
             edf["Title"] += '_'
             edf["Title"] = edf["Title"] + edf["Date"].map(str)
             counts = hdf["Election_Code"].value_counts()
+            counts.index = counts.index.map(str)
             elec_dict = {
                 k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
                 'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
