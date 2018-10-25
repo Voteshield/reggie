@@ -1003,6 +1003,10 @@ class Preprocessor(Loader):
                 return [elec_dict[k]['index'] for k in arr]
 
         vdf['sparse_history'] = vdf['all_history'].apply(insert_code_bin)
+        vdf.loc[
+            vdf[self.config['birthday_identifier']] <
+            pd.to_datetime('1900-01-01'),
+            self.config['birthday_identifier']] = pd.NaT
 
         self.meta = {
             "message": "new_jersey_{}".format(datetime.now().isoformat()),
