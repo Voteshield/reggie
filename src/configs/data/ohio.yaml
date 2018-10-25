@@ -14,7 +14,6 @@ no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
 numeric_county: true
 party_identifier: PARTY_AFFILIATION
-missing_required_fields: false
 name_fields:
   - LAST_NAME
   - FIRST_NAME

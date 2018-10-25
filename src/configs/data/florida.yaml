@@ -23,7 +23,6 @@ independent_party: INT
 independence_party: IDP
 americas_independent_party: AIP
 party_identifier: Party_Affiliation
-missing_required_fields: false
 date_format: '%m/%d/%Y'
 numeric_county: false
 generated_columns:
