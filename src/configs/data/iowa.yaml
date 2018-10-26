@@ -12,6 +12,7 @@ voter_status_active: Active
 voter_status_inactive: Inactive
 voter_status_pending: Pending
 voter_status_null:
+absentee_ballot_code: 'A'
 democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB
