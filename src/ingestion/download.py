@@ -502,7 +502,7 @@ class Preprocessor(Loader):
         Provisional = []
         Supplimental = []
         history['County_Number'] = history['Concat_str'].str[0:3]
-        history['Regestration_Number'] = history['Concat_str'].str[3:11]
+        history['Registration_Number'] = history['Concat_str'].str[3:11]
         history['Election_Date'] = history['Concat_str'].str[11:19]
         history['Election_Type'] = history['Concat_str'].str[19:22]
         history['Party'] = history['Concat_str'].str[22:24]
@@ -511,41 +511,42 @@ class Preprocessor(Loader):
         history['Supplimental'] = history['Other'].str[2]
         history['Combo_history'] = history[['Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']].apply(lambda x: x.str.cat(sep='_'), axis=1)
         history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional','Supplimental', 'Combo_history'])
-        voter_groups = history.groupby['Registration_Number']
-        all_history = voter_groups['Combo_history'].apply(list)
-
-        valid_elections, counts = np.unique(df_hist["Combo_history"],
+        print("finished string manipulation")
+        valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
                              key=lambda x: datetime.strptime(x[1][0:8],
                                                              "%Y%m%d"),
                              reverse=True)]
+
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": datetime.strptime(k[0:8], "%Y%m%d")}
                              for i, k in enumerate(sorted_codes)}
-
         history["array_position"] = history["Combo_history"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
+                      
 
-        def insert_code_bin(a):
-            return [sorted_codes_dict.get(k, default_item)["index"] for k in a]
+        voter_groups = history.groupby['Registration_Number']
+        all_history = voter_groups['Combo_history'].apply(list)
 
-        history["sparse_history"] = history.Combo_history.apply(insert_code_bin)
+        df_voters = df_voters.set_index(self.config["voter_id"])
+        df_voters["all_history"] = all_history
 
+        
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
-            "array_decoding": json.dumps(elections.tolist()),
+            "array_decoding": json.dumps(sorted_codes),
         }
 
         os.remove(concat_voter_file)
         os.remove(concat_history_file)
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        history.to_csv(self.main_file)
+        df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
