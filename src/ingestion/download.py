@@ -780,7 +780,8 @@ class Preprocessor(Loader):
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
             "Residential ZipCode", "Mailing ZipCode", "Precinct",
-            "House Number", "Unit Number", "Split"])
+            "House Number", "Unit Number", "Split", "Township",
+            "Ward", "Precinct Name"])
 
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),
