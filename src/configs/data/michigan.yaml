@@ -11,6 +11,7 @@ voter_status_inactive: V
 voter_status_cancelled: C
 voter_status_rejected: R
 voter_status_challenged: CH
+absentee_ballot_code: 'Y'
 democratic_party: None
 no_party_affiliation: npa
 republican_party: None
@@ -278,3 +279,7 @@ county_names:
   Washtenaw_County: 81
   Wayne_County: 82
   Wexford_County: 83
+<<<<<<< HEAD:src/configs/michigan.yaml
+=======
+missing_required_fields: true
+>>>>>>> master:src/configs/data/michigan.yaml
