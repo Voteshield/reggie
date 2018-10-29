@@ -12,11 +12,12 @@ voter_status_active: Active
 voter_status_inactive: Inactive
 voter_status_pending: Pending
 voter_status_null:
+absentee_ballot_code: 'A'
 democratic_party: DEM
 republican_party: REP
+libertarian_party: LIB
 no_party_affiliation: NP
 party_identifier: PARTY
-missing_required_fields: 0
 numeric_county: false
 date_format: '%m/%d/%Y'
 generated_columns:
