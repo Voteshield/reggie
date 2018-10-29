@@ -950,7 +950,7 @@ class Preprocessor(Loader):
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
                                hdf['election_date']
-        hdf = self.coerce_dates(hdf, col_list='hist_columns_type')
+        hdf = self.config.coerce_dates(hdf, col_list='hist_columns_type')
         hdf.sort_values('election_date', inplace=True)
         hdf = hdf.dropna(subset=['election_name'])
         hdf = hdf.reset_index()
