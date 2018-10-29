@@ -932,8 +932,8 @@ class Preprocessor(Loader):
             logging.info("Reading " + f)
             new_df = pd.read_csv(f, sep='|', names=config['ordered_columns'],
                                  low_memory=False)
-            new_df = self.config.coerce_dates(new_df, col_list='columns')
-            new_df = self.config.coerce_numeric(new_df, col_list='columns')
+            new_df = self.config.coerce_dates(new_df)
+            new_df = self.config.coerce_numeric(new_df)
             vdf = pd.concat([vdf, new_df], axis=0)
         for f in hist_files:
             logging.info("Reading " + f)
@@ -941,7 +941,7 @@ class Preprocessor(Loader):
                                   names=config['hist_columns'],
                                   index_col=False,
                                  low_memory=False)
-            new_df = self.coerce_numeric(new_df, col_list='hist_columns_type')
+            new_df = self.coerce_numeric(new_df, extra_cols='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
         for f in voter_files:
             os.remove(f)
