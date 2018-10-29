@@ -476,7 +476,7 @@ class Preprocessor(Loader):
             if "Georgia" in i:
                 df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
                 df_voters.columns = self.config["ordered_columns"]
-
+                df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i:
                 vh_files.append(i)
         def concat_and_delete(in_list, concat_file):
@@ -523,28 +523,37 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
+        print("sorted codes work done")
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": datetime.strptime(k[0:8], "%Y%m%d")}
                              for i, k in enumerate(sorted_codes)}
         history["array_position"] = history["Combo_history"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
+        print("created and filled dict")
                       
 
-        voter_groups = history.groupby['Registration_Number']
+        voter_groups = history.groupby('Registration_Number')
         all_history = voter_groups['Combo_history'].apply(list)
-
-        df_voters = df_voters.set_index(self.config["voter_id"])
+        print("check index and index type")
+        print(type(all_history.index[0]))
+        print(all_history.head(50))
+        print("groupby and apply done")
+        df_voters = df_voters.set_index('Registration_Number')
         df_voters["all_history"] = all_history
+        print("check post merge")
+        print(df_voters.head(30))
+        print(df_voters.describe())
 
+
+        print("now making the json dumps")
         
+
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_encoding": json.dumps(sorted_codes_dict, indent=4, sort_keys=True, default=str),
             "array_decoding": json.dumps(sorted_codes),
         }
-
-        os.remove(concat_voter_file)
-        os.remove(concat_history_file)
+        print("json dumps complete, moving to saving files")
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)

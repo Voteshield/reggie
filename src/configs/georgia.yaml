@@ -19,6 +19,8 @@ no_party_affiliation: Non-
 numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
+generated_columns:
+  all_history: int[]
 name_fields:
   - First_Name
   - Middle_Name
@@ -49,7 +51,7 @@ base_columns:
   post_value: text
   state: varchar
 generated_columns:
-  all_history: text[]
+  Combo_history: text[]
 ordered_generated_columns:
   - all_history
 has_headers: NO
@@ -61,15 +63,6 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Independent_American_Party
-  - Republican
-  - Democrat
-  - Non_Partisan
-  - Libertarian_Party
-  - Other_All_Others
-  - Green_Party
-  - Natural_Law_Party
-  - county
 summary_types:
   - int
   - timestamp
@@ -114,7 +107,7 @@ columns:
   ID_Required: char
 ordered_columns:
   - County_code
-  - Registration_number
+  - Registration_Number
   - Voter_status
   - Last_name
   - First_name
@@ -178,7 +171,7 @@ ordered_columns:
   - Mail_country
 hist_columns:
   - County Number 
-  - Registration_Number
+  - Registration_number
   - Election_Date
   - Election_Type
   - Party
