@@ -941,7 +941,7 @@ class Preprocessor(Loader):
                                   names=config['hist_columns'],
                                   index_col=False,
                                  low_memory=False)
-            new_df = self.coerce_numeric(new_df, extra_cols='hist_columns_type')
+            new_df = self.coerce_numeric(new_df, col_list='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
         for f in voter_files:
             os.remove(f)

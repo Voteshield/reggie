@@ -75,7 +75,7 @@ class Config(object):
                         break
         return df
 
-    def coerce_numeric(self, df, extra_cols=None):
+    def coerce_numeric(self, df, extra_cols=None, col_list="columns"):
         """
         takes all columns with int labels in the config file as well as any
         requested extra columns, and forces the corresponding entries in the
@@ -85,9 +85,9 @@ class Config(object):
         :return: modified dataframe
         """
         extra_cols = [] if extra_cols is None else extra_cols
-        numeric_fields = [c for c, v in self.data["columns"].items()
+        numeric_fields = [c for c, v in self.data[col_list].items()
                           if "int" in v or v == "float" or v == "double"]
-        int_fields = [c for c, v in self.data["columns"].items()
+        int_fields = [c for c, v in self.data[col_list].items()
                       if "int" in v]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
