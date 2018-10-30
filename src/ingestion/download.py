@@ -968,12 +968,13 @@ class Preprocessor(Loader):
         vdf['tmp_id'] = vdf['voter_id']
         vdf = vdf.set_index('tmp_id')
 
+        hdf_id_group = hdf.groupby('voter_id')
         logging.info("Creating all_history array")
-        vdf['all_history'] = hdf.groupby('voter_id').apply(
+        vdf['all_history'] = hdf_id_group.apply(
             lambda x: x['election_name'].values
         )
         logging.info("Creating party_history array")
-        vdf['party_history'] = hdf.groupby('voter_id').apply(
+        vdf['party_history'] = hdf_id_group.apply(
             lambda x: x['party_code'].values
         )
 
