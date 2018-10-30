@@ -63,6 +63,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
+  - democratic_party
 summary_types:
   - int
   - timestamp
