@@ -19,6 +19,7 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
+import time
 import sys
 
 
@@ -175,6 +176,7 @@ class Loader(object):
         p = Popen(["unzip", file_name, "-d", new_loc],
                   stdout=PIPE, stderr=PIPE, stdin=PIPE)
         p.communicate("A")
+        time.sleep(5)  # slowboi
         return new_loc, p
 
     def gunzip_decompress(self, file_name):
@@ -359,15 +361,9 @@ class Preprocessor(Loader):
                         d = decompressed_result + "/" + f
                         expand_recurse(d)
 
-                elif zipfile.is_zipfile(decompressed_result):
-                    expand_recurse(decompressed_result)
-                    
                 else:
                     # was file
                     all_files.append(decompressed_result)
-
-                if not success:
-                    logging.error("Failed to decompress " + file_name)
 
         expand_recurse(self.main_file)
 
@@ -929,9 +925,6 @@ class Preprocessor(Loader):
     def preprocess_new_jersey(self):
         new_files = self.unpack_files()
         config = Config("new_jersey")
-        for n in new_files:
-            print(os.path.dirname(n))
-            print(n)
         voter_files = [n for n in new_files if 'AlphaVoter' in n]
         hist_files = [n for n in new_files if 'History' in n]
         vdf = pd.DataFrame()
