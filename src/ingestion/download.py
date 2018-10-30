@@ -358,9 +358,16 @@ class Preprocessor(Loader):
                     for f in os.listdir(decompressed_result):
                         d = decompressed_result + "/" + f
                         expand_recurse(d)
+
+                elif zipfile.is_zipfile(decompressed_result):
+                    expand_recurse(decompressed_result)
+                    
                 else:
                     # was file
                     all_files.append(decompressed_result)
+
+                if not success:
+                    logging.error("Failed to decompress " + file_name)
 
         expand_recurse(self.main_file)
 
@@ -924,6 +931,7 @@ class Preprocessor(Loader):
         config = Config("new_jersey")
         for n in new_files:
             print(os.path.dirname(n))
+            print(n)
         voter_files = [n for n in new_files if 'AlphaVoter' in n]
         hist_files = [n for n in new_files if 'History' in n]
         vdf = pd.DataFrame()
