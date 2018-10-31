@@ -52,7 +52,7 @@ primary_key:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  voter_id: varchar
+  voter_id: int
   change_type: text
   pre_value: text
   post_value: text
@@ -105,7 +105,7 @@ summary_types:
   - text
 columns:
   county: varchar
-  voter_id: varchar
+  voter_id: int
   legacy_id: int
   last_name: varchar
   first_name: varchar
@@ -202,7 +202,7 @@ hist_columns:
   - election_category
   - ballot_type
 hist_columns_type:
-  voter_id: varchar
+  voter_id: int
   status_code: char
   party_code: varchar
   last_name: varchar
