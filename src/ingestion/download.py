@@ -176,7 +176,7 @@ class Loader(object):
         p = Popen(["unzip", file_name, "-d", new_loc],
                   stdout=PIPE, stderr=PIPE, stdin=PIPE)
         p.communicate("A")
-        time.sleep(10)  # slowboi
+        time.sleep(15)  # slowboi
         return new_loc, p
 
     def gunzip_decompress(self, file_name):
