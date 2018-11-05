@@ -19,7 +19,7 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
-import time
+import subprocess
 import sys
 
 
@@ -173,11 +173,8 @@ class Loader(object):
         logging.info("decompressing unzip {} to {}".format(file_name,
                                                            new_loc))
         os.mkdir(new_loc)
-        p = Popen(["unzip", file_name, "-d", new_loc],
-                  stdout=PIPE, stderr=PIPE, stdin=PIPE)
-        p.communicate("A")
-        time.sleep(15)  # slowboi
-        return new_loc, p
+        r = subprocess.call(['unzip', file_name, '-d', new_loc])
+        return new_loc, r
 
     def gunzip_decompress(self, file_name):
         """
@@ -199,7 +196,7 @@ class Loader(object):
             new_loc = file_name[:-3]
         else:
             new_loc = file_name
-        return new_loc, p
+        return new_loc, p.returncode
 
     def bunzip2_decompress(self, file_name):
         """
@@ -221,7 +218,7 @@ class Loader(object):
             new_loc = file_name[:-4]
         else:
             new_loc = file_name + ".out"
-        return new_loc, p
+        return new_loc, p.returncode
 
     def sevenzip_decompress(self, file_name):
         """
@@ -242,7 +239,7 @@ class Loader(object):
         p = Popen(["7z", "e", "-so", file_name],
                   stdout=open(new_loc, "w"), stderr=PIPE, stdin=PIPE)
         p.communicate()
-        return new_loc, p
+        return new_loc, p.returncode
 
     def infer_compression(self, file_name):
         """
@@ -298,7 +295,7 @@ class Loader(object):
             else:
                 new_loc, p = self.gunzip_decompress(file_name)
 
-            if compression_type is not None and p.returncode == 0:
+            if compression_type is not None and p == 0:
                 logging.info("decompression done: {}".format(file_name))
                 self.temp_files.append(new_loc)
                 success = True
