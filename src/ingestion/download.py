@@ -174,6 +174,8 @@ class Loader(object):
                                                            new_loc))
         os.mkdir(new_loc)
         r = subprocess.call(['unzip', file_name, '-d', new_loc])
+        if r == 1:
+            r = 0
         return new_loc, r
 
     def gunzip_decompress(self, file_name):
