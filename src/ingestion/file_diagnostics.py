@@ -7,7 +7,8 @@ import pandas as pd
 import numpy as np
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
-from storage import get_raw_s3_uploads, load_configs_from_file, state_from_str, config_file_from_state
+from configs.configs import Config
+from storage import get_raw_s3_uploads, state_from_str
 from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 from storage.connections import s3
@@ -23,7 +24,7 @@ class TestFileBuilder(Preprocessor):
         if s3_key is not None and state is None:
             state = state_from_str(s3_key)
 
-        config_file = config_file_from_state(state)
+        config_file = Config.config_file_from_state(state)
         super(TestFileBuilder, self).__init__(
               raw_s3_file=s3_key,
               config_file=config_file,
@@ -32,7 +33,7 @@ class TestFileBuilder(Preprocessor):
             self.state = state_from_str(s3_key)
         else:
             self.state = state
-        self.config = load_configs_from_file(state=self.state)
+        self.config = Config(state=self.state)
         self.local_file = local_file
 
     def get_smallest_counties(self, df, count=2):
@@ -88,7 +89,7 @@ class TestFileBuilder(Preprocessor):
         new_files = self.unpack_files()
         ny_file = new_files[0]
         truncated_file = ny_file + ".head"
-        config = load_configs_from_file(state="new_york")
+        config = Config(state="new_york")
         os.system("head -4000 {0} > {1}".format(ny_file, truncated_file))
 
         df = pd.read_csv(
@@ -174,7 +175,7 @@ class TestFileBuilder(Preprocessor):
                 hist_file = file
             if 'state_v' in file:
                 voter_file = file
-        config = load_configs_from_file(state='michigan')
+        config = Config(state='michigan')
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
 
@@ -284,7 +285,7 @@ class DiagnosticTest(object):
 
     def __init__(self, file_path, config_file, preproc_obj):
         self.file_path = file_path
-        self.configs = load_configs_from_file(config_file=config_file)
+        self.configs = Config(file_name=config_file)
         self.preproc_obj = preproc_obj
         self.logs = ""
         self.config_file = config_file
