@@ -95,7 +95,7 @@ class Loader(object):
                     os.chmod(fn, 0777)
                     os.remove(fn)
                 except OSError:
-                    logging.warning("cannot remove {}".format(fm))
+                    logging.warning("cannot remove {}".format(fn))
                     continue
             elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
