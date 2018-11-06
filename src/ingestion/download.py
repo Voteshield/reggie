@@ -804,31 +804,60 @@ class Preprocessor(Loader):
         if(elec_codes):
             logging.info("Detected election code file: " + elec_codes)
 
-        vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
-                     [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
-                     [105, 135], [135, 141], [141, 143], [143, 156],
-                     [156, 191], [191, 193], [193, 198], [198, 248],
-                     [248, 298], [298, 348], [348, 398], [398, 448],
-                     [448, 461], [461, 463], [463, 468], [468, 474],
-                     [474, 479], [479, 484], [484, 489], [489, 494],
-                     [494, 499], [499, 504], [504, 510], [510, 516],
-                     [516, 517], [517, 519]]
-        hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-        ecolspecs = [[0, 13], [13, 21], [21, 46]]
-        logging.info("MICHIGAN: Loading voter file")
-        vdf = pd.read_fwf(voter_file, colspecs=vcolspecs,
-                          names=config["ordered_columns"], na_filter=False)
-        logging.info("Removing voter file")
-        os.remove(voter_file)
-        logging.info("MICHIGAN: Loading historical file")
-        hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
-                          names=config["hist_columns"], na_filter=False)
-        logging.info("Removing historical file")
-        os.remove(hist_file)
+        if voter_file[-3:] == "lst":
+            vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
+                         [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
+                         [105, 135], [135, 141], [141, 143], [143, 156],
+                         [156, 191], [191, 193], [193, 198], [198, 248],
+                         [248, 298], [298, 348], [348, 398], [398, 448],
+                         [448, 461], [461, 463], [463, 468], [468, 474],
+                         [474, 479], [479, 484], [484, 489], [489, 494],
+                         [494, 499], [499, 504], [504, 510], [510, 516],
+                         [516, 517], [517, 519]]
+            logging.info("MICHIGAN: Loading voter file")
+            vdf = pd.read_fwf(voter_file, colspecs=vcolspecs,
+                              names=config["ordered_columns"], na_filter=False)
+            logging.info("Removing voter file")
+            os.remove(voter_file)
+        elif voter_file[-3:] == "csv":
+            logging.info("MICHIGAN: Loading voter file")
+            vdf = pd.read_csv(voter_file, names=config["ordered_columns"],
+                              na_filter=False)
+            logging.info("Removing voter file")
+            os.remove(voter_file)
+        else:
+            raise NotImplementedError("File format not implemented. Contact "
+                                      "your local code monkey")
+        if hist_file[-3:] == "lst":
+            hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
+            logging.info("MICHIGAN: Loading historical file")
+            hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
+                              names=config["hist_columns"], na_filter=False)
+            logging.info("Removing historical file")
+            os.remove(hist_file)
+        elif hist_file[-3:]:
+            logging.info("MICHIGAN: Loading historical file")
+            hdf = pd.read_csv(hist_file, names=config["hist_columns"],
+                              na_filter=False)
+            logging.info("Removing historical file")
+            os.remove(hist_file)
+        else:
+            raise NotImplementedError("File format not implemented. Contact "
+                                      "your local code monkey")
 
         if elec_codes:
-            edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
-                              names=config["elec_code_columns"], na_filter=False)
+            if elec_codes[-3:] == "lst":
+                ecolspecs = [[0, 13], [13, 21], [21, 46]]
+                edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
+                                  names=config["elec_code_columns"],
+                                  na_filter=False)
+            elif elec_codes[-3:] == "csv":
+                edf = pd.read_csv(elec_codes,
+                                  names=config["elec_code_columns"],
+                                  na_filter=False)
+            else:
+                raise NotImplementedError("File format not implemented. "
+                                          "Contact your local code monkey")
             edf["Date"] = edf["Date"].apply(
                 lambda x: pd.to_datetime(x, format='%m%d%Y')
             )
