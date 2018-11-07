@@ -821,8 +821,14 @@ class Preprocessor(Loader):
             os.remove(voter_file)
         elif voter_file[-3:] == "csv":
             logging.info("MICHIGAN: Loading voter file")
-            vdf = pd.read_csv(voter_file, names=config["ordered_columns"],
-                              na_filter=False)
+            vdf = pd.read_csv(voter_file, na_filter=False)\
+                .drop(["COUNTY_NAME", "JURISDICTION_NAME",
+                       "SCHOOL_DISTRICT_NAME", "STATE_HOUSE_DISTRICT_NAME",
+                       "STATE_SENATE_DISTRICT_NAME",
+                       "US_CONGRESS_DISTRICT_NAME",
+                       "COUNTY_COMMISSIONER_DISTRICT_NAME",
+                       "VILLAGE_DISTRICT_NAME"], axis=1)
+            vdf.columns = config["ordered_columns"]
             logging.info("Removing voter file")
             os.remove(voter_file)
         else:
@@ -884,6 +890,10 @@ class Preprocessor(Loader):
             sorted_codes = old_meta["array_decoding"]
             elec_dict = old_meta["array_encoding"]
 
+        vdf = self.config.coerce_dates(vdf)
+        vdf = self.config.coerce_numeric(vdf)
+        vdf = self.config.coerce_strings(vdf)
+
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
                       hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
                       hdf['county_number'].map(str) + '_' + \
@@ -932,12 +942,16 @@ class Preprocessor(Loader):
         vdf[config["voter_id"]] = vdf[config["voter_id"]]\
             .astype(int, errors='ignore')
         vdf["party_identifier"] = "npa"
-
         vdf.fillna('')
-        logging.info("Coercing dates and numeric")
-        vdf = self.config.coerce_dates(vdf)
-        vdf = self.config.coerce_numeric(vdf)
-        vdf = self.config.coerce_strings(vdf)
+
+        # get rid of stupid latin-1
+        text_fields = [c for c, v in config["columns"].items()
+                       if v == "text" or v == "varchar"]
+        for field in text_fields:
+            if (field in vdf) and (field != config["voter_status"]) \
+                    and (field != config["party_identifier"]):
+                vdf[field] = vdf[field].str.decode("latin-1")
+
         logging.info("Writing to csv")
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
