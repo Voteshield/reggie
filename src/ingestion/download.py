@@ -797,7 +797,8 @@ class Preprocessor(Loader):
         config = Config("michigan")
         new_files = self.unpack_files()
         voter_file = ([n for n in new_files if 'entire_state_v' in n] + [None])[0]
-        hist_file = ([n for n in new_files if 'entire_state_h' in n] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n
+                      or 'EntireStateVoterHistory' in n] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
@@ -821,13 +822,14 @@ class Preprocessor(Loader):
             os.remove(voter_file)
         elif voter_file[-3:] == "csv":
             logging.info("MICHIGAN: Loading voter file")
-            vdf = pd.read_csv(voter_file, na_filter=False)\
+            vdf = pd.read_csv(voter_file, na_filter=False,
+                              error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
                        "SCHOOL_DISTRICT_NAME", "STATE_HOUSE_DISTRICT_NAME",
                        "STATE_SENATE_DISTRICT_NAME",
                        "US_CONGRESS_DISTRICT_NAME",
                        "COUNTY_COMMISSIONER_DISTRICT_NAME",
-                       "VILLAGE_DISTRICT_NAME"], axis=1)
+                       "VILLAGE_DISTRICT_NAME", "UOCAVA_STATUS_NAME"], axis=1)
             vdf.columns = config["ordered_columns"]
             logging.info("Removing voter file")
             os.remove(voter_file)
