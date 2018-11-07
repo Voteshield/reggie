@@ -937,6 +937,7 @@ class Preprocessor(Loader):
         logging.info("Coercing dates and numeric")
         vdf = self.config.coerce_dates(vdf)
         vdf = self.config.coerce_numeric(vdf)
+        vdf = self.config.coerce_strings(vdf)
         logging.info("Writing to csv")
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
