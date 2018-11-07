@@ -845,8 +845,11 @@ class Preprocessor(Loader):
             os.remove(hist_file)
         elif hist_file[-3:]:
             logging.info("MICHIGAN: Loading historical file")
-            hdf = pd.read_csv(hist_file, names=config["hist_columns"],
-                              na_filter=False)
+            hdf = pd.read_csv(hist_file, na_filter=False,
+                              error_bad_lines=False)\
+                .drop(["COUNTY_NAME", "JURISDICTION_NAME",
+                       "SCHOOL_DISTRICT_NAME"])
+            hdf.columns = config["hist_columns"]
             logging.info("Removing historical file")
             os.remove(hist_file)
         else:
