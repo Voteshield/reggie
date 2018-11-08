@@ -848,7 +848,7 @@ class Preprocessor(Loader):
             hdf = pd.read_csv(hist_file, na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
-                       "SCHOOL_DISTRICT_NAME"])
+                       "SCHOOL_DISTRICT_NAME"], axis=1)
             hdf.columns = config["hist_columns"]
             logging.info("Removing historical file")
             os.remove(hist_file)
