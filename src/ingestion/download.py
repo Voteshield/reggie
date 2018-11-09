@@ -430,8 +430,10 @@ class Preprocessor(Loader):
                 df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
+                os.remove(i)
             elif "TXT" in i:
                 vh_files.append(i)
+
         def concat_and_delete(in_list, concat_file):
             with open(concat_file, 'w') as outfile:
                 for fname in in_list:
@@ -443,7 +445,7 @@ class Preprocessor(Loader):
                 vh_files, '/tmp/concat_history_file.txt')
 
         history = pd.read_csv(concat_history_file, sep = "  ", names = ['Concat_str', 'Other'])
-        print(history.head())
+        os.remove(concat_history_file)
 
         history['County_Number'] = history['Concat_str'].str[0:3]
         history['Registration_Number'] = history['Concat_str'].str[3:11]
