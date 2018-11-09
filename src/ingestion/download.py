@@ -455,8 +455,10 @@ class Preprocessor(Loader):
         history['Absentee'] = history['Other'].str[0]
         history['Provisional'] = history['Other'].str[1]
         history['Supplimental'] = history['Other'].str[2]
-        history['Combo_history'] = history[['Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']].apply(lambda x: x.str.cat(sep='_'), axis=1)
-        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
+        type_dict = {"001": "GEN_PRIMARY", "002": "GEN_PRIMARY_RUNOFF", "003": "GEN", "004":"GEN_ELECT_RUNOFF", "005":"SPECIAL_ELECT", 
+                     "006":"SPECIAL_RUNOFF", "007":"NON-PARTISAN", "008":"SPECIAL_NON-PARTISAN", "009":"RECALL","010":"PPP"}
+        history = history.replace({"Election_Type": type_dict})
+        history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
         print("finished string manipulation")
         valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
@@ -487,7 +489,7 @@ class Preprocessor(Loader):
         print("groupby and apply done")
         df_voters = df_voters.set_index('Registration_Number')
         df_voters["all_history"] = all_history
-        df_voters["sparse_history_indices"] = all_history_indices
+        df_voters["sparse_history"] = all_history_indices
         print("check post merge")
         print(df_voters.head(30))
         print(df_voters.describe())
@@ -500,6 +502,7 @@ class Preprocessor(Loader):
             "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict, indent=4, sort_keys=True, default=str),
             "array_decoding": json.dumps(sorted_codes),
+            "election_type": json.dumps(type_dict)
         }
         print("json dumps complete, moving to saving files")
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
