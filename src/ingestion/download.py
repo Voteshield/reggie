@@ -445,15 +445,6 @@ class Preprocessor(Loader):
         history = pd.read_csv(concat_history_file, sep = "  ", names = ['Concat_str', 'Other'])
         print(history.head())
 
-
-        County_Number = []
-        Regestration_Number = []
-        Election_Date = []
-        Election_Type = []
-        Party = []
-        Absentee = []
-        Provisional = []
-        Supplimental = []
         history['County_Number'] = history['Concat_str'].str[0:3]
         history['Registration_Number'] = history['Concat_str'].str[3:11]
         history['Election_Date'] = history['Concat_str'].str[11:19]
