@@ -30,8 +30,12 @@ address_fields:
 primary_key:
   - pre_date
   - post_date
-  - VoterID
+  - Registration_Number
   - change_type
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
 format:
   separate_hist: true
   separate_counties_voter_file: false
@@ -41,7 +45,7 @@ format:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  Registration_Number: int
   change_type: text
   pre_value: text
   post_value: text
