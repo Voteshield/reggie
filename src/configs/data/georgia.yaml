@@ -32,6 +32,10 @@ primary_key:
   - post_date
   - Registration_Number
   - change_type
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
 format:
   separate_hist: true
   separate_counties_voter_file: false
