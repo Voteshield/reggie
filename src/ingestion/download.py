@@ -463,7 +463,7 @@ class Preprocessor(Loader):
         history['Provisional'] = history['Other'].str[1]
         history['Supplimental'] = history['Other'].str[2]
         history['Combo_history'] = history[['Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']].apply(lambda x: x.str.cat(sep='_'), axis=1)
-        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional','Supplimental', 'Combo_history'])
+        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
         print("finished string manipulation")
         valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
