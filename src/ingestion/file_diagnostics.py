@@ -311,7 +311,7 @@ class DiagnosticTest(object):
 
     def __init__(self, file_path, config_file, preproc_obj):
         self.file_path = file_path
-        self.configs = Config(config_file=config_file)
+        self.configs = Config(file_name=config_file)
         self.preproc_obj = preproc_obj
         self.logs = ""
         self.config_file = config_file
