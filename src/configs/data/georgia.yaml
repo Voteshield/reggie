@@ -80,30 +80,11 @@ summary_types:
   - int
   - text
 columns:
-  VoterID: int
-  County: varchar
+  Registration_Number: int
+  County_code: varchar
   First_Name: varchar
-  Middle_Name: varchar
-  Last_Name: varchar
-  Suffix: varchar
-  Birth_Date: date
-  Registration_Date: date
-  Address_1: varchar
-  Address_2: varchar
-  City: varchar
-  state: varchar
-  Zip: varchar
-  Phone: varchar
-  Party: varchar
-  Congressional_District: varchar
-  Senate_District: varchar
-  Assembly_District: varchar
-  Education_District: varchar
-  Regent_District: varchar
-  Registered_Precinct: varchar
-  County_Status: varchar
-  County_Voter_ID: varchar
-  ID_Required: char
+  
+  
 ordered_columns:
   - County_code
   - Registration_Number

@@ -433,8 +433,6 @@ class Preprocessor(Loader):
                 os.remove(i)
             elif "TXT" in i:
                 vh_files.append(i)
-        if not vh_files:
-            #download 
 
         def concat_and_delete(in_list, concat_file):
             with open(concat_file, 'w') as outfile:
