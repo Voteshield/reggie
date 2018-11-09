@@ -460,14 +460,15 @@ class Preprocessor(Loader):
         history = history.replace({"Election_Type": type_dict})
         history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')
         history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
+        history = history.dropna()
         print("finished string manipulation")
         valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
+
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
-                             key=lambda x: datetime.strptime(x[1][0:8],
-                                                             "%Y%m%d"),
-                             reverse=True)]
+                             key=lambda x: datetime.strptime(
+                                 x[1][0:8], "%Y%m%d"), reverse=True)]
 
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
