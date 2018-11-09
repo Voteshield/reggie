@@ -1,12 +1,10 @@
-# Nevada voter file/history comes as a single .zip file with the date of creation in the filename- for instance
-# "VoterList.38593.DATETIME.zip".  The voter file name is "VoterList.ElgbVtr.38593.DATETIME.csv" and the history file is
-# "VoterList.VtHst.38593.DATETIME.csv". These files DO NOT contain headers.
+#this is not done yet at all, needs to be reformatted
 file_type: csv
 state: georgia
 source: boe
 file_class: voter_file
-voter_id: 
-county_identifier: 
+voter_id: Registration_Number
+county_identifier: County_code
 birthday_identifier: 
 voter_status: 
 voter_status_active: 

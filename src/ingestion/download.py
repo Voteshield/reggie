@@ -432,6 +432,8 @@ class Preprocessor(Loader):
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i:
                 vh_files.append(i)
+        if not vh_files:
+            #download 
         def concat_and_delete(in_list, concat_file):
             with open(concat_file, 'w') as outfile:
                 for fname in in_list:
@@ -487,12 +489,14 @@ class Preprocessor(Loader):
 
         voter_groups = history.groupby('Registration_Number')
         all_history = voter_groups['Combo_history'].apply(list)
+        all_history_indices = voter_groups['array_position'].apply(list)
         print("check index and index type")
         print(type(all_history.index[0]))
         print(all_history.head(50))
         print("groupby and apply done")
         df_voters = df_voters.set_index('Registration_Number')
         df_voters["all_history"] = all_history
+        df_voters["sparse_history_indices"] = all_history_indices
         print("check post merge")
         print(df_voters.head(30))
         print(df_voters.describe())
