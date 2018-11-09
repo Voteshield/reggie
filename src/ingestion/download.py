@@ -458,7 +458,8 @@ class Preprocessor(Loader):
         type_dict = {"001": "GEN_PRIMARY", "002": "GEN_PRIMARY_RUNOFF", "003": "GEN", "004":"GEN_ELECT_RUNOFF", "005":"SPECIAL_ELECT", 
                      "006":"SPECIAL_RUNOFF", "007":"NON-PARTISAN", "008":"SPECIAL_NON-PARTISAN", "009":"RECALL","010":"PPP"}
         history = history.replace({"Election_Type": type_dict})
-        history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
+        history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')
+        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
         print("finished string manipulation")
         valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
