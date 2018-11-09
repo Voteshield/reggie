@@ -1004,8 +1004,6 @@ class Preprocessor(Loader):
 
         return chksum
 
-
-
     def execute(self):
         self.state_router()
 
