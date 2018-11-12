@@ -91,14 +91,14 @@ columns:
   Land_district: text
   Land_lot: text
   Status_reason: text
-  County_precinct_id: int
-  City_precinct_id: int
+  County_precinct_id: text
+  City_precinct_id: text
   Congressional_district: int
   Senate_district: int
   House_district: int
-  Judicial_district: int
-  Commission_district: int
-  School_district: int
+  Judicial_district: text
+  Commission_district: text
+  School_district: text
   County_district_a_name: text
   County_district_a_value: text
   County_district_b_name: text
@@ -106,9 +106,9 @@ columns:
   Municipal_name: text
   Municipal_code: int
   Ward_city_council_name: text
-  Ward city council_code: int
+  Ward city council_code: text
   City_school_district_name: text
-  City_school_district_value: int
+  City_school_district_value: text
   City_dista_name: text
   City_dista_value: text
   City_distb_name: text
@@ -124,7 +124,7 @@ columns:
   District_combo: text
   Race_desc: text
   Last_contact_date: date
-  Mail_house_nbr: int
+  Mail_house_nbr: text
   Mail_street_name: text
   Mail_apt_unit_nbr: text
   Mail_city: text
