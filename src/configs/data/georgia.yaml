@@ -81,7 +81,7 @@ columns:
   Residence_house_number: int
   Residence_street_name: text 
   Residence_street_suffix: text
-  Residence_apt_unit_nbr: int
+  Residence_apt_unit_nbr: text
   Residence_city: text
   Residence_zipcode: int
   Year_of_Birth: int
@@ -126,7 +126,7 @@ columns:
   Last_contact_date: date
   Mail_house_nbr: int
   Mail_street_name: text
-  Mail_apt_unit_nbr: int
+  Mail_apt_unit_nbr: text
   Mail_city: text
   Mail_state: text
   Mail_zip_code: int
