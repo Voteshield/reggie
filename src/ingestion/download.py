@@ -490,6 +490,7 @@ class Preprocessor(Loader):
         print(all_history.head(50))
         print("groupby and apply done")
         df_voters = df_voters.set_index('Registration_Number')
+        df_voters["party_identifier"] = "npa"
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
         print("check post merge")
