@@ -45,7 +45,7 @@ format:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  Registration_Number: int
+  Registration_Number: text
   change_type: text
   pre_value: text
   post_value: text
@@ -55,6 +55,7 @@ summary_columns:
   - totals
   - date
   - state
+  - county
   - ages_18_34
   - ages_35_49
   - ages_50_64
@@ -63,6 +64,7 @@ summary_types:
   - int
   - timestamp
   - text
+  - int
   - int
   - int
   - int
@@ -88,7 +90,7 @@ columns:
   Gender: text
   Land_district: text
   Land_lot: text
-  Status_reason:
+  Status_reason: text
   County_precinct_id: int
   City_precinct_id: int
   Congressional_district: int
