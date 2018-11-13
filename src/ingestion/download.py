@@ -422,6 +422,9 @@ class Preprocessor(Loader):
             with open(self.main_file, "a+") as fo:
                 fo.write(s)
 
+        os.rename(self.main_file, self.main_file.split('.')[0] + '.csv')
+        self.main_file = self.main_file.split('.')[0] + '.csv'
+
     def preprocess_georgia(self):
         config = Config("georgia")
         new_files = self.unpack_files(compression = 'unzip')
@@ -516,7 +519,7 @@ class Preprocessor(Loader):
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
-                
+
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
