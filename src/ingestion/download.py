@@ -423,6 +423,7 @@ class Preprocessor(Loader):
                 fo.write(s)
 
     def preprocess_georgia(self):
+        config = Config("georgia")
         new_files = self.unpack_files(compression = 'unzip')
         vh_files = []
         for i in new_files:
@@ -493,6 +494,8 @@ class Preprocessor(Loader):
         df_voters["party_identifier"] = "npa"
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
+        df_voters = config.coerce_dates(df_voters)
+        df_voters = config.coerce_numeric(df_voters)
         print("check post merge")
         print(df_voters.head(30))
         print(df_voters.describe())
