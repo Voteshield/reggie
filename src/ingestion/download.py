@@ -430,7 +430,8 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(compression = 'unzip')
         vh_files = []
         for i in new_files:
-            if "/Georgia" in i:
+            if "/Georgia_Daily_VoterBase" in i:
+                logging.info("Detected voter file: " + i)
                 df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
