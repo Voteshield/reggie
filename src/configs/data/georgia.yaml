@@ -14,7 +14,7 @@ democratic_party: None
 republican_party: None
 no_party_affiliation: npa
 numeric_county: false
-date_format: '%Y%m%d'
+date_format: '%Y'
 generated_columns:
   all_history: text[]
   sparse_history: int[]
@@ -54,6 +54,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: varchar
+  party_identifier: text
 has_headers: YES
 summary_columns:
   - totals
@@ -88,7 +89,7 @@ columns:
   Residence_apt_unit_nbr: text
   Residence_city: text
   Residence_zipcode: int
-  Year_of_Birth: int
+  Year_of_Birth: date
   Registration_date: date
   Race: text
   Gender: text
