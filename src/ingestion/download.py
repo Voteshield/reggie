@@ -432,7 +432,8 @@ class Preprocessor(Loader):
         for i in new_files:
             if "/Georgia_Daily_VoterBase" in i:
                 logging.info("Detected voter file: " + i)
-                df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3)
+                df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3,
+                                        error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
                 os.remove(i)
