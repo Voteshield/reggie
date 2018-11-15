@@ -427,6 +427,7 @@ class Preprocessor(Loader):
 
     def preprocess_georgia(self):
         config = Config("georgia")
+        logging.info("GEORGIA: loading voter and voter history file")
         new_files = self.unpack_files(compression = 'unzip')
         vh_files = []
         for i in new_files:
@@ -450,6 +451,8 @@ class Preprocessor(Loader):
         concat_history_file = concat_and_delete(
                 vh_files, '/tmp/concat_history_file.txt')
 
+        logging.info("Performing GA history manipulation")
+
         history = pd.read_csv(concat_history_file, sep = "  ", names = ['Concat_str', 'Other'])
         os.remove(concat_history_file)
 
@@ -467,7 +470,9 @@ class Preprocessor(Loader):
         history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')
         history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
         history = history.dropna()
-        print("finished string manipulation")
+
+        logging.info("Creating GA sparse history")
+
         valid_elections, counts = np.unique(history["Combo_history"],
                                             return_counts=True)
 
@@ -479,43 +484,29 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        print("sorted codes work done")
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": datetime.strptime(k[0:8], "%Y%m%d")}
                              for i, k in enumerate(sorted_codes)}
         history["array_position"] = history["Combo_history"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-        print("created and filled dict")
                       
 
         voter_groups = history.groupby('Registration_Number')
         all_history = voter_groups['Combo_history'].apply(list)
         all_history_indices = voter_groups['array_position'].apply(list)
-        print("check index and index type")
-        print(type(all_history.index[0]))
-        print(all_history.head(50))
-        print("groupby and apply done")
         df_voters = df_voters.set_index('Registration_Number')
         df_voters["party_identifier"] = "npa"
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
         df_voters = config.coerce_dates(df_voters)
         df_voters = config.coerce_numeric(df_voters)
-        print("check post merge")
-        print(df_voters.head(30))
-        print(df_voters.describe())
-
-
-        print("now making the json dumps")
-        
-
+    
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict, indent=4, sort_keys=True, default=str),
             "array_decoding": json.dumps(sorted_codes),
             "election_type": json.dumps(type_dict)
         }
-        print("json dumps complete, moving to saving files")
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters.to_csv(self.main_file)
         self.temp_files.append(self.main_file)
