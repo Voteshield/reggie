@@ -23,7 +23,7 @@ name_fields:
   - First_Name
   - Middle_Name
   - Last_Name
-  - Suffix
+  - Name_Suffix
 address_fields:
   - house_number_character
   - residence_street_character
