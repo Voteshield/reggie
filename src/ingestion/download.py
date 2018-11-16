@@ -998,7 +998,6 @@ class Preprocessor(Loader):
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
-
         return chksum
 
 
