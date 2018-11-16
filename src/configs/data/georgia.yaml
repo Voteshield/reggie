@@ -1,0 +1,378 @@
+#this is not done yet at all, needs to be reformatted
+file_type: csv
+state: georgia
+source: boe
+file_class: voter_file
+voter_id: Registration_Number
+county_identifier: County_code
+birthday_identifier: Year_of_Birth
+voter_status: Voter_status
+voter_status_active: A
+voter_status_inactive: I
+party_identifier: party_identifier
+democratic_party: None
+republican_party: None
+no_party_affiliation: npa
+numeric_county: false
+date_format:
+  - '%Y'
+  - '%Y%m%d'
+missing_required_fields: True
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+name_fields:
+  - Last_name
+  - First_name 
+  - Middle_maiden_name 
+  - Name_suffix
+  - Name_title
+address_fields:
+  - Residence_house_number
+  - Residence_street_name
+  - Residence_street_suffix 
+  - Residence_apt_unit_nbr
+  - Residence_city
+  - Residence_zipcode
+primary_key:
+  - pre_date
+  - post_date
+  - Registration_Number
+  - change_type
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  Registration_Number: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: varchar
+  party_identifier: text
+has_headers: YES
+summary_columns:
+  - totals
+  - date
+  - state
+  - county
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+columns:
+  County_code: int
+  Registration_Number: text
+  Voter_status: text
+  Last_name: text
+  First_name: text
+  Middle_maiden_name: text
+  Name_suffix: text
+  Name_title: text
+  Residence_house_number: int
+  Residence_street_name: text 
+  Residence_street_suffix: text
+  Residence_apt_unit_nbr: text
+  Residence_city: text
+  Residence_zipcode: int
+  Year_of_Birth: date
+  Registration_date: date
+  Race: text
+  Gender: text
+  Land_district: text
+  Land_lot: text
+  Status_reason: text
+  County_precinct_id: text
+  City_precinct_id: text
+  Congressional_district: int
+  Senate_district: int
+  House_district: int
+  Judicial_district: text
+  Commission_district: text
+  School_district: text
+  County_district_a_name: text
+  County_district_a_value: text
+  County_district_b_name: text
+  County_district_b_value: text
+  Municipal_name: text
+  Municipal_code: int
+  Ward_city_council_name: text
+  Ward city council_code: text
+  City_school_district_name: text
+  City_school_district_value: text
+  City_dista_name: text
+  City_dista_value: text
+  City_distb_name: text
+  City_distb_value: text
+  City_distc_name: text
+  City_distc_value: text
+  City_distd_name: text
+  City_distd_value: text
+  Date_last_voted: date
+  Party_last_voted: text
+  Date_added: date
+  Date_changed: date
+  District_combo: text
+  Race_desc: text
+  Last_contact_date: date
+  Mail_house_nbr: text
+  Mail_street_name: text
+  Mail_apt_unit_nbr: text
+  Mail_city: text
+  Mail_state: text
+  Mail_zip_code: int
+  Mail_address_2: text
+  Mail_address_3: text
+  Mail_country: text
+
+  
+ordered_columns:
+  - County_code
+  - Registration_Number
+  - Voter_status
+  - Last_name
+  - First_name
+  - Middle_maiden_name
+  - Name_suffix
+  - Name_title
+  - Residence_house_number
+  - Residence_street_name
+  - Residence_street_suffix
+  - Residence_apt_unit_nbr
+  - Residence_city
+  - Residence_zipcode
+  - Year_of_Birth
+  - Registration_date
+  - Race
+  - Gender
+  - Land_district
+  - Land_lot
+  - Status_reason
+  - County_precinct_id
+  - City_precinct_id
+  - Congressional_district
+  - Senate_district
+  - House_district
+  - Judicial_district
+  - Commission_district
+  - School_district
+  - County_district_a_name
+  - County_district_a_value
+  - County_district_b_name
+  - County_district_b_value
+  - Municipal_name
+  - Municipal_code
+  - Ward_city_council_name
+  - Ward city council_code
+  - City_school_district_name
+  - City_school_district_value
+  - City_dista_name
+  - City_dista_value
+  - City_distb_name
+  - City_distb_value
+  - City_distc_name
+  - City_distc_value
+  - City_distd_name
+  - City_distd_value
+  - Date_last_voted
+  - Party_last_voted
+  - Date_added
+  - Date_changed
+  - District_combo
+  - Race_desc
+  - Last_contact_date
+  - Mail_house_nbr
+  - Mail_street_name
+  - Mail_apt_unit_nbr
+  - Mail_city
+  - Mail_state
+  - Mail_zip_code
+  - Mail_address_2
+  - Mail_address_3
+  - Mail_country
+hist_columns:
+  - County Number 
+  - Registration_number
+  - Election_Date
+  - Election_Type
+  - Party
+  - Absentee
+  - Provisional
+  - Supplemental
+county_names:
+  Appling: 1
+  Atkinson: 2
+  Bacon: 3
+  Baker: 4
+  Baldwin: 5
+  Banks: 6
+  Barrow: 7
+  Bartow: 8
+  Ben Hill: 9
+  Berrien: 10
+  Bibb: 11
+  Bleckley: 12
+  Brantley: 13
+  Brooks: 14
+  Bryan: 15
+  Bulloch: 16
+  Burke: 17
+  Butts: 18
+  Calhoun: 19
+  Camden: 20
+  Candler: 21
+  Carroll: 22
+  Catoosa: 23
+  Charlton: 24
+  Chatham: 25
+  Chattahoochee: 26
+  Chattooga: 27
+  Cherokee: 28
+  Clarke: 29
+  Clay: 30
+  Clayton: 31
+  Clinch: 32
+  Cobb: 33
+  Coffee: 34
+  Colquitt: 35
+  Columbia: 36
+  Cook: 37
+  Coweta: 38
+  Crawford: 39
+  Crisp: 40
+  Dade: 41
+  Dawson: 42
+  De Kalb: 43
+  Decatur: 44
+  Dodge: 45
+  Dooly: 46
+  Dougherty: 47
+  Douglas: 48
+  Early: 49
+  Echols: 50
+  Effingham: 51
+  Elbert: 52
+  Emanuel: 53
+  Evans: 54
+  Fannin: 55
+  Fayette: 56
+  Floyd: 57
+  Forsyth: 58
+  Franklin: 59
+  Fulton: 60
+  Gilmer: 61
+  Glascock: 62
+  Glynn: 63
+  Gordon: 64
+  Grady: 65
+  Greene: 66
+  Gwinnett: 67
+  Habersham: 68
+  Hall: 69
+  Hancock: 70
+  Haralson: 71
+  Harris: 72
+  Hart: 73
+  Heard: 74
+  Henry: 75
+  Houston: 76
+  Irwin: 77
+  Jackson: 78
+  Jasper: 79
+  Jeff Davis: 80
+  Jefferson: 81
+  Jenkins: 82
+  Johnson: 83
+  Jones: 84
+  Lamar: 85
+  Lanier: 86
+  Laurens: 87
+  Lee: 88
+  Liberty: 89
+  Lincoln: 90
+  Long: 91
+  Lowndes: 92
+  Lumpkin: 93
+  Macon: 94
+  Madison: 95
+  Marion: 96
+  McDuffie: 97
+  McIntosh: 98
+  Meriwether: 99
+  Miller: 100
+  Mitchell: 101
+  Monroe: 102
+  Montgomery: 103
+  Morgan: 104
+  Murray: 105
+  Muscogee: 106
+  Newton: 107
+  Oconee: 108
+  Oglethorpe: 109
+  Paulding: 110
+  Peach: 111
+  Pickens: 112
+  Pierce: 113
+  Pike: 114
+  Polk: 115
+  Pulaski: 116
+  Putnam: 117
+  Quitman: 118
+  Rabun: 119
+  Randolph: 120
+  Richmond: 121
+  Rockdale: 122
+  Schley: 123
+  Screven: 124
+  Seminole: 125
+  Spalding: 126
+  Stephens: 127
+  Stewart: 128
+  Sumter: 129
+  Talbot: 130
+  Taliaferro: 131
+  Tattnall: 132
+  Taylor: 133
+  Telfair: 134
+  Terrell: 135
+  Thomas: 136
+  Tift: 137
+  Toombs: 138
+  Towns: 139
+  Treutlen: 140
+  Troup: 141
+  Turner: 142
+  Twiggs: 143
+  Union: 144
+  Upson: 145
+  Walker: 146
+  Walton: 147
+  Ware: 148
+  Warren: 149
+  Washington: 150
+  Wayne: 151
+  Webster: 152
+  Wheeler: 153
+  White: 154
+  Whitfield: 155
+  Wilcox: 156
+  Wilkes: 157
+  Wilkinson: 158
+  Worth: 159
