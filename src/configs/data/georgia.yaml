@@ -1,41 +1,48 @@
-# Nevada voter file/history comes as a single .zip file with the date of creation in the filename- for instance
-# "VoterList.38593.DATETIME.zip".  The voter file name is "VoterList.ElgbVtr.38593.DATETIME.csv" and the history file is
-# "VoterList.VtHst.38593.DATETIME.csv". These files DO NOT contain headers.
+#this is not done yet at all, needs to be reformatted
 file_type: csv
 state: georgia
 source: boe
 file_class: voter_file
-voter_id:
-county_identifier:
-birthday_identifier:
-voter_status:
-voter_status_active:
-voter_status_inactive:
-voter_status_waitlist:
-voter_status_null:
-democratic_party:
-republican_party:
-no_party_affiliation: Non-
+voter_id: Registration_Number
+county_identifier: County_code
+birthday_identifier: Year_of_Birth
+voter_status: Voter_status
+voter_status_active: A
+voter_status_inactive: I
+party_identifier: party_identifier
+democratic_party: None
+republican_party: None
+no_party_affiliation: npa
 numeric_county: false
-date_format: '%m/%d/%Y'
-party_identifier: Party
+date_format:
+  - '%Y'
+  - '%Y%m%d'
+missing_required_fields: True
 generated_columns:
-  all_history: int[]
+  all_history: text[]
+  sparse_history: int[]
 name_fields:
-  - First_Name
-  - Middle_Name
-  - Last_Name
+  - Last_name
+  - First_name
+  - Middle_maiden_name
+  - Name_suffix
+  - Name_title
 address_fields:
-  - Address_1
-  - Address_2
-  - City
-  - state
-  - Zip
+  - Residence_house_number
+  - Residence_street_name
+  - Residence_street_suffix
+  - Residence_apt_unit_nbr
+  - Residence_city
+  - Residence_zipcode
 primary_key:
   - pre_date
   - post_date
-  - VoterID
+  - Registration_Number
   - change_type
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
 format:
   separate_hist: true
   separate_counties_voter_file: false
@@ -45,23 +52,22 @@ format:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  Registration_Number: text
   change_type: text
   pre_value: text
   post_value: text
   state: varchar
-ordered_generated_columns:
-  - all_history
-has_headers: NO
+  party_identifier: text
+has_headers: YES
 summary_columns:
   - totals
   - date
   - state
+  - county
   - ages_18_34
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - democratic_party
 summary_types:
   - int
   - timestamp
@@ -71,39 +77,70 @@ summary_types:
   - int
   - int
   - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
-  VoterID: int
-  County: varchar
-  First_Name: varchar
-  Middle_Name: varchar
-  Last_Name: varchar
-  Suffix: varchar
-  Birth_Date: date
-  Registration_Date: date
-  Address_1: varchar
-  Address_2: varchar
-  City: varchar
-  state: varchar
-  Zip: varchar
-  Phone: varchar
-  Party: varchar
-  Congressional_District: varchar
-  Senate_District: varchar
-  Assembly_District: varchar
-  Education_District: varchar
-  Regent_District: varchar
-  Registered_Precinct: varchar
-  County_Status: varchar
-  County_Voter_ID: varchar
-  ID_Required: char
+  County_code: int
+  Registration_Number: text
+  Voter_status: text
+  Last_name: text
+  First_name: text
+  Middle_maiden_name: text
+  Name_suffix: text
+  Name_title: text
+  Residence_house_number: int
+  Residence_street_name: text
+  Residence_street_suffix: text
+  Residence_apt_unit_nbr: text
+  Residence_city: text
+  Residence_zipcode: int
+  Year_of_Birth: date
+  Registration_date: date
+  Race: text
+  Gender: text
+  Land_district: text
+  Land_lot: text
+  Status_reason: text
+  County_precinct_id: text
+  City_precinct_id: text
+  Congressional_district: int
+  Senate_district: int
+  House_district: int
+  Judicial_district: text
+  Commission_district: text
+  School_district: text
+  County_district_a_name: text
+  County_district_a_value: text
+  County_district_b_name: text
+  County_district_b_value: text
+  Municipal_name: text
+  Municipal_code: int
+  Ward_city_council_name: text
+  Ward city council_code: text
+  City_school_district_name: text
+  City_school_district_value: text
+  City_dista_name: text
+  City_dista_value: text
+  City_distb_name: text
+  City_distb_value: text
+  City_distc_name: text
+  City_distc_value: text
+  City_distd_name: text
+  City_distd_value: text
+  Date_last_voted: date
+  Party_last_voted: text
+  Date_added: date
+  Date_changed: date
+  District_combo: text
+  Race_desc: text
+  Last_contact_date: date
+  Mail_house_nbr: text
+  Mail_street_name: text
+  Mail_apt_unit_nbr: text
+  Mail_city: text
+  Mail_state: text
+  Mail_zip_code: int
+  Mail_address_2: text
+  Mail_address_3: text
+  Mail_country: text
 ordered_columns:
   - County_code
   - Registration_Number
