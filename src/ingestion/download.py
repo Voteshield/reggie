@@ -174,8 +174,6 @@ class Loader(object):
                                                            new_loc))
         os.mkdir(new_loc)
         r = subprocess.call(['unzip', file_name, '-d', new_loc])
-        if r == 1:
-            r = 0
         return new_loc, r
 
     def gunzip_decompress(self, file_name):
@@ -239,7 +237,7 @@ class Loader(object):
         else:
             new_loc = file_name + ".out"
         p = Popen(["7z", "e", "-so", file_name],
-                  stdout=open(new_loc, "w"), stderr=PIPE, stdin=PIPE)
+                  stdout=open(new_loc, "w+"), stderr=PIPE, stdin=PIPE)
         p.communicate()
         return new_loc, p.returncode
 
@@ -329,15 +327,18 @@ class Loader(object):
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
+
         super(Preprocessor, self).__init__(config_file=config_file,
                                            force_date=date_from_str(raw_s3_file), **kwargs)
         self.raw_s3_file = raw_s3_file
+
         if self.raw_s3_file is not None:
             self.s3_download()
 
     def s3_download(self):
         self.main_file = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
+
         get_object(self.raw_s3_file, self.main_file)
         self.temp_files.append(self.main_file)
 
@@ -387,6 +388,7 @@ class Preprocessor(Loader):
         """
         if os.path.isfile(self.main_file):
             os.remove(self.main_file)
+        self.main_file = ".".join(self.main_file.split(".")[:-1]) + '.concat'
         first_success = False
         last_headers = None
 
@@ -400,7 +402,6 @@ class Preprocessor(Loader):
 
         file_names = sorted(file_names, key=lambda x: os.stat(x).st_size, reverse=True)
         for f in file_names:
-            print(f)
             try:
                 if self.config["file_type"] == 'xlsx':
                     df = pd.read_excel(f)
@@ -668,6 +669,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
         self.concat_file_segments(new_files)
+        logging.warning(self.main_file)
         main_df = pd.read_csv(self.main_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
@@ -1000,7 +1002,6 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-
     def execute(self):
         self.state_router()
 
@@ -1012,7 +1013,8 @@ class Preprocessor(Loader):
             'new_york': self.preprocess_new_york,
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
-            'new_jersey': self.preprocess_new_jersey
+            'new_jersey': self.preprocess_new_jersey,
+            'iowa': self.preprocess_iowa
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

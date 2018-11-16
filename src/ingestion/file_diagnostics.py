@@ -138,7 +138,6 @@ class TestFileBuilder(Preprocessor):
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             for f in smaller_files:
                 zf.write(f, os.path.basename(f))
-        
 
     def __build_ohio(self):
         """
