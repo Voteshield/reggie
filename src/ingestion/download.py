@@ -464,11 +464,20 @@ class Preprocessor(Loader):
         history['Absentee'] = history['Other'].str[0]
         history['Provisional'] = history['Other'].str[1]
         history['Supplimental'] = history['Other'].str[2]
-        type_dict = {"001": "GEN_PRIMARY", "002": "GEN_PRIMARY_RUNOFF", "003": "GEN", "004":"GEN_ELECT_RUNOFF", "005":"SPECIAL_ELECT", 
-                     "006":"SPECIAL_RUNOFF", "007":"NON-PARTISAN", "008":"SPECIAL_NON-PARTISAN", "009":"RECALL","010":"PPP"}
+        type_dict = {"001": "GEN_PRIMARY", "002": "GEN_PRIMARY_RUNOFF",
+                     "003": "GEN", "004": "GEN_ELECT_RUNOFF",
+                     "005": "SPECIAL_ELECT",
+                     "006": "SPECIAL_RUNOFF", "007": "NON-PARTISAN",
+                     "008": "SPECIAL_NON-PARTISAN", "009": "RECALL",
+                     "010": "PPP"}
         history = history.replace({"Election_Type": type_dict})
-        history['Combo_history'] = history['Election_Date'].str.cat(others=history[['Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental']], sep='_')
-        history = history.filter(items = ['County_Number', 'Registration_Number', 'Election_Date', 'Election_Type', 'Party', 'Absentee', 'Provisional', 'Supplimental', 'Combo_history'])
+        history['Combo_history'] = history['Election_Date'].str.cat(
+            others=history[['Election_Type', 'Party', 'Absentee',
+                            'Provisional', 'Supplimental']], sep='_')
+        history = history.filter(items=['County_Number', 'Registration_Number',
+                                        'Election_Date', 'Election_Type',
+                                        'Party', 'Absentee', 'Provisional',
+                                        'Supplimental', 'Combo_history'])
         history = history.dropna()
 
         logging.info("Creating GA sparse history")
@@ -503,7 +512,8 @@ class Preprocessor(Loader):
     
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict, indent=4, sort_keys=True, default=str),
+            "array_encoding": json.dumps(sorted_codes_dict, indent=4,
+                                         sort_keys=True, default=str),
             "array_decoding": json.dumps(sorted_codes),
             "election_type": json.dumps(type_dict)
         }
@@ -726,13 +736,13 @@ class Preprocessor(Loader):
 
         default_item = {"index": len(elections)}
 
-        def insert_code_bin(a):
+        def ins_code_bin(a):
             return [sorted_codes_dict.get(k, default_item)["index"] for k in a]
 
         # In an instance like this, where we've created our own systematized
         # labels for each election I think it makes sense to also keep them
         # in addition to the sparse history
-        df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
+        df_voters["sparse_history"] = df_voters.all_history.apply(ins_code_bin)
 
         self.meta = {
             "message": "iowa_{}".format(datetime.now().isoformat()),
@@ -756,12 +766,15 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and
+                     "CANCELLED" not in f]
         self.concat_file_segments(new_files)
         main_df = pd.read_csv(self.main_file)
 
-        voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
-        voting_method_cols = list(filter(lambda x: "voting_method" in x, main_df.columns.values))
+        voting_action_cols = list(filter(lambda x: "party_voted" in x,
+                                         main_df.columns.values))
+        voting_method_cols = list(filter(lambda x: "voting_method" in x,
+                                         main_df.columns.values))
         all_voting_history_cols = voting_action_cols + voting_method_cols
 
         main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
