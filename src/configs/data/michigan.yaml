@@ -17,8 +17,9 @@ no_party_affiliation: npa
 republican_party: None
 party_identifier: party_identifier
 numeric_county: True
-date_format: "%m%d%Y"
-birthdate_format: '%Y'
+date_format:
+  - "%m%d%Y"
+  - '%Y'
 name_fields:
   - First_Name
   - Middle_Name
