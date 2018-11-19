@@ -114,7 +114,8 @@ class Loader(object):
             logging.info("downloading chunk {} from {}".format(i, url))
             chunk_storage = "{}.{}.gz".format(self.main_file, str(i))
             with open(chunk_storage, "w+") as f:
-                dl_proc = Popen(["curl", "--insecure", "-X", "GET", url], stdout=f, stderr=PIPE)
+                dl_proc = Popen(["curl", "--insecure", "-X", "GET", url],
+                                stdout=f, stderr=PIPE)
                 dl_proc.communicate()
                 dl_proc.wait()
 
@@ -149,13 +150,15 @@ class Loader(object):
 
     def compress(self, compression_type="gzip"):
         """
-        intended to be called after the consolidated (processed) file has been created and saved in self.main_file
+        intended to be called after the consolidated (processed) file has been
+        created and saved in self.main_file
         :param compression_type: gzip is default
         :return: None
         """
         if not self.is_compressed:
             logging.info("compressing")
-            p = Popen([compression_type, self.main_file], stdout=PIPE, stderr=PIPE)
+            p = Popen([compression_type, self.main_file], stdout=PIPE,
+                      stderr=PIPE)
             p.communicate()
             if self.main_file[-3:] != ".gz":
                 self.main_file += ".gz"
@@ -270,7 +273,8 @@ class Loader(object):
         pandas)
         :param file_name: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
-        :return: a (str, bool) tuple containing the location of the processed file and whether or not it was actually
+        :return: a (str, bool) tuple containing the location of the processed
+        file and whether or not it was actually
         decompressed
         """
 
@@ -328,8 +332,9 @@ class Loader(object):
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
-        super(Preprocessor, self).__init__(config_file=config_file,
-                                           force_date=date_from_str(raw_s3_file), **kwargs)
+        super(Preprocessor, self).__init__(
+            config_file=config_file, force_date=date_from_str(raw_s3_file),
+            **kwargs)
         self.raw_s3_file = raw_s3_file
         if self.raw_s3_file is not None:
             self.s3_download()
@@ -396,7 +401,8 @@ class Preprocessor(Loader):
                 i += 1
             return False
 
-        file_names = sorted(file_names, key=lambda x: os.stat(x).st_size, reverse=True)
+        file_names = sorted(file_names, key=lambda x: os.stat(x).st_size,
+                            reverse=True)
         for f in file_names:
             print(f)
             try:
@@ -593,7 +599,8 @@ class Preprocessor(Loader):
             df_voters[c] += key_delim + df_voters[vote_type_col].str.strip()
 
             # the code below will format each key as
-            # <election_type>_<date>_<voting_method>_<political_party>_<political_org>
+            # <election_type>_<date>_<voting_method>_<political_party>_
+            # <political_org>
             if "PRIMARY" in prefix:
 
                 # so far so good but we need more columns in the event of a
@@ -640,7 +647,8 @@ class Preprocessor(Loader):
         # In an instance like this, where we've created our own systematized
         # labels for each election I think it makes sense to also keep them
         # in addition to the sparse history
-        df_voters["sparse_history"] = df_voters.all_history.apply(insert_code_bin)
+        df_voters["sparse_history"] = df_voters.all_history.apply(
+            insert_code_bin)
 
         self.meta = {
             "message": "iowa_{}".format(datetime.now().isoformat()),
@@ -664,21 +672,26 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and "CANCELLED" not in f]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and
+                     "CANCELLED" not in f]
         self.concat_file_segments(new_files)
         main_df = pd.read_csv(self.main_file)
 
-        voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
-        voting_method_cols = list(filter(lambda x: "voting_method" in x, main_df.columns.values))
+        voting_action_cols = list(filter(lambda x: "party_voted" in x,
+                                         main_df.columns.values))
+        voting_method_cols = list(filter(lambda x: "voting_method" in x,
+                                         main_df.columns.values))
         all_voting_history_cols = voting_action_cols + voting_method_cols
 
-        main_df["all_history"] = df_to_postgres_array_string(main_df, voting_action_cols)
-        main_df["all_voting_methods"] = df_to_postgres_array_string(main_df, voting_method_cols)
-        main_df[self.config["birthday_identifier"]] = pd.to_datetime(main_df[self.config["birthday_identifier"]],
-                                                                     format=self.config["date_format"],
-                                                                     errors='coerce')
+        main_df["all_history"] = df_to_postgres_array_string(
+            main_df, voting_action_cols)
+        main_df["all_voting_methods"] = df_to_postgres_array_string(
+            main_df, voting_method_cols)
+        main_df[self.config["birthday_identifier"]] = pd.to_datetime(
+            main_df[self.config["birthday_identifier"]],
+            format=self.config["date_format"],
+            errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
-
 
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
@@ -828,7 +841,8 @@ class Preprocessor(Loader):
 
         if elec_codes:
             edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
-                              names=config["elec_code_columns"], na_filter=False)
+                              names=config["elec_code_columns"],
+                              na_filter=False)
             edf["Date"] = edf["Date"].apply(
                 lambda x: pd.to_datetime(x, format='%m%d%Y')
             )
