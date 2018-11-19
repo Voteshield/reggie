@@ -38,7 +38,7 @@ absentee_ballot_code: 'A'
 valid_voting_methods: ['E','I','Y','P','F']
 voting_method_column: 'all_voting_methods'
 numeric_county: false
-date_format: '%Y.0'
+date_format: '%Y'
 party_identifier: desc_party
 name_fields:
   - cde_name_title
