@@ -23,14 +23,14 @@ generated_columns:
   sparse_history: int[]
 name_fields:
   - Last_name
-  - First_name 
-  - Middle_maiden_name 
+  - First_name
+  - Middle_maiden_name
   - Name_suffix
   - Name_title
 address_fields:
   - Residence_house_number
   - Residence_street_name
-  - Residence_street_suffix 
+  - Residence_street_suffix
   - Residence_apt_unit_nbr
   - Residence_city
   - Residence_zipcode
@@ -87,7 +87,7 @@ columns:
   Name_suffix: text
   Name_title: text
   Residence_house_number: int
-  Residence_street_name: text 
+  Residence_street_name: text
   Residence_street_suffix: text
   Residence_apt_unit_nbr: text
   Residence_city: text
@@ -141,8 +141,6 @@ columns:
   Mail_address_2: text
   Mail_address_3: text
   Mail_country: text
-
-  
 ordered_columns:
   - County_code
   - Registration_Number
@@ -208,7 +206,7 @@ ordered_columns:
   - Mail_address_3
   - Mail_country
 hist_columns:
-  - County Number 
+  - County Number
   - Registration_number
   - Election_Date
   - Election_Type
