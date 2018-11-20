@@ -33,7 +33,7 @@ voter_status_not_eligible: 'N   '
 voter_status_not_registered: 'NR  '
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
-no_party_affiliation: PARTY_NOT_DESIGNATED
+npa: "PARTY NOT DESIGNATED"
 independent: INDEPENDENT
 other: OTHER
 libertarian: LIBERTARIAN
@@ -114,12 +114,26 @@ summary_columns:
   - ages_65_130
   - Republican
   - Democratic
+  - Party_Not_Designated
+  - Independent
   - Other
+  - Libertarian
+  - Green
+  - Liberal
+  - Reform
+  - Americans_Elect
   - county
 summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
   - int
   - int
   - int
