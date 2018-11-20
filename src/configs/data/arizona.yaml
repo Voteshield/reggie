@@ -33,7 +33,7 @@ voter_status_not_eligible: 'N   '
 voter_status_not_registered: 'NR  '
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
-npa: "PARTY NOT DESIGNATED"
+no_party_affiliation: "PARTY NOT DESIGNATED"
 independent: INDEPENDENT
 other: OTHER
 libertarian: LIBERTARIAN
