@@ -50,8 +50,6 @@ format:
   separate_counties_hist_file: false
   hist_election_rows: false
   columnar_elections: true
-  ignore_files:
-    - readme.txt
 base_columns:
   pre_date: timestamp
   post_date: timestamp
