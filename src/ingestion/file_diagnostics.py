@@ -138,7 +138,6 @@ class TestFileBuilder(Preprocessor):
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             for f in smaller_files:
                 zf.write(f, os.path.basename(f))
-        
 
     def __build_ohio(self):
         """
@@ -224,7 +223,12 @@ class TestFileBuilder(Preprocessor):
             zipper(self.main_file + '_decompressed', zf)
 
     def __upload_michigan(self):
-        #numpy doesn't want to create fixed width files without a separator, so it must be created locally
+        # numpy doesn't want to create fixed width files without a separator,
+        # so it must be created locally
+        return
+
+    def __build_new_jersey(self):
+        # built manually
         return
 
     def build(self, file_name=None, save_local=False, save_remote=True):
@@ -236,10 +240,12 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
-                  "missouri": self.__build_missouri,
-                  "michigan": self.__upload_michigan,
+                  "michigan": self.__build_michigan,
                   "florida": self.__build_florida,
-                  "iowa": self.__build_iowa}
+                  "missouri": self.__build_missouri,
+                  "iowa": self.__build_iowa,
+                  "new_jersey": self.__build_new_jersey
+                  }
 
         f = routes[self.state]
         f()
@@ -285,7 +291,7 @@ class DiagnosticTest(object):
 
     def __init__(self, file_path, config_file, preproc_obj):
         self.file_path = file_path
-        self.configs = Config(config_file=config_file)
+        self.configs = Config(file_name=config_file)
         self.preproc_obj = preproc_obj
         self.logs = ""
         self.config_file = config_file
@@ -363,3 +369,9 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
+
+
+if __name__ == '__main__':
+    import sys
+    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
+        tf.build()

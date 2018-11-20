@@ -51,14 +51,15 @@ class Config(object):
     def items(self):
         return self.data.items()
 
-    def coerce_dates(self, df):
+    def coerce_dates(self, df, col_list="columns"):
         """
         takes all columns with timestamp or date labels in the config file and
         forces the corresponding entries in the raw file into datetime objects
         :param df: dataframe to modify
+        :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-        date_fields = [c for c, v in self.data["columns"].items() if
+        date_fields = [c for c, v in self.data[col_list].items() if
                        v == "date" or v == "timestamp"]
         for field in date_fields:
             df[field] = df[field].apply(str)
@@ -75,19 +76,20 @@ class Config(object):
                         break
         return df
 
-    def coerce_numeric(self, df, extra_cols=None):
+    def coerce_numeric(self, df, extra_cols=None, col_list="columns"):
         """
         takes all columns with int labels in the config file as well as any
         requested extra columns, and forces the corresponding entries in the
         raw file into numerics
         :param df: dataframe to modify
         :param extra_cols: other columns to convert
+        :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
         extra_cols = [] if extra_cols is None else extra_cols
-        numeric_fields = [c for c, v in self.data["columns"].items()
+        numeric_fields = [c for c, v in self.data[col_list].items()
                           if "int" in v or v == "float" or v == "double"]
-        int_fields = [c for c, v in self.data["columns"].items()
+        int_fields = [c for c, v in self.data[col_list].items()
                       if "int" in v]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
