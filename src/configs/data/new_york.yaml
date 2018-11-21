@@ -9,9 +9,9 @@ voter_id: sboeid
 county_identifier: countycode
 birthday_identifier: dob
 voter_status: status
-voter_status_active: A
-voter_status_inactive: I
-voter_status_purged: purged
+voter_status_active: ACTIVE
+voter_status_inactive: INACTIVE
+voter_status_purged: PURGED
 voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
@@ -21,7 +21,7 @@ democratic_party: DEM
 republican_party: REP
 no_party_affiliation: OTHER
 independence_party: IND
-numeric_county: false
+numeric_county: true
 date_format: '%Y%m%d'
 party_identifier: enrollment
 name_fields:
@@ -184,6 +184,10 @@ ordered_columns:
   - purge_date
   - sboeid
   - voterhistory
+blacklist_columns:
+  - prevcounty
+  - prevaddress
+  - prevname
 hist_columns:
   - voterhistory
 county_names:
