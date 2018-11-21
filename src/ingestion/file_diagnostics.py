@@ -21,8 +21,20 @@ from subprocess import Popen, PIPE
 
 class TestFileBuilder(Preprocessor):
     def __init__(self, s3_key=None, local_file=None, state=None):
-        if s3_key is not None and state is None:
+        if s3_key is not None:
             state = state_from_str(s3_key)
+            logging.info("using file: {} to generate test data for {}"
+                         .format(s3_key, state))
+        elif s3_key is None and state is not None:
+            s3_objs = get_raw_s3_uploads(state)
+            if len(s3_objs) > 0:
+                s3_key = s3_objs[0].key
+                logging.info("using file: {} to generate test data for {}"
+                             .format(s3_key, state))
+            elif local_file is None:
+                logging.info("No s3 files found for {}".format(state))
+                raise ValueError("no local file or valid s3 key provided to"
+                                 "generate test file")
 
         config_file = Config.config_file_from_state(state)
         super(TestFileBuilder, self).__init__(
@@ -84,6 +96,18 @@ class TestFileBuilder(Preprocessor):
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             for f in smallest_counties:
                 zf.write(f, os.path.basename(f))
+
+    def __build_georgia(self):
+        new_files = self.unpack_files(compression = 'unzip')
+        #here check if there are voter history files, for the moment assume we have vh files
+        ga_file = new_files[0]
+        df_voters = pd.read_csv(new_files[0], sep = "|", quotechar='"',
+                                quoting=3, nrows = 10000)
+        df_voters.to_csv("Georgia.csv", sep = "|", index=False)
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write("Georgia.csv", os.path.basename(ga_file))
+
+        self.temp_files.append(ga_file)
 
     def __build_new_york(self):
         new_files = self.unpack_files()
@@ -232,6 +256,7 @@ class TestFileBuilder(Preprocessor):
         return
 
     def build(self, file_name=None, save_local=False, save_remote=True):
+        print("hey")
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -240,10 +265,11 @@ class TestFileBuilder(Preprocessor):
         routes = {"ohio": self.__build_ohio,
                   "arizona": self.__build_arizona,
                   "new_york": self.__build_new_york,
-                  "michigan": self.__build_michigan,
+                  "iowa": self.__build_iowa,
+                  "georgia": self.__build_georgia,
+                  "michigan": self.__upload_michigan,
                   "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
-                  "iowa": self.__build_iowa,
                   "new_jersey": self.__build_new_jersey
                   }
 
@@ -369,9 +395,3 @@ class DiagnosticTest(object):
         t0 = self.test_file_size()
         t1 = self.test_snapshots_dryrun()
         return all([t0, t1]), self.logs
-
-
-if __name__ == '__main__':
-    import sys
-    with TestFileBuilder(local_file=sys.argv[1], state=sys.argv[2]) as tf:
-        tf.build()
