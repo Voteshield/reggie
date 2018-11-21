@@ -19,8 +19,14 @@ voter_status_uocava: AU
 voter_status_preregistered: 17
 democratic_party: DEM
 republican_party: REP
-no_party_affiliation: OTHER
+conservative_party: CON
+green_party: GRE
 independence_party: IND
+reform_party: REF
+womens_equality_party: WEP
+working_families_party: WOR
+other_parties: OTH
+no_party_affiliation: BLK
 numeric_county: true
 date_format: '%Y%m%d'
 party_identifier: enrollment
@@ -74,15 +80,31 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Independence
-  - Other
+  - male
+  - female
+  - DEM
+  - REP
+  - CON
+  - GRE
+  - IND
+  - REF
+  - WEP
+  - WOR
+  - OTH
+  - BLK
   - county
 summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
   - int
   - int
   - int
