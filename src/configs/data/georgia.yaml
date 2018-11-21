@@ -205,14 +205,6 @@ ordered_columns:
   - Mail_address_2
   - Mail_address_3
   - Mail_country
-  - County Number
-  - Registration_number
-  - Election_Date
-  - Election_Type
-  - Party
-  - Absentee
-  - Provisional
-  - Supplemental
 county_names:
   Appling: 1
   Atkinson: 2
