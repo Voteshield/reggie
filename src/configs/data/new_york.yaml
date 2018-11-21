@@ -113,7 +113,7 @@ summary_types:
   - int
   - int
   - int
-  - text
+  - int
 columns:
   lastname: varchar #Last name
   firstname: varchar #First name
