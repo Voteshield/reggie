@@ -844,6 +844,8 @@ class Preprocessor(Loader):
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
 
+        # in this case we save ny as sparse array since so many elections are
+        # stored
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
         self.meta = {
