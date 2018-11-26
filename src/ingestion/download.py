@@ -668,7 +668,10 @@ class Preprocessor(Loader):
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
+        for f in new_files:
+            logging.info("New file: " + f)
         self.concat_file_segments(new_files)
+        os.remove(new_files)
         main_df = pd.read_csv(self.main_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x, main_df.columns.values))
