@@ -11,7 +11,7 @@ birthday_identifier: dob
 voter_status: status
 voter_status_active: ACTIVE
 voter_status_inactive: INACTIVE
-voter_status_purged: PURGED
+voter_status_cancelled: PURGED
 voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
@@ -206,10 +206,6 @@ ordered_columns:
   - purge_date
   - sboeid
   - voterhistory
-blacklist_columns:
-  - prevcounty
-  - prevaddress
-  - prevname
 hist_columns:
   - voterhistory
 county_names:
