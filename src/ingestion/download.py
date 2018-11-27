@@ -862,7 +862,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        main_df.to_csv(self.main_file, index=False, compression="gzip",
+                       encoding='utf-8')
         self.is_compressed = True
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
