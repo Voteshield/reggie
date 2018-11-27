@@ -925,6 +925,84 @@ class Preprocessor(Loader):
 
         return chksum
 
+    def preprocess_pennsylvania(self):
+        config = Config('pennsylvania')
+        new_files = self.unpack_files()
+        voter_files = [f for f in new_files if "FVE" in f]
+        election_maps = [f for f in new_files if "Election Map" in f]
+        zone_codes = [f for f in new_files if "Codes" in f]
+        zone_types = [f for f in new_files if "Types" in f]
+        counties = config["county_names"]
+
+        def build_election_array(x, edf):
+            arr = []
+            for i in range(40):
+                if x["election_{}_vote_method".format(i + 1)]:
+                    arr.append("{} {} {} {}".format(edf.iloc[i]["title"],
+                                                    edf.iloc[i]["date"],
+                                                    x["election_{}_vote_method"
+                                                        .format(i + 1)],
+                                                    x["election_{}_party"
+                                                        .format(i + 1)]))
+
+            return arr
+
+        def build_district_array(x, zdf, tdf):
+            arr = []
+            for i in range(40):
+                if x["district_{}".format(i + 1)]:
+                    zone = zdf.loc[x["district_{}".format(i + 1)] ==
+                                   zdf["code"]]["title"]
+                    ztype = tdf.loc[tdf["number"] ==
+                                   zdf.loc[zdf["title"] == zone]["number"]]
+                    ["title"]
+                    arr.append("{}, Type: {}".format(
+                        zone, ztype))
+
+            return arr
+
+        for c in counties:
+            voter_file = next(f for f in voter_files if c in f)
+            election_map = next(f for f in election_maps if c in f)
+            zones = next(f for f in zone_codes if c in f)
+            types = next(f for f in zone_types if c in f)
+            df = pd.read_csv(voter_file, sep='\t',
+                             names=config["ordered_columns"])
+            edf = pd.read_csv(election_map, sep='\t',
+                              names=['county', 'number', 'title', 'date'])
+            zdf = pd.read_csv(zones, sep='\t',
+                              names=['county', 'number', 'code', 'title'])
+            tdf = pd.read_csv(types, sep='\t',
+                              names=['county', 'number', 'abbr', 'title'])
+            df = df.replace('"')
+            edf = edf.replace('"')
+            zdf = zdf.replace('"')
+            logging.info("Building {} election array".format(c))
+            df["elections"] = df.apply(lambda x: build_election_array(x, edf))
+            logging.info("Building {} district array".format(c))
+            df["districts"] = df.apply(lambda x:
+                                       build_district_array(x, zdf, tdf))
+            for i in range(40):
+                df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
+                df = df.drop("election_{}_party".format(i + 1), axis=1)
+                df = df.drop("district_{}".format(i + 1), axis=1)
+
+            if not main_df:
+                main_df = df
+            else:
+                main_df = pd.concat([main_df, df], ignore_index=True)
+
+        logging.info("Writing CSV")
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.meta = {
+            "message": "michigan_{}".format(datetime.now().isoformat()),
+        }
+        self.temp_files.append(self.main_file)
+
+        chksum = self.compute_checksum()
+
+        return chksum
+
     def execute(self):
         self.state_router()
 
@@ -936,7 +1014,8 @@ class Preprocessor(Loader):
             'new_york': self.preprocess_new_york,
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
-            'iowa': self.preprocess_iowa
+            'iowa': self.preprocess_iowa,
+            'pennsylvania': self.preprocess_pennsylvania()
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

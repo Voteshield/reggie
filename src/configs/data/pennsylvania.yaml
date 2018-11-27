@@ -54,11 +54,11 @@ base_columns:
   post_value: varchar
   state: varchar
 generated_columns:
-  election_vote_methods: varchar[]
-  election_parties: varchar[]
+  elections: varchar[]
+  districts: varchar[]
 ordered_generated_columns:
-  - election_vote_methods
-  - election_parties
+  - elections
+  - districts
 summary_columns:
   - totals
   - date
