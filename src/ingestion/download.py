@@ -21,6 +21,7 @@ import shutil
 import numpy as np
 import subprocess
 import sys
+import gc
 
 
 def ohio_get_last_updated():
@@ -818,6 +819,7 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        gc.collect()
         main_df = pd.read_csv(main_file,
                               header=None,
                               names=config["ordered_columns"])
@@ -840,6 +842,7 @@ class Preprocessor(Loader):
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
+        gc.collect()
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
@@ -858,7 +861,7 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
+        gc.collect()
         main_df.to_csv(self.main_file, index=False, compression="gzip")
         self.is_compressed = True
         self.temp_files.append(self.main_file)
