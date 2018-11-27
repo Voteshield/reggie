@@ -114,5 +114,6 @@ class Config(object):
         for field in text_fields:
             if (field in df) and (field != self.data["voter_status"]) \
                and (field != self.data["party_identifier"]):
-                df[field] = df[field].astype(str).str.strip().str.lower()
+                df[field] = df[field].astype(str).str.strip().str.lower()\
+                    .str.decode('utf-8', errors='ignore').str.encode('utf-8')
         return df
