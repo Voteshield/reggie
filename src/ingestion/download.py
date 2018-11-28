@@ -854,7 +854,8 @@ class Preprocessor(Loader):
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
             "raddnumber", "rhalfcode", "rapartment", "rzip5", "rzip4",
-            "ward", "countyvrnumber", "lastvoteddate", "prevyearvoted"])
+            "mailadd4", "ward", "countyvrnumber", "lastvoteddate",
+            "prevyearvoted"])
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
