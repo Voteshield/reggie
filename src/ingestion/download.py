@@ -962,10 +962,10 @@ class Preprocessor(Loader):
             return arr
 
         for c in counties:
-            voter_file = next(f for f in voter_files if c in f)
-            election_map = next(f for f in election_maps if c in f)
-            zones = next(f for f in zone_codes if c in f)
-            types = next(f for f in zone_types if c in f)
+            voter_file = next(f for f in voter_files if c.upper() in f)
+            election_map = next(f for f in election_maps if c.upper() in f)
+            zones = next(f for f in zone_codes if c.upper() in f)
+            types = next(f for f in zone_types if c.upper() in f)
             df = pd.read_csv(voter_file, sep='\t',
                              names=config["ordered_columns"])
             edf = pd.read_csv(election_map, sep='\t',
@@ -992,6 +992,7 @@ class Preprocessor(Loader):
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
 
+        main_df = config.coerce_dates(main_df)
         logging.info("Writing CSV")
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
