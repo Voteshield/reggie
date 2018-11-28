@@ -934,6 +934,9 @@ class Preprocessor(Loader):
         zone_types = [f for f in new_files if "Types" in f]
         counties = config["county_names"]
         main_df = None
+        dfcols = config["ordered_columns"][:-3]
+        dfcols.extend(config["bonus_columns"])
+        dfcols.extend(config["ordered_columns"][-3:])
 
         for c in counties:
             logging.info("Processing {}".format(c))
@@ -944,8 +947,7 @@ class Preprocessor(Loader):
                 types = next(f for f in zone_types if c.upper() in f)
             except StopIteration:
                 continue
-            df = pd.read_csv(voter_file, sep='\t',
-                             names=config["ordered_columns"])
+            df = pd.read_csv(voter_file, sep='\t', names=dfcols)
             edf = pd.read_csv(election_map, sep='\t',
                               names=['county', 'number', 'title', 'date'])
             zdf = pd.read_csv(zones, sep='\t',
@@ -963,7 +965,7 @@ class Preprocessor(Loader):
                                               df["election_{}_party"
                                                   .format(i + 1)]
                 df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
-                       "election_{}".format(i + 1)] = pd.np.nan
+                       "election_{}".format(i)] = pd.np.nan
                 df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
                 df = df.drop("election_{}_party".format(i + 1), axis=1)
 
@@ -1003,6 +1005,7 @@ class Preprocessor(Loader):
         self.temp_files.append(self.main_file)
 
         chksum = self.compute_checksum()
+        print(df.columns)
 
         return chksum
 
