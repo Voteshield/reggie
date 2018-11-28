@@ -935,33 +935,6 @@ class Preprocessor(Loader):
         counties = config["county_names"]
         main_df = None
 
-        def build_election_array(x, edf):
-            arr = []
-            for i in range(40):
-                if x["election_{}_vote_method".format(i + 1)].any():
-                    arr.append("{} {} {} {}".format(edf.iloc[i]["title"],
-                                                    edf.iloc[i]["date"],
-                                                    x["election_{}_vote_method"
-                                                        .format(i + 1)],
-                                                    x["election_{}_party"
-                                                        .format(i + 1)]))
-
-            return arr
-
-        def build_district_array(x, zdf, tdf):
-            arr = []
-            for i in range(40):
-                if x["district_{}".format(i + 1)].any():
-                    zone = zdf.loc[x["district_{}".format(i + 1)] ==
-                                   zdf["code"]]["title"]
-                    ztype = tdf.loc[tdf["number"] ==
-                                   zdf.loc[zdf["title"] == zone]["number"]]
-                    ["title"]
-                    arr.append("{}, Type: {}".format(
-                        zone, ztype))
-
-            return arr
-
         for c in counties:
             logging.info("Processing {}".format(c))
             try:
