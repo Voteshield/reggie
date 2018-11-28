@@ -862,6 +862,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
+        self.temp_files.append(self.main_file)
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         main_df.to_csv(self.main_file, index=False, compression="gzip",
                        encoding='utf-8')
         self.is_compressed = True
