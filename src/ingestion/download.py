@@ -933,11 +933,12 @@ class Preprocessor(Loader):
         zone_codes = [f for f in new_files if "Codes" in f]
         zone_types = [f for f in new_files if "Types" in f]
         counties = config["county_names"]
+        main_df = None
 
         def build_election_array(x, edf):
             arr = []
             for i in range(40):
-                if x["election_{}_vote_method".format(i + 1)]:
+                if x["election_{}_vote_method".format(i + 1)].any():
                     arr.append("{} {} {} {}".format(edf.iloc[i]["title"],
                                                     edf.iloc[i]["date"],
                                                     x["election_{}_vote_method"
@@ -950,7 +951,7 @@ class Preprocessor(Loader):
         def build_district_array(x, zdf, tdf):
             arr = []
             for i in range(40):
-                if x["district_{}".format(i + 1)]:
+                if x["district_{}".format(i + 1)].any():
                     zone = zdf.loc[x["district_{}".format(i + 1)] ==
                                    zdf["code"]]["title"]
                     ztype = tdf.loc[tdf["number"] ==
@@ -977,14 +978,26 @@ class Preprocessor(Loader):
             df = df.replace('"')
             edf = edf.replace('"')
             zdf = zdf.replace('"')
-            logging.info("Building {} election array".format(c))
-            df["elections"] = df.apply(lambda x: build_election_array(x, edf))
-            logging.info("Building {} district array".format(c))
-            df["districts"] = df.apply(lambda x:
-                                       build_district_array(x, zdf, tdf))
             for i in range(40):
+                df["election_{}".format(i+1)] = edf.iloc[i]["title"] + ' ' + \
+                                              edf.iloc[i]["date"] + ' ' + \
+                                              df["election_{}_vote_method"
+                                                  .format(i + 1)] + ' ' + \
+                                              df["election_{}_party"
+                                                  .format(i + 1)]
+                df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
+                       "election_{}".format(i + 1)] = pd.np.nan
                 df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
                 df = df.drop("election_{}_party".format(i + 1), axis=1)
+
+                df["district_{}".format(i+1)] = df["district_{}".format(i+1)]\
+                    .map(zdf.drop_duplicates('code').reset_index()
+                         .set_index('code')['title'])
+                df["district_{}".format(i+1)] += \
+                    ', Type: ' + df["district_{}".format(i+1)]\
+                    .map(zdf.drop_duplicates('title').reset_index()
+                         .set_index('title')['number'])\
+                    .map(tdf.set_index('number')['title'])
                 df = df.drop("district_{}".format(i + 1), axis=1)
 
             if not main_df:
