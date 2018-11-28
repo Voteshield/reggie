@@ -840,9 +840,8 @@ class Preprocessor(Loader):
         counts = counts[count_order]
 
         sorted_codes = unique_codes.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
-                                 "date": date_from_str(k)}
-                             for i, k in enumerate(sorted_codes)}
+        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+                             enumerate(sorted_codes)}
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
