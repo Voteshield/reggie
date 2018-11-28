@@ -963,10 +963,14 @@ class Preprocessor(Loader):
             return arr
 
         for c in counties:
-            voter_file = next(f for f in voter_files if c.upper() in f)
-            election_map = next(f for f in election_maps if c.upper() in f)
-            zones = next(f for f in zone_codes if c.upper() in f)
-            types = next(f for f in zone_types if c.upper() in f)
+            logging.info("Processing {}".format(c))
+            try:
+                voter_file = next(f for f in voter_files if c.upper() in f)
+                election_map = next(f for f in election_maps if c.upper() in f)
+                zones = next(f for f in zone_codes if c.upper() in f)
+                types = next(f for f in zone_types if c.upper() in f)
+            except StopIteration:
+                continue
             df = pd.read_csv(voter_file, sep='\t',
                              names=config["ordered_columns"])
             edf = pd.read_csv(election_map, sep='\t',
@@ -979,10 +983,10 @@ class Preprocessor(Loader):
             edf = edf.replace('"')
             zdf = zdf.replace('"')
             for i in range(40):
-                df["election_{}".format(i+1)] = edf.iloc[i]["title"] + ' ' + \
+                df["election_{}".format(i)] = edf.iloc[i]["title"] + ' ' + \
                                               edf.iloc[i]["date"] + ' ' + \
                                               df["election_{}_vote_method"
-                                                  .format(i + 1)] + ' ' + \
+                                                  .format(i + 1)].apply(str) + ' ' + \
                                               df["election_{}_party"
                                                   .format(i + 1)]
                 df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
@@ -998,9 +1002,21 @@ class Preprocessor(Loader):
                     .map(zdf.drop_duplicates('title').reset_index()
                          .set_index('title')['number'])\
                     .map(tdf.set_index('number')['title'])
-                df = df.drop("district_{}".format(i + 1), axis=1)
 
-            if not main_df:
+            df["elections"] = df[["election_{}".format(i) for i in range(40)]]\
+                .values.tolist()
+            df["elections"] = df["elections"].map(
+                lambda L: list(filter(pd.notna, L)))
+            df["districts"] = df[["district_{}".format(i+1) for i in range(40)]]\
+                .values.tolist()
+            df["districts"] = df["districts"].map(
+                lambda L: list(filter(pd.notna, L)))
+
+            for i in range(40):
+                df = df.drop("election_{}".format(i), axis=1)
+                df = df.drop("district_{}".format(i+1), axis=1)
+
+            if main_df is None:
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
@@ -1029,7 +1045,7 @@ class Preprocessor(Loader):
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
             'iowa': self.preprocess_iowa,
-            'pennsylvania': self.preprocess_pennsylvania()
+            'pennsylvania': self.preprocess_pennsylvania
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
