@@ -11,12 +11,12 @@ birthday_identifier: dob
 voter_status: status
 voter_status_active: ACTIVE
 voter_status_inactive: INACTIVE
+voter_status_preregistered: PREREG
 voter_status_cancelled: PURGED
 voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
 voter_status_uocava: AU
-voter_status_preregistered: 17
 democratic_party: DEM
 republican_party: REP
 conservative_party: CON
