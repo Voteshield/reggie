@@ -68,9 +68,9 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Independent
+  - R
+  - D
+  - I
   - Other
   - county
 summary_types:
