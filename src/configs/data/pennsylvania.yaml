@@ -4,6 +4,7 @@ source: boe
 file_class: voter_file
 voter_id: voter_id
 county_identifier: county
+numeric_county: False
 valid_voting_methods: ['AP', 'AB', 'P']
 voter_status: voter_status
 voter_status_active: A
