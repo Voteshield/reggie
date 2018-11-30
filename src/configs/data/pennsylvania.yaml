@@ -9,7 +9,7 @@ valid_voting_methods: ['AP', 'AB', 'P']
 voter_status: voter_status
 voter_status_active: A
 voter_status_inactive: I
-party_identifier: party_code
+party_identifier: party_identifier
 democratic_party: D
 republican_party: R
 no_party_affiliation: I
@@ -98,7 +98,7 @@ columns:
   registration_date: date
   voter_status: varchar
   status_change_date: date
-  party_code: varchar
+  party_identifier: varchar
   house_number: varchar
   house_number_suffix: varchar
   street_name: varchar
@@ -132,7 +132,7 @@ ordered_columns:
   - registration_date
   - voter_status
   - status_change_date
-  - party_code
+  - party_identifier
   - house_number
   - house_number_suffix
   - street_name

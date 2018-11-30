@@ -996,11 +996,11 @@ class Preprocessor(Loader):
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
 
-        main_df.loc[main_df.party_code.isin(['INDd', 'IDR', 'IT', 'ITENT',
+        main_df.loc[main_df.party_identifier.isin(['INDd', 'IDR', 'IT', 'ITENT',
                                            'IND', 'INDE', 'INDY', 'INNP',
                                            'NEI', 'N', 'NF', 'NO', 'NON',
                                            'NOP', 'NOPA', 'NPA']),
-                    "party_code"] = 'I'
+                    "party_identifier"] = 'I'
         main_df = config.coerce_dates(main_df)
         logging.info("Writing CSV")
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
