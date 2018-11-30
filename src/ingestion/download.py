@@ -1148,9 +1148,9 @@ class Preprocessor(Loader):
                          .set_index('title')['number'])\
                     .map(tdf.set_index('number')['title'])
 
-            df["elections"] = df[["election_{}".format(i) for i in range(40)]]\
+            df["all_history"] = df[["election_{}".format(i) for i in range(40)]]\
                 .values.tolist()
-            df["elections"] = df["elections"].map(
+            df["all_history"] = df["all_history"].map(
                 lambda L: list(filter(pd.notna, L)))
             df["districts"] = df[["district_{}".format(i+1) for i in range(40)]]\
                 .values.tolist()

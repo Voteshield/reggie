@@ -55,10 +55,10 @@ base_columns:
   post_value: varchar
   state: varchar
 generated_columns:
-  elections: varchar[]
+  all_history: varchar[]
   districts: varchar[]
 ordered_generated_columns:
-  - elections
+  - all_history
   - districts
 summary_columns:
   - totals
