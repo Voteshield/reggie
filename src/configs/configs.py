@@ -51,6 +51,13 @@ class Config(object):
     def items(self):
         return self.data.items()
 
+    def database_columns(self):
+        return [c for c in self.data["ordered_columns"] if c not in
+                self.data["blacklist_columns"]]
+
+    def processed_file_columns(self):
+        return self.data["ordered_columns"]
+
     def coerce_dates(self, df, col_list="columns"):
         """
         takes all columns with timestamp or date labels in the config file and
