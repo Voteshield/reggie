@@ -1274,7 +1274,7 @@ class Preprocessor(Loader):
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
             'iowa': self.preprocess_iowa,
-            'pennsylvania': self.preprocess_pennsylvania
+            'pennsylvania': self.preprocess_pennsylvania,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
         }
