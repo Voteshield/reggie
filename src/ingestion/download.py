@@ -1127,9 +1127,15 @@ class Preprocessor(Loader):
             df = df.replace('"')
             edf = edf.replace('"')
             zdf = zdf.replace('"')
+            edf.index = edf["number"]
             for i in range(40):
-                df["election_{}".format(i)] = edf.iloc[i]["title"] + ' ' + \
-                                              edf.iloc[i]["date"] + ' ' + \
+                s = pd.Series(index=df.index)
+                # Blair isn't sending all their election codes
+                try:
+                    s[:] = edf.iloc[i]["title"] + ' ' + edf.iloc[i]["date"]+' '
+                except IndexError:
+                    s[:] = "UNSPECIFIED"
+                df["election_{}".format(i)] = s + \
                                               df["election_{}_vote_method"
                                                   .format(i + 1)].apply(str) + ' ' + \
                                               df["election_{}_party"
