@@ -1128,6 +1128,11 @@ class Preprocessor(Loader):
             edf = edf.replace('"')
             zdf = zdf.replace('"')
             edf.index = edf["number"]
+            os.remove(voter_file)
+            os.remove(election_map)
+            os.remove(zones)
+            os.remove(types)
+            
             for i in range(40):
                 s = pd.Series(index=df.index)
                 # Blair isn't sending all their election codes
