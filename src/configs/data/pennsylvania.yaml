@@ -71,13 +71,11 @@ summary_columns:
   - R
   - D
   - I
-  - Other
   - county
 summary_types:
   - int
   - timestamp
   - varchar
-  - int
   - int
   - int
   - int
