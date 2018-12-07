@@ -268,3 +268,12 @@ county_names:
   Wakulla: 65
   Walton: 66
   Washington: 67
+race_options:
+  1: american_indian_or_alaskan_native
+  2: asian_or_pacific_islander
+  3: black
+  4: hispanic
+  5: white
+  6: other
+  7: multi_racial
+  9: unknown
