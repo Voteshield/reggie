@@ -1183,6 +1183,10 @@ class Preprocessor(Loader):
                                            'NOP', 'NOPA', 'NPA']),
                     "party_identifier"] = 'I'
         main_df = config.coerce_dates(main_df)
+        main_df = config.coerce_numeric(main_df, extra_cols=[
+            "house_number", "apartment_number", "address_line_2", "zip",
+            "mail_address_1", "mail_address_2", "mail_zip", "precinct_code",
+            "precinct_split_id", "legacy_id", "home_phone"])
         logging.info("Writing CSV")
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
