@@ -519,8 +519,15 @@ class Preprocessor(Loader):
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
         df_voters = config.coerce_dates(df_voters)
-        df_voters = config.coerce_numeric(df_voters)
-    
+        df_voters = config.coerce_numeric(df_voters, extra_cols=[
+            "Land_district", "Mail_house_nbr", "Land_lot",
+            "Commission_district", "School_district",
+            "Ward city council_code", "County_precinct_id",
+            "Judicial_district", "County_district_a_value",
+            "County_district_b_value", "City_precinct_id", "Mail_address_2",
+            "Mail_address_3", "Mail_apt_unit_nbr", "Mail_country",
+            "Residence_apt_unit_nbr"])
+
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict, indent=4,
@@ -770,7 +777,10 @@ class Preprocessor(Loader):
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.config.coerce_dates(df_voters)
-        df_voters = self.config.coerce_numeric(df_voters)
+        df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
+            "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
+            "LOSST_CONTIGUOUS_CITIES", "PRECINCT", "SANITARY",
+            "SCHOOL_DIRECTOR", "UNIT_NUM"])
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
@@ -805,6 +815,15 @@ class Preprocessor(Loader):
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
 
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
+        main_df = self.config.coerce_numeric(main_df, extra_cols=[
+            "text_mail_zip5", "text_mail_zip4", "text_phone_last_four",
+            "text_phone_exchange", "text_phone_area_code",
+            "precinct_part_text_name", "precinct_part",
+            "occupation", "text_mail_carrier_rte",
+            "text_res_address_nbr", "text_res_address_nbr_suffix",
+            "text_res_unit_nbr", "text_res_carrier_rte",
+            "text_mail_address1", "text_mail_address2", "text_mail_address3",
+            "text_mail_address4"])
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
@@ -1021,7 +1040,7 @@ class Preprocessor(Loader):
             elec_dict = old_meta["array_encoding"]
 
         vdf = self.config.coerce_dates(vdf)
-        vdf = self.config.coerce_numeric(vdf)
+        vdf = self.config.coerce_numeric(vdf, extra_cols=["School_Precinct"])
         vdf = self.config.coerce_strings(vdf)
 
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
@@ -1106,7 +1125,8 @@ class Preprocessor(Loader):
             new_df = pd.read_csv(f, sep='|', names=config['ordered_columns'],
                                  low_memory=False)
             new_df = self.config.coerce_dates(new_df)
-            new_df = self.config.coerce_numeric(new_df)
+            new_df = self.config.coerce_numeric(new_df, extra_cols=[
+                "regional_school", "fire", "apt_no"])
             vdf = pd.concat([vdf, new_df], axis=0)
         for f in hist_files:
             logging.info("Reading " + f)
