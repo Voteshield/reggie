@@ -1186,7 +1186,7 @@ class Preprocessor(Loader):
         logging.info("Writing CSV")
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
-            "message": "michigan_{}".format(datetime.now().isoformat()),
+            "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
         self.temp_files.append(self.main_file)
 
