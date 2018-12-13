@@ -12,8 +12,8 @@ from constants import *
 import zipfile
 from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
-    df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
-    listcol_tonumpy, get_surrounding_dates, get_metadata_for_key
+    df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
+    get_metadata_for_key
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
