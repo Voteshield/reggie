@@ -1033,8 +1033,7 @@ class Preprocessor(Loader):
         else:
             this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
             pre_date, post_date, pre_key, post_key = get_surrounding_dates(
-                date=this_date, state=self.state,
-                ignore_conflicting_uploads=True, testing=self.testing)
+                date=this_date, state=self.state, testing=self.testing)
             old_meta = get_metadata_for_key(pre_key)
             sorted_codes = old_meta["array_decoding"]
             elec_dict = old_meta["array_encoding"]
