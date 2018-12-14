@@ -852,7 +852,6 @@ class Preprocessor(Loader):
         main_df["all_history"] = strcol_to_array(main_df.voterhistory,
                                                  delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
-        gc.collect()
 
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
@@ -868,7 +867,6 @@ class Preprocessor(Loader):
         # in this case we save ny as sparse array since so many elections are
         # stored
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
-        gc.collect()
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
