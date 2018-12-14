@@ -12,7 +12,7 @@ voter_status_inactive: I
 party_identifier: party_identifier
 democratic_party: D
 republican_party: R
-no_party_affiliation: I
+no_party_affiliation: NF
 birthday_identifier: dob
 date_format: '%m/%d/%Y'
 has_headers: False

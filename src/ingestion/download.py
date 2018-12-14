@@ -1196,11 +1196,6 @@ class Preprocessor(Loader):
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
 
-        main_df.loc[main_df.party_identifier.isin(['INDd', 'IDR', 'IT', 'ITENT',
-                                           'IND', 'INDE', 'INDY', 'INNP',
-                                           'NEI', 'N', 'NF', 'NO', 'NON',
-                                           'NOP', 'NOPA', 'NPA']),
-                    "party_identifier"] = 'I'
         main_df = config.coerce_dates(main_df)
         main_df = config.coerce_numeric(main_df, extra_cols=[
             "house_number", "apartment_number", "address_line_2", "zip",
