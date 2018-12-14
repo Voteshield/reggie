@@ -70,7 +70,7 @@ summary_columns:
   - ages_65_130
   - R
   - D
-  - I
+  - NF
   - county
 summary_types:
   - int
