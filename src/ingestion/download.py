@@ -21,6 +21,7 @@ import shutil
 import numpy as np
 import subprocess
 import sys
+import gc
 
 
 def ohio_get_last_updated():
@@ -837,6 +838,7 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        gc.collect()
         main_df = pd.read_csv(main_file,
                               header=None,
                               names=config["ordered_columns"])
@@ -864,16 +866,23 @@ class Preprocessor(Loader):
 
         # in this case we save ny as sparse array since so many elections are
         # stored
-
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
+        main_df = self.config.coerce_strings(main_df)
+        main_df = self.config.coerce_numeric(main_df, extra_cols=[
+            "raddnumber", "rhalfcode", "rapartment", "rzip5", "rzip4",
+            "mailadd4", "ward", "countyvrnumber", "lastvoteddate",
+            "prevyearvoted", "prevcounty"])
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
-        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        gc.collect()
+        self.temp_files.append(self.main_file)
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        main_df.to_csv(self.main_file, index=False, compression="gzip",
+                       encoding='utf-8')
         self.is_compressed = True
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
