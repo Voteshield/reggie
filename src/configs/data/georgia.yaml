@@ -374,3 +374,11 @@ county_names:
   Wilkes: 157
   Wilkinson: 158
   Worth: 159
+race_options:
+  WH: white
+  BH: black
+  U: unknown
+  HP: hispanic
+  AP: asian_or_pacific_islander
+  OT: other
+  AI: american_indian_or_alaskan_native
