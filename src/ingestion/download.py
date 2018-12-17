@@ -444,7 +444,7 @@ class Preprocessor(Loader):
         for i in new_files:
             if "/Georgia_Daily_VoterBase" in i:
                 logging.info("Detected voter file: " + i)
-                df_voters = pd.read_csv(i, sep = "|", quotechar='"', quoting=3,
+                df_voters = pd.read_csv(i, sep="|", quotechar='"', quoting=3,
                                         error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
@@ -1075,7 +1075,6 @@ class Preprocessor(Loader):
 
             return coded
 
-
         vdf['tmp_id'] = vdf[self.config["voter_id"]]
         vdf = vdf.set_index('tmp_id')
         logging.info("Generating sparse history")
@@ -1161,13 +1160,9 @@ class Preprocessor(Loader):
 
         hdf_id_group = hdf.groupby('voter_id')
         logging.info("Creating all_history array")
-        vdf['all_history'] = hdf_id_group.apply(
-            lambda x: x['election_name'].values
-        )
+        vdf['all_history'] = hdf_id_group['election_code'].apply(list)
         logging.info("Creating party_history array")
-        vdf['party_history'] = hdf_id_group.apply(
-            lambda x: x['party_code'].values
-        )
+        vdf['party_history'] = hdf_id_group['party_code'].apply(list)
 
         def insert_code_bin(arr):
             if arr is np.nan:
