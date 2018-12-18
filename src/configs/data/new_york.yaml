@@ -9,21 +9,28 @@ voter_id: sboeid
 county_identifier: countycode
 birthday_identifier: dob
 voter_status: status
-voter_status_active: A
-voter_status_inactive: I
-voter_status_purged: purged
+voter_status_active: ACTIVE
+voter_status_inactive: INACTIVE
+voter_status_preregistered: PREREG
+voter_status_cancelled: PURGED
 voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
 voter_status_uocava: AU
-voter_status_preregistered: 17
 democratic_party: DEM
 republican_party: REP
-no_party_affiliation: OTHER
+conservative_party: CON
+green_party: GRE
 independence_party: IND
-numeric_county: false
+reform_party: REF
+womens_equality_party: WEP
+working_families_party: WOR
+other_parties: OTH
+no_party_affiliation: BLK
+numeric_county: true
 date_format: '%Y%m%d'
 party_identifier: enrollment
+gender_identifier: gender
 name_fields:
   - firstname
   - middlename
@@ -31,18 +38,11 @@ name_fields:
   - namesuffix
 address_fields:
   - raddnumber
-  - rhalfcode
   - rapartment
-  - rpredirection
   - rstreetname
-  - rpostdirection
   - rcity
   - rzip5
   - rzip4
-  - mailadd1
-  - mailadd2
-  - mailadd3
-  - mailadd4
 format:
   separate_hist: false
   segmented_files: false
@@ -74,10 +74,18 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - Republican
-  - Democratic
-  - Independence
-  - Other
+  - male
+  - female
+  - DEM
+  - REP
+  - CON
+  - GRE
+  - IND
+  - REF
+  - WEP
+  - WOR
+  - OTH
+  - BLK
   - county
 summary_types:
   - int
@@ -91,7 +99,15 @@ summary_types:
   - int
   - int
   - int
-  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
 columns:
   lastname: varchar #Last name
   firstname: varchar #First name
@@ -193,7 +209,7 @@ county_names:
   broome: 4,
   cattaraugus: 5,
   cayuga: 6,
-  cha utauqua: 7,
+  chautauqua: 7,
   chemung: 8,
   chenango: 9,
   clinton: 10,
