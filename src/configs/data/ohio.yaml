@@ -136,7 +136,6 @@ columns:
   STATE_REPRESENTATIVE_DISTRICT: text
   STATE_SENATE_DISTRICT: text
   TOWNSHIP: text
-  SOS_VOTERID: text
 ordered_columns:
   - COUNTY_NUMBER
   - COUNTY_ID
