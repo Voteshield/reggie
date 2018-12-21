@@ -143,5 +143,8 @@ class Config(object):
             "coded_history",
             "verbose_history",
             "voterhistory",
-            "lastvoteddate"]
+            "lastvoteddate",
+            "Date_last_voted",
+            "Date_changed",
+            "Last_contact_date"]
         return history_cols
