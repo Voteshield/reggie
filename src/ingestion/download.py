@@ -869,8 +869,8 @@ class Preprocessor(Loader):
             elif "ncvoter" in i:
                 voter_file = i
 
-        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"')
-        vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"')
+        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'python')
+        vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'python')
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
 
@@ -889,7 +889,6 @@ class Preprocessor(Loader):
         vote_hist["array_position"] = vote_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
 
-        logging.info("FLORIDA: history apply")
         voter_groups = vote_hist.groupby("voter_reg_num")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["voting_method"].apply(list)

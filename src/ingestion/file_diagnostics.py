@@ -97,6 +97,40 @@ class TestFileBuilder(Preprocessor):
             for f in smallest_counties:
                 zf.write(f, os.path.basename(f))
 
+    def __build_north_carolina(self):
+        logging.info("unpacking files")
+        new_files = self.unpack_files()
+        logging.info("getting config")
+        config = Config("north_carolina")
+        logging.info("separating files")
+        for i in new_files:
+            if "ncvhis" in i:
+                vote_hist_file = i
+            elif "ncvoter" in i:
+                voter_file = i
+        logging.info("reading in files")
+        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'python', nrows=1000000)
+        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'python', nrows = 10000000)
+        logging.info("setting columns")
+        voter_df.columns = self.config["ordered_columns"]
+        voter_hist.columns = self.config["hist_columns"]
+
+        logging.info("sampling")
+        voter_df = voter_df.sample(n = 10000)
+        logging.info("filtering")
+        voter_hist = voter_hist[voter_hist['voter_reg_num'].isin(voter_df['voter_reg_num'])]
+        voter_hist = voter_hist.sample(n = 10000)
+        logging.info("zipping")
+        voter_df.to_csv("ncvoter.csv", sep = "\t", quotechar = '"', header=True)
+        voter_hist.to_csv("ncvhis.csv", sep = "\t", quotechar = '"', header=True)
+
+
+        new_files = ["voter_df.csv", "voter_hist.csv"]
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in new_files:
+                zf.write(f, os.path.basename(f))
+
+
     def __build_georgia(self):
         new_files = self.unpack_files(compression = 'unzip')
         #here check if there are voter history files, for the moment assume we have vh files
@@ -256,7 +290,6 @@ class TestFileBuilder(Preprocessor):
         return
 
     def build(self, file_name=None, save_local=False, save_remote=True):
-        print("hey")
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -270,7 +303,8 @@ class TestFileBuilder(Preprocessor):
                   "michigan": self.__upload_michigan,
                   "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
-                  "new_jersey": self.__build_new_jersey
+                  "new_jersey": self.__build_new_jersey,
+                  "north_carolina": self.__build_north_carolina
                   }
 
         f = routes[self.state]
