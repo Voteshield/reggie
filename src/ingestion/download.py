@@ -13,7 +13,7 @@ import zipfile
 from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
     df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
-    get_metadata_for_key
+    get_metadata_for_key, format_column_name
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -1131,17 +1131,23 @@ class Preprocessor(Loader):
         zone_types = [f for f in new_files if "Types" in f]
         counties = config["county_names"]
         main_df = None
+        elections = 40
         dfcols = config["ordered_columns"][:-3]
-        dfcols.extend(config["bonus_columns"])
+        for i in range(elections):
+            dfcols.extend(["district_{}".format(i+1)])
+        for i in range(elections):
+            dfcols.extend(["election_{}_vote_method".format(i + 1)])
+            dfcols.extend(["election_{}_party".format(i+1)])
         dfcols.extend(config["ordered_columns"][-3:])
 
         for c in counties:
             logging.info("Processing {}".format(c))
+            c = format_column_name(c)
             try:
-                voter_file = next(f for f in voter_files if c.upper() in f)
-                election_map = next(f for f in election_maps if c.upper() in f)
-                zones = next(f for f in zone_codes if c.upper() in f)
-                types = next(f for f in zone_types if c.upper() in f)
+                voter_file = next(f for f in voter_files if c in f.lower())
+                election_map = next(f for f in election_maps if c in f.lower())
+                zones = next(f for f in zone_codes if c in f.lower())
+                types = next(f for f in zone_types if c in f.lower())
             except StopIteration:
                 continue
             df = pd.read_csv(voter_file, sep='\t', names=dfcols)
@@ -1160,7 +1166,7 @@ class Preprocessor(Loader):
             os.remove(zones)
             os.remove(types)
             
-            for i in range(40):
+            for i in range(elections):
                 s = pd.Series(index=df.index)
                 # Blair isn't sending all their election codes
                 try:
@@ -1186,16 +1192,16 @@ class Preprocessor(Loader):
                          .set_index('title')['number'])\
                     .map(tdf.set_index('number')['title'])
 
-            df["all_history"] = df[["election_{}".format(i) for i in range(40)]]\
+            df["all_history"] = df[["election_{}".format(i) for i in range(elections)]]\
                 .values.tolist()
             df["all_history"] = df["all_history"].map(
                 lambda L: list(filter(pd.notna, L)))
-            df["districts"] = df[["district_{}".format(i+1) for i in range(40)]]\
+            df["districts"] = df[["district_{}".format(i+1) for i in range(elections)]]\
                 .values.tolist()
             df["districts"] = df["districts"].map(
                 lambda L: list(filter(pd.notna, L)))
 
-            for i in range(40):
+            for i in range(elections):
                 df = df.drop("election_{}".format(i), axis=1)
                 df = df.drop("district_{}".format(i+1), axis=1)
 
