@@ -863,7 +863,9 @@ class Preprocessor(Loader):
     def preprocess_north_carolina(self):
         new_files = self.unpack_files()
         config = Config("north_carolina")
+
         for i in new_files:
+            print(i)
             if "ncvhis" in i:
                 vote_hist_file = i
             elif "ncvoter" in i:
@@ -871,6 +873,7 @@ class Preprocessor(Loader):
 
         voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'python')
         vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'python')
+
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
 
@@ -886,14 +889,16 @@ class Preprocessor(Loader):
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
-        vote_hist["array_position"] = vote_hist["election_name"].map(
+        vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
+        print("vote hist columns")
+        print(vote_hist.columns)
 
         voter_groups = vote_hist.groupby("voter_reg_num")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["voting_method"].apply(list)
 
-        voter_df = voter_df.set_index(self.config["voter_reg_num"])
+        voter_df = voter_df.set_index("voter_reg_num")
 
         voter_df["all_history"] = all_history
         voter_df["vote_type"] = vote_type
@@ -1245,6 +1250,7 @@ class Preprocessor(Loader):
             'iowa': self.preprocess_iowa,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
+            'north_carolina': self.preprocess_north_carolina
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
