@@ -127,7 +127,8 @@ class Config(object):
 
     def admissible_change_types(self):
         change_types = [col for col in self.data["ordered_columns"]
-                        if col not in self.history_change_types()]
+                        if (col not in self.history_change_types() and
+                            col != self.data["voter_id"])]
         return change_types
 
     def history_change_types(self):
