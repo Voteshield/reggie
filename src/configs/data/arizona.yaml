@@ -33,12 +33,19 @@ voter_status_not_eligible: 'N   '
 voter_status_not_registered: 'NR  '
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
-no_party_affiliation: OTHER
+no_party_affiliation: "PARTY NOT DESIGNATED"
+independent: INDEPENDENT
+other: OTHER
+libertarian: LIBERTARIAN
+green: GREEN
+liberal: LIBERAL
+reform: REFORM
+americans_elect: "AMERICANS ELECT"
 absentee_ballot_code: 'A'
 valid_voting_methods: ['E','I','Y','P','F']
 voting_method_column: 'all_voting_methods'
 numeric_county: false
-date_format: '%Y.0'
+date_format: '%Y'
 party_identifier: desc_party
 name_fields:
   - cde_name_title
@@ -107,12 +114,26 @@ summary_columns:
   - ages_65_130
   - Republican
   - Democratic
+  - Party_Not_Designated
+  - Independent
   - Other
+  - Libertarian
+  - Green
+  - Liberal
+  - Reform
+  - Americans_Elect
   - county
 summary_types:
   - int
   - timestamp
   - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
   - int
   - int
   - int

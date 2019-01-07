@@ -12,8 +12,8 @@ from constants import *
 import zipfile
 from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
-    df_to_postgres_array_string, strcol_to_postgres_array_str, strcol_to_array,\
-    listcol_tonumpy, get_surrounding_dates, get_metadata_for_key
+    df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
+    get_metadata_for_key, format_column_name
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -21,6 +21,7 @@ import shutil
 import numpy as np
 import subprocess
 import sys
+import gc
 
 
 def ohio_get_last_updated():
@@ -519,8 +520,15 @@ class Preprocessor(Loader):
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
         df_voters = config.coerce_dates(df_voters)
-        df_voters = config.coerce_numeric(df_voters)
-    
+        df_voters = config.coerce_numeric(df_voters, extra_cols=[
+            "Land_district", "Mail_house_nbr", "Land_lot",
+            "Commission_district", "School_district",
+            "Ward city council_code", "County_precinct_id",
+            "Judicial_district", "County_district_a_value",
+            "County_district_b_value", "City_precinct_id", "Mail_address_2",
+            "Mail_address_3", "Mail_apt_unit_nbr", "Mail_country",
+            "Residence_apt_unit_nbr"])
+
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict, indent=4,
@@ -770,7 +778,10 @@ class Preprocessor(Loader):
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
         df_voters = self.config.coerce_dates(df_voters)
-        df_voters = self.config.coerce_numeric(df_voters)
+        df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
+            "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
+            "LOSST_CONTIGUOUS_CITIES", "PRECINCT", "SANITARY",
+            "SCHOOL_DIRECTOR", "UNIT_NUM"])
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
@@ -782,10 +793,12 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f and
-                     "CANCELLED" not in f]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
+
         self.concat_file_segments(new_files)
-        logging.warning(self.main_file)
+        for f in new_files:
+            logging.info("New file: " + f)
+            os.remove(f)
         main_df = pd.read_csv(self.main_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x,
@@ -805,6 +818,15 @@ class Preprocessor(Loader):
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
 
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
+        main_df = self.config.coerce_numeric(main_df, extra_cols=[
+            "text_mail_zip5", "text_mail_zip4", "text_phone_last_four",
+            "text_phone_exchange", "text_phone_area_code",
+            "precinct_part_text_name", "precinct_part",
+            "occupation", "text_mail_carrier_rte",
+            "text_res_address_nbr", "text_res_address_nbr_suffix",
+            "text_res_unit_nbr", "text_res_carrier_rte",
+            "text_mail_address1", "text_mail_address2", "text_mail_address3",
+            "text_mail_address4"])
         main_df.to_csv(self.main_file, encoding='utf-8', index=False)
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
@@ -818,6 +840,7 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
         main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        gc.collect()
         main_df = pd.read_csv(main_file,
                               header=None,
                               names=config["ordered_columns"])
@@ -845,16 +868,23 @@ class Preprocessor(Loader):
 
         # in this case we save ny as sparse array since so many elections are
         # stored
-
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
+        main_df = self.config.coerce_strings(main_df)
+        main_df = self.config.coerce_numeric(main_df, extra_cols=[
+            "raddnumber", "rhalfcode", "rapartment", "rzip5", "rzip4",
+            "mailadd4", "ward", "countyvrnumber", "lastvoteddate",
+            "prevyearvoted", "prevcounty"])
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
-        main_df.to_csv(self.main_file, index=False, compression="gzip")
+        gc.collect()
+        os.remove(self.main_file)
+        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        main_df.to_csv(self.main_file, index=False, compression="gzip",
+                       encoding='utf-8')
         self.is_compressed = True
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
@@ -1078,14 +1108,13 @@ class Preprocessor(Loader):
         else:
             this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
             pre_date, post_date, pre_key, post_key = get_surrounding_dates(
-                date=this_date, state=self.state,
-                ignore_conflicting_uploads=True, testing=self.testing)
+                date=this_date, state=self.state, testing=self.testing)
             old_meta = get_metadata_for_key(pre_key)
             sorted_codes = old_meta["array_decoding"]
             elec_dict = old_meta["array_encoding"]
 
         vdf = self.config.coerce_dates(vdf)
-        vdf = self.config.coerce_numeric(vdf)
+        vdf = self.config.coerce_numeric(vdf, extra_cols=["School_Precinct"])
         vdf = self.config.coerce_strings(vdf)
 
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
@@ -1158,6 +1187,110 @@ class Preprocessor(Loader):
 
         return chksum
 
+    def preprocess_pennsylvania(self):
+        config = Config('pennsylvania')
+        new_files = self.unpack_files()
+        voter_files = [f for f in new_files if "FVE" in f]
+        election_maps = [f for f in new_files if "Election Map" in f]
+        zone_codes = [f for f in new_files if "Codes" in f]
+        zone_types = [f for f in new_files if "Types" in f]
+        counties = config["county_names"]
+        main_df = None
+        elections = 40
+        dfcols = config["ordered_columns"][:-3]
+        for i in range(elections):
+            dfcols.extend(["district_{}".format(i+1)])
+        for i in range(elections):
+            dfcols.extend(["election_{}_vote_method".format(i + 1)])
+            dfcols.extend(["election_{}_party".format(i+1)])
+        dfcols.extend(config["ordered_columns"][-3:])
+
+        for c in counties:
+            logging.info("Processing {}".format(c))
+            c = format_column_name(c)
+            try:
+                voter_file = next(f for f in voter_files if c in f.lower())
+                election_map = next(f for f in election_maps if c in f.lower())
+                zones = next(f for f in zone_codes if c in f.lower())
+                types = next(f for f in zone_types if c in f.lower())
+            except StopIteration:
+                continue
+            df = pd.read_csv(voter_file, sep='\t', names=dfcols)
+            edf = pd.read_csv(election_map, sep='\t',
+                              names=['county', 'number', 'title', 'date'])
+            zdf = pd.read_csv(zones, sep='\t',
+                              names=['county', 'number', 'code', 'title'])
+            tdf = pd.read_csv(types, sep='\t',
+                              names=['county', 'number', 'abbr', 'title'])
+            df = df.replace('"')
+            edf = edf.replace('"')
+            zdf = zdf.replace('"')
+            edf.index = edf["number"]
+            os.remove(voter_file)
+            os.remove(election_map)
+            os.remove(zones)
+            os.remove(types)
+            
+            for i in range(elections):
+                s = pd.Series(index=df.index)
+                # Blair isn't sending all their election codes
+                try:
+                    s[:] = edf.iloc[i]["title"] + ' ' + edf.iloc[i]["date"]+' '
+                except IndexError:
+                    s[:] = "UNSPECIFIED"
+                df["election_{}".format(i)] = s + \
+                                              df["election_{}_vote_method"
+                                                  .format(i + 1)].apply(str) + ' ' + \
+                                              df["election_{}_party"
+                                                  .format(i + 1)]
+                df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
+                       "election_{}".format(i)] = pd.np.nan
+                df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
+                df = df.drop("election_{}_party".format(i + 1), axis=1)
+
+                df["district_{}".format(i+1)] = df["district_{}".format(i+1)]\
+                    .map(zdf.drop_duplicates('code').reset_index()
+                         .set_index('code')['title'])
+                df["district_{}".format(i+1)] += \
+                    ', Type: ' + df["district_{}".format(i+1)]\
+                    .map(zdf.drop_duplicates('title').reset_index()
+                         .set_index('title')['number'])\
+                    .map(tdf.set_index('number')['title'])
+
+            df["all_history"] = df[["election_{}".format(i) for i in range(elections)]]\
+                .values.tolist()
+            df["all_history"] = df["all_history"].map(
+                lambda L: list(filter(pd.notna, L)))
+            df["districts"] = df[["district_{}".format(i+1) for i in range(elections)]]\
+                .values.tolist()
+            df["districts"] = df["districts"].map(
+                lambda L: list(filter(pd.notna, L)))
+
+            for i in range(elections):
+                df = df.drop("election_{}".format(i), axis=1)
+                df = df.drop("district_{}".format(i+1), axis=1)
+
+            if main_df is None:
+                main_df = df
+            else:
+                main_df = pd.concat([main_df, df], ignore_index=True)
+
+        main_df = config.coerce_dates(main_df)
+        main_df = config.coerce_numeric(main_df, extra_cols=[
+            "house_number", "apartment_number", "address_line_2", "zip",
+            "mail_address_1", "mail_address_2", "mail_zip", "precinct_code",
+            "precinct_split_id", "legacy_id", "home_phone"])
+        logging.info("Writing CSV")
+        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.meta = {
+            "message": "pennsylvania_{}".format(datetime.now().isoformat()),
+        }
+        self.temp_files.append(self.main_file)
+
+        chksum = self.compute_checksum()
+
+        return chksum
+
     def preprocess_new_jersey(self):
         new_files = self.unpack_files()
         config = Config("new_jersey")
@@ -1170,7 +1303,8 @@ class Preprocessor(Loader):
             new_df = pd.read_csv(f, sep='|', names=config['ordered_columns'],
                                  low_memory=False)
             new_df = self.config.coerce_dates(new_df)
-            new_df = self.config.coerce_numeric(new_df)
+            new_df = self.config.coerce_numeric(new_df, extra_cols=[
+                "regional_school", "fire", "apt_no"])
             vdf = pd.concat([vdf, new_df], axis=0)
         for f in hist_files:
             logging.info("Reading " + f)
@@ -1234,6 +1368,7 @@ class Preprocessor(Loader):
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
+
         return chksum
 
     def execute(self):
@@ -1248,6 +1383,7 @@ class Preprocessor(Loader):
             'michigan': self.preprocess_michigan,
             'missouri': self.preprocess_missouri,
             'iowa': self.preprocess_iowa,
+            'pennsylvania': self.preprocess_pennsylvania,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina

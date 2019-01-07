@@ -121,5 +121,30 @@ class Config(object):
         for field in text_fields:
             if (field in df) and (field != self.data["voter_status"]) \
                and (field != self.data["party_identifier"]):
-                df[field] = df[field].astype(str).str.strip().str.lower()
+                df[field] = df[field].astype(str).str.strip().str.lower()\
+                    .str.decode('utf-8', errors='ignore').str.encode('utf-8')
         return df
+
+    def admissible_change_types(self):
+        change_types = [col for col in self.data["ordered_columns"]
+                        if col not in self.history_change_types()]
+        return change_types
+
+    def history_change_types(self):
+        history_cols = [
+            "all_history",
+            "primary_history",
+            "special_history",
+            "general_history",
+            "sparse_history",
+            "vote_type",
+            "all_voting_methods",
+            "party_history",
+            "coded_history",
+            "verbose_history",
+            "voterhistory",
+            "lastvoteddate",
+            "Date_last_voted",
+            "Date_changed",
+            "Last_contact_date"]
+        return history_cols
