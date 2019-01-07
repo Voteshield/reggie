@@ -109,8 +109,8 @@ class TestFileBuilder(Preprocessor):
             elif "ncvoter" in i:
                 voter_file = i
         logging.info("reading in files")
-        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'python', nrows=1000000)
-        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'python', nrows = 10000000)
+        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'c', nrows=1000000)
+        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'c', nrows = 10000000)
         logging.info("setting columns")
         voter_df.columns = self.config["ordered_columns"]
         voter_hist.columns = self.config["hist_columns"]
