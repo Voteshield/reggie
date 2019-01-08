@@ -120,12 +120,14 @@ class TestFileBuilder(Preprocessor):
         logging.info("filtering")
         voter_hist = voter_hist[voter_hist['voter_reg_num'].isin(voter_df['voter_reg_num'])]
         voter_hist = voter_hist.sample(n = 10000)
+        voter_df.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
+        voter_hist.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
         logging.info("zipping")
-        voter_df.to_csv("ncvoter.csv", sep = "\t", quotechar = '"', header=True, index=False)
-        voter_hist.to_csv("ncvhis.csv", sep = "\t", quotechar = '"', header=True, index = False)
+        voter_df.to_csv("ncvoter.txt", sep = "\t", quotechar = '"', header=True, index=False, encoding='utf8')
+        voter_hist.to_csv("ncvhis.txt", sep = "\t", quotechar = '"', header=True, index = False, encoding='utf8')
 
 
-        new_files = ["ncvoter.csv", "ncvhis.csv"]
+        new_files = ["ncvoter.txt", "ncvhis.txt"]
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             for f in new_files:
                 zf.write(f, os.path.basename(f))

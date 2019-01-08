@@ -44,7 +44,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-  voter_reg_num: int
+  voter_reg_num: text
 summary_columns:
   - totals
   - date
@@ -95,7 +95,7 @@ format:
 columns:
   county_id: smallint
   county_desc: varchar
-  voter_reg_num: int
+  voter_reg_num: text
   status_cd: char
   voter_status_desc: varchar
   reason_cd: char
