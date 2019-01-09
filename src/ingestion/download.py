@@ -921,10 +921,7 @@ class Preprocessor(Loader):
 
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-        print("voter df")
-        print(voter_df.head())
-        print("voter hist")
-        print(vote_hist.head())
+        
 
         voter_groups = vote_hist.groupby("voter_reg_num")
         all_history = voter_groups["array_position"].apply(list)

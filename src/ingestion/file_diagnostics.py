@@ -98,28 +98,25 @@ class TestFileBuilder(Preprocessor):
                 zf.write(f, os.path.basename(f))
 
     def __build_north_carolina(self):
-        logging.info("unpacking files")
         new_files = self.unpack_files()
-        logging.info("getting config")
         config = Config("north_carolina")
-        logging.info("separating files")
         for i in new_files:
             if "ncvhis" in i:
                 vote_hist_file = i
             elif "ncvoter" in i:
                 voter_file = i
         logging.info("reading in files")
-        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'c', nrows=1000000)
-        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'c', nrows = 10000000)
+        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'c')
+        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'c')
         logging.info("setting columns")
         voter_df.columns = self.config["ordered_columns"]
         voter_hist.columns = self.config["hist_columns"]
 
         logging.info("sampling")
-        voter_df = voter_df.sample(n = 10000)
+        voter_df = voter_df[voter_df['county_desc'] == "CHOWAN"]
         logging.info("filtering")
         voter_hist = voter_hist[voter_hist['voter_reg_num'].isin(voter_df['voter_reg_num'])]
-        voter_hist = voter_hist.sample(n = 10000)
+        voter_hist = voter_hist.sample(n = 100)
         voter_df.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
         voter_hist.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
         logging.info("zipping")

@@ -35,7 +35,7 @@ address_fields:
 primary_key:
   - pre_date
   - post_date
-  - party_cd
+  - voter_reg_num
   - change_type
 base_columns:
   pre_date: timestamp
@@ -90,80 +90,80 @@ format:
   separate_hist: true
   separate_counties_voter_file: false
   separate_counties_hist_file: false
-  hist_election_rows: false
-  columnar_elections: true
+  hist_election_rows: true
+  columnar_elections: false
 columns:
-  county_id: smallint
-  county_desc: varchar
+  county_id: int
+  county_desc: text
   voter_reg_num: text
-  status_cd: char
-  voter_status_desc: varchar
-  reason_cd: char
-  voter_status_reason_desc: varchar
-  absent_ind: char
-  name_prefx_cd: char
-  last_name: char
-  first_name: char
-  midl_name: char
-  name_sufx_cd: char
-  res_street_address: varchar
-  res_city_desc: varchar
-  state_cd: char
-  zip_code: char
-  mail_addr1: varchar
-  mail_addr2: varchar
-  mail_addr3: varchar
-  mail_addr4: varchar
-  mail_city: varchar
-  mail_state: char
-  mail_zipcode: char
-  full_phone_number: varchar
-  race_code: char
-  ethnic_code: char
-  party_cd: char
-  gender_code: varchar
+  status_cd: text
+  voter_status_desc: text
+  reason_cd: text
+  voter_status_reason_desc: text
+  absent_ind: text
+  name_prefx_cd: text
+  last_name: text
+  first_name: text
+  midl_name: text
+  name_sufx_cd: text
+  res_street_address: text
+  res_city_desc: text
+  state_cd: text
+  zip_code: text
+  mail_addr1: text
+  mail_addr2: text
+  mail_addr3: text
+  mail_addr4: text
+  mail_city: text
+  mail_state: text
+  mail_zipcode: text
+  full_phone_number: text
+  race_code: text
+  ethnic_code: text
+  party_cd: text
+  gender_code: text
   birth_age: int
-  birth_place: char
-  drivers_lic: char
-  registr_dt: char
-  precinct_abbrv: char
-  precinct_desc: varchar
-  municipality_abbrv: char
-  municipality_desc: varchar
-  ward_abbrv: char
-  ward_desc: varchar
-  cong_dist_abbrv: char
-  super_court_abbrv: char
-  judic_dist_abbrv: char
-  nc_senate_abbrv: char
-  nc_house_abbrv: char
-  county_commiss_abbrv: char
-  county_commiss_desc: varchar
-  township_abbrv: char
-  township_desc: varchar
-  school_dist_abbrv: char
-  school_dist_desc: varchar
-  fire_dist_abbrv: char
-  fire_dist_desc: varchar
-  water_dist_abbrv: char
-  water_dist_desc: varchar
-  sewer_dist_abbrv: char
-  sewer_dist_desc: varchar
-  sanit_dist_abbrv: char
-  sanit_dist_desc: varchar
-  rescue_dist_abbrv: char
-  rescue_dist_desc: varchar
-  munic_dist_abbrv: char
-  munic_dist_desc: varchar
-  dist_1_abbrv: char
-  dist_1_desc: varchar
-  dist_2_abbrv: char
-  dist_2_desc: varchar
-  Confidential_ind: char
-  birth_year: char
-  ncid: char
-  vtd_abbrv: char
-  vtd_desc: char
+  birth_place: text
+  drivers_lic: text
+  registr_dt: text
+  precinct_abbrv: text
+  precinct_desc: text
+  municipality_abbrv: text
+  municipality_desc: text
+  ward_abbrv: text
+  ward_desc: text
+  cong_dist_abbrv: text
+  super_court_abbrv: text
+  judic_dist_abbrv: text
+  nc_senate_abbrv: text
+  nc_house_abbrv: text
+  county_commiss_abbrv: text
+  county_commiss_desc: text
+  township_abbrv: text
+  township_desc: text
+  school_dist_abbrv: text
+  school_dist_desc: text
+  fire_dist_abbrv: text
+  fire_dist_desc: text
+  water_dist_abbrv: text
+  water_dist_desc: text
+  sewer_dist_abbrv: text
+  sewer_dist_desc: text
+  sanit_dist_abbrv: text
+  sanit_dist_desc: text
+  rescue_dist_abbrv: text
+  rescue_dist_desc: text
+  munic_dist_abbrv: text
+  munic_dist_desc: text
+  dist_1_abbrv: text
+  dist_1_desc: text
+  dist_2_abbrv: text
+  dist_2_desc: text
+  Confidential_ind: text
+  birth_year: text
+  ncid: text
+  vtd_abbrv: text
+  vtd_desc: text
 
 hist_columns:
   - county_id
