@@ -375,10 +375,10 @@ county_names:
   Wilkinson: 158
   Worth: 159
 race_options:
-  WH: white
-  BH: black
-  U: unknown
-  HP: hispanic
-  AP: asian_or_pacific_islander
-  OT: other
-  AI: american_indian_or_alaskan_native
+  White not of Hispanic Origin: white
+  Black not of Hispanic Origin: black
+  Unknown: unknown
+  Hispanic: hispanic
+  Asian or Pacific Islander: asian_or_pacific_islander
+  Other: other
+  American Indian or Alaskan Native: american_indian_or_alaskan_native
