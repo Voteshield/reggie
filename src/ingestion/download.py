@@ -93,15 +93,28 @@ class Loader(object):
     def clean_up(self):
         for fn in self.temp_files:
             if os.path.isfile(fn):
+                
                 try:
                     os.chmod(fn, 0777)
                     os.remove(fn)
+                    logging.info("removed {}".format(fn))
                 except OSError:
                     logging.warning("cannot remove {}".format(fn))
                     continue
             elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
+
+    def clean_up_osx(self):
+        for fn in self.temp_files:
+            if "MACOSX" in fn:
+                try:
+                    os.chmod(fn, 0777)
+                    os.remove(fn)
+                    logging.info("removed {}".format(fn))
+                except OSError:
+                    logging.warning("cannot remove {}".format(fn))
+                    continue
 
     def download_src_chunks(self):
         """
@@ -896,17 +909,25 @@ class Preprocessor(Loader):
 
         for i in new_files:
             print(i)
-            if "ncvhis" in i:
+            if "ncvhis" in i and "MACOSX" not in i:
                 vote_hist_file = i
-            elif "ncvoter" in i:
+            elif "ncvoter" in i and "MACOSX" not in i:
                 voter_file = i
-
+        logging.info("reading in voter files")
+        logging.info(vote_hist_file)
+        logging.info(voter_file)
         voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"')
         vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"')
+        logging.info("removing osx")
+        self.clean_up_osx()
+        logging.info("removing everything")
+        self.clean_up()
 
+        logging.info("setting columns")
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
 
+        logging.info("getting valid elections")
         valid_elections, counts = np.unique(vote_hist["election_desc"],
                                             return_counts=True)
 
@@ -918,32 +939,33 @@ class Preprocessor(Loader):
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
-
+        logging.info("dictionary work")
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
         
-
+        logging.info("groupby and apply work")
         voter_groups = vote_hist.groupby("voter_reg_num")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["voting_method"].apply(list)
 
+        logging.info("setting index")
         voter_df = voter_df.set_index("voter_reg_num")
 
         voter_df["all_history"] = all_history
         voter_df["vote_type"] = vote_type
 
+        logging.info("coercing")
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
         voter_df = self.config.coerce_numeric(voter_df)
 
+        logging.info("meta dumps")
         self.meta = {
             "message": "north_carolina_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
 
-        os.remove(voter_file)
-        os.remove(vote_hist_file)
 
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         voter_df.to_csv(self.main_file)

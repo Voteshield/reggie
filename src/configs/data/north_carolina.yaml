@@ -8,8 +8,12 @@ birthday_identifier: birth_year
 voter_status: status_cd
 voter_status_active: A
 voter_status_inactive: I
+voter_status_removed: R
+voter_status_died: D
+voter_status_S: S
 democratic_party: DEM
 republican_party: REP
+libertarian_party: LIB
 no_party_affiliation: UNA
 date_format: '%Y'
 numeric_county: true
@@ -44,7 +48,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-  voter_reg_num: text
+  voter_reg_num: int
 summary_columns:
   - totals
   - date
@@ -95,8 +99,8 @@ format:
 columns:
   county_id: int
   county_desc: text
-  voter_reg_num: text
-  status_cd: text
+  voter_reg_num: int
+  status_cd: char
   voter_status_desc: text
   reason_cd: text
   voter_status_reason_desc: text
