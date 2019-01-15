@@ -91,9 +91,11 @@ class Loader(object):
             self.clean_up()
 
     def clean_up(self):
+        logging.info("got to clean up function")
         for fn in self.temp_files:
+            logging.info("checking if {} is a file".format(fn))
             if os.path.isfile(fn):
-                
+                logging.info("{} is a file".format(fn))
                 try:
                     os.chmod(fn, 0777)
                     os.remove(fn)
@@ -104,17 +106,6 @@ class Loader(object):
             elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
-
-    def clean_up_osx(self):
-        for fn in self.temp_files:
-            if "MACOSX" in fn:
-                try:
-                    os.chmod(fn, 0777)
-                    os.remove(fn)
-                    logging.info("removed {}".format(fn))
-                except OSError:
-                    logging.warning("cannot remove {}".format(fn))
-                    continue
 
     def download_src_chunks(self):
         """
@@ -906,7 +897,6 @@ class Preprocessor(Loader):
     def preprocess_north_carolina(self):
         new_files = self.unpack_files()
         config = Config("north_carolina")
-
         for i in new_files:
             print(i)
             if "ncvhis" in i and "MACOSX" not in i:
@@ -918,8 +908,6 @@ class Preprocessor(Loader):
         logging.info(voter_file)
         voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"')
         vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"')
-        logging.info("removing osx")
-        self.clean_up_osx()
         logging.info("removing everything")
         self.clean_up()
 
@@ -965,11 +953,10 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
-
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        voter_df.to_csv(self.main_file)
-        self.temp_files.append(self.main_file)
+        voter_df.to_csv(self.main_file, index=False, compression="gzip",
+                       encoding='utf-8')
+        self.is_compressed = True
         chksum = self.compute_checksum()
         return chksum
 

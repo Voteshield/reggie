@@ -81,6 +81,9 @@ summary_types:
   - int
   - int
   - int
+data_chunk_links:
+  - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvoter_Statewide.zip
+  - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvhis_Statewide.zip
 additional_snapshot_columns:
   all_history: text[]
   vote_type: text[]
@@ -99,7 +102,7 @@ format:
 columns:
   county_id: int
   county_desc: text
-  voter_reg_num: int
+  voter_reg_num: text
   status_cd: char
   voter_status_desc: text
   reason_cd: text
