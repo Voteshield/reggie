@@ -951,7 +951,7 @@ class Preprocessor(Loader):
         config = Config("michigan")
         new_files = self.unpack_files()
         voter_file = ([n for n in new_files if 'entire_state_v' in n
-                       or 'EntireStateVoters.csv' in n] + [None])[0]
+                       or 'EntireStateVoters' in n] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n
                       or 'EntireStateVoterHistory' in n] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
