@@ -985,8 +985,8 @@ class Preprocessor(Loader):
                        "US_CONGRESS_DISTRICT_NAME",
                        "COUNTY_COMMISSIONER_DISTRICT_NAME",
                        "VILLAGE_DISTRICT_NAME", "UOCAVA_STATUS_NAME"], axis=1)
-                if "PRECINCT" in vdf.columns:
-                    vdf = vdf.drop(["PRECINCT"], axis=1)
+            if "PRECINCT" in vdf.columns:
+                vdf = vdf.drop(["PRECINCT"], axis=1)
             vdf.columns = config["ordered_columns"][:-1]
             logging.info("Removing voter file")
             os.remove(voter_file)
