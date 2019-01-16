@@ -314,8 +314,9 @@ class TestFileBuilder(Preprocessor):
             with open(self.main_file) as f:
                 s3.Object(
                     S3_BUCKET, self.test_key(file_name)).put(
-                    Body=f.read(), Metadata={
-                        "last_updated": self.download_date})
+                    Body=f.read(),
+                    ServerSideEncryption='AES256',
+                    Metadata={"last_updated": self.download_date})
         if save_local:
             os.rename(self.main_file, file_name)
 
