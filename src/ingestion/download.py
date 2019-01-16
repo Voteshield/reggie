@@ -330,10 +330,10 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f)
+                .put(Body=f, ServerSideEncryption="AES256")
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
-            .put(Body=json.dumps(meta))
+            .put(Body=json.dumps(meta), ServerSideEncryption="AES256")
 
 
 class Preprocessor(Loader):
@@ -953,8 +953,10 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+        logging.info("setting main file")
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        voter_df.to_csv(self.main_file, index=False, compression="gzip",
+        logging.info("to csv")
+        voter_df.to_csv(self.main_file, index=True, compression="gzip",
                        encoding='utf-8')
         self.is_compressed = True
         chksum = self.compute_checksum()
