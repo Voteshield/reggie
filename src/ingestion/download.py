@@ -330,18 +330,10 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         with open(self.main_file) as f:
             s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-<<<<<<< HEAD
-                .put(Body=f, ServerSideEncryption="AES256")
-        s3.Object(S3_BUCKET,
-                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
-            .put(Body=json.dumps(meta), ServerSideEncryption="AES256")
-=======
                 .put(Body=f, ServerSideEncryption='AES256')
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
->>>>>>> c99d4d9286e9d455072d5f9c8e856bbea15cde74
-
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
