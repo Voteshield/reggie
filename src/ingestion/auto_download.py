@@ -6,6 +6,7 @@ import datetime
 import zipfile
 import boto3
 from ingestion.download import Loader
+from constants import RAW_FILE_PREFIX
 
 def state_download(state):
 
@@ -29,13 +30,13 @@ def state_download(state):
 			        handle.write(chunk)
 			handle.close()
 
-		file_to_zip = "raw_voter_file/north_carolina/boe_download/" + today + ".zip"
+		file_to_zip = today + ".zip"
 		with zipfile.ZipFile(file_to_zip, 'w') as myzip:
 			for f in zipped_files:
 				myzip.write(f)
 		with Loader(config_file=config_file, force_date=today,
                  force_file=file_to_zip) as loader:
-			loader.s3_dump()
+			loader.s3_dump(file_class=RAW_FILE_PREFIX)
 
 
 	if state == "practice":
