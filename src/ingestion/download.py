@@ -22,7 +22,12 @@ import numpy as np
 import subprocess
 import sys
 import gc
-
+from io import BytesIO
+from zipfile import ZipFile, BadZipfile
+from gzip import GzipFile
+from bz2 import BZ2File
+from py7zlib import Archive7z, FormatError
+from StringIO import StringIO
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
@@ -36,13 +41,26 @@ def get_object(key, fn):
         s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
 
 
-def concat_and_delete(in_list, concat_file):
-    with open(concat_file, 'w') as outfile:
-        for fname in in_list:
-            with open(fname) as infile:
-                outfile.write(infile.read())
-            os.remove(fname)
-    return concat_file
+def get_object_mem(key):
+    file_obj = BytesIO()
+    s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
+    return file_obj
+
+
+def concat_and_delete(in_list):
+    outfile = StringIO()
+
+    for f_obj in in_list:
+        s = f_obj["obj"].read()
+        outfile.write(s)
+    outfile.seek(0)
+    return outfile
+
+
+class S3FileItem(object):
+    def __init__(self, key, name):
+        self.obj = get_object_mem(key)
+        self.name = name
 
 
 class Loader(object):
@@ -100,17 +118,7 @@ class Loader(object):
             self.clean_up()
 
     def clean_up(self):
-        for fn in self.temp_files:
-            if os.path.isfile(fn):
-                try:
-                    os.chmod(fn, 0777)
-                    os.remove(fn)
-                except OSError:
-                    logging.warning("cannot remove {}".format(fn))
-                    continue
-            elif os.path.isdir(fn):
-                shutil.rmtree(fn, ignore_errors=True)
-        self.temp_files = []
+        logging.info("cleaning done")
 
     def download_src_chunks(self):
         """
@@ -154,12 +162,14 @@ class Loader(object):
 
     def compute_checksum(self):
         logging.info("calculating checksum")
-        p = Popen(["cksum", self.main_file], stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate()
+        p = Popen(["cksum"], stdout=PIPE,
+                  stdin=PIPE, stderr=PIPE)
+        out, err = p.communicate(self.main_file.read())
+        self.main_file.seek(0)
         self.checksum = out
         return self.checksum
 
-    def compress(self, compression_type="gzip"):
+    def compress(self):
         """
         intended to be called after the consolidated (processed) file has been
         created and saved in self.main_file
@@ -168,28 +178,26 @@ class Loader(object):
         """
         if not self.is_compressed:
             logging.info("compressing")
-            p = Popen([compression_type, self.main_file], stdout=PIPE,
-                      stderr=PIPE)
-            p.communicate()
-            if self.main_file[-3:] != ".gz":
-                self.main_file += ".gz"
+            p = Popen(["gzip", "-c"], stdout=PIPE,
+                      stderr=PIPE, stdin=PIPE)
+            op, err = p.communicate(self.main_file.read())
+            self.main_file.seek(0)
             self.is_compressed = True
-            self.temp_files.append(self.main_file)
+            self.main_file = BytesIO(op)
 
     def unzip_decompress(self, file_name):
         """
         handles decompression for .zip files
         :param file_name: .zip file
-        :return: name of new directory containing contents of file_name
+        :return: dictionary of file-like objects with their names as keys
         """
-        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
-        logging.info("decompressing unzip {} to {}".format(file_name,
-                                                           new_loc))
-        os.mkdir(new_loc)
-        r = subprocess.call(['unzip', file_name, '-d', new_loc])
-        if r == 1:
-            r = 0
-        return new_loc, r
+        zip_file = ZipFile(file_name)
+        file_names = zip_file.namelist()
+        logging.info("decompressing unzip {} into {}".format(file_name,
+                                                             file_names))
+        file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))} for name in file_names]
+
+        return file_objs
 
     def gunzip_decompress(self, file_name):
         """
@@ -199,19 +207,8 @@ class Loader(object):
         successful, and a reference to the subprocess object which ran the
         decompression)
         """
-        logging.info("decompressing {} {} to {}"
-                     .format("gunzip",
-                             file_name,
-                             os.path.dirname(file_name)))
-
-        p = Popen(["gunzip", file_name], stdout=PIPE,
-                  stderr=PIPE, stdin=PIPE)
-        p.communicate()
-        if file_name[-3:] == ".gz":
-            new_loc = file_name[:-3]
-        else:
-            new_loc = file_name
-        return new_loc, p.returncode
+        gzip_file = GzipFile(file_name)
+        return [{"name": "decompressed_file", "obj": gzip_file}]
 
     def bunzip2_decompress(self, file_name):
         """
@@ -225,15 +222,8 @@ class Loader(object):
                      .format("bunzip2",
                              file_name,
                              os.path.dirname(file_name)))
-
-        p = Popen(["bunzip2", file_name], stdout=PIPE,
-                  stderr=PIPE, stdin=PIPE)
-        p.communicate()
-        if file_name[-4:] == ".bz2":
-            new_loc = file_name[:-4]
-        else:
-            new_loc = file_name + ".out"
-        return new_loc, p.returncode
+        bz2_file = BZ2File(file_name)
+        return [{"name": "decompressed_file", "obj": bz2_file}]
 
     def sevenzip_decompress(self, file_name):
         """
@@ -243,18 +233,15 @@ class Loader(object):
         successful, and a reference to the subprocess object which ran the
         decompression)
         """
-        logging.info("decompressing {} {} to {}"
-                     .format("7zip",
-                             file_name,
-                             os.path.dirname(file_name)))
-        if file_name[-4:] == ".zip":
-            new_loc = file_name[:-4] + ".out"
-        else:
-            new_loc = file_name + ".out"
-        p = Popen(["7z", "e", "-so", file_name],
-                  stdout=open(new_loc, "w+"), stderr=PIPE, stdin=PIPE)
-        p.communicate()
-        return new_loc, p.returncode
+        print(file_name)
+        seven_zip_file = Archive7z(file_name)
+        file_names = seven_zip_file.getnames()
+        logging.info("decompressing 7zip {} into {}".format(file_name,
+                                                            file_names))
+        file_objs = [{"name": name, "obj": seven_zip_file.getmember(name)} for
+                     name in file_names]
+
+        return file_objs
 
     def infer_compression(self, file_name):
         """
@@ -276,52 +263,44 @@ class Loader(object):
                 "could not infer the file type of {}".format(file_name))
         return compression_type
 
-    def decompress(self, file_name, compression_type="gunzip"):
+    def decompress(self, s3_file_obj, compression_type="gunzip"):
         """
         decompress a file using either unzip or gunzip, unless the file is an
         .xlsx file, in which case it is returned as is (these files are
         compressed by default, and are unreadable in their unpacked form by
         pandas)
-        :param file_name: the path of the file to be decompressed
+        :param s3_file_obj: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
         :return: a (str, bool) tuple containing the location of the processed
         file and whether or not it was actually
         decompressed
         """
 
-        logging.info("decompressing {}".format(file_name))
-        new_loc = "{}_decompressed".format(os.path.abspath(file_name))
-        success = False
-
+        logging.info("decompressing {}".format(s3_file_obj["name"]))
+        new_files = None
         if compression_type is "infer":
-            compression_type = self.infer_compression(file_name)
+            compression_type = self.infer_compression(s3_file_obj["name"])
 
-        if file_name.split(".")[-1] == "xlsx":
-            logging.info("did not decompress {}".format(file_name))
-            shutil.rmtree(new_loc, ignore_errors=True)
-            new_loc = file_name
-            success = True
+        if s3_file_obj["name"].split(".")[-1] == "xlsx":
+            logging.info("did not decompress {}".format(s3_file_obj["name"]))
         else:
             if compression_type == "unzip":
-                new_loc, p = self.unzip_decompress(file_name)
-            elif compression_type == "bunzip2":
-                new_loc, p = self.bunzip2_decompress(file_name)
-            elif compression_type == "7zip":
-                new_loc, p = self.sevenzip_decompress(file_name)
-            else:
-                new_loc, p = self.gunzip_decompress(file_name)
+                new_files = self.unzip_decompress(s3_file_obj["obj"])
 
-            if compression_type is not None and p == 0:
-                logging.info("decompression done: {}".format(file_name))
-                self.temp_files.append(new_loc)
-                success = True
+            elif compression_type == "bunzip2":
+                new_files = self.bunzip2_decompress(s3_file_obj["obj"])
+            elif compression_type == "7zip":
+                new_files = self.sevenzip_decompress(s3_file_obj["obj"])
             else:
-                logging.info("did not decompress {}".format(file_name))
-                shutil.rmtree(new_loc, ignore_errors=True)
-                new_loc = file_name
+                new_files = self.gunzip_decompress(s3_file_obj["obj"])
+
+            if compression_type is not None and new_files is not None:
+                logging.info("decompression done: {}".format(s3_file_obj))
+            else:
+                logging.info("did not decompress {}".format(s3_file_obj))
 
         self.is_compressed = False
-        return new_loc, success
+        return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
@@ -333,9 +312,8 @@ class Loader(object):
             self.download_date = ohio_get_last_updated().isoformat()
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        with open(self.main_file) as f:
-            s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-                .put(Body=f, ServerSideEncryption='AES256')
+        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
+            .put(Body=self.main_file, ServerSideEncryption='AES256')
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
@@ -353,44 +331,40 @@ class Preprocessor(Loader):
             self.s3_download()
 
     def s3_download(self):
-        self.main_file = "/tmp/voteshield_{}" \
+        name = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
 
-        get_object(self.raw_s3_file, self.main_file)
-        self.temp_files.append(self.main_file)
+        self.main_file = S3FileItem(key=self.raw_s3_file, name=name)
 
     def unpack_files(self, compression="unzip"):
         all_files = []
 
-        def expand_recurse(file_name):
+        def expand_recurse(s3_file_obj):
+                # is dir
+                print("*****")
+                print(s3_file_obj)
+                for f in s3_file_obj:
+                    if f["name"][-1] != "/":
+                        try:
+                            decompressed_result = self.decompress(
+                                f, compression_type=compression)
+                            print("result:")
+                            print(decompressed_result)
+                            expand_recurse(decompressed_result)
+                        except (BadZipfile, FormatError) as e:
+                            print(e)
+                            all_files.append(f)
 
-            if os.path.isdir(file_name):
-                for f in os.listdir(file_name):
-                    d = file_name + "/" + f
-                    expand_recurse(d)
-            else:
-                decompressed_result, success = self.decompress(
-                    file_name, compression_type=compression)
-
-                if os.path.isdir(decompressed_result):
-                    # is dir
-                    for f in os.listdir(decompressed_result):
-                        d = decompressed_result + "/" + f
-                        expand_recurse(d)
-
-                else:
-                    # was file
-                    all_files.append(decompressed_result)
-
-        expand_recurse(self.main_file)
+        expand_recurse([{"name": self.main_file.name,
+                         "obj": self.main_file.obj}])
 
         if "format" in self.config and "ignore_files" in self.config["format"]:
-            all_files = [n for n in all_files if n not in
+            all_files = [n for n in all_files if n.keys()[0] not in
                          self.config["format"]["ignore_files"]
-                         and os.path.basename(n) not in
+                         and os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
-        else:
-            all_files = [n for n in all_files]
+        for n in all_files:
+            n["obj"].seek(0)
         self.temp_files.extend(all_files)
         logging.info("unpacked: - {}".format(all_files))
         return all_files
@@ -589,20 +563,21 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
+
+        # new_files is list of dicts, i.e. [{"name":.. , "obj": <fileobj>}, ..]
         new_files = self.unpack_files(compression='unzip')
 
         vote_history_files = []
         voter_files = []
+        print(new_files[0]["obj"])
         for i in new_files:
-            if "_H_" in i:
+            if "_H_" in i["name"]:
                 vote_history_files.append(i)
-            elif ".txt" in i:
+            elif ".txt" in i["name"]:
                 voter_files.append(i)
 
-        concat_voter_file = concat_and_delete(
-            voter_files, '/tmp/concat_voter_file.txt')
-        concat_history_file = concat_and_delete(
-            vote_history_files, '/tmp/concat_voter_history.txt')
+        concat_voter_file = concat_and_delete(voter_files)
+        concat_history_file = concat_and_delete(vote_history_files)
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
@@ -647,6 +622,7 @@ class Preprocessor(Loader):
         df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
             "Precinct", "Precinct_Split", "Daytime_Phone_Number",
             "Daytime_Area_Code", "Daytime_Phone_Extension",
+            "Daytime_Area_Code", "Daytime_Phone_Extension",
             "Mailing_Zipcode", "Residence_Zipcode",
             "Mailing_Address_Line_1", "Mailing_Address_Line_2",
             "Mailing_Address_Line_3", "Residence_Address_Line_1",
@@ -659,31 +635,28 @@ class Preprocessor(Loader):
         }
 
         logging.info("FLORIDA: writing out")
-        os.remove(concat_voter_file)
-        os.remove(concat_history_file)
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        df_voters.to_csv(self.main_file)
-        self.temp_files.append(self.main_file)
+        self.main_file = StringIO(df_voters.to_csv())
         chksum = self.compute_checksum()
         return chksum
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")
-        first_file = [f for f in new_files if "CD1" in f and "Part1" in f][0]
-        remaining_files = [f for f in new_files if "CD1" not in f or
-                           "Part1" not in f]
+        first_file = [f for f in new_files if "CD1" in f["name"] and
+                      "Part1" in f["name"]][0]
+        remaining_files = [f for f in new_files if "CD1" not in f["name"] or
+                           "Part1" not in f["name"]]
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
         buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4"]
         total_cols = main_cols + history_cols + buffer_cols
-        df_voters = pd.read_csv(first_file, skiprows=1, header=None,
+        df_voters = pd.read_csv(first_file["obj"], skiprows=1, header=None,
                                 names=total_cols)
 
         for i in remaining_files:
-            skiprows = 1 if "Part1" in i else 0
-            new_df = pd.read_csv(i, header=None, skiprows=skiprows,
+            skiprows = 1 if "Part1" in i["name"] else 0
+            new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
                                  names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
@@ -778,9 +751,7 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
-        df_voters.to_csv(self.main_file, index=False, compression="gzip")
-        self.is_compressed = True
-        self.temp_files.append(self.main_file)
+        self.main_file = StringIO(df_voters.to_csv(index=False))
         chksum = self.compute_checksum()
         return chksum
 
@@ -884,9 +855,9 @@ class Preprocessor(Loader):
         return chksum
 
     def preprocess_missouri(self):
-        new_file = self.unpack_files(compression="7zip")
+        new_file = self.unpack_files(compression="unzip")
         new_file = new_file[0]
-        main_df = pd.read_csv(new_file, sep='\t')
+        main_df = pd.read_csv(new_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
         main_df[self.config["voter_status"]] = np.nan
@@ -935,8 +906,8 @@ class Preprocessor(Loader):
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
-        self.temp_files.append(self.main_file)
+        self.main_file = StringIO(main_df.to_csv(encoding='utf-8',
+                                                 index=False))
         chksum = self.compute_checksum()
         return chksum
 
