@@ -29,6 +29,7 @@ from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 
+
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
@@ -233,7 +234,6 @@ class Loader(object):
         successful, and a reference to the subprocess object which ran the
         decompression)
         """
-        print(file_name)
         seven_zip_file = Archive7z(file_name)
         file_names = seven_zip_file.getnames()
         logging.info("decompressing 7zip {} into {}".format(file_name,
@@ -283,6 +283,7 @@ class Loader(object):
 
         if s3_file_obj["name"].split(".")[-1] == "xlsx":
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
+            raise BadZipfile
         else:
             if compression_type == "unzip":
                 new_files = self.unzip_decompress(s3_file_obj["obj"])
@@ -341,18 +342,14 @@ class Preprocessor(Loader):
 
         def expand_recurse(s3_file_obj):
                 # is dir
-                print("*****")
-                print(s3_file_obj)
                 for f in s3_file_obj:
                     if f["name"][-1] != "/":
                         try:
                             decompressed_result = self.decompress(
                                 f, compression_type=compression)
-                            print("result:")
-                            print(decompressed_result)
-                            expand_recurse(decompressed_result)
+                            if decompressed_result is not None:
+                                expand_recurse(decompressed_result)
                         except (BadZipfile, FormatError) as e:
-                            print(e)
                             all_files.append(f)
 
         expand_recurse([{"name": self.main_file.name,
@@ -377,11 +374,10 @@ class Preprocessor(Loader):
         files into self.main_file
         :param file_names: files to concatenate
         """
-        if os.path.isfile(self.main_file):
-            os.remove(self.main_file)
-        self.main_file = ".".join(self.main_file.split(".")[:-1]) + '.concat'
+
         first_success = False
         last_headers = None
+        self.main_file = StringIO()
 
         def list_compare(a, b):
             i = 0
@@ -391,17 +387,17 @@ class Preprocessor(Loader):
                 i += 1
             return False
 
-        file_names = sorted(file_names, key=lambda x: os.stat(x).st_size,
+        file_names = sorted(file_names, key=lambda x: x["obj"].len,
                             reverse=True)
         for f in file_names:
             try:
                 if self.config["file_type"] == 'xlsx':
-                    df = pd.read_excel(f)
+                    df = pd.read_excel(f["obj"])
                 else:
-                    df = pd.read_csv(f)
+                    df = pd.read_csv(f["obj"])
             except (XLRDError, ParserError):
-                print("Skipping {} ... Unsupported format, or corrupt file"
-                      .format(f))
+                logging.info("Skipping {} ... Unsupported format, or corrupt "
+                             "file".format(f["name"]))
                 continue
             if not first_success:
                 last_headers = sorted(df.columns)
@@ -411,14 +407,11 @@ class Preprocessor(Loader):
                 raise ValueError("file chunks contained different or "
                                  "misaligned headers: {} != {} at index {}"
                                  .format(*mismatched_headers))
-
             s = df.to_csv(header=not first_success, encoding='utf-8')
             first_success = True
-            with open(self.main_file, "a+") as fo:
-                fo.write(s)
+            self.main_file.write(s)
 
-        os.rename(self.main_file, self.main_file.split('.')[0] + '.csv')
-        self.main_file = self.main_file.split('.')[0] + '.csv'
+        self.main_file.seek(0)
 
     def preprocess_georgia(self):
         config = Config("georgia")
@@ -426,23 +419,21 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(compression='unzip')
         vh_files = []
         for i in new_files:
-            if "/Georgia_Daily_VoterBase" in i:
-                logging.info("Detected voter file: " + i)
-                df_voters = pd.read_csv(i, sep="|", quotechar='"', quoting=3,
-                                        error_bad_lines=False)
+            if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
+                logging.info("Detected voter file: " + i["name"])
+                df_voters = pd.read_csv(i["obj"], sep="|", quotechar='"',
+                                        quoting=3, error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
-                os.remove(i)
-            elif "TXT" in i:
+            elif "TXT" in i["name"]:
                 vh_files.append(i)
 
-        concat_history_file = concat_and_delete(
-                vh_files, '/tmp/concat_history_file.txt')
+        concat_history_file = concat_and_delete(vh_files)
 
         logging.info("Performing GA history manipulation")
 
-        history = pd.read_csv(concat_history_file, sep = "  ", names = ['Concat_str', 'Other'])
-        os.remove(concat_history_file)
+        history = pd.read_csv(concat_history_file, sep="  ",
+                              names=['Concat_str', 'Other'])
 
         history['County_Number'] = history['Concat_str'].str[0:3]
         history['Registration_Number'] = history['Concat_str'].str[3:11]
@@ -512,23 +503,21 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
             "election_type": json.dumps(type_dict)
         }
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        df_voters.to_csv(self.main_file)
-        self.temp_files.append(self.main_file)
+        self.main_file = StringIO(df_voters.to_csv())
         chksum = self.compute_checksum()
         return chksum
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
-        voter_file = new_files[0] if "ElgbVtr" in new_files[0] \
+        voter_file = new_files[0] if "ElgbVtr" in new_files[0]["name"] \
             else new_files[1]
-        hist_file = new_files[0] if "VtHst" in new_files[0] else new_files[1]
-        self.temp_files.extend([hist_file, voter_file])
+        hist_file = new_files[0] if "VtHst" in new_files[0]["name"] else \
+            new_files[1]
         logging.info("NEVADA: loading historical file")
-        df_hist = pd.read_csv(hist_file, header=None)
+        df_hist = pd.read_csv(hist_file["obj"], header=None)
         df_hist.columns = self.config["hist_columns"]
         logging.info("NEVADA: loading main voter file")
-        df_voters = pd.read_csv(voter_file, header=None)
+        df_voters = pd.read_csv(voter_file["obj"], header=None)
         df_voters.columns = self.config["ordered_columns"]
         valid_elections = df_hist.date.unique().tolist()
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
@@ -553,11 +542,9 @@ class Preprocessor(Loader):
         df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters)
-        df_voters.to_csv(self.main_file, index=False)
-        self.temp_files.append(self.main_file)
+        self.main_file = df_voters.to_csv(index=False)
         chksum = self.compute_checksum()
         return chksum
 
@@ -569,7 +556,6 @@ class Preprocessor(Loader):
 
         vote_history_files = []
         voter_files = []
-        print(new_files[0]["obj"])
         for i in new_files:
             if "_H_" in i["name"]:
                 vote_history_files.append(i)
@@ -757,12 +743,10 @@ class Preprocessor(Loader):
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(compression="unzip")
-        new_files = [f for f in new_files if "LEGEND.xlsx" not in f]
+        new_files = [f for f in new_files if "LEGEND.xlsx" not in f["name"]]
 
         self.concat_file_segments(new_files)
-        for f in new_files:
-            logging.info("New file: " + f)
-            os.remove(f)
+
         main_df = pd.read_csv(self.main_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x,
@@ -791,21 +775,21 @@ class Preprocessor(Loader):
             "text_res_unit_nbr", "text_res_carrier_rte",
             "text_mail_address1", "text_mail_address2", "text_mail_address3",
             "text_mail_address4"])
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.main_file = StringIO(main_df.to_csv(encoding='utf-8',
+                                                 index=False))
         self.meta = {
             "message": "arizona_{}".format(datetime.now().isoformat()),
             "array_dates": json.dumps(elections_key)
         }
-        self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
 
     def preprocess_new_york(self):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
-        main_file = filter(lambda x: x[-4:] != ".pdf", new_files)[0]
+        main_file = filter(lambda x: x["name"][-4:] != ".pdf", new_files)[0]
         gc.collect()
-        main_df = pd.read_csv(main_file,
+        main_df = pd.read_csv(main_file["obj"],
                               header=None,
                               names=config["ordered_columns"])
         null_hists = main_df.voterhistory != main_df.voterhistory
@@ -845,12 +829,11 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        os.remove(self.main_file)
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        main_df.to_csv(self.main_file, index=False, compression="gzip",
-                       encoding='utf-8')
+        self.main_file = StringIO(main_df.to_csv(index=False,
+                                                 compression="gzip",
+                                                 encoding='utf-8'))
         self.is_compressed = True
-        self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
 
@@ -914,16 +897,16 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config("michigan")
         new_files = self.unpack_files()
-        voter_file = ([n for n in new_files if 'entire_state_v' in n] + [None])[0]
-        hist_file = ([n for n in new_files if 'entire_state_h' in n
+        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"]] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n["name"]
                       or 'EntireStateVoterHistory' in n] + [None])[0]
-        elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
+        elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] + [None])[0]
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
         if(elec_codes):
             logging.info("Detected election code file: " + elec_codes)
 
-        if voter_file[-3:] == "lst":
+        if voter_file["name"][-3:] == "lst":
             vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
                          [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
                          [105, 135], [135, 141], [141, 143], [143, 156],
@@ -934,13 +917,12 @@ class Preprocessor(Loader):
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
             logging.info("MICHIGAN: Loading voter file")
-            vdf = pd.read_fwf(voter_file, colspecs=vcolspecs,
+            vdf = pd.read_fwf(voter_file["obj"], colspecs=vcolspecs,
                               names=config["ordered_columns"], na_filter=False)
             logging.info("Removing voter file")
-            os.remove(voter_file)
-        elif voter_file[-3:] == "csv":
+        elif voter_file["name"][-3:] == "csv":
             logging.info("MICHIGAN: Loading voter file")
-            vdf = pd.read_csv(voter_file, na_filter=False,
+            vdf = pd.read_csv(voter_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
                        "SCHOOL_DISTRICT_NAME", "STATE_HOUSE_DISTRICT_NAME",
@@ -950,20 +932,18 @@ class Preprocessor(Loader):
                        "VILLAGE_DISTRICT_NAME", "UOCAVA_STATUS_NAME"], axis=1)
             vdf.columns = config["ordered_columns"]
             logging.info("Removing voter file")
-            os.remove(voter_file)
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
-        if hist_file[-3:] == "lst":
+        if hist_file["name"][-3:] == "lst":
             hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
             logging.info("MICHIGAN: Loading historical file")
-            hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
+            hdf = pd.read_fwf(hist_file["obj"], colspecs=hcolspecs,
                               names=config["hist_columns"], na_filter=False)
             logging.info("Removing historical file")
-            os.remove(hist_file)
-        elif hist_file[-3:]:
+        elif hist_file["name"][-3:] == "csv":
             logging.info("MICHIGAN: Loading historical file")
-            hdf = pd.read_csv(hist_file, na_filter=False,
+            hdf = pd.read_csv(hist_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
                        "SCHOOL_DISTRICT_NAME"], axis=1)
@@ -975,13 +955,13 @@ class Preprocessor(Loader):
                                       "your local code monkey")
 
         if elec_codes:
-            if elec_codes[-3:] == "lst":
+            if elec_codes["name"][-3:] == "lst":
                 ecolspecs = [[0, 13], [13, 21], [21, 46]]
-                edf = pd.read_fwf(elec_codes, colspecs=ecolspecs,
+                edf = pd.read_fwf(elec_codes["obj"], colspecs=ecolspecs,
                                   names=config["elec_code_columns"],
                                   na_filter=False)
-            elif elec_codes[-3:] == "csv":
-                edf = pd.read_csv(elec_codes,
+            elif elec_codes["name"][-3:] == "csv":
+                edf = pd.read_csv(elec_codes["obj"],
                                   names=config["elec_code_columns"],
                                   na_filter=False)
             else:
@@ -1075,13 +1055,12 @@ class Preprocessor(Loader):
                 vdf[field] = vdf[field].str.decode("latin-1")
 
         logging.info("Writing to csv")
-        vdf.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.main_file = StringIO(vdf.to_csv(encoding='utf-8', index=False))
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
             "array_decoding": sorted_codes,
             "array_encoding": elec_dict
         }
-        self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
 
         return chksum
@@ -1089,10 +1068,10 @@ class Preprocessor(Loader):
     def preprocess_pennsylvania(self):
         config = Config('pennsylvania')
         new_files = self.unpack_files()
-        voter_files = [f for f in new_files if "FVE" in f]
-        election_maps = [f for f in new_files if "Election Map" in f]
-        zone_codes = [f for f in new_files if "Codes" in f]
-        zone_types = [f for f in new_files if "Types" in f]
+        voter_files = [f for f in new_files if "FVE" in f["name"]]
+        election_maps = [f for f in new_files if "Election Map" in f["name"]]
+        zone_codes = [f for f in new_files if "Codes" in f["name"]]
+        zone_types = [f for f in new_files if "Types" in f["name"]]
         counties = config["county_names"]
         main_df = None
         elections = 40
@@ -1108,27 +1087,23 @@ class Preprocessor(Loader):
             logging.info("Processing {}".format(c))
             c = format_column_name(c)
             try:
-                voter_file = next(f for f in voter_files if c in f.lower())
-                election_map = next(f for f in election_maps if c in f.lower())
-                zones = next(f for f in zone_codes if c in f.lower())
-                types = next(f for f in zone_types if c in f.lower())
+                voter_file = next(f for f in voter_files if c in f["name"].lower())
+                election_map = next(f for f in election_maps if c in f["name"].lower())
+                zones = next(f for f in zone_codes if c in f["name"].lower())
+                types = next(f for f in zone_types if c in f["name"].lower())
             except StopIteration:
                 continue
-            df = pd.read_csv(voter_file, sep='\t', names=dfcols)
-            edf = pd.read_csv(election_map, sep='\t',
+            df = pd.read_csv(voter_file["obj"], sep='\t', names=dfcols)
+            edf = pd.read_csv(election_map["obj"], sep='\t',
                               names=['county', 'number', 'title', 'date'])
-            zdf = pd.read_csv(zones, sep='\t',
+            zdf = pd.read_csv(zones['obj'], sep='\t',
                               names=['county', 'number', 'code', 'title'])
-            tdf = pd.read_csv(types, sep='\t',
+            tdf = pd.read_csv(types['obj'], sep='\t',
                               names=['county', 'number', 'abbr', 'title'])
             df = df.replace('"')
             edf = edf.replace('"')
             zdf = zdf.replace('"')
             edf.index = edf["number"]
-            os.remove(voter_file)
-            os.remove(election_map)
-            os.remove(zones)
-            os.remove(types)
             
             for i in range(elections):
                 s = pd.Series(index=df.index)
@@ -1180,43 +1155,39 @@ class Preprocessor(Loader):
             "mail_address_1", "mail_address_2", "mail_zip", "precinct_code",
             "precinct_split_id", "legacy_id", "home_phone"])
         logging.info("Writing CSV")
-        main_df.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.main_file = StringIO(main_df.to_csv(encoding='utf-8',
+                                                 index=False))
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
-        self.temp_files.append(self.main_file)
 
         chksum = self.compute_checksum()
-
         return chksum
 
     def preprocess_new_jersey(self):
         new_files = self.unpack_files()
         config = Config("new_jersey")
-        voter_files = [n for n in new_files if 'AlphaVoter' in n]
-        hist_files = [n for n in new_files if 'History' in n]
+        voter_files = [n for n in new_files if 'AlphaVoter' in n["name"]]
+        hist_files = [n for n in new_files if 'History' in n["name"]]
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         for f in voter_files:
-            logging.info("Reading " + f)
-            new_df = pd.read_csv(f, sep='|', names=config['ordered_columns'],
+            logging.info("Reading " + f["name"])
+            new_df = pd.read_csv(f["obj"], sep='|',
+                                 names=config['ordered_columns'],
                                  low_memory=False)
             new_df = self.config.coerce_dates(new_df)
             new_df = self.config.coerce_numeric(new_df, extra_cols=[
                 "regional_school", "fire", "apt_no"])
             vdf = pd.concat([vdf, new_df], axis=0)
         for f in hist_files:
-            logging.info("Reading " + f)
-            new_df = pd.read_csv(f, sep='|',
-                                  names=config['hist_columns'],
-                                  index_col=False,
+            logging.info("Reading " + f["name"])
+            new_df = pd.read_csv(f["obj"], sep='|',
+                                 names=config['hist_columns'],
+                                 index_col=False,
                                  low_memory=False)
             new_df = self.config.coerce_numeric(new_df, col_list='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
-        for f in voter_files:
-            os.remove(f)
-        for f in hist_files:
-            os.remove(f)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
                                hdf['election_date']
@@ -1260,7 +1231,7 @@ class Preprocessor(Loader):
             "array_encoding": elec_dict,
             "array_decoding": elections
         }
-        vdf.to_csv(self.main_file, encoding='utf-8', index=False)
+        self.main_file = StringIO(vdf.to_csv(encoding='utf-8', index=False))
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
 
