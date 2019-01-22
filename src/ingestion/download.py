@@ -950,7 +950,8 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config("michigan")
         new_files = self.unpack_files()
-        voter_file = ([n for n in new_files if 'entire_state_v' in n] + [None])[0]
+        voter_file = ([n for n in new_files if 'entire_state_v' in n
+                       or 'EntireStateVoters' in n] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n
                       or 'EntireStateVoterHistory' in n] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n] + [None])[0]
@@ -984,7 +985,9 @@ class Preprocessor(Loader):
                        "US_CONGRESS_DISTRICT_NAME",
                        "COUNTY_COMMISSIONER_DISTRICT_NAME",
                        "VILLAGE_DISTRICT_NAME", "UOCAVA_STATUS_NAME"], axis=1)
-            vdf.columns = config["ordered_columns"]
+            if "PRECINCT" in vdf.columns:
+                vdf = vdf.drop(["PRECINCT"], axis=1)
+            vdf.columns = config["ordered_columns"][:-1]
             logging.info("Removing voter file")
             os.remove(voter_file)
         else:
@@ -1108,7 +1111,8 @@ class Preprocessor(Loader):
         for field in text_fields:
             if (field in vdf) and (field != config["voter_status"]) \
                     and (field != config["party_identifier"]):
-                vdf[field] = vdf[field].str.decode("latin-1")
+                if vdf[field].dtype == object:
+                    vdf[field] = vdf[field].str.decode("latin-1")
 
         logging.info("Writing to csv")
         vdf.to_csv(self.main_file, encoding='utf-8', index=False)
