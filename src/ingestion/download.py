@@ -440,7 +440,7 @@ class Preprocessor(Loader):
     def preprocess_georgia(self):
         config = Config("georgia")
         logging.info("GEORGIA: loading voter and voter history file")
-        new_files = self.unpack_files(compression = 'unzip')
+        new_files = self.unpack_files(compression='unzip')
         vh_files = []
         for i in new_files:
             if "/Georgia_Daily_VoterBase" in i:
@@ -541,7 +541,6 @@ class Preprocessor(Loader):
         self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
         return chksum
-
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(compression='unzip')
