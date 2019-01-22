@@ -36,6 +36,15 @@ def get_object(key, fn):
         s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
 
 
+def concat_and_delete(in_list, concat_file):
+    with open(concat_file, 'w') as outfile:
+        for fname in in_list:
+            with open(fname) as infile:
+                outfile.write(infile.read())
+            os.remove(fname)
+    return concat_file
+
+
 class Loader(object):
     """
     this object should be used to perform downloads directly from online resources which are specified by yaml files
@@ -453,13 +462,6 @@ class Preprocessor(Loader):
             elif "TXT" in i:
                 vh_files.append(i)
 
-        def concat_and_delete(in_list, concat_file):
-            with open(concat_file, 'w') as outfile:
-                for fname in in_list:
-                    with open(fname) as infile:
-                        outfile.write(infile.read())
-                    os.remove(fname)
-            return concat_file
         concat_history_file = concat_and_delete(
                 vh_files, '/tmp/concat_history_file.txt')
 
@@ -596,14 +598,6 @@ class Preprocessor(Loader):
                 vote_history_files.append(i)
             elif ".txt" in i:
                 voter_files.append(i)
-
-        def concat_and_delete(in_list, concat_file):
-            with open(concat_file, 'w') as outfile:
-                for fname in in_list:
-                    with open(fname) as infile:
-                        outfile.write(infile.read())
-                    os.remove(fname)
-            return concat_file
 
         concat_voter_file = concat_and_delete(
             voter_files, '/tmp/concat_voter_file.txt')
