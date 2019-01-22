@@ -894,11 +894,13 @@ class Preprocessor(Loader):
         return chksum
 
     def preprocess_north_carolina(self):
-        new_files = self.unpack_files()
+        new_files = self.unpack_files() #array of dicts
+
         config = Config("north_carolina")
         for i in new_files:
             print(i)
             if "ncvhis" in i and "MACOSX" not in i:
+                #switch to ['name']
                 vote_hist_file = i
             elif "ncvoter" in i and "MACOSX" not in i:
                 voter_file = i
@@ -907,6 +909,7 @@ class Preprocessor(Loader):
         logging.info(voter_file)
         voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"')
         vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"')
+        #vote_hist_file['obj']
         logging.info("removing everything")
         self.clean_up()
 
@@ -955,6 +958,10 @@ class Preprocessor(Loader):
         logging.info("setting main file")
         self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         logging.info("to csv")
+        #remove anything removing files
+        #self.main_file = StringIO(voter_df.to_csv(index=True ...))
+        #remove compression and set is compressed to false
+
         voter_df.to_csv(self.main_file, index=True, compression="gzip",
                        encoding='utf-8')
         self.is_compressed = True
