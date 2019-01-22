@@ -113,7 +113,7 @@ class TestFileBuilder(Preprocessor):
         voter_hist.columns = self.config["hist_columns"]
 
         logging.info("sampling")
-        voter_df = voter_df[voter_df['county_desc'] == "CHOWAN"]
+        voter_df = voter_df[voter_df['county_desc'] == "CHATHAM"]
         logging.info("filtering")
         voter_hist = voter_hist[voter_hist['voter_reg_num'].isin(voter_df['voter_reg_num'])]
         voter_hist = voter_hist.sample(n = 100)
