@@ -544,7 +544,7 @@ class Preprocessor(Loader):
         df_voters["all_history"] = voting_histories
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters)
-        self.main_file = df_voters.to_csv(index=False)
+        self.main_file = StringIO(df_voters.to_csv(index=False))
         chksum = self.compute_checksum()
         return chksum
 
