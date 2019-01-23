@@ -9,7 +9,6 @@ import requests
 from dateutil import parser
 import json
 from constants import *
-import zipfile
 from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
     df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
@@ -20,7 +19,6 @@ from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
 import subprocess
-import sys
 import gc
 
 
