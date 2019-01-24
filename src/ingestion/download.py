@@ -113,8 +113,9 @@ class Loader(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.clean_up_tmp_files:
-            self.clean_up()
+        #if self.clean_up_tmp_files:
+            #self.clean_up()
+        return 0
 
     def clean_up(self):
         logging.info("got to clean up function")
@@ -861,7 +862,6 @@ class Preprocessor(Loader):
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep = "\t",quotechar = '"')
         vote_hist = pd.read_csv(vote_hist_file['obj'], sep = "\t",quotechar = '"')
-        self.clean_up()
 
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
@@ -895,7 +895,6 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        #remove anything removing files
         self.main_file = StringIO(voter_df.to_csv(index=True, encoding='utf-8'))
         self.is_compressed = False
         chksum = self.compute_checksum()
