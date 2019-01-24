@@ -48,14 +48,13 @@ def state_download(state):
 
 def date_grab():
 	browser = webdriver.Chrome()
-	url = "http://example.com/login.php"
+	url = "https://dl.ncsbe.gov/?prefix=data/"
 	browser.get(url)
-	quote_page = "https://dl.ncsbe.gov/?prefix=data/"
-	headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"}
-	r = requests.get(quote_page, headers=headers).content
-
-	soup = BeautifulSoup(r, "html.parser")
-	print(soup)
+	print(browser.execute_script("return document.body.innerHTML")) #returns the inner HTML as a string
+	
+	print("---------")
+	#soup = BeautifulSoup(innerHTML, "html.parser")
+	#print(soup)
 
 
 
