@@ -7,11 +7,13 @@ import zipfile
 import boto3
 from ingestion.download import Loader
 from constants import RAW_FILE_PREFIX
+from selenium import webdriver
+
 
 def state_download(state):
 
-	config_file = Config.config_file_from_state(state=state)
-	configs = Config(file_name=config_file)
+	#config_file = Config.config_file_from_state(state=state)
+	#configs = Config(file_name=config_file)
 	today = datetime.datetime.now().strftime("%Y-%m-%d")
 
 	if state == "north_carolina":
@@ -45,15 +47,17 @@ def state_download(state):
 
 
 def date_grab():
+	browser = webdriver.Chrome()
+	url = "http://example.com/login.php"
+	browser.get(url)
 	quote_page = "https://dl.ncsbe.gov/?prefix=data/"
 	headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"}
-	r = requests.get(quote_page, headers=headers).text
+	r = requests.get(quote_page, headers=headers).content
+
 	soup = BeautifulSoup(r, "html.parser")
 	print(soup)
 
-	s3_connection = boto.connect_s3()
 
-	bucket = s3_connection.get_bucket('your bucket name')
 
 
 
