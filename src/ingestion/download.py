@@ -854,29 +854,19 @@ class Preprocessor(Loader):
 
         config = Config("north_carolina")
         for i in new_files:
-            print(i)
-            if "ncvhis" in i and "MACOSX" not in i:
+            if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
                 #switch to ['name']
                 vote_hist_file = i
-            elif "ncvoter" in i and "MACOSX" not in i:
+            elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
-        logging.info("reading in voter files")
-        logging.info(vote_hist_file)
-        logging.info(voter_file)
-        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"')
-        vote_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"')
-        #vote_hist_file['obj']
-        logging.info("removing everything")
+        voter_df = pd.read_csv(voter_file['obj'], sep = "\t",quotechar = '"')
+        vote_hist = pd.read_csv(vote_hist_file['obj'], sep = "\t",quotechar = '"')
         self.clean_up()
 
-        logging.info("setting columns")
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
-
-        logging.info("getting valid elections")
         valid_elections, counts = np.unique(vote_hist["election_desc"],
                                             return_counts=True)
-
         count_order = counts.argsort()
         valid_elections = valid_elections[count_order]
         counts = counts[count_order]
@@ -885,42 +875,29 @@ class Preprocessor(Loader):
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
-        logging.info("dictionary work")
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-        
-        logging.info("groupby and apply work")
         voter_groups = vote_hist.groupby("voter_reg_num")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["voting_method"].apply(list)
 
-        logging.info("setting index")
         voter_df = voter_df.set_index("voter_reg_num")
 
         voter_df["all_history"] = all_history
         voter_df["vote_type"] = vote_type
 
-        logging.info("coercing")
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
         voter_df = self.config.coerce_numeric(voter_df)
 
-        logging.info("meta dumps")
         self.meta = {
             "message": "north_carolina_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        logging.info("setting main file")
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-        logging.info("to csv")
         #remove anything removing files
-        #self.main_file = StringIO(voter_df.to_csv(index=True ...))
-        #remove compression and set is compressed to false
-
-        voter_df.to_csv(self.main_file, index=True, compression="gzip",
-                       encoding='utf-8')
-        self.is_compressed = True
+        self.main_file = StringIO(voter_df.to_csv(index=True, encoding='utf-8'))
+        self.is_compressed = False
         chksum = self.compute_checksum()
         return chksum
 
