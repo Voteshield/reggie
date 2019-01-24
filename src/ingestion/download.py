@@ -243,22 +243,22 @@ class Loader(object):
 
     def infer_compression(self, file_name):
         """
-        infer file type and map to compression type
-        :param file_name: file in question
+        infer file type
+        :param file_name: file name in question
         :return: string (de)compression type or None
         """
-        guess = filetype.guess(file_name)
-        compression_type = None
-        if guess is not None:
-            options = {"application/x-bzip2": "bunzip2",
-                       "application/gzip": "gunzip",
-                       "application/zip": "unzip"}
-            compression_type = options.get(guess.mime, None)
-            if compression_type is None:
-                logging.info("unsupported file format: {}".format(guess.mime))
+        if file_name[-3:] == "bz2":
+            compression_type = "bunzip2"
+        elif file_name[-2:] == "gz":
+            compression_type = "gunzip"
+        elif file_name[-3:] == "zip":
+            compression_type = "unzip"
         else:
+            compression_type = None
+        if compression_type is None:
             logging.info(
                 "could not infer the file type of {}".format(file_name))
+        logging.info("compression type of {} is {}".format(file_name, compression_type))
         return compression_type
 
     def decompress(self, s3_file_obj, compression_type="gunzip"):
@@ -279,7 +279,8 @@ class Loader(object):
         if compression_type is "infer":
             compression_type = self.infer_compression(s3_file_obj["name"])
 
-        if s3_file_obj["name"].split(".")[-1] == "xlsx":
+        if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
+           (s3_file_obj["name"].split(".")[-1] == "txt"):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -832,11 +833,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
         self.main_file = StringIO(main_df.to_csv(index=False,
-                                                 compression="gzip",
                                                  encoding='utf-8'))
-        self.is_compressed = True
         chksum = self.compute_checksum()
         return chksum
 
