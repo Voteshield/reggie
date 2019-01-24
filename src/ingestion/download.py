@@ -4,7 +4,6 @@ from subprocess import Popen, PIPE
 
 import bs4
 import pandas as pd
-import filetype
 import requests
 from dateutil import parser
 import json
@@ -18,7 +17,6 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
-import subprocess
 import gc
 from io import BytesIO
 from zipfile import ZipFile, BadZipfile
@@ -64,11 +62,14 @@ class S3FileItem(object):
 
 class Loader(object):
     """
-    this object should be used to perform downloads directly from online resources which are specified by yaml files
+    this object should be used to perform downloads directly from
+    online resources which are specified by yaml files
     in the config directory.
 
-    A Loader uses filesystem resources for temporarily storing the files on disk during the chunk concatenation process,
-    therefore __enter__ and __exit__ are defined to allow safe usage of Loader in a 'with' statement:
+    A Loader uses filesystem resources for temporarily storing the files
+    on disk during the chunk concatenation process,
+    therefore __enter__ and __exit__ are defined to allow safe usage
+    of Loader in a 'with' statement:
     for example:
     ```
         with Loader() as l:
@@ -194,8 +195,8 @@ class Loader(object):
         file_names = zip_file.namelist()
         logging.info("decompressing unzip {} into {}".format(file_name,
                                                              file_names))
-        file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))} for name in file_names]
-
+        file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))}
+                     for name in file_names]
         return file_objs
 
     def gunzip_decompress(self, file_name):
@@ -238,7 +239,6 @@ class Loader(object):
                                                             file_names))
         file_objs = [{"name": name, "obj": seven_zip_file.getmember(name)} for
                      name in file_names]
-
         return file_objs
 
     def infer_compression(self, file_name):
@@ -258,7 +258,8 @@ class Loader(object):
         if compression_type is None:
             logging.info(
                 "could not infer the file type of {}".format(file_name))
-        logging.info("compression type of {} is {}".format(file_name, compression_type))
+        logging.info("compression type of {} is {}".format(
+            file_name, compression_type))
         return compression_type
 
     def decompress(self, s3_file_obj, compression_type="gunzip"):
@@ -286,7 +287,6 @@ class Loader(object):
         else:
             if compression_type == "unzip":
                 new_files = self.unzip_decompress(s3_file_obj["obj"])
-
             elif compression_type == "bunzip2":
                 new_files = self.bunzip2_decompress(s3_file_obj["obj"])
             elif compression_type == "7zip":
@@ -423,7 +423,8 @@ class Preprocessor(Loader):
                 df_voters = pd.read_csv(i["obj"], sep="|", quotechar='"',
                                         quoting=3, error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
-                df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
+                df_voters['Registration_Number'] = df_voters[
+                    'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
                 vh_files.append(i)
 
@@ -476,7 +477,6 @@ class Preprocessor(Loader):
                              for i, k in enumerate(sorted_codes)}
         history["array_position"] = history["Combo_history"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-                      
 
         voter_groups = history.groupby('Registration_Number')
         all_history = voter_groups['Combo_history'].apply(list)
@@ -687,7 +687,7 @@ class Preprocessor(Loader):
                 df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
                 df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
                 party_info = df_voters[party_col].str.strip() + key_delim + \
-                             df_voters[org_col].str.replace(" ", "")
+                    df_voters[org_col].str.replace(" ", "")
                 df_voters[c] += key_delim + party_info
             else:
                 # add 'blank' values for the primary slots
@@ -911,7 +911,8 @@ class Preprocessor(Loader):
 
         logging.info("MICHIGAN: Loading voter file")
         if voter_file["name"][-3:] == "lst":
-            vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
+            vcolspecs = [[0, 35], [35, 55], [55, 75],
+                         [75, 78], [78, 82], [82, 83],
                          [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
                          [105, 135], [135, 141], [141, 143], [143, 156],
                          [156, 191], [191, 193], [193, 198], [198, 248],
@@ -939,7 +940,8 @@ class Preprocessor(Loader):
                                       "your local code monkey")
         logging.info("MICHIGAN: Loading historical file")
         if hist_file["name"][-3:] == "lst":
-            hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
+            hcolspecs = [[0, 13], [13, 15], [15, 20],
+                         [20, 25], [25, 38], [38, 39]]
             hdf = pd.read_fwf(hist_file["obj"], colspecs=hcolspecs,
                               names=config["hist_columns"], na_filter=False)
         elif hist_file["name"][-3:] == "csv":
@@ -981,7 +983,7 @@ class Preprocessor(Loader):
             counts.index = counts.index.map(str)
             elec_dict = {
                 k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
-                'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
+                    'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
                 for i, k in enumerate(sorted_codes)}
         else:
             this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
@@ -1076,18 +1078,20 @@ class Preprocessor(Loader):
         elections = 40
         dfcols = config["ordered_columns"][:-3]
         for i in range(elections):
-            dfcols.extend(["district_{}".format(i+1)])
+            dfcols.extend(["district_{}".format(i + 1)])
         for i in range(elections):
             dfcols.extend(["election_{}_vote_method".format(i + 1)])
-            dfcols.extend(["election_{}_party".format(i+1)])
+            dfcols.extend(["election_{}_party".format(i + 1)])
         dfcols.extend(config["ordered_columns"][-3:])
 
         for c in counties:
             logging.info("Processing {}".format(c))
             c = format_column_name(c)
             try:
-                voter_file = next(f for f in voter_files if c in f["name"].lower())
-                election_map = next(f for f in election_maps if c in f["name"].lower())
+                voter_file = next(
+                    f for f in voter_files if c in f["name"].lower())
+                election_map = next(
+                    f for f in election_maps if c in f["name"].lower())
                 zones = next(f for f in zone_codes if c in f["name"].lower())
                 types = next(f for f in zone_types if c in f["name"].lower())
             except StopIteration:
@@ -1103,45 +1107,44 @@ class Preprocessor(Loader):
             edf = edf.replace('"')
             zdf = zdf.replace('"')
             edf.index = edf["number"]
-            
+
             for i in range(elections):
                 s = pd.Series(index=df.index)
                 # Blair isn't sending all their election codes
                 try:
-                    s[:] = edf.iloc[i]["title"] + ' ' + edf.iloc[i]["date"]+' '
+                    s[:] = edf.iloc[i]["title"] + ' ' + \
+                        edf.iloc[i]["date"] + ' '
                 except IndexError:
                     s[:] = "UNSPECIFIED"
                 df["election_{}".format(i)] = s + \
-                                              df["election_{}_vote_method"
-                                                  .format(i + 1)].apply(str) + ' ' + \
-                                              df["election_{}_party"
-                                                  .format(i + 1)]
+                    df["election_{}_vote_method".format(i + 1)].apply(
+                        str) + ' ' + df["election_{}_party".format(i + 1)]
                 df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
                        "election_{}".format(i)] = pd.np.nan
                 df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
                 df = df.drop("election_{}_party".format(i + 1), axis=1)
 
-                df["district_{}".format(i+1)] = df["district_{}".format(i+1)]\
-                    .map(zdf.drop_duplicates('code').reset_index()
-                         .set_index('code')['title'])
-                df["district_{}".format(i+1)] += \
-                    ', Type: ' + df["district_{}".format(i+1)]\
+                df["district_{}".format(i + 1)] = df["district_{}".format(
+                    i + 1)].map(zdf.drop_duplicates('code').reset_index()
+                                .set_index('code')['title'])
+                df["district_{}".format(i + 1)] += \
+                    ', Type: ' + df["district_{}".format(i + 1)]\
                     .map(zdf.drop_duplicates('title').reset_index()
                          .set_index('title')['number'])\
                     .map(tdf.set_index('number')['title'])
 
-            df["all_history"] = df[["election_{}".format(i) for i in range(elections)]]\
-                .values.tolist()
+            df["all_history"] = df[["election_{}".format(i)
+                                   for i in range(elections)]].values.tolist()
             df["all_history"] = df["all_history"].map(
                 lambda L: list(filter(pd.notna, L)))
-            df["districts"] = df[["district_{}".format(i+1) for i in range(elections)]]\
-                .values.tolist()
+            df["districts"] = df[["district_{}".format(i + 1)
+                                 for i in range(elections)]].values.tolist()
             df["districts"] = df["districts"].map(
                 lambda L: list(filter(pd.notna, L)))
 
             for i in range(elections):
                 df = df.drop("election_{}".format(i), axis=1)
-                df = df.drop("district_{}".format(i+1), axis=1)
+                df = df.drop("district_{}".format(i + 1), axis=1)
 
             if main_df is None:
                 main_df = df
@@ -1185,7 +1188,8 @@ class Preprocessor(Loader):
                                  names=config['hist_columns'],
                                  index_col=False,
                                  low_memory=False)
-            new_df = self.config.coerce_numeric(new_df, col_list='hist_columns_type')
+            new_df = self.config.coerce_numeric(
+                new_df, col_list='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
