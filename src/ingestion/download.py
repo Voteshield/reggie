@@ -901,11 +901,12 @@ class Preprocessor(Loader):
                       or 'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
-        logging.info("Detected voter file: " + voter_file)
-        logging.info("Detected history file: " + hist_file)
+        logging.info("Detected voter file: " + voter_file["name"])
+        logging.info("Detected history file: " + hist_file["name"])
         if(elec_codes):
-            logging.info("Detected election code file: " + elec_codes)
+            logging.info("Detected election code file: " + elec_codes["name"])
 
+        logging.info("MICHIGAN: Loading voter file")
         if voter_file["name"][-3:] == "lst":
             vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
                          [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
@@ -916,12 +917,9 @@ class Preprocessor(Loader):
                          [474, 479], [479, 484], [484, 489], [489, 494],
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
-            logging.info("MICHIGAN: Loading voter file")
             vdf = pd.read_fwf(voter_file["obj"], colspecs=vcolspecs,
                               names=config["ordered_columns"], na_filter=False)
-            logging.info("Removing voter file")
         elif voter_file["name"][-3:] == "csv":
-            logging.info("MICHIGAN: Loading voter file")
             vdf = pd.read_csv(voter_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
@@ -933,25 +931,20 @@ class Preprocessor(Loader):
             if "PRECINCT" in vdf.columns:
                 vdf = vdf.drop(["PRECINCT"], axis=1)
             vdf.columns = config["ordered_columns"][:-1]
-            logging.info("Removing voter file")
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
+        logging.info("MICHIGAN: Loading historical file")
         if hist_file["name"][-3:] == "lst":
             hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-            logging.info("MICHIGAN: Loading historical file")
             hdf = pd.read_fwf(hist_file["obj"], colspecs=hcolspecs,
                               names=config["hist_columns"], na_filter=False)
-            logging.info("Removing historical file")
         elif hist_file["name"][-3:] == "csv":
-            logging.info("MICHIGAN: Loading historical file")
             hdf = pd.read_csv(hist_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
                        "SCHOOL_DISTRICT_NAME"], axis=1)
             hdf.columns = config["hist_columns"]
-            logging.info("Removing historical file")
-            os.remove(hist_file)
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
