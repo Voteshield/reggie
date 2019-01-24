@@ -360,7 +360,6 @@ class Preprocessor(Loader):
                          self.config["format"]["ignore_files"]]
         for n in all_files:
             n["obj"].seek(0)
-        self.temp_files.extend(all_files)
         logging.info("unpacked: - {}".format(all_files))
         return all_files
 
@@ -1236,7 +1235,6 @@ class Preprocessor(Loader):
             "array_decoding": elections
         }
         self.main_file = StringIO(vdf.to_csv(encoding='utf-8', index=False))
-        self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
 
         return chksum
