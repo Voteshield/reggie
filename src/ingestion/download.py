@@ -562,10 +562,12 @@ class Preprocessor(Loader):
 
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
+        gc.collect()
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
         df_hist.columns = self.config["hist_columns"]
+        gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
         df_hist["election_name"] = df_hist["date"] + "_" + \
@@ -591,6 +593,7 @@ class Preprocessor(Loader):
         voter_groups = df_hist.groupby("VoterID")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["vote_type"].apply(list)
+        gc.collect()
 
         logging.info("FLORIDA: loading main voter file")
         df_voters = pd.read_csv(concat_voter_file,
@@ -600,6 +603,7 @@ class Preprocessor(Loader):
 
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
+        gc.collect()
 
         df_voters = self.config.coerce_strings(df_voters)
         df_voters = self.config.coerce_dates(df_voters)
@@ -618,6 +622,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
 
+        gc.collect()
         logging.info("FLORIDA: writing out")
         self.main_file = StringIO(df_voters.to_csv())
         chksum = self.compute_checksum()
