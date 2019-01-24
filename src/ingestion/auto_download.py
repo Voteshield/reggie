@@ -48,8 +48,11 @@ def state_download(state):
 
 def date_grab():
 	browser = webdriver.Chrome()
-	url = "https://dl.ncsbe.gov/?prefix=data/"
+	url = "https://s3.amazonaws.com/dl.ncsbe.gov/data/list.html"
 	browser.get(url)
+	#browser.findElement(By.xpath("//a[@href='https://dl.ncsbe.gov.s3.amazonaws.com/data/']")).click()
+	browser.find_element_by_link_text('data/').click()
+
 	print(browser.execute_script("return document.body.innerHTML")) #returns the inner HTML as a string
 	
 	print("---------")
