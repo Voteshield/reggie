@@ -8,9 +8,9 @@ birthday_identifier: birth_year
 voter_status: status_cd
 voter_status_active: A
 voter_status_inactive: I
-voter_status_removed: R
-voter_status_died: D
-voter_status_S: S
+voter_status_cancelled: R
+voter_status_denied: D
+voter_status_temporary: S
 democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB
