@@ -113,8 +113,8 @@ class Loader(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        #if self.clean_up_tmp_files:
-            #self.clean_up()
+        if self.clean_up_tmp_files:
+            self.clean_up()
         return 0
 
     def clean_up(self):
