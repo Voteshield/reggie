@@ -204,9 +204,9 @@ class Loader(object):
             file_names = [os.path.join(new_loc_decomp, f) for f in
                           os.listdir(new_loc_decomp)]
             logging.info("file_names = {}".format(file_names))
-            file_objs = [{"name": name, "obj": StringIO(open(name).read())}
+            # NY also has memory issues, so just read into csv from disk
+            file_objs = [{"name": name, "obj": name}
                          for name in file_names]
-            shutil.rmtree(new_loc_decomp, ignore_errors=True)
         else:
             zip_file = ZipFile(file_name)
             file_names = zip_file.namelist()
@@ -378,7 +378,8 @@ class Preprocessor(Loader):
                          os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
         for n in all_files:
-            n["obj"].seek(0)
+            if type(n["obj"]) != str:
+                n["obj"].seek(0)
         self.temp_files.extend(all_files)
         logging.info("unpacked: - {}".format(all_files))
         return all_files
@@ -815,7 +816,8 @@ class Preprocessor(Loader):
         main_df = pd.read_csv(self.main_file["obj"],
                               header=None,
                               names=config["ordered_columns"])
-        del self.main_file
+        shutil.rmtree(os.path.dirname(self.main_file["name"]),
+                      ignore_errors=True)
         gc.collect()
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
@@ -824,6 +826,7 @@ class Preprocessor(Loader):
             .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
+        logging.info("Making all_history")
         main_df["all_history"] = strcol_to_array(main_df.voterhistory,
                                                  delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
@@ -832,7 +835,6 @@ class Preprocessor(Loader):
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
-
         sorted_codes = unique_codes.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
                              enumerate(sorted_codes)}
@@ -843,6 +845,7 @@ class Preprocessor(Loader):
 
         # in this case we save ny as sparse array since so many elections are
         # stored
+        logging.info("Applying history codes")
         main_df.all_history = main_df.all_history.apply(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
@@ -856,8 +859,10 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
+        logging.info("Write df to StringIO")
         self.main_file = StringIO(main_df.to_csv(index=False,
                                                  encoding='utf-8'))
+        del main_df
         gc.collect()
         chksum = self.compute_checksum()
         return chksum
