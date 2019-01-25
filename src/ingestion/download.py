@@ -17,6 +17,7 @@ from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
+import subprocess
 import gc
 from io import BytesIO
 from zipfile import ZipFile, BadZipfile
@@ -191,12 +192,28 @@ class Loader(object):
         :param file_name: .zip file
         :return: dictionary of file-like objects with their names as keys
         """
-        zip_file = ZipFile(file_name)
-        file_names = zip_file.namelist()
-        logging.info("decompressing unzip {} into {}".format(file_name,
-                                                             file_names))
-        file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))}
-                     for name in file_names]
+        if self.state == "new_york":
+            new_loc = "/tmp/voteshield_{}".format(uuid.uuid4())
+            with open(new_loc, 'wb') as fh:
+                fh.write(file_name.getvalue())
+            new_loc_decomp = new_loc + "_decompressed"
+            logging.info("decompressing unzip {} into {} (NY file = on disk)"
+                         .format(new_loc, new_loc_decomp))
+            subprocess.call(['unzip', new_loc, '-d', new_loc_decomp])
+            os.remove(new_loc)
+            file_names = [os.path.join(new_loc_decomp, f) for f in
+                          os.listdir(new_loc_decomp)]
+            logging.info("file_names = {}".format(file_names))
+            file_objs = [{"name": name, "obj": StringIO(open(name).read())}
+                         for name in file_names]
+            shutil.rmtree(new_loc_decomp, ignore_errors=True)
+        else:
+            zip_file = ZipFile(file_name)
+            file_names = zip_file.namelist()
+            logging.info("decompressing unzip {} into {}".format(file_name,
+                                                                 file_names))
+            file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))}
+                         for name in file_names]
         return file_objs
 
     def gunzip_decompress(self, file_name):
@@ -281,7 +298,8 @@ class Loader(object):
             compression_type = self.infer_compression(s3_file_obj["name"])
 
         if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
-           (s3_file_obj["name"].split(".")[-1] == "txt"):
+           (s3_file_obj["name"].split(".")[-1] == "txt") or \
+           (s3_file_obj["name"].split(".")[-1] == "pdf"):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
