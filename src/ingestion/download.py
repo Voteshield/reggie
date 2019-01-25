@@ -845,8 +845,8 @@ class Preprocessor(Loader):
 
         # in this case we save ny as sparse array since so many elections are
         # stored
-        logging.info("Applying history codes")
-        main_df.all_history = main_df.all_history.apply(insert_code_bin)
+        logging.info("Mapping history codes")
+        main_df.all_history = main_df.all_history.map(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
