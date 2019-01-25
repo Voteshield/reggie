@@ -113,26 +113,12 @@ class Loader(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        #if self.clean_up_tmp_files:
-            #self.clean_up()
+        if self.clean_up_tmp_files:
+            self.clean_up()
         return 0
 
     def clean_up(self):
-        logging.info("got to clean up function")
-        for fn in self.temp_files:
-            logging.info("checking if {} is a file".format(fn))
-            if os.path.isfile(fn):
-                logging.info("{} is a file".format(fn))
-                try:
-                    os.chmod(fn, 0777)
-                    os.remove(fn)
-                    logging.info("removed {}".format(fn))
-                except OSError:
-                    logging.warning("cannot remove {}".format(fn))
-                    continue
-            elif os.path.isdir(fn):
-                shutil.rmtree(fn, ignore_errors=True)
-        self.temp_files = []
+        logging.info("cleaning done")
 
 
     def download_src_chunks(self):
