@@ -55,7 +55,8 @@ class Loader(object):
         self.clean_up_tmp_files = clean_up_tmp_files
         config = Config(file_name=config_file)
         self.config = config
-        self.chunk_urls = config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
+        self.chunk_urls = config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in \
+                                                       config else []
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
@@ -958,11 +959,11 @@ class Preprocessor(Loader):
             logging.info("Detected election code file: " + elec_codes)
 
         if voter_file[-3:] == "lst":
-            vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
-                         [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
-                         [105, 135], [135, 141], [141, 143], [143, 156],
-                         [156, 191], [191, 193], [193, 198], [198, 248],
-                         [248, 298], [298, 348], [348, 398], [398, 448],
+            vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82],
+                         [82, 83], [83, 91], [91, 92], [92, 99], [99, 103],
+                         [103, 105], [105, 135], [135, 141], [141, 143],
+                         [143, 156], [156, 191], [191, 193], [193, 198],
+                         [198, 248], [248, 298], [298, 348], [348, 398], [398, 448],
                          [448, 461], [461, 463], [463, 468], [468, 474],
                          [474, 479], [479, 484], [484, 489], [489, 494],
                          [494, 499], [499, 504], [504, 510], [510, 516],
@@ -991,7 +992,8 @@ class Preprocessor(Loader):
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
         if hist_file[-3:] == "lst":
-            hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
+            hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38],
+                         [38, 39]]
             logging.info("MICHIGAN: Loading historical file")
             hdf = pd.read_fwf(hist_file, colspecs=hcolspecs,
                               names=config["hist_columns"], na_filter=False)
