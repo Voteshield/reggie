@@ -809,11 +809,14 @@ class Preprocessor(Loader):
     def preprocess_new_york(self):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
-        main_file = filter(lambda x: x["name"][-4:] != ".pdf", new_files)[0]
+        self.main_file = filter(
+            lambda x: x["name"][-4:] != ".pdf", new_files)[0]
         gc.collect()
-        main_df = pd.read_csv(main_file["obj"],
+        main_df = pd.read_csv(self.main_file["obj"],
                               header=None,
                               names=config["ordered_columns"])
+        del self.main_file
+        gc.collect()
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
         all_codes = main_df.voterhistory.str.replace(" ", "_") \
@@ -824,6 +827,7 @@ class Preprocessor(Loader):
         main_df["all_history"] = strcol_to_array(main_df.voterhistory,
                                                  delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
+        gc.collect()
 
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
@@ -832,6 +836,7 @@ class Preprocessor(Loader):
         sorted_codes = unique_codes.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
                              enumerate(sorted_codes)}
+        gc.collect()
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
@@ -853,6 +858,7 @@ class Preprocessor(Loader):
         gc.collect()
         self.main_file = StringIO(main_df.to_csv(index=False,
                                                  encoding='utf-8'))
+        gc.collect()
         chksum = self.compute_checksum()
         return chksum
 
