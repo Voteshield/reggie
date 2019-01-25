@@ -867,7 +867,7 @@ class Preprocessor(Loader):
         vote_hist.columns = self.config["hist_columns"]
         valid_elections, counts = np.unique(vote_hist["election_desc"],
                                             return_counts=True)
-        count_order = counts.argsort()
+        count_order = counts.argsort()[::-1]
         valid_elections = valid_elections[count_order]
         counts = counts[count_order]
 
@@ -878,8 +878,8 @@ class Preprocessor(Loader):
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
         voter_groups = vote_hist.groupby("voter_reg_num")
-        all_history = voter_groups["array_position"].apply(list)
-        vote_type = voter_groups["voting_method"].apply(list)
+        all_history = voter_groups["array_position"].map(list)
+        vote_type = voter_groups["voting_method"].map(list)
 
         voter_df = voter_df.set_index("voter_reg_num")
 
