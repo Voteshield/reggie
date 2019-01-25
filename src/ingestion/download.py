@@ -846,8 +846,10 @@ class Preprocessor(Loader):
                 vote_hist_file = i
             elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
-        voter_df = pd.read_csv(voter_file['obj'], sep = "\t",quotechar = '"')
-        vote_hist = pd.read_csv(vote_hist_file['obj'], sep = "\t",quotechar = '"')
+        voter_df = pd.read_csv(voter_file['obj'], sep = "\t",
+                               quotechar = '"')
+        vote_hist = pd.read_csv(vote_hist_file['obj'], sep = "\t",
+                                quotechar = '"')
 
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
@@ -874,19 +876,23 @@ class Preprocessor(Loader):
 
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
-        voter_df = self.config.coerce_numeric(voter_df)
+        voter_df = self.config.coerce_numeric(voter_df, extra_cols=[
+            "county_commiss_abbrv", "fire_dist_abbrv", "full_phone_number",
+            "judic_dist_abbrv", "munic_dist_abbrv", "municipality_abbrv",
+            "precinct_abbrv", "precinct_desc", "school_dist_abbrv",
+            "super_court_abbrv", "township_abbrv", "township_desc",
+            "vtd_abbrv", "vtd_desc", "ward_abbrv"])
 
         self.meta = {
             "message": "north_carolina_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        self.main_file = StringIO(voter_df.to_csv(index=True, encoding='utf-8'))
+        self.main_file = StringIO(voter_df.to_csv(
+            index=True, encoding='utf-8'))
         self.is_compressed = False
         chksum = self.compute_checksum()
         return chksum
-
-
 
     def preprocess_missouri(self):
         new_file = self.unpack_files(compression="unzip")
