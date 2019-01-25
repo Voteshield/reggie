@@ -115,7 +115,6 @@ class Loader(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.clean_up_tmp_files:
             self.clean_up()
-        return 0
 
     def clean_up(self):
         logging.info("cleaning done")
@@ -837,19 +836,18 @@ class Preprocessor(Loader):
         return chksum
 
     def preprocess_north_carolina(self):
-        new_files = self.unpack_files() #array of dicts
+        new_files = self.unpack_files()  # array of dicts
 
-        config = Config("north_carolina")
+        self.config = Config("north_carolina")
         for i in new_files:
             if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
-                #switch to ['name']
                 vote_hist_file = i
             elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
-        voter_df = pd.read_csv(voter_file['obj'], sep = "\t",
-                               quotechar = '"')
-        vote_hist = pd.read_csv(vote_hist_file['obj'], sep = "\t",
-                                quotechar = '"')
+        voter_df = pd.read_csv(voter_file['obj'], sep="\t",
+                               quotechar='"')
+        vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
+                                quotechar='"')
 
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
