@@ -260,7 +260,7 @@ class Loader(object):
 
     def infer_compression(self, file_name):
         """
-        infer file type
+        infer file type and map to compression type
         :param file_name: file name in question
         :return: string (de)compression type or None
         """
@@ -374,8 +374,8 @@ class Preprocessor(Loader):
 
         if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n.keys()[0] not in
-                         self.config["format"]["ignore_files"]
-                         and os.path.basename(n.keys()[0]) not in
+                         self.config["format"]["ignore_files"] and
+                         os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
         for n in all_files:
             n["obj"].seek(0)
