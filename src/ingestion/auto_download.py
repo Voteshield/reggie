@@ -1,6 +1,7 @@
 from configs.configs import Config
 import requests
 from bs4 import BeautifulSoup
+import xmltodict
 import urllib2
 import datetime
 import zipfile
@@ -8,13 +9,18 @@ import boto3
 from ingestion.download import Loader
 from constants import RAW_FILE_PREFIX
 from selenium import webdriver
+import xml.etree.ElementTree
+import logging
+
+
+
 
 
 def state_download(state):
 
-	#config_file = Config.config_file_from_state(state=state)
-	#configs = Config(file_name=config_file)
-	today = datetime.datetime.now().strftime("%Y-%m-%d")
+	config_file = Config.config_file_from_state(state=state)
+	configs = Config(file_name=config_file)
+	today = nc_date_grab()
 
 	if state == "north_carolina":
 		list_files = configs['data_chunk_links']
@@ -39,25 +45,63 @@ def state_download(state):
 		with Loader(config_file=config_file, force_date=today,
                  force_file=file_to_zip) as loader:
 			loader.s3_dump(file_class=RAW_FILE_PREFIX)
+			#config files not required by loader, fix this
 
 
-	if state == "practice":
-		date_grab()
+def nc_date_grab():
+	file = urllib2.urlopen('https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
+	data = file.read()
+	file.close()	
+	root = xml.etree.ElementTree.fromstring(data)
+	a = xml.etree.ElementTree.fromstring(data).findall('.//Key')
+	for child in root:
+		if "Contents" in child.tag:
+			z = 0
+			for i in child:
+				if "data/ncvoter_Statewide.zip" in i.text:
+					z += 1
+					continue
+				if z == 1:
+					file_date_vf = i.text
+					z = 0
 
+	for child in root:
+		if "Contents" in child.tag:
+			z = 0
+			for i in child:
+				if "data/ncvhis_Statewide.zip" in i.text:
+					z += 1
+					continue
+				if z == 1:
+					file_date_his = i.text
+					z = 0
+	if file_date_his[0:10] != file_date_vf[0:10]:
+		logging.info("Different dates between files, reverting to voter file date")
 
+	file_date_vf = str(datetime.datetime.strptime(file_date_vf[0:10], "%Y-%m-%d"))[0:10]
 
-def date_grab():
-	browser = webdriver.Chrome()
-	url = "https://s3.amazonaws.com/dl.ncsbe.gov/data/list.html"
-	browser.get(url)
-	#browser.findElement(By.xpath("//a[@href='https://dl.ncsbe.gov.s3.amazonaws.com/data/']")).click()
-	browser.find_element_by_link_text('data/').click()
-
-	print(browser.execute_script("return document.body.innerHTML")) #returns the inner HTML as a string
+	return(file_date_vf)
 	
-	print("---------")
-	#soup = BeautifulSoup(innerHTML, "html.parser")
-	#print(soup)
+
+					
+
+	
+		
+	"""
+	from lxml import etree
+	root = etree.fromstring(data)
+	print(etree.tostring(root, pretty_print = True))
+	"""
+	"""	
+	for child in root:
+		for i in child:
+			print(i.attrib)		
+	"""	
+			#e = xml.etree.ElementTree.parse(data)
+	#root = e.getroot()
+	#print(e)
+
+	
 
 
 
