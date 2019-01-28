@@ -49,27 +49,22 @@ def nc_date_grab():
 	nc_file.close()	
 	root = xml.etree.ElementTree.fromstring(data)
 	a = xml.etree.ElementTree.fromstring(data).findall('.//Key')
-	for child in root:
-		if "Contents" in child.tag:
-			z = 0
-			for i in child:
-				if "data/ncvoter_Statewide.zip" in i.text:
-					z += 1
-					continue
-				if z == 1:
-					file_date_vf = i.text
-					break
 
-	for child in root:
-		if "Contents" in child.tag:
-			z = 0
-			for i in child:
-				if "data/ncvhis_Statewide.zip" in i.text:
-					z += 1
-					continue
-				if z == 1:
-					file_date_his = i.text
-					break
+	def nc_parse_xml(file_name):
+		for child in root:
+			if "Contents" in child.tag:
+				z = 0
+				for i in child:
+					if file_name in i.text:
+						z += 1
+						continue
+					if z == 1:
+						return(i.text)
+						break
+
+	file_date_vf = nc_parse_xml(file_name ="data/ncvoter_Statewide.zip")
+	file_date_his = nc_parse_xml(file_name = "data/ncvhis_Statewide.zip")
+
 	if file_date_his[0:10] != file_date_vf[0:10]:
 		logging.info("Different dates between files, reverting to voter file date")
 
