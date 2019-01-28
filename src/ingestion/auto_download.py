@@ -1,7 +1,5 @@
 from configs.configs import Config
 import requests
-from bs4 import BeautifulSoup
-import xmltodict
 import urllib2
 import datetime
 import zipfile
@@ -10,6 +8,8 @@ from ingestion.download import Loader
 from constants import RAW_FILE_PREFIX
 import xml.etree.ElementTree
 import logging
+from dateutil import parser
+
 
 
 
@@ -73,7 +73,7 @@ def nc_date_grab():
 	if file_date_his[0:10] != file_date_vf[0:10]:
 		logging.info("Different dates between files, reverting to voter file date")
 
-	file_date_vf = str(datetime.datetime.strptime(file_date_vf[0:10], "%Y-%m-%d"))[0:10]
+	file_date_vf = parser.parse(file_date_vf).isoformat()
 	return(file_date_vf)
 	
 
