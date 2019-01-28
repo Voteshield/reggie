@@ -262,7 +262,7 @@ class Loader(object):
     def infer_compression(self, file_name):
         """
         infer file type and map to compression type
-        :param file_name: file name in question
+        :param file_name: file in question
         :return: string (de)compression type or None
         """
         if file_name[-3:] == "bz2":
