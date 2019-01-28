@@ -117,7 +117,7 @@ class Config(object):
         :return: modified dataframe
         """
         text_fields = [c for c, v in self.data["columns"].items()
-                       if v == "text" or v == "varchar"]
+                       if v == "text" or "char" in v]
         for field in text_fields:
             if (field in df) and (field != self.data["voter_status"]) \
                and (field != self.data["party_identifier"]):

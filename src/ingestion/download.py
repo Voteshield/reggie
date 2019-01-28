@@ -121,6 +121,7 @@ class Loader(object):
     def clean_up(self):
         logging.info("cleaning done")
 
+
     def download_src_chunks(self):
         """
         we expect each chunk to be a compressed (.gz) csv file
@@ -323,6 +324,9 @@ class Loader(object):
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
                             self.download_date, "csv", "gz")
+        if self.state == "north_carolina":
+            k = generate_s3_key(file_class, self.state, self.source,
+                            self.download_date, "zip")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
@@ -335,7 +339,6 @@ class Loader(object):
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
-
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
@@ -867,6 +870,63 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+    def preprocess_north_carolina(self):
+        new_files = self.unpack_files()  # array of dicts
+
+        self.config = Config("north_carolina")
+        for i in new_files:
+            if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
+                vote_hist_file = i
+            elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
+                voter_file = i
+        voter_df = pd.read_csv(voter_file['obj'], sep="\t",
+                               quotechar='"')
+        vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
+                                quotechar='"')
+
+        voter_df.columns = self.config["ordered_columns"]
+        vote_hist.columns = self.config["hist_columns"]
+        valid_elections, counts = np.unique(vote_hist["election_desc"],
+                                            return_counts=True)
+        count_order = counts.argsort()[::-1]
+        valid_elections = valid_elections[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+        vote_hist["array_position"] = vote_hist["election_desc"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+        voter_groups = vote_hist.groupby("voter_reg_num")
+        all_history = voter_groups["array_position"].map(list)
+        vote_type = voter_groups["voting_method"].map(list)
+
+        voter_df = voter_df.set_index("voter_reg_num")
+
+        voter_df["all_history"] = all_history
+        voter_df["vote_type"] = vote_type
+
+        voter_df = self.config.coerce_strings(voter_df)
+        voter_df = self.config.coerce_dates(voter_df)
+        voter_df = self.config.coerce_numeric(voter_df, extra_cols=[
+            "county_commiss_abbrv", "fire_dist_abbrv", "full_phone_number",
+            "judic_dist_abbrv", "munic_dist_abbrv", "municipality_abbrv",
+            "precinct_abbrv", "precinct_desc", "school_dist_abbrv",
+            "super_court_abbrv", "township_abbrv", "township_desc",
+            "vtd_abbrv", "vtd_desc", "ward_abbrv"])
+
+        self.meta = {
+            "message": "north_carolina_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+        self.main_file = StringIO(voter_df.to_csv(
+            index=True, encoding='utf-8'))
+        self.is_compressed = False
+        chksum = self.compute_checksum()
+        return chksum
+
     def preprocess_missouri(self):
         new_file = self.unpack_files(compression="unzip")
         new_file = new_file[0]
@@ -1284,6 +1344,7 @@ class Preprocessor(Loader):
             'pennsylvania': self.preprocess_pennsylvania,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
+            'north_carolina': self.preprocess_north_carolina
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
