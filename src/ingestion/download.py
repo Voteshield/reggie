@@ -810,10 +810,9 @@ class Preprocessor(Loader):
     def preprocess_new_york(self):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
-        del self.main_file
-        gc.collect()
         self.main_file = filter(
             lambda x: x["name"][-4:] != ".pdf", new_files)[0]
+        gc.collect()
         main_df = pd.read_csv(self.main_file["obj"],
                               header=None,
                               names=config["ordered_columns"])
