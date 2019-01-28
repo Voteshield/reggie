@@ -305,6 +305,9 @@ class Loader(object):
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
                             self.download_date, "csv", "gz")
+        if self.state == "north_carolina":
+            k = generate_s3_key(file_class, self.state, self.source,
+                            self.download_date, "zip")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
