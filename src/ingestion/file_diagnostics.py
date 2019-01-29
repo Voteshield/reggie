@@ -196,6 +196,19 @@ class TestFileBuilder(Preprocessor):
             for f in smaller_files:
                 zf.write(f, os.path.basename(f))
 
+    def __build_kansas(self):
+        new_files = self.unpack_files()
+        for f in new_files:
+            if ".txt" in f['name']:
+                logging.info("reading kansas file")
+                df = pd.read_csv(f['key'], sep="\t", index_col=False).sample(n = 10000)
+                ks_file = f['name']
+        
+        df.to_csv(ks_file, header=True, sep = "\t")
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            zf.write(ks_file, os.path.basename(ks_file))
+
+
     def __build_ohio(self):
         """
         this only generates a truncated _processed_ file, no test raw file
@@ -303,7 +316,8 @@ class TestFileBuilder(Preprocessor):
                   "florida": self.__build_florida,
                   "missouri": self.__build_missouri,
                   "new_jersey": self.__build_new_jersey,
-                  "north_carolina": self.__build_north_carolina
+                  "north_carolina": self.__build_north_carolina,
+                  "kansas": self.__build_kansas
                   }
 
         f = routes[self.state]
