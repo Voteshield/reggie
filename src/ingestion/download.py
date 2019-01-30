@@ -626,6 +626,53 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
+
+    def preprocess_kansas(self):
+        new_files = self.unpack_files()
+
+        for f in new_files:
+            if ".txt" in f['name']:
+                logging.info("reading kansas file")
+                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
+        print(df.shape)
+        df.colums = self.config["ordered_columns"]
+
+        def add_history(main_df):
+            # also save as sparse array since so many elections are stored
+            count_df = pd.DataFrame()
+            for idx, hist in enumerate(self.config['hist_columns']):
+                unique_codes, counts = np.unique(main_df[hist].str.replace(
+                    " ", "_").dropna().values, return_counts=True)
+                count_df_new = pd.DataFrame(index=unique_codes, data=counts,
+                                            columns=['counts_' + hist])
+                count_df = pd.concat([count_df, count_df_new], axis=1)
+            count_df['total_counts'] = count_df.sum(axis=1)
+            unique_codes = count_df.index.values
+            counts = count_df['total_counts'].values
+            count_order = counts.argsort()
+            unique_codes = unique_codes[count_order]
+            counts = counts[count_order]
+            sorted_codes = unique_codes.tolist()
+            sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                     "date": date_from_str(k)}
+                                 for i, k in enumerate(sorted_codes)}
+
+            def insert_code_bin(arr):
+                return [sorted_codes_dict[k]["index"] for k in arr]
+
+            main_df['all_history'] = main_df[
+                self.config['hist_columns']].apply(
+                lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
+            main_df.all_history = main_df.all_history.map(insert_code_bin)
+            return sorted_codes, sorted_codes_dict
+
+        sorted_codes, sorted_codes_dict = add_history(main_df = df)
+        print(sorted_codes)
+        print(sorted_codes_dict)
+
+                
+
+
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
         logging.info("IOWA: reading in voter file")

@@ -202,10 +202,10 @@ class TestFileBuilder(Preprocessor):
             if ".txt" in f['name']:
                 logging.info("reading kansas file")
                 df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python').sample(n = 10000)
-                ks_file = f['name'] + ".zip"
+                ks_file = f['name']
         
         df.to_csv(ks_file, header=True, sep = "\t", compression='zip')
-        
+        self.main_file = ks_file
 
     def __build_ohio(self):
         """
