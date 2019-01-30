@@ -305,9 +305,6 @@ class Loader(object):
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         k = generate_s3_key(file_class, self.state, self.source,
                             self.download_date, "csv", "gz")
-        if self.state == "north_carolina":
-            k = generate_s3_key(file_class, self.state, self.source,
-                            self.download_date, "zip")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_class=PROCESSED_FILE_PREFIX):
@@ -866,11 +863,11 @@ class Preprocessor(Loader):
                              for i, k in enumerate(sorted_codes)}
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-        voter_groups = vote_hist.groupby("voter_reg_num")
-        all_history = voter_groups["array_position"].map(list)
-        vote_type = voter_groups["voting_method"].map(list)
+        voter_groups = vote_hist.groupby(self.config["voter_id"])
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["voting_method"].apply(list)
 
-        voter_df = voter_df.set_index("voter_reg_num")
+        voter_df = voter_df.set_index(self.config["voter_id"])
 
         voter_df["all_history"] = all_history
         voter_df["vote_type"] = vote_type
