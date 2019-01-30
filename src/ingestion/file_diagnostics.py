@@ -201,13 +201,11 @@ class TestFileBuilder(Preprocessor):
         for f in new_files:
             if ".txt" in f['name']:
                 logging.info("reading kansas file")
-                df = pd.read_csv(f['key'], sep="\t", index_col=False).sample(n = 10000)
-                ks_file = f['name']
+                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python').sample(n = 10000)
+                ks_file = f['name'] + ".zip"
         
-        df.to_csv(ks_file, header=True, sep = "\t")
-        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
-            zf.write(ks_file, os.path.basename(ks_file))
-
+        df.to_csv(ks_file, header=True, sep = "\t", compression='zip')
+        
 
     def __build_ohio(self):
         """
