@@ -863,6 +863,7 @@ class Preprocessor(Loader):
                              for i, k in enumerate(sorted_codes)}
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
+
         voter_groups = vote_hist.groupby(self.config["voter_id"])
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["voting_method"].apply(list)
