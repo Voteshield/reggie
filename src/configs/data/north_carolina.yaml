@@ -2,7 +2,7 @@ file_type: csv
 state: north_carolina
 source: boe_download
 file_class: voter_file
-voter_id: voter_reg_num
+voter_id: ncid
 county_identifier: county_id
 birthday_identifier: birth_year
 voter_status: status_cd
@@ -39,7 +39,7 @@ address_fields:
 primary_key:
   - pre_date
   - post_date
-  - voter_reg_num
+  - ncid
   - change_type
 base_columns:
   pre_date: timestamp
@@ -48,7 +48,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-  voter_reg_num: char(12)
+  ncid: char(12)
 summary_columns:
   - totals
   - date
