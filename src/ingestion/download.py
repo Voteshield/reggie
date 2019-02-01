@@ -635,11 +635,7 @@ class Preprocessor(Loader):
             if ".txt" in f['name']:
                 logging.info("reading kansas file")
                 df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
-        print(df.shape)
-        print(df.head())
-        df.colums = self.config["ordered_columns"]
-        print(df.head())
-
+        df.columns = self.config["ordered_columns"]
         def ks_hist_date(s):
             try:   
                 elect_year = parser.parse(s[2:6]).year
@@ -689,8 +685,6 @@ class Preprocessor(Loader):
         }
         self.main_file = StringIO(df.to_csv(encoding='utf-8',
                                                  index=False))
-        print(df.head())
-        print(df.date_of_birth)
         chksum = self.compute_checksum()
         return chksum
 
