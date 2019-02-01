@@ -23,7 +23,6 @@ name_fields:
   - text_name_last
   - cde_name_suffix
 address_fields:
-  - text_registrant_id
   - text_res_address_nbr
   - text_res_address_nbr_suffix
   - cde_street_dir_prefix
@@ -61,7 +60,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-  text_registrant_id: text
+  text_registrant_id: int
 summary_columns:
   - totals
   - date
@@ -87,11 +86,9 @@ summary_types:
   - int
   - int
   - int
-  - int
-additional_snapshot_columns:
-  all_history: text[]
+  - text
 generated_columns:
-  all_history: text[]
+  all_history: int[]
 ordered_generated_columns:
   - all_history
 format:

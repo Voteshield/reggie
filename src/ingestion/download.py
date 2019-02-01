@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from subprocess import Popen, PIPE
+from datetime import date as dt
 
 import bs4
 import pandas as pd
@@ -635,10 +636,21 @@ class Preprocessor(Loader):
                 logging.info("reading kansas file")
                 df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
         print(df.shape)
+        print(df.head())
         df.colums = self.config["ordered_columns"]
+        print(df.head())
+
+        def ks_hist_date(s):
+            try:   
+                elect_year = parser.parse(s[2:6]).year
+            except:
+                elect_year=None
+                pass
+            if (elect_year < 1850) or (elect_year > dt.today().year + 1):
+                elect_year=None
+            return(elect_year)
 
         def add_history(main_df):
-            # also save as sparse array since so many elections are stored
             count_df = pd.DataFrame()
             for idx, hist in enumerate(self.config['hist_columns']):
                 unique_codes, counts = np.unique(main_df[hist].str.replace(
@@ -654,7 +666,7 @@ class Preprocessor(Loader):
             counts = counts[count_order]
             sorted_codes = unique_codes.tolist()
             sorted_codes_dict = {k: {"index": i, "count": counts[i],
-                                     "date": date_from_str(k)}
+                                     "date": ks_hist_date(k)}
                                  for i, k in enumerate(sorted_codes)}
 
             def insert_code_bin(arr):
@@ -667,11 +679,20 @@ class Preprocessor(Loader):
             return sorted_codes, sorted_codes_dict
 
         sorted_codes, sorted_codes_dict = add_history(main_df = df)
-        print(sorted_codes)
-        print(sorted_codes_dict)
 
-                
-
+        df = self.config.coerce_numeric(df)
+        df = self.config.coerce_strings(df)
+        self.meta = {
+            "message": "kansas_{}".format(datetime.now().isoformat()),
+            "array_encoding": sorted_codes_dict,
+            "array_decoding": sorted_codes,
+        }
+        self.main_file = StringIO(df.to_csv(encoding='utf-8',
+                                                 index=False))
+        print(df.head())
+        print(df.date_of_birth)
+        chksum = self.compute_checksum()
+        return chksum
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(compression='unzip')
@@ -1363,7 +1384,8 @@ class Preprocessor(Loader):
             'pennsylvania': self.preprocess_pennsylvania,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
-            'north_carolina': self.preprocess_north_carolina
+            'north_carolina': self.preprocess_north_carolina,
+            'kansas': self.preprocess_kansas
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

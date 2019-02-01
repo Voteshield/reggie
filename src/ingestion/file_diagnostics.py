@@ -201,9 +201,12 @@ class TestFileBuilder(Preprocessor):
         for f in new_files:
             if ".txt" in f['name']:
                 logging.info("reading kansas file")
-                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python').sample(n = 10000)
+                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
+                random_sample = df.sample(n = 200)
+                df = df[df['db_logid']=="Clay"]
+                df = pd.concat([df, random_sample], ignore_index=True)
                 ks_file = f['name']
-        
+        df.set_index('db_logid', inplace=True)
         df.to_csv(ks_file, header=True, sep = "\t", compression='zip')
         self.main_file = ks_file
 
