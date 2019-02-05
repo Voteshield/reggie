@@ -658,6 +658,7 @@ class Preprocessor(Loader):
                 logging.info("reading kansas file")
                 df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
         df.columns = self.config["ordered_columns"]
+        df[self.config["voter_status"]] = df[self.config["voter_status"]].str.replace(" ","")
         def ks_hist_date(s):
             try:   
                 elect_year = parser.parse(s[2:6]).year
@@ -700,6 +701,8 @@ class Preprocessor(Loader):
 
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
+        print("length of cde reg status")
+        print(len(df.cde_registrant_status[0]))
         self.meta = {
             "message": "kansas_{}".format(datetime.now().isoformat()),
             "array_encoding": sorted_codes_dict,
