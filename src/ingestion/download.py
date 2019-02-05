@@ -926,9 +926,10 @@ class Preprocessor(Loader):
         return chksum
 
     def preprocess_missouri(self):
-        new_file = self.unpack_files(compression="unzip")
-        new_file = new_file[0]
-        main_df = pd.read_csv(new_file["obj"], sep='\t')
+        new_files = self.unpack_files(compression="unzip")
+        main_file = [x for x in new_files if
+                     ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
+        main_df = pd.read_csv(main_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
         main_df[self.config["voter_status"]] = np.nan
