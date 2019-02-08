@@ -4,7 +4,6 @@ from subprocess import Popen, PIPE
 
 import bs4
 import pandas as pd
-import filetype
 import requests
 from dateutil import parser
 import json
@@ -64,11 +63,14 @@ class S3FileItem(object):
 
 class Loader(object):
     """
-    this object should be used to perform downloads directly from online resources which are specified by yaml files
+    this object should be used to perform downloads directly from
+    online resources which are specified by yaml files
     in the config directory.
 
-    A Loader uses filesystem resources for temporarily storing the files on disk during the chunk concatenation process,
-    therefore __enter__ and __exit__ are defined to allow safe usage of Loader in a 'with' statement:
+    A Loader uses filesystem resources for temporarily storing the files
+    on disk during the chunk concatenation process,
+    therefore __enter__ and __exit__ are defined to allow safe usage
+    of Loader in a 'with' statement:
     for example:
     ```
         with Loader() as l:
@@ -119,6 +121,7 @@ class Loader(object):
 
     def clean_up(self):
         logging.info("cleaning done")
+
 
     def download_src_chunks(self):
         """
@@ -191,12 +194,28 @@ class Loader(object):
         :param file_name: .zip file
         :return: dictionary of file-like objects with their names as keys
         """
-        zip_file = ZipFile(file_name)
-        file_names = zip_file.namelist()
-        logging.info("decompressing unzip {} into {}".format(file_name,
-                                                             file_names))
-        file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))} for name in file_names]
-
+        if self.state == "new_york":
+            new_loc = "/tmp/voteshield_{}".format(uuid.uuid4())
+            with open(new_loc, 'wb') as fh:
+                fh.write(file_name.getvalue())
+            new_loc_decomp = new_loc + "_decompressed"
+            logging.info("decompressing unzip {} into {} (NY file = on disk)"
+                         .format(new_loc, new_loc_decomp))
+            subprocess.call(['unzip', new_loc, '-d', new_loc_decomp])
+            os.remove(new_loc)
+            file_names = [os.path.join(new_loc_decomp, f) for f in
+                          os.listdir(new_loc_decomp)]
+            logging.info("file_names = {}".format(file_names))
+            # NY also has memory issues, so just read into csv from disk
+            file_objs = [{"name": name, "obj": name}
+                         for name in file_names]
+        else:
+            zip_file = ZipFile(file_name)
+            file_names = zip_file.namelist()
+            logging.info("decompressing unzip {} into {}".format(file_name,
+                                                                 file_names))
+            file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))}
+                         for name in file_names]
         return file_objs
 
     def gunzip_decompress(self, file_name):
@@ -239,7 +258,6 @@ class Loader(object):
                                                             file_names))
         file_objs = [{"name": name, "obj": seven_zip_file.getmember(name)} for
                      name in file_names]
-
         return file_objs
 
     def infer_compression(self, file_name):
@@ -248,18 +266,19 @@ class Loader(object):
         :param file_name: file in question
         :return: string (de)compression type or None
         """
-        guess = filetype.guess(file_name)
-        compression_type = None
-        if guess is not None:
-            options = {"application/x-bzip2": "bunzip2",
-                       "application/gzip": "gunzip",
-                       "application/zip": "unzip"}
-            compression_type = options.get(guess.mime, None)
-            if compression_type is None:
-                logging.info("unsupported file format: {}".format(guess.mime))
+        if file_name[-3:] == "bz2":
+            compression_type = "bunzip2"
+        elif file_name[-2:] == "gz":
+            compression_type = "gunzip"
+        elif file_name[-3:] == "zip":
+            compression_type = "unzip"
         else:
+            compression_type = None
+        if compression_type is None:
             logging.info(
                 "could not infer the file type of {}".format(file_name))
+        logging.info("compression type of {} is {}".format(
+            file_name, compression_type))
         return compression_type
 
     def decompress(self, s3_file_obj, compression_type="gunzip"):
@@ -280,13 +299,14 @@ class Loader(object):
         if compression_type is "infer":
             compression_type = self.infer_compression(s3_file_obj["name"])
 
-        if s3_file_obj["name"].split(".")[-1] == "xlsx":
+        if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
+           (s3_file_obj["name"].split(".")[-1] == "txt") or \
+           (s3_file_obj["name"].split(".")[-1] == "pdf"):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
             if compression_type == "unzip":
                 new_files = self.unzip_decompress(s3_file_obj["obj"])
-
             elif compression_type == "bunzip2":
                 new_files = self.bunzip2_decompress(s3_file_obj["obj"])
             elif compression_type == "7zip":
@@ -317,7 +337,6 @@ class Loader(object):
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
-
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
@@ -356,11 +375,13 @@ class Preprocessor(Loader):
 
         if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n.keys()[0] not in
-                         self.config["format"]["ignore_files"]
-                         and os.path.basename(n.keys()[0]) not in
+                         self.config["format"]["ignore_files"] and
+                         os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
         for n in all_files:
-            n["obj"].seek(0)
+            if type(n["obj"]) != str:
+                n["obj"].seek(0)
+        self.temp_files.extend(all_files)
         logging.info("unpacked: - {}".format(all_files))
         return all_files
 
@@ -422,7 +443,8 @@ class Preprocessor(Loader):
                 df_voters = pd.read_csv(i["obj"], sep="|", quotechar='"',
                                         quoting=3, error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
-                df_voters['Registration_Number'] = df_voters['Registration_Number'].astype(str).str.zfill(8)
+                df_voters['Registration_Number'] = df_voters[
+                    'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
                 vh_files.append(i)
 
@@ -475,7 +497,6 @@ class Preprocessor(Loader):
                              for i, k in enumerate(sorted_codes)}
         history["array_position"] = history["Combo_history"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-                      
 
         voter_groups = history.groupby('Registration_Number')
         all_history = voter_groups['Combo_history'].apply(list)
@@ -562,10 +583,12 @@ class Preprocessor(Loader):
 
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
+        gc.collect()
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
         df_hist.columns = self.config["hist_columns"]
+        gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
         df_hist["election_name"] = df_hist["date"] + "_" + \
@@ -591,6 +614,7 @@ class Preprocessor(Loader):
         voter_groups = df_hist.groupby("VoterID")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["vote_type"].apply(list)
+        gc.collect()
 
         logging.info("FLORIDA: loading main voter file")
         df_voters = pd.read_csv(concat_voter_file,
@@ -600,6 +624,7 @@ class Preprocessor(Loader):
 
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
+        gc.collect()
 
         df_voters = self.config.coerce_strings(df_voters)
         df_voters = self.config.coerce_dates(df_voters)
@@ -618,6 +643,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
 
+        gc.collect()
         logging.info("FLORIDA: writing out")
         self.main_file = StringIO(df_voters.to_csv())
         chksum = self.compute_checksum()
@@ -681,7 +707,7 @@ class Preprocessor(Loader):
                 df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
                 df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
                 party_info = df_voters[party_col].str.strip() + key_delim + \
-                             df_voters[org_col].str.replace(" ", "")
+                    df_voters[org_col].str.replace(" ", "")
                 df_voters[c] += key_delim + party_info
             else:
                 # add 'blank' values for the primary slots
@@ -785,11 +811,15 @@ class Preprocessor(Loader):
     def preprocess_new_york(self):
         config = Config("new_york")
         new_files = self.unpack_files(compression="infer")
-        main_file = filter(lambda x: x["name"][-4:] != ".pdf", new_files)[0]
+        self.main_file = filter(
+            lambda x: x["name"][-4:] != ".pdf", new_files)[0]
         gc.collect()
-        main_df = pd.read_csv(main_file["obj"],
+        main_df = pd.read_csv(self.main_file["obj"],
                               header=None,
                               names=config["ordered_columns"])
+        shutil.rmtree(os.path.dirname(self.main_file["name"]),
+                      ignore_errors=True)
+        gc.collect()
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
         all_codes = main_df.voterhistory.str.replace(" ", "_") \
@@ -797,24 +827,27 @@ class Preprocessor(Loader):
             .str.replace("]", "")
         all_codes = all_codes.str.cat(sep=";")
         all_codes = np.array(all_codes.split(";"))
+        logging.info("Making all_history")
         main_df["all_history"] = strcol_to_array(main_df.voterhistory,
                                                  delim=";")
         unique_codes, counts = np.unique(all_codes, return_counts=True)
+        gc.collect()
 
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
-
         sorted_codes = unique_codes.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
                              enumerate(sorted_codes)}
+        gc.collect()
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
 
         # in this case we save ny as sparse array since so many elections are
         # stored
-        main_df.all_history = main_df.all_history.apply(insert_code_bin)
+        logging.info("Mapping history codes")
+        main_df.all_history = main_df.all_history.map(insert_code_bin)
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
@@ -827,18 +860,77 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+        logging.info("Write df to StringIO")
         self.main_file = StringIO(main_df.to_csv(index=False,
-                                                 compression="gzip",
                                                  encoding='utf-8'))
-        self.is_compressed = True
+        del main_df
+        gc.collect()
+        chksum = self.compute_checksum()
+        return chksum
+
+    def preprocess_north_carolina(self):
+        new_files = self.unpack_files()  # array of dicts
+
+        self.config = Config("north_carolina")
+        for i in new_files:
+            if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
+                vote_hist_file = i
+            elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
+                voter_file = i
+        voter_df = pd.read_csv(voter_file['obj'], sep="\t",
+                               quotechar='"')
+        vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
+                                quotechar='"')
+
+        voter_df.columns = self.config["ordered_columns"]
+        vote_hist.columns = self.config["hist_columns"]
+        valid_elections, counts = np.unique(vote_hist["election_desc"],
+                                            return_counts=True)
+        count_order = counts.argsort()[::-1]
+        valid_elections = valid_elections[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+        vote_hist["array_position"] = vote_hist["election_desc"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+
+        voter_groups = vote_hist.groupby(self.config["voter_id"])
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["voting_method"].apply(list)
+
+        voter_df = voter_df.set_index(self.config["voter_id"])
+
+        voter_df["all_history"] = all_history
+        voter_df["vote_type"] = vote_type
+
+        voter_df = self.config.coerce_strings(voter_df)
+        voter_df = self.config.coerce_dates(voter_df)
+        voter_df = self.config.coerce_numeric(voter_df, extra_cols=[
+            "county_commiss_abbrv", "fire_dist_abbrv", "full_phone_number",
+            "judic_dist_abbrv", "munic_dist_abbrv", "municipality_abbrv",
+            "precinct_abbrv", "precinct_desc", "school_dist_abbrv",
+            "super_court_abbrv", "township_abbrv", "township_desc",
+            "vtd_abbrv", "vtd_desc", "ward_abbrv"])
+
+        self.meta = {
+            "message": "north_carolina_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+        self.main_file = StringIO(voter_df.to_csv(
+            index=True, encoding='utf-8'))
+        self.is_compressed = False
         chksum = self.compute_checksum()
         return chksum
 
     def preprocess_missouri(self):
-        new_file = self.unpack_files(compression="unzip")
-        new_file = new_file[0]
-        main_df = pd.read_csv(new_file["obj"], sep='\t')
+        new_files = self.unpack_files(compression="unzip")
+        main_file = [x for x in new_files if
+                     ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
+        main_df = pd.read_csv(main_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
         main_df[self.config["voter_status"]] = np.nan
@@ -895,20 +987,21 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config("michigan")
         new_files = self.unpack_files()
-        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"]] +
-                      [None])[0]
+        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"]
+                       or 'EntireStateVoters' in n["name"]] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n["name"]
-
-                      or 'EntireStateVoterHistory' in n] + [None])[0]
+                      or 'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
-        logging.info("Detected voter file: " + voter_file)
-        logging.info("Detected history file: " + hist_file)
+        logging.info("Detected voter file: " + voter_file["name"])
+        logging.info("Detected history file: " + hist_file["name"])
         if(elec_codes):
-            logging.info("Detected election code file: " + elec_codes)
+            logging.info("Detected election code file: " + elec_codes["name"])
 
+        logging.info("MICHIGAN: Loading voter file")
         if voter_file["name"][-3:] == "lst":
-            vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83],
+            vcolspecs = [[0, 35], [35, 55], [55, 75],
+                         [75, 78], [78, 82], [82, 83],
                          [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
                          [105, 135], [135, 141], [141, 143], [143, 156],
                          [156, 191], [191, 193], [193, 198], [198, 248],
@@ -917,12 +1010,9 @@ class Preprocessor(Loader):
                          [474, 479], [479, 484], [484, 489], [489, 494],
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
-            logging.info("MICHIGAN: Loading voter file")
             vdf = pd.read_fwf(voter_file["obj"], colspecs=vcolspecs,
                               names=config["ordered_columns"], na_filter=False)
-            logging.info("Removing voter file")
         elif voter_file["name"][-3:] == "csv":
-            logging.info("MICHIGAN: Loading voter file")
             vdf = pd.read_csv(voter_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
@@ -934,26 +1024,21 @@ class Preprocessor(Loader):
             if "PRECINCT" in vdf.columns:
                 vdf = vdf.drop(["PRECINCT"], axis=1)
             vdf.columns = config["ordered_columns"][:-1]
-            logging.info("Removing voter file")
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
-
+        logging.info("MICHIGAN: Loading historical file")
         if hist_file["name"][-3:] == "lst":
-            hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-            logging.info("MICHIGAN: Loading historical file")
+            hcolspecs = [[0, 13], [13, 15], [15, 20],
+                         [20, 25], [25, 38], [38, 39]]
             hdf = pd.read_fwf(hist_file["obj"], colspecs=hcolspecs,
                               names=config["hist_columns"], na_filter=False)
-            logging.info("Removing historical file")
         elif hist_file["name"][-3:] == "csv":
-            logging.info("MICHIGAN: Loading historical file")
             hdf = pd.read_csv(hist_file["obj"], na_filter=False,
                               error_bad_lines=False)\
                 .drop(["COUNTY_NAME", "JURISDICTION_NAME",
                        "SCHOOL_DISTRICT_NAME"], axis=1)
             hdf.columns = config["hist_columns"]
-            logging.info("Removing historical file")
-            os.remove(hist_file)
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
@@ -987,7 +1072,7 @@ class Preprocessor(Loader):
             counts.index = counts.index.map(str)
             elec_dict = {
                 k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
-                'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
+                    'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
                 for i, k in enumerate(sorted_codes)}
         else:
             this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
@@ -1082,18 +1167,20 @@ class Preprocessor(Loader):
         elections = 40
         dfcols = config["ordered_columns"][:-3]
         for i in range(elections):
-            dfcols.extend(["district_{}".format(i+1)])
+            dfcols.extend(["district_{}".format(i + 1)])
         for i in range(elections):
             dfcols.extend(["election_{}_vote_method".format(i + 1)])
-            dfcols.extend(["election_{}_party".format(i+1)])
+            dfcols.extend(["election_{}_party".format(i + 1)])
         dfcols.extend(config["ordered_columns"][-3:])
 
         for c in counties:
             logging.info("Processing {}".format(c))
             c = format_column_name(c)
             try:
-                voter_file = next(f for f in voter_files if c in f["name"].lower())
-                election_map = next(f for f in election_maps if c in f["name"].lower())
+                voter_file = next(
+                    f for f in voter_files if c in f["name"].lower())
+                election_map = next(
+                    f for f in election_maps if c in f["name"].lower())
                 zones = next(f for f in zone_codes if c in f["name"].lower())
                 types = next(f for f in zone_types if c in f["name"].lower())
             except StopIteration:
@@ -1109,45 +1196,44 @@ class Preprocessor(Loader):
             edf = edf.replace('"')
             zdf = zdf.replace('"')
             edf.index = edf["number"]
-            
+
             for i in range(elections):
                 s = pd.Series(index=df.index)
                 # Blair isn't sending all their election codes
                 try:
-                    s[:] = edf.iloc[i]["title"] + ' ' + edf.iloc[i]["date"]+' '
+                    s[:] = edf.iloc[i]["title"] + ' ' + \
+                        edf.iloc[i]["date"] + ' '
                 except IndexError:
                     s[:] = "UNSPECIFIED"
                 df["election_{}".format(i)] = s + \
-                                              df["election_{}_vote_method"
-                                                  .format(i + 1)].apply(str) + ' ' + \
-                                              df["election_{}_party"
-                                                  .format(i + 1)]
+                    df["election_{}_vote_method".format(i + 1)].apply(
+                        str) + ' ' + df["election_{}_party".format(i + 1)]
                 df.loc[df["election_{}_vote_method".format(i + 1)].isna(),
                        "election_{}".format(i)] = pd.np.nan
                 df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
                 df = df.drop("election_{}_party".format(i + 1), axis=1)
 
-                df["district_{}".format(i+1)] = df["district_{}".format(i+1)]\
-                    .map(zdf.drop_duplicates('code').reset_index()
-                         .set_index('code')['title'])
-                df["district_{}".format(i+1)] += \
-                    ', Type: ' + df["district_{}".format(i+1)]\
+                df["district_{}".format(i + 1)] = df["district_{}".format(
+                    i + 1)].map(zdf.drop_duplicates('code').reset_index()
+                                .set_index('code')['title'])
+                df["district_{}".format(i + 1)] += \
+                    ', Type: ' + df["district_{}".format(i + 1)]\
                     .map(zdf.drop_duplicates('title').reset_index()
                          .set_index('title')['number'])\
                     .map(tdf.set_index('number')['title'])
 
-            df["all_history"] = df[["election_{}".format(i) for i in range(elections)]]\
-                .values.tolist()
+            df["all_history"] = df[["election_{}".format(i)
+                                   for i in range(elections)]].values.tolist()
             df["all_history"] = df["all_history"].map(
                 lambda L: list(filter(pd.notna, L)))
-            df["districts"] = df[["district_{}".format(i+1) for i in range(elections)]]\
-                .values.tolist()
+            df["districts"] = df[["district_{}".format(i + 1)
+                                 for i in range(elections)]].values.tolist()
             df["districts"] = df["districts"].map(
                 lambda L: list(filter(pd.notna, L)))
 
             for i in range(elections):
                 df = df.drop("election_{}".format(i), axis=1)
-                df = df.drop("district_{}".format(i+1), axis=1)
+                df = df.drop("district_{}".format(i + 1), axis=1)
 
             if main_df is None:
                 main_df = df
@@ -1191,7 +1277,8 @@ class Preprocessor(Loader):
                                  names=config['hist_columns'],
                                  index_col=False,
                                  low_memory=False)
-            new_df = self.config.coerce_numeric(new_df, col_list='hist_columns_type')
+            new_df = self.config.coerce_numeric(
+                new_df, col_list='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
@@ -1256,6 +1343,7 @@ class Preprocessor(Loader):
             'pennsylvania': self.preprocess_pennsylvania,
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
+            'north_carolina': self.preprocess_north_carolina
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
