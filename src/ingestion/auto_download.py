@@ -70,30 +70,3 @@ def nc_date_grab():
 
 	file_date_vf = parser.parse(file_date_vf).isoformat()
 	return(file_date_vf)
-	
-
-					
-
-	
-		
-	"""
-	from lxml import etree
-	root = etree.fromstring(data)
-	print(etree.tostring(root, pretty_print = True))
-	"""
-	"""	
-	for child in root:
-		for i in child:
-			print(i.attrib)		
-	"""	
-			#e = xml.etree.ElementTree.parse(data)
-	#root = e.getroot()
-	#print(e)
-
-	
-
-
-
-
-
-
