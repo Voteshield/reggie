@@ -72,12 +72,17 @@ class Loader(object):
             self.download_date = parser.parse(force_date).isoformat()
         else:
             self.download_date = datetime.now().isoformat()
-
         if force_file is not None:
             working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
             logging.info("copying {} to {}".format(force_file, working_file))
             shutil.copy2(force_file, working_file)
+            print("file size of force file")
+            print(os.path.getsize(force_file))
+            print("working file")
+            print(os.path.getsize(working_file))
             self.main_file = working_file
+            print(self.main_file)
+            print(os.path.getsize(self.main_file))
         else:
             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
@@ -102,6 +107,7 @@ class Loader(object):
             elif os.path.isdir(fn):
                 shutil.rmtree(fn, ignore_errors=True)
         self.temp_files = []
+        logging.info("cleaning done")
 
     def download_src_chunks(self):
         """
