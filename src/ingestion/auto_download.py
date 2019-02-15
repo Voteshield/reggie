@@ -38,10 +38,7 @@ def state_download(state):
 		with zipfile.ZipFile(file_to_zip, 'w') as myzip:
 			for f in zipped_files:
 				myzip.write(f)
-		print(os.path.getsize(file_to_zip))
 		loader = Loader(config_file=config_file, force_date=today, force_file=file_to_zip)
-		loader.view_main_file_size()
-		print("gets here")
 		loader.s3_dump(file_class=RAW_FILE_PREFIX)
 
 def nc_date_grab():
