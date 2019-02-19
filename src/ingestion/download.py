@@ -1259,6 +1259,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files()
         config = Config("new_jersey")
         voter_files = [n for n in new_files if 'AlphaVoter' in n["name"]]
+
         hist_files = [n for n in new_files if 'History' in n["name"]]
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
