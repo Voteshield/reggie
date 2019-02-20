@@ -76,7 +76,14 @@ class FileItem(object):
         self.name = name
 
     def __str__(self):
-        return "FileItem: name={}, obj={}".format(self.name, self.obj) 
+        if isinstance(self.obj, StringIO):
+            s = self.obj.len
+        elif isinstance(self.obj, BytesIO):
+            s = len(self.obj.getvalue())
+        else:
+            s = "unknown"
+        return "FileItem: name={}, obj={}, size={}"\
+        .format(self.name, self.obj, s)
 
 
 class Loader(object):
@@ -267,7 +274,7 @@ class Loader(object):
                      name in file_names]
         return file_objs
 
-    def infer_compression(self, file_name):
+    def infer_compression(self, file_name): 
         """
         infer file type and map to compression type
         :param file_name: file in question
@@ -330,7 +337,12 @@ class Loader(object):
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        k = generate_s3_key(file_class, self.state, self.source,
+        if "native_file_extension" in self.config:
+            k = generate_s3_key(file_class, self.state, 
+                            self.source,self.download_date, 
+                            self.config["native_file_extension"])
+        else:
+            k = generate_s3_key(file_class, self.state, self.source,
                             self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 

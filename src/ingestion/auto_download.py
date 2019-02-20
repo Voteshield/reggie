@@ -4,7 +4,7 @@ import urllib2
 import datetime
 import zipfile
 import boto3
-from ingestion.download import Loader
+from ingestion.download import Loader, FileItem
 from constants import RAW_FILE_PREFIX
 import xml.etree.ElementTree
 import logging
@@ -35,8 +35,10 @@ def state_download(state):
 		with zipfile.ZipFile(file_to_zip, 'w') as myzip:
 			for f in zipped_files:
 				myzip.write(f)
-		loader = Loader(config_file=config_file, force_date=today, force_file=file_to_zip, clean_up_tmp_files = False)
-		loader.s3_dump(file_class=RAW_FILE_PREFIX)
+		file_to_zip = FileItem("NC file auto download", filename=file_to_zip)
+		loader = Loader(config_file=config_file, force_date=today, 
+                        clean_up_tmp_files=False)
+		loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
 def nc_date_grab():
 	nc_file = urllib2.urlopen('https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
