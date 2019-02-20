@@ -783,7 +783,8 @@ class Preprocessor(Loader):
         main_df["all_voting_methods"] = df_to_postgres_array_string(
             main_df, voting_method_cols)
         main_df[self.config["birthday_identifier"]] = pd.to_datetime(
-            main_df[self.config["birthday_identifier"]],
+            main_df[self.config["birthday_identifier"]].fillna(
+                -1).astype(int).astype(str),
             format=self.config["date_format"],
             errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
