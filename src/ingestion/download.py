@@ -28,7 +28,8 @@ from StringIO import StringIO
 
 
 def ohio_get_last_updated():
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
+    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
+                        verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
@@ -121,7 +122,6 @@ class Loader(object):
 
     def clean_up(self):
         logging.info("cleaning done")
-
 
     def download_src_chunks(self):
         """
