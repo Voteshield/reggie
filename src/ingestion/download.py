@@ -845,17 +845,10 @@ class Preprocessor(Loader):
                 vote_hist_file = i
             elif "ncvoter" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
-        print(voter_file)
-        print(vote_hist_file)
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
                                quotechar='"')
         vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
                                 quotechar='"')
-        print(voter_df.head())
-        print(vote_hist.head())
-        print("columns")
-        print(voter_df.columns)
-        print(self.config['ordered_columns'])
 
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
