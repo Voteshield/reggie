@@ -9,9 +9,7 @@ from constants import RAW_FILE_PREFIX
 import xml.etree.ElementTree
 import logging
 from dateutil import parser
-
-
-
+import os
 
 
 
@@ -37,11 +35,8 @@ def state_download(state):
 		with zipfile.ZipFile(file_to_zip, 'w') as myzip:
 			for f in zipped_files:
 				myzip.write(f)
-		with Loader(config_file=config_file, force_date=today,
-                 force_file=file_to_zip) as loader:
-			loader.s3_dump(file_class=RAW_FILE_PREFIX)
-			#config files not required by loader, fix this
-
+		loader = Loader(config_file=config_file, force_date=today, force_file=file_to_zip, clean_up_tmp_files = False)
+		loader.s3_dump(file_class=RAW_FILE_PREFIX)
 
 def nc_date_grab():
 	nc_file = urllib2.urlopen('https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
@@ -70,30 +65,3 @@ def nc_date_grab():
 
 	file_date_vf = parser.parse(file_date_vf).isoformat()
 	return(file_date_vf)
-	
-
-					
-
-	
-		
-	"""
-	from lxml import etree
-	root = etree.fromstring(data)
-	print(etree.tostring(root, pretty_print = True))
-	"""
-	"""	
-	for child in root:
-		for i in child:
-			print(i.attrib)		
-	"""	
-			#e = xml.etree.ElementTree.parse(data)
-	#root = e.getroot()
-	#print(e)
-
-	
-
-
-
-
-
-

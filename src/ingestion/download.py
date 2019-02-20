@@ -105,7 +105,8 @@ class Loader(object):
             working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
             logging.info("copying {} to {}".format(force_file, working_file))
             shutil.copy2(force_file, working_file)
-            self.main_file = working_file
+            with open(working_file) as f:
+                self.main_file = StringIO(f.read())
         else:
             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
@@ -333,6 +334,7 @@ class Loader(object):
         meta["last_updated"] = self.download_date
         s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
             .put(Body=self.main_file, ServerSideEncryption='AES256')
+        
         s3.Object(S3_BUCKET,
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
