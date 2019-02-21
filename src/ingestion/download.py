@@ -848,7 +848,8 @@ class Preprocessor(Loader):
         main_df["all_voting_methods"] = df_to_postgres_array_string(
             main_df, voting_method_cols)
         main_df[self.config["birthday_identifier"]] = pd.to_datetime(
-            main_df[self.config["birthday_identifier"]],
+            main_df[self.config["birthday_identifier"]].fillna(
+                -1).astype(int).astype(str),
             format=self.config["date_format"],
             errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
@@ -937,9 +938,9 @@ class Preprocessor(Loader):
 
         self.config = Config("north_carolina")
         for i in new_files:
-            if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
+            if "ncvhis" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
                 vote_hist_file = i
-            elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
+            elif "ncvoter" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
                                quotechar='"')
@@ -991,9 +992,10 @@ class Preprocessor(Loader):
         return chksum
 
     def preprocess_missouri(self):
-        new_file = self.unpack_files(compression="unzip")
-        new_file = new_file[0]
-        main_df = pd.read_csv(new_file["obj"], sep='\t')
+        new_files = self.unpack_files(compression="unzip")
+        main_file = [x for x in new_files if
+                     ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
+        main_df = pd.read_csv(main_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
         main_df[self.config["voter_status"]] = np.nan
@@ -1387,7 +1389,6 @@ class Preprocessor(Loader):
             "array_decoding": elections
         }
         self.main_file = StringIO(vdf.to_csv(encoding='utf-8', index=False))
-        self.temp_files.append(self.main_file)
         chksum = self.compute_checksum()
 
         return chksum
