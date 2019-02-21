@@ -872,9 +872,9 @@ class Preprocessor(Loader):
 
         self.config = Config("north_carolina")
         for i in new_files:
-            if "ncvhis" in i['name'] and "MACOSX" not in i['name']:
+            if "ncvhis" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
                 vote_hist_file = i
-            elif "ncvoter" in i['name'] and "MACOSX" not in i['name']:
+            elif "ncvoter" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
                                quotechar='"')
