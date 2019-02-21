@@ -183,7 +183,7 @@ class Loader(object):
 
         self.compress()
         self.download_date = datetime.now().isoformat()
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO("concatenated_chunks", filename=main_file))
 
     def compress(self):
@@ -548,7 +548,7 @@ class Preprocessor(Loader):
             "election_type": json.dumps(type_dict)
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv()))
 
     def preprocess_nevada(self):
@@ -589,7 +589,7 @@ class Preprocessor(Loader):
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.conf
         ig.coerce_numeric(df_voters)
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
     def preprocess_florida(self):
@@ -676,7 +676,7 @@ class Preprocessor(Loader):
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(
-            file_item=self.main_file, compression='unzip')
+            file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
         first_file = [f for f in new_files if "CD1" in f["name"] and
                       "Part1" in f["name"]][0]
@@ -787,12 +787,12 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(
-            file_item=self.main_file, compression="unzip")
+            file_obj=self.main_file, compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f["name"]]
 
         self.concat_file_segments(new_files)
@@ -830,14 +830,14 @@ class Preprocessor(Loader):
             "array_dates": json.dumps(elections_key)
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
                                                            index=False)))
 
     def preprocess_new_york(self):
         config = Config("new_york")
         new_files = self.unpack_files(
-            file_item=self.main_file, compression="infer")
+            file_obj=self.main_file, compression="infer")
         self.main_file = filter(
             lambda x: x["name"][-4:] != ".pdf", new_files)[0]
         gc.collect()
@@ -891,7 +891,7 @@ class Preprocessor(Loader):
         del main_df
         gc.collect()
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(index=False,
                                                        encoding='utf-8')))
 
@@ -955,7 +955,7 @@ class Preprocessor(Loader):
 
     def preprocess_missouri(self):
         new_files = self.unpack_files(
-            file_item=self.main_file, compression="unzip")
+            file_obj=self.main_file, compression="unzip")
         main_file = [x for x in new_files if
                      ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
         main_df = pd.read_csv(main_file["obj"], sep='\t')
@@ -1008,13 +1008,13 @@ class Preprocessor(Loader):
             "array_decoding": sorted_codes,
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
                                                            index=False)))
 
     def preprocess_michigan(self):
         config = Config("michigan")
-        new_files = self.unpack_files(file_item=self.main_file)
+        new_files = self.unpack_files(file_obj=self.main_file)
         voter_file = ([n for n in new_files if 'entire_state_v' in n["name"]
                        or 'EntireStateVoters' in n["name"]] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n["name"]
@@ -1179,12 +1179,12 @@ class Preprocessor(Loader):
             "array_encoding": elec_dict
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8', index=False)))
 
     def preprocess_pennsylvania(self):
         config = Config('pennsylvania')
-        new_files = self.unpack_files()
+        new_files = self.unpack_files(file_obj=self.main_file)
         voter_files = [f for f in new_files if "FVE" in f["name"]]
         election_maps = [f for f in new_files if "Election Map" in f["name"]]
         zone_codes = [f for f in new_files if "Codes" in f["name"]]
@@ -1277,12 +1277,12 @@ class Preprocessor(Loader):
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
                                                            index=False)))
 
     def preprocess_new_jersey(self):
-        new_files = self.unpack_files()
+        new_files = self.unpack_files(file_obj=self.main_file)
         config = Config("new_jersey")
         voter_files = [n for n in new_files if 'AlphaVoter' in n["name"]]
         hist_files = [n for n in new_files if 'History' in n["name"]]
@@ -1350,7 +1350,7 @@ class Preprocessor(Loader):
             "array_decoding": elections
         }
 
-        return FileItem(name="{}.processed".format(config["state"]),
+        return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',index=False)))
 
     def execute(self):
