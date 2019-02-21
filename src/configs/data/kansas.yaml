@@ -15,6 +15,7 @@ no_party_affiliation: Unaffiliated
 date_format: '%d/&m/&Y'
 numeric_county: false
 party_identifier: desc_party
+gender_identifier: cde_gender
 has_headers: YES
 name_fields:
   - cde_name_title
