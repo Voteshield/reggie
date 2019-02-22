@@ -28,8 +28,9 @@ from StringIO import StringIO
 
 
 def ohio_get_last_updated():
-    html = requests.get(
-        "https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
+
+    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
+                        verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
@@ -382,20 +383,21 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(s3_file_objs):
-                # is dir
-            for f in s3_file_objs:
-                if f["name"][-1] != "/":
-                    try:
-                        decompressed_result = self.decompress(
-                            f, compression_type=compression)
-                        if decompressed_result is not None:
-                            expand_recurse(decompressed_result)
-                    except (BadZipfile, FormatError) as e:
-                        all_files.append(f)
-
-        expand_recurse([{"name": file_obj.name,
-                         "obj": file_obj.obj}])
-
+                for f in s3_file_obj:
+                    if f["name"][-1] != "/":
+                        try:
+                            decompressed_result = self.decompress(
+                                f, compression_type=compression)
+                            if decompressed_result is not None:
+                                expand_recurse(decompressed_result)
+                        except (BadZipfile, FormatError) as e:
+                            all_files.append(f)
+        if type(self.main_file) == str:
+            expand_recurse([{"name": self.main_file,
+                             "obj": open(self.main_file)}])
+        else:
+            expand_recurse([{"name": self.main_file.name,
+                             "obj": self.main_file.obj}])
         if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n.keys()[0] not in
                          self.config["format"]["ignore_files"] and
@@ -957,8 +959,13 @@ class Preprocessor(Loader):
     def preprocess_missouri(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
-        main_file = [x for x in new_files if
-                     ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
+        preferred_files = [x for x in new_files if ("VotersList" in x["name"])
+                          and (".txt" in x["name"])]
+        if len(preferred_files) > 0:
+            main_file = preferred_files[0]
+        else:
+            main_file = new_files[0]
+
         main_df = pd.read_csv(main_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
@@ -1286,6 +1293,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(file_obj=self.main_file)
         config = Config("new_jersey")
         voter_files = [n for n in new_files if 'AlphaVoter' in n["name"]]
+
         hist_files = [n for n in new_files if 'History' in n["name"]]
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
