@@ -28,7 +28,8 @@ from StringIO import StringIO
 
 
 def ohio_get_last_updated():
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD", verify=False).text
+    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
+                        verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
@@ -85,7 +86,8 @@ class Loader(object):
         self.clean_up_tmp_files = clean_up_tmp_files
         config = Config(file_name=config_file)
         self.config = config
-        self.chunk_urls = config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
+        self.chunk_urls = config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in \
+                                                       config else []
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
@@ -120,7 +122,6 @@ class Loader(object):
 
     def clean_up(self):
         logging.info("cleaning done")
-
 
     def download_src_chunks(self):
         """
@@ -337,6 +338,7 @@ class Loader(object):
                   self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
             .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
 
+
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):
 
@@ -368,9 +370,13 @@ class Preprocessor(Loader):
                                 expand_recurse(decompressed_result)
                         except (BadZipfile, FormatError) as e:
                             all_files.append(f)
-
-        expand_recurse([{"name": self.main_file.name,
-                         "obj": self.main_file.obj}])
+        print(self.main_file)
+        if type(self.main_file) == str:
+            expand_recurse([{"name": self.main_file,
+                             "obj": open(self.main_file)}])
+        else:
+            expand_recurse([{"name": self.main_file.name,
+                             "obj": self.main_file.obj}])
 
         if "format" in self.config and "ignore_files" in self.config["format"]:
             all_files = [n for n in all_files if n.keys()[0] not in
@@ -928,8 +934,13 @@ class Preprocessor(Loader):
 
     def preprocess_missouri(self):
         new_files = self.unpack_files(compression="unzip")
-        main_file = [x for x in new_files if
-                     ("VotersList" in x["name"]) and (".txt" in x["name"])][0]
+        preferred_files = [x for x in new_files if ("VotersList" in x["name"])
+                          and (".txt" in x["name"])]
+        if len(preferred_files) > 0:
+            main_file = preferred_files[0]
+        else:
+            main_file = new_files[0]
+
         main_df = pd.read_csv(main_file["obj"], sep='\t')
 
         # add empty columns for voter_status and party_identifier
@@ -1259,6 +1270,7 @@ class Preprocessor(Loader):
         new_files = self.unpack_files()
         config = Config("new_jersey")
         voter_files = [n for n in new_files if 'AlphaVoter' in n["name"]]
+
         hist_files = [n for n in new_files if 'History' in n["name"]]
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
