@@ -11,12 +11,7 @@ import logging
 from dateutil import parser
 
 
-
-
-
-
 def state_download(state):
-
 	config_file = Config.config_file_from_state(state=state)
 	configs = Config(file_name=config_file)
 	today = nc_date_grab()
@@ -30,15 +25,15 @@ def state_download(state):
 			response = requests.get(url, stream=True)
 			handle = open(target_path, "wb")
 			for chunk in response.iter_content(chunk_size=512):
-			    if chunk:  # filter out keep-alive new chunks
-			        handle.write(chunk)
+				if chunk:  # filter out keep-alive new chunks
+					handle.write(chunk)
 			handle.close()
 		file_to_zip = today + ".zip"
 		with zipfile.ZipFile(file_to_zip, 'w') as myzip:
 			for f in zipped_files:
 				myzip.write(f)
 		with Loader(config_file=config_file, force_date=today,
-                 force_file=file_to_zip) as loader:
+					force_file=file_to_zip) as loader:
 			loader.s3_dump(file_class=RAW_FILE_PREFIX)
 			#config files not required by loader, fix this
 
@@ -59,8 +54,7 @@ def nc_date_grab():
 						z += 1
 						continue
 					if z == 1:
-						return(i.text)
-						break
+						return i.text
 
 	file_date_vf = nc_parse_xml(file_name ="data/ncvoter_Statewide.zip")
 	file_date_his = nc_parse_xml(file_name = "data/ncvhis_Statewide.zip")
@@ -69,13 +63,13 @@ def nc_date_grab():
 		logging.info("Different dates between files, reverting to voter file date")
 
 	file_date_vf = parser.parse(file_date_vf).isoformat()
-	return(file_date_vf)
+	return file_date_vf
 	
 
 					
 
 	
-		
+
 	"""
 	from lxml import etree
 	root = etree.fromstring(data)
