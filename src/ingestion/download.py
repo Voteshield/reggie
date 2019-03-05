@@ -383,6 +383,9 @@ class Preprocessor(Loader):
                          self.config["format"]["ignore_files"] and
                          os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
+
+        all_files = [n for n in all_files if ".png" not in n["name"]]
+
         for n in all_files:
             if type(n["obj"]) != str:
                 n["obj"].seek(0)
@@ -794,6 +797,8 @@ class Preprocessor(Loader):
             format=self.config["date_format"],
             errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
+
+        main_df.columns = main_df.columns.str.strip()
 
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
