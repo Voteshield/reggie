@@ -119,10 +119,12 @@ class Config(object):
         text_fields = [c for c, v in self.data["columns"].items()
                        if v == "text" or "char" in v]
         for field in text_fields:
-            if (field in df) and (field != self.data["voter_status"]) \
-               and (field != self.data["party_identifier"]):
-                df[field] = df[field].astype(str).str.strip().str.lower()\
-                    .str.decode('utf-8', errors='ignore').str.encode('utf-8')
+            if field in df:
+                df[field] = df[field].astype(str).str.decode(
+                    'utf-8', errors='ignore').str.encode('utf-8')
+                if (field != self.data["voter_status"]) and \
+                   (field != self.data["party_identifier"]):
+                    df[field] = df[field].astype(str).str.strip().str.lower()
         return df
 
     def admissible_change_types(self):

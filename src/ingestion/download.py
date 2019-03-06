@@ -761,6 +761,11 @@ class Preprocessor(Loader):
         df_voters.drop(columns=history_cols, inplace=True)
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
+
+        for c in df_voters.columns:
+            df_voters[c] = df_voters[c].astype(str).str.decode(
+                'utf-8', errors='ignore').str.encode('utf-8')
+
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
             "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
@@ -769,7 +774,8 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
-        self.main_file = StringIO(df_voters.to_csv(index=False))
+        self.main_file = StringIO(df_voters.to_csv(encoding='utf-8',
+                                                   index=False))
         chksum = self.compute_checksum()
         return chksum
 
@@ -798,9 +804,9 @@ class Preprocessor(Loader):
             errors='coerce')
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
 
-        main_df.columns = main_df.columns.str.strip()
-
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
+
+        main_df.columns = main_df.columns.str.strip(' ')
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
             "text_mail_zip5", "text_mail_zip4", "text_phone_last_four",
             "text_phone_exchange", "text_phone_area_code",
