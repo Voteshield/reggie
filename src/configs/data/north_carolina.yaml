@@ -1,6 +1,7 @@
 file_type: csv
 state: north_carolina
 source: boe_download
+native_file_extension: zip
 file_class: voter_file
 voter_id: ncid
 county_identifier: county_id
