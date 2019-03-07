@@ -403,6 +403,9 @@ class Preprocessor(Loader):
                          self.config["format"]["ignore_files"] and
                          os.path.basename(n.keys()[0]) not in
                          self.config["format"]["ignore_files"]]
+
+        all_files = [n for n in all_files if ".png" not in n["name"]]
+
         for n in all_files:
             if type(n["obj"]) != str:
                 n["obj"].seek(0)
@@ -781,6 +784,11 @@ class Preprocessor(Loader):
         df_voters.drop(columns=history_cols, inplace=True)
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
+
+        for c in df_voters.columns:
+            df_voters[c] = df_voters[c].astype(str).str.decode(
+                'utf-8', errors='ignore').str.encode('utf-8')
+
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
             "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
@@ -790,7 +798,8 @@ class Preprocessor(Loader):
         pd.set_option('max_row', 6)
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv(index=False)))
+                        io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
+                                                         index=False)))
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(
@@ -819,6 +828,8 @@ class Preprocessor(Loader):
         elections_key = [c.split("_")[-1] for c in voting_action_cols]
 
         main_df.drop(all_voting_history_cols, axis=1, inplace=True)
+
+        main_df.columns = main_df.columns.str.strip(' ')
         main_df = self.config.coerce_numeric(main_df, extra_cols=[
             "text_mail_zip5", "text_mail_zip4", "text_phone_last_four",
             "text_phone_exchange", "text_phone_area_code",
@@ -834,8 +845,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
-                                                           index=False)))
+                        io_obj=StringIO(main_df.to_csv(encoding='utf-8',
+                                                       index=False)))
 
     def preprocess_new_york(self):
         config = Config("new_york")
@@ -1017,7 +1028,7 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
+                        io_obj=StringIO(main_df.to_csv(encoding='utf-8',
                                                            index=False)))
 
     def preprocess_michigan(self):
@@ -1286,7 +1297,7 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(main_df.to_csv(encoding='utf-)8',
+                        io_obj=StringIO(main_df.to_csv(encoding='utf-8',
                                                            index=False)))
 
     def preprocess_new_jersey(self):
