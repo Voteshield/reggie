@@ -1,0 +1,155 @@
+file_type: csv
+state: minnesota
+source: boe_download
+file_class: voter_file
+voter_id: VoterId
+county_identifier: CountyCode
+birthday_identifier: DOBYear
+date_format: '%Y'
+numeric_county: true
+name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
+  - NameSuffix
+address_fields:
+  - HouseNumber
+  - StreetName
+  - UnitType
+  - UnitNumber
+  - Address2
+  - City
+  - State
+  - ZipCode
+primary_key:
+  - pre_date
+  - post_date
+  - ncid
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+  VoterId: int
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+
+additional_snapshot_columns:
+  all_history: text[]
+  vote_type: text[]
+generated_columns:
+  all_history: text[]
+  vote_type: text[]
+ordered_generated_columns:
+  - all_history
+  - vote_type
+format:
+  separate_hist: true
+  hist_election_rows: true
+  columnar_elections: false
+columns:
+  VoterId: int
+  CountyCode: int
+  FirstName: text
+  MiddleName: text
+  LastName: text
+  NameSuffix: text
+  HouseNumber: text
+  StreetName: text
+  UnitType: text
+  UnitNumber: text
+  Address2: text
+  City: text
+  State: text
+  ZipCode: text
+  MailAddress: text
+  MailCity: text
+  MailState: text
+  MailZipCode: text
+  PhoneNumber: text
+  RegistrationDate: text
+  DOBYear: text
+  StateMcdCode: text
+  McdName: text
+  PrecinctCode: text
+  PrecinctName: text
+  WardCode: text
+  School: text
+  SchSub: text
+  Judicial: text
+  Legislative: text
+  StateSen: text
+  Congressional: text
+  Commissioner: text
+  Park: text
+  SoilWater: text
+  Hospital: text
+  LegacyId: int
+
+hist_columns:
+  - VoterId
+  - ElectionDate
+  - ElectionDescription
+  - VotingMethod
+
+ordered_columns:
+  - VoterId
+  - CountyCode
+  - FirstName
+  - MiddleName
+  - LastName
+  - NameSuffix
+  - HouseNumber
+  - StreetName
+  - UnitType
+  - UnitNumber
+  - Address2
+  - City
+  - State
+  - ZipCode
+  - MailAddress
+  - MailCity
+  - MailState
+  - MailZipCode
+  - PhoneNumber
+  - RegistrationDate
+  - DOBYear
+  - StateMcdCode
+  - McdName
+  - PrecinctCode
+  - PrecinctName
+  - WardCode
+  - School
+  - SchSub
+  - Judicial
+  - Legislative
+  - StateSen
+  - Congressional
+  - Commissioner
+  - Park
+  - SoilWater
+  - Hospital
+  - LegacyId
+  
+has_headers: YES
+county_names:
+  ALAMANCE: 1,

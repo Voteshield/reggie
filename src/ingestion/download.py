@@ -437,6 +437,52 @@ class Preprocessor(Loader):
 
         self.main_file.seek(0)
 
+    def preprocess_minnesota(self):
+        config = Config("minnesota")
+        logging.info("Minnesota: loading voter file")
+        new_files = self.unpack_files()
+        voter_reg_files = []
+        voter_history_files = []
+        for i in new_files:
+            if "election" in i['name'].lower():
+                voter_reg_files.append(i)
+            if "voter" in i['name'].lower():
+                voter_history_files.append(i)
+        concat_voter_reg = concat_and_delete(voter_reg_files)
+        concat_voter_hist = concat_and_delete(voter_history_files)
+        voter_reg_df = pd.read_csv(concat_voter_reg)
+        voter_hist_df = pd.read_csv(concat_voter_hist)
+        voter_hist_df.columns = self.config["hist_columns"]
+        voter_reg_df.columns = self.config["ordered_columns"]
+
+
+        voter_hist_df["election_name"] = voter_hist_df["ElectionDate"]+\
+            "_" + voter_hist_df["VotingMethod"]
+        valid_elections, counts = np.unique(voter_hist_df["election_name"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][:-4],
+                                                             "%m/%d/%Y"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+
+        df_hist["array_position"] = df_hist["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+
+        logging.info("FLORIDA: history apply")
+        voter_groups = df_hist.groupby("VoterID")
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["vote_type"].apply(list)
+
+
+
+
     def preprocess_georgia(self):
         config = Config("georgia")
         logging.info("GEORGIA: loading voter and voter history file")
