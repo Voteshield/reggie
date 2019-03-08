@@ -20,6 +20,7 @@ from subprocess import Popen, PIPE
 
 
 class TestFileBuilder(Preprocessor):
+
     def __init__(self, s3_key=None, local_file=None, state=None):
         if s3_key is not None:
             state = state_from_str(s3_key)
@@ -38,9 +39,9 @@ class TestFileBuilder(Preprocessor):
 
         config_file = Config.config_file_from_state(state)
         super(TestFileBuilder, self).__init__(
-              raw_s3_file=s3_key,
-              config_file=config_file,
-              force_file=local_file)
+            raw_s3_file=s3_key,
+            config_file=config_file,
+            force_file=local_file)
         if state is None:
             self.state = state_from_str(s3_key)
         else:
@@ -106,8 +107,9 @@ class TestFileBuilder(Preprocessor):
             elif "ncvoter" in i:
                 voter_file = i
         logging.info("reading in files")
-        voter_df = pd.read_csv(voter_file, sep = "\t",quotechar = '"', engine = 'c')
-        voter_hist = pd.read_csv(vote_hist_file, sep = "\t",quotechar = '"', engine = 'c')
+        voter_df = pd.read_csv(voter_file, sep="\t", quotechar='"', engine='c')
+        voter_hist = pd.read_csv(
+            vote_hist_file, sep="\t", quotechar='"', engine='c')
         logging.info("setting columns")
         voter_df.columns = self.config["ordered_columns"]
         voter_hist.columns = self.config["hist_columns"]
@@ -115,28 +117,30 @@ class TestFileBuilder(Preprocessor):
         logging.info("sampling")
         voter_df = voter_df[voter_df['county_desc'] == "CHATHAM"]
         logging.info("filtering")
-        voter_hist = voter_hist[voter_hist['voter_reg_num'].isin(voter_df['voter_reg_num'])]
-        voter_hist = voter_hist.sample(n = 100)
-        voter_df.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
-        voter_hist.replace({r'[^\x00-\x7F]+':''}, regex=True, inplace=True)
+        voter_hist = voter_hist[voter_hist[
+            'voter_reg_num'].isin(voter_df['voter_reg_num'])]
+        voter_hist = voter_hist.sample(n=100)
+        voter_df.replace({r'[^\x00-\x7F]+': ''}, regex=True, inplace=True)
+        voter_hist.replace({r'[^\x00-\x7F]+': ''}, regex=True, inplace=True)
         logging.info("zipping")
-        voter_df.to_csv("ncvoter.txt", sep = "\t", quotechar = '"', header=True, index=False, encoding='utf8')
-        voter_hist.to_csv("ncvhis.txt", sep = "\t", quotechar = '"', header=True, index = False, encoding='utf8')
-
+        voter_df.to_csv("ncvoter.txt", sep="\t", quotechar='"',
+                        header=True, index=False, encoding='utf8')
+        voter_hist.to_csv("ncvhis.txt", sep="\t", quotechar='"',
+                          header=True, index=False, encoding='utf8')
 
         new_files = ["ncvoter.txt", "ncvhis.txt"]
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             for f in new_files:
                 zf.write(f, os.path.basename(f))
 
-
     def __build_georgia(self):
-        new_files = self.unpack_files(compression = 'unzip')
-        #here check if there are voter history files, for the moment assume we have vh files
+        new_files = self.unpack_files(compression='unzip')
+        # here check if there are voter history files, for the moment assume we
+        # have vh files
         ga_file = new_files[0]
-        df_voters = pd.read_csv(new_files[0], sep = "|", quotechar='"',
-                                quoting=3, nrows = 10000)
-        df_voters.to_csv("Georgia.csv", sep = "|", index=False)
+        df_voters = pd.read_csv(new_files[0], sep="|", quotechar='"',
+                                quoting=3, nrows=10000)
+        df_voters.to_csv("Georgia.csv", sep="|", index=False)
         with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
             zf.write("Georgia.csv", os.path.basename(ga_file))
 
@@ -184,7 +188,7 @@ class TestFileBuilder(Preprocessor):
     def __build_iowa(self):
         new_files = self.unpack_files()
 
-        #read in dataframe here, haven't figured this out yet
+        # read in dataframe here, haven't figured this out yet
 
         print(new_files)
         smaller_files = []
@@ -201,13 +205,14 @@ class TestFileBuilder(Preprocessor):
         for f in new_files:
             if ".txt" in f['name']:
                 logging.info("reading kansas file")
-                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
-                random_sample = df.sample(n = 200)
-                df = df[df['db_logid']=="Clay"]
+                df = pd.read_csv(f['obj'], sep="\t",
+                                 index_col=False, engine='python')
+                random_sample = df.sample(n=200)
+                df = df[df['db_logid'] == "Clay"]
                 df = pd.concat([df, random_sample], ignore_index=True)
                 ks_file = f['name']
         df.set_index('db_logid', inplace=True)
-        df.to_csv(ks_file, header=True, sep = "\t", compression='zip')
+        df.to_csv(ks_file, header=True, sep="\t", compression='zip')
         self.main_file = ks_file
 
     def __build_ohio(self):
@@ -250,17 +255,23 @@ class TestFileBuilder(Preprocessor):
         logging.info("Detected history file: " + hist_file)
 
         vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
-                  [91, 92], [92, 99], [99, 103], [103, 105], [105, 135], [135, 141],
-                  [141, 143], [143, 156], [156, 191], [191, 193], [193, 198], [198, 248],
-                  [248, 298], [298, 348], [348, 398], [398, 448], [448, 461], [461, 463],
-                  [463, 468], [468, 474], [474, 479], [479, 484], [484, 489], [489, 494],
-                  [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519], [519,520]]
+                     [91, 92], [92, 99], [99, 103], [
+                         103, 105], [105, 135], [135, 141],
+                     [141, 143], [143, 156], [156, 191], [
+                         191, 193], [193, 198], [198, 248],
+                     [248, 298], [298, 348], [348, 398], [
+            398, 448], [448, 461], [461, 463],
+            [463, 468], [468, 474], [474, 479], [
+                479, 484], [484, 489], [489, 494],
+            [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519], [519, 520]]
         hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs, names=config["ordered_columns"], na_filter=False)
+        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs, names=config[
+                          "ordered_columns"], na_filter=False)
         vdf = vdf.next()
         two_small_counties = self.get_smallest_counties(vdf, count=2)
         filtered_data = self.filter_counties(vdf, counties=two_small_counties)
-        hdf = pd.read_fwf(hist_file, chunksize=1000000, colspecs=hcolspecs, names=config["hist_columns"], na_filter=False)
+        hdf = pd.read_fwf(hist_file, chunksize=1000000, colspecs=hcolspecs, names=config[
+                          "hist_columns"], na_filter=False)
         hdf = hdf.next()
         hdf = self.sample(hdf, frac=0.001)
         with open(new_files[0], 'w+') as vfile:
@@ -337,6 +348,7 @@ class TestFileBuilder(Preprocessor):
 
 
 class ProcessedTestFileBuilder(object):
+
     def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
         self.df, self.meta = Snapshot.load_from_s3(
             s3_key, compression=compression)

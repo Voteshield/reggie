@@ -58,6 +58,7 @@ def concat_and_delete(in_list):
 
 
 class S3FileItem(object):
+
     def __init__(self, key, name):
         self.obj = get_object_mem(key)
         self.name = name
@@ -88,7 +89,7 @@ class Loader(object):
         config = Config(file_name=config_file)
         self.config = config
         self.chunk_urls = config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in \
-                                                       config else []
+            config else []
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
@@ -341,6 +342,7 @@ class Loader(object):
 
 
 class Preprocessor(Loader):
+
     def __init__(self, raw_s3_file, config_file, **kwargs):
 
         super(Preprocessor, self).__init__(
@@ -362,15 +364,15 @@ class Preprocessor(Loader):
 
         def expand_recurse(s3_file_obj):
                 # is dir
-                for f in s3_file_obj:
-                    if f["name"][-1] != "/":
-                        try:
-                            decompressed_result = self.decompress(
-                                f, compression_type=compression)
-                            if decompressed_result is not None:
-                                expand_recurse(decompressed_result)
-                        except (BadZipfile, FormatError) as e:
-                            all_files.append(f)
+            for f in s3_file_obj:
+                if f["name"][-1] != "/":
+                    try:
+                        decompressed_result = self.decompress(
+                            f, compression_type=compression)
+                        if decompressed_result is not None:
+                            expand_recurse(decompressed_result)
+                    except (BadZipfile, FormatError) as e:
+                        all_files.append(f)
         print(self.main_file)
         if type(self.main_file) == str:
             expand_recurse([{"name": self.main_file,
@@ -655,24 +657,32 @@ class Preprocessor(Loader):
         chksum = self.compute_checksum()
         return chksum
 
-
     def preprocess_kansas(self):
         new_files = self.unpack_files()
 
         for f in new_files:
-            if ".txt" in f['name']:
-                logging.info("reading kansas file")
-                df = pd.read_csv(f['obj'], sep="\t", index_col=False, engine='python')
+            if ".txt" in f['name'] and "._" not in f['name']:
+                logging.info("reading kansas file from {}".format(f['name']))
+                df = pd.read_csv(f['obj'], sep="\t",
+                                 index_col=False, engine='c', error_bad_lines=False)
+        print(df.head())
+        print(len(df.columns))
+        print("ordered columns")
+        print(self.config["ordered_columns"])
+        print(len(self.config["ordered_columns"]))
+
         df.columns = self.config["ordered_columns"]
-        df[self.config["voter_status"]] = df[self.config["voter_status"]].str.replace(" ","")
+        df[self.config["voter_status"]] = df[
+            self.config["voter_status"]].str.replace(" ", "")
+
         def ks_hist_date(s):
-            try:   
+            try:
                 elect_year = parser.parse(s[2:6]).year
             except:
-                elect_year=None
+                elect_year = None
                 pass
             if (elect_year < 1850) or (elect_year > dt.today().year + 1):
-                elect_year=None
+                elect_year = None
             return(elect_year)
 
         def add_history(main_df):
@@ -703,19 +713,17 @@ class Preprocessor(Loader):
             main_df.all_history = main_df.all_history.map(insert_code_bin)
             return sorted_codes, sorted_codes_dict
 
-        sorted_codes, sorted_codes_dict = add_history(main_df = df)
+        sorted_codes, sorted_codes_dict = add_history(main_df=df)
 
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
-        print("length of cde reg status")
-        print(len(df.cde_registrant_status[0]))
         self.meta = {
             "message": "kansas_{}".format(datetime.now().isoformat()),
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
         self.main_file = StringIO(df.to_csv(encoding='utf-8',
-                                                 index=False))
+                                            index=False))
         chksum = self.compute_checksum()
         return chksum
 
@@ -1000,7 +1008,7 @@ class Preprocessor(Loader):
     def preprocess_missouri(self):
         new_files = self.unpack_files(compression="unzip")
         preferred_files = [x for x in new_files if ("VotersList" in x["name"])
-                          and (".txt" in x["name"])]
+                           and (".txt" in x["name"])]
         if len(preferred_files) > 0:
             main_file = preferred_files[0]
         else:
@@ -1163,10 +1171,10 @@ class Preprocessor(Loader):
         vdf = self.config.coerce_strings(vdf)
 
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
-                      hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
-                      hdf['county_number'].map(str) + '_' + \
-                      hdf["Jurisdiction"].map(str) + '_' + \
-                      hdf["School_Code"].map(str)
+            hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
+            hdf['county_number'].map(str) + '_' + \
+            hdf["Jurisdiction"].map(str) + '_' + \
+            hdf["School_Code"].map(str)
 
         def get_sparse_history(group):
             sparse = []
@@ -1299,11 +1307,11 @@ class Preprocessor(Loader):
                     .map(tdf.set_index('number')['title'])
 
             df["all_history"] = df[["election_{}".format(i)
-                                   for i in range(elections)]].values.tolist()
+                                    for i in range(elections)]].values.tolist()
             df["all_history"] = df["all_history"].map(
                 lambda L: list(filter(pd.notna, L)))
             df["districts"] = df[["district_{}".format(i + 1)
-                                 for i in range(elections)]].values.tolist()
+                                  for i in range(elections)]].values.tolist()
             df["districts"] = df["districts"].map(
                 lambda L: list(filter(pd.notna, L)))
 
@@ -1359,7 +1367,7 @@ class Preprocessor(Loader):
             hdf = pd.concat([hdf, new_df], axis=0)
 
         hdf['election_name'] = hdf['election_name'] + ' ' + \
-                               hdf['election_date']
+            hdf['election_date']
         hdf = self.config.coerce_dates(hdf, col_list='hist_columns_type')
         hdf.sort_values('election_date', inplace=True)
         hdf = hdf.dropna(subset=['election_name'])
