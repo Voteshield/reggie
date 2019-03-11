@@ -383,7 +383,7 @@ class Preprocessor(Loader):
         all_files = []
 
         def expand_recurse(s3_file_objs):
-                for f in s3_file_obj:
+                for f in s3_file_objs:
                     if f["name"][-1] != "/":
                         try:
                             decompressed_result = self.decompress(
