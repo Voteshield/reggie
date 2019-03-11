@@ -118,7 +118,7 @@ class Loader(object):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
         self.source = config["source"]
-        self.is_compressed = Fals
+        self.is_compressed = False
         self.checksum = None
         self.state = config["state"]
         self.obj_will_download = False
@@ -684,18 +684,14 @@ class Preprocessor(Loader):
                         io_obj=StringIO(df_voters.to_csv()))
 
     def preprocess_kansas(self):
-        new_files = self.unpack_files()
+        new_files = self.unpack_files(
+            file_obj=self.main_file, compression='unzip')
 
         for f in new_files:
-            if ".txt" in f['name'] and "._" not in f['name']:
+            if ".txt" in f['name'] and "._" not in f['name'] and "description" not in f['name'].lower():
                 logging.info("reading kansas file from {}".format(f['name']))
                 df = pd.read_csv(f['obj'], sep="\t",
                                  index_col=False, engine='c', error_bad_lines=False)
-        print(df.head())
-        print(len(df.columns))
-        print("ordered columns")
-        print(self.config["ordered_columns"])
-        print(len(self.config["ordered_columns"]))
 
         df.columns = self.config["ordered_columns"]
         df[self.config["voter_status"]] = df[
@@ -748,10 +744,11 @@ class Preprocessor(Loader):
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-        self.main_file = StringIO(df.to_csv(encoding='utf-8',
-                                            index=False))
-        chksum = self.compute_checksum()
-        return chksum
+        
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df.to_csv(encoding='utf-8',
+                                                       index=False)))
+        
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(
