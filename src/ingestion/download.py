@@ -384,18 +384,17 @@ class Preprocessor(Loader):
     def unpack_files(self, file_obj, compression="unzip"):
         all_files = []
 
-        def expand_recurse(s3_file_obj):
-                # is dir
-            for f in s3_file_obj:
-                if f["name"][-1] != "/":
-                    try:
-                        decompressed_result = self.decompress(
-                            f, compression_type=compression)
-                        if decompressed_result is not None:
-                            expand_recurse(decompressed_result)
-                    except (BadZipfile, FormatError) as e:
-                        all_files.append(f)
-        print(self.main_file)
+
+        def expand_recurse(s3_file_objs):
+                for f in s3_file_objs:
+                    if f["name"][-1] != "/":
+                        try:
+                            decompressed_result = self.decompress(
+                                f, compression_type=compression)
+                            if decompressed_result is not None:
+                                expand_recurse(decompressed_result)
+                        except (BadZipfile, FormatError) as e:
+                            all_files.append(f)
         if type(self.main_file) == str:
             expand_recurse([{"name": self.main_file,
                              "obj": open(self.main_file)}])
