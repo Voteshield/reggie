@@ -146,17 +146,6 @@ class Loader(object):
             self.clean_up()
 
     def clean_up(self):
-        for fn in self.temp_files:
-            if os.path.isfile(fn):
-                try:
-                    os.chmod(fn, 0777)
-                    os.remove(fn)
-                except OSError:
-                    logging.warning("cannot remove {}".format(fn))
-                    continue
-            elif os.path.isdir(fn):
-                shutil.rmtree(fn, ignore_errors=True)
-        self.temp_files = []
         logging.info("cleaning done")
 
     def download_src_chunks(self):
