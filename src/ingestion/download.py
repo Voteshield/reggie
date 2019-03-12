@@ -85,7 +85,7 @@ class FileItem(object):
         else:
             s = "unknown"
         return "FileItem: name={}, obj={}, size={}"\
-        .format(self.name, self.obj, s)
+            .format(self.name, self.obj, s)
 
 
 class Loader(object):
@@ -277,7 +277,7 @@ class Loader(object):
                      name in file_names]
         return file_objs
 
-    def infer_compression(self, file_name): 
+    def infer_compression(self, file_name):
         """
         infer file type and map to compression type
         :param file_name: file in question
@@ -341,12 +341,12 @@ class Loader(object):
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
         if "native_file_extension" in self.config:
-            k = generate_s3_key(file_class, self.state, 
-                            self.source,self.download_date, 
-                            self.config["native_file_extension"])
+            k = generate_s3_key(file_class, self.state,
+                                self.source, self.download_date,
+                                self.config["native_file_extension"])
         else:
             k = generate_s3_key(file_class, self.state, self.source,
-                            self.download_date, "csv", "gz")
+                                self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
@@ -384,17 +384,16 @@ class Preprocessor(Loader):
     def unpack_files(self, file_obj, compression="unzip"):
         all_files = []
 
-
         def expand_recurse(s3_file_objs):
-                for f in s3_file_objs:
-                    if f["name"][-1] != "/":
-                        try:
-                            decompressed_result = self.decompress(
-                                f, compression_type=compression)
-                            if decompressed_result is not None:
-                                expand_recurse(decompressed_result)
-                        except (BadZipfile, FormatError) as e:
-                            all_files.append(f)
+            for f in s3_file_objs:
+                if f["name"][-1] != "/":
+                    try:
+                        decompressed_result = self.decompress(
+                            f, compression_type=compression)
+                        if decompressed_result is not None:
+                            expand_recurse(decompressed_result)
+                    except (BadZipfile, FormatError) as e:
+                        all_files.append(f)
         if type(self.main_file) == str:
             expand_recurse([{"name": self.main_file,
                              "obj": open(self.main_file)}])
@@ -746,11 +745,10 @@ class Preprocessor(Loader):
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-        
+
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv(encoding='utf-8',
-                                                       index=False)))
-        
+                                                  index=False)))
 
     def preprocess_iowa(self):
         new_files = self.unpack_files(
@@ -1038,7 +1036,7 @@ class Preprocessor(Loader):
         self.is_compressed = False
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_df.to_csv(
-                        index=True, encoding='utf-8')))
+                            index=True, encoding='utf-8')))
 
     def preprocess_missouri(self):
         new_files = self.unpack_files(
@@ -1102,7 +1100,7 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
-                                                           index=False)))
+                                                       index=False)))
 
     def preprocess_michigan(self):
         config = Config("michigan")
@@ -1371,7 +1369,7 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
-                                                           index=False)))
+                                                       index=False)))
 
     def preprocess_new_jersey(self):
         new_files = self.unpack_files(file_obj=self.main_file)
@@ -1444,7 +1442,7 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(vdf.to_csv(encoding='utf-8',index=False)))
+                        io_obj=StringIO(vdf.to_csv(encoding='utf-8', index=False)))
 
     def execute(self):
         return self.state_router()
