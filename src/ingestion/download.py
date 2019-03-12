@@ -685,14 +685,17 @@ class Preprocessor(Loader):
     def preprocess_kansas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
-
         for f in new_files:
             if ".txt" in f['name'] and "._" not in f['name'] and "description" not in f['name'].lower():
                 logging.info("reading kansas file from {}".format(f['name']))
                 df = pd.read_csv(f['obj'], sep="\t",
                                  index_col=False, engine='c', error_bad_lines=False)
-
-        df.columns = self.config["ordered_columns"]
+        try:
+            df.columns = self.config["ordered_columns"]
+        except:
+            df.columns = self.config["ordered_columns_new"]
+            for i in set(list(self.config["ordered_columns"])) - set(list(self.config["ordered_columns_new"])):
+                df[i] = None
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]].str.replace(" ", "")
 

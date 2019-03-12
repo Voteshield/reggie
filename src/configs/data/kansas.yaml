@@ -254,6 +254,77 @@ ordered_columns:
   - district_sb
   - district_pt
   - district_sd
+ordered_columns_new:
+  - db_logid
+  - cde_registrant_status
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+  - cde_gender
+  - text_registrant_id
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - cde_res_unit_type
+  - text_res_unit_nbr
+  - text_res_city
+  - cde_res_state
+  - text_res_zip5
+  - text_res_zip4
+  - text_res_carrier_rte
+  - ind_res_military
+  - text_mail_address1
+  - text_mail_address2
+  - text_mail_address3
+  - text_mail_address4
+  - text_mail_city
+  - cde_mail_state
+  - text_mail_zip5
+  - text_mail_zip4
+  - text_mail_carrier_rte
+  - ind_mail_military
+  - ind_mail_foreign
+  - desc_party
+  - precinct_text_name
+  - precinct_text_designation
+  - date_of_birth
+  - date_of_registration
+  - text_phone_area_code
+  - text_phone_exchange
+  - text_phone_last_four
+  - text_election_code_1
+  - text_election_code_2
+  - text_election_code_3
+  - text_election_code_4
+  - text_election_code_5
+  - text_election_code_6
+  - text_election_code_7
+  - text_election_code_8
+  - text_election_code_9
+  - text_election_code_10
+  - text_res_physical_address
+  - polling_place_text_name
+  - polling_place_text_address1
+  - polling_place_text_address2
+  - polling_place_text_address3
+  - polling_place_text_address4
+  - polling_place_text_city
+  - polling_place_cde_state
+  - polling_place_text_zip5
+  - polling_place_text_zip4
+  - district_cc
+  - district_cg
+  - district_jd
+  - district_kr
+  - district_ks
+  - district_sb
+  - district_pt
+  - district_sd
 county_names:
   - Allen
   - Anderson
