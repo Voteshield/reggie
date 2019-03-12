@@ -11,31 +11,6 @@ import os
 
 
 def state_download(state):
-    """
-    config_file = Config.config_file_from_state(state=state)
-    configs = Config(file_name=config_file)
-    today = nc_date_grab()
-
-    if state == "north_carolina":
-        list_files = configs['data_chunk_links']
-        zipped_files = []
-        for i, url in enumerate(list_files):
-            target_path = "/tmp/" + state + str(i) + ".zip"
-            zipped_files.append(target_path)
-            response = requests.get(url, stream=True)
-            handle = open(target_path, "wb")
-            for chunk in response.iter_content(chunk_size=512):
-                if chunk:  # filter out keep-alive new chunks
-                    handle.write(chunk)
-            handle.close()
-        file_to_zip = today + ".zip"
-        file_to_zip = FileItem("NC_file_auto_download", filename = file_to_zip)
-        with zipfile.ZipFile(file_to_zip, 'w') as myzip:
-            for f in zipped_files:
-                myzip.write(f)
-        loader = Loader(config_file=config_file, force_date=today, force_file=file_to_zip)
-        loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
-    """
     config_file = Config.config_file_from_state(state=state)
     configs = Config(file_name=config_file)
     today = nc_date_grab()
@@ -60,7 +35,6 @@ def state_download(state):
         loader = Loader(config_file=config_file, force_date=today,
                         clean_up_tmp_files=False)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
-        
 
 
 def nc_date_grab():
