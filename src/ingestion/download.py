@@ -740,6 +740,7 @@ class Preprocessor(Loader):
 
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
+        df = self.config.coerce_dates(df)
         self.meta = {
             "message": "kansas_{}".format(datetime.now().isoformat()),
             "array_encoding": sorted_codes_dict,
