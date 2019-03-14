@@ -147,5 +147,15 @@ class Config(object):
             "lastvoteddate",
             "Date_last_voted",
             "Date_changed",
-            "Last_contact_date"]
+            "Last_contact_date",
+            "text_election_code_1",
+            "text_election_code_2", 
+            "text_election_code_3" ,
+            "text_election_code_4",
+            "text_election_code_5",
+            "text_election_code_6",
+            "text_election_code_7",
+            "text_election_code_8",
+            "text_election_code_9",
+            "text_election_code_10"]
         return history_cols
