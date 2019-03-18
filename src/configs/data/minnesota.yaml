@@ -5,6 +5,15 @@ file_class: voter_file
 voter_id: VoterId
 county_identifier: CountyCode
 birthday_identifier: DOBYear
+voter_status: voter_status
+voter_status_active: Active
+voter_status_inactive: Inactive
+no_party_affiliation: NPA
+party_identifier: party_identifier
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation: npa
+missing_required_fields: true
 date_format: '%Y'
 numeric_county: true
 name_fields:
@@ -19,12 +28,12 @@ address_fields:
   - UnitNumber
   - Address2
   - City
-  - State
+  - state
   - ZipCode
 primary_key:
   - pre_date
   - post_date
-  - ncid
+  - VoterId
   - change_type
 base_columns:
   pre_date: timestamp
@@ -33,7 +42,7 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-  VoterId: int
+  VoterId: text
 summary_columns:
   - totals
   - date
@@ -55,9 +64,8 @@ summary_types:
 
 additional_snapshot_columns:
   all_history: text[]
-  vote_type: text[]
 generated_columns:
-  all_history: text[]
+  all_history: int[]
   vote_type: text[]
 ordered_generated_columns:
   - all_history
@@ -67,7 +75,7 @@ format:
   hist_election_rows: true
   columnar_elections: false
 columns:
-  VoterId: int
+  VoterId: text
   CountyCode: int
   FirstName: text
   MiddleName: text
@@ -79,7 +87,7 @@ columns:
   UnitNumber: text
   Address2: text
   City: text
-  State: text
+  state: text
   ZipCode: text
   MailAddress: text
   MailCity: text
@@ -87,7 +95,7 @@ columns:
   MailZipCode: text
   PhoneNumber: text
   RegistrationDate: text
-  DOBYear: text
+  DOBYear: date
   StateMcdCode: text
   McdName: text
   PrecinctCode: text
@@ -103,7 +111,9 @@ columns:
   Park: text
   SoilWater: text
   Hospital: text
-  LegacyId: int
+  LegacyId: text
+  voter_status: text
+  party_identifier: text
 
 hist_columns:
   - VoterId
@@ -124,7 +134,7 @@ ordered_columns:
   - UnitNumber
   - Address2
   - City
-  - State
+  - state
   - ZipCode
   - MailAddress
   - MailCity
@@ -149,7 +159,94 @@ ordered_columns:
   - SoilWater
   - Hospital
   - LegacyId
-  
+  - voter_status
+  - party_identifier
 has_headers: YES
 county_names:
-  ALAMANCE: 1,
+  Aitkin: 1,
+  Anoka: 3,
+  Becker: 5,
+  Beltrami: 7,
+  Benton: 9,
+  Big Stone: 11,
+  Blue Earth: 13,
+  Brown: 15,
+  Carlton: 17,
+  Carver: 19,
+  Cass: 21,
+  Chippewa: 23,
+  Chisago: 25,
+  Clay: 27,
+  Clearwater: 29,
+  Cook: 31,
+  Cottonwood: 33,
+  Crow Wing: 35,
+  Dakota: 37,
+  Dodge: 39,
+  Douglas: 41,
+  Faribault: 43,
+  Fillmore: 45,
+  Freeborn: 47,
+  Goodhue: 49,
+  Grant: 51,
+  Hennepin: 53,
+  Houston: 55,
+  Hubbard: 57,
+  Isanti: 59,
+  Itasca: 61,
+  Jackson: 63,
+  Kanabec: 65,
+  Kandiyohi: 67,
+  Kittson: 69,
+  Koochiching: 71,
+  Lac qui Parle: 73,
+  Lake of the Woods: 77,
+  Lake: 75,
+  Le Sueur: 79,
+  Lincoln: 81,
+  Lyon: 83,
+  Mahnomen: 87,
+  Marshall: 89,
+  Martin: 91,
+  McLeod: 85,
+  Meeker: 93,
+  Mille Lacs: 95,
+  Morrison: 97,
+  Mower: 99,
+  Murray: 101,
+  Nicollet: 103,
+  Nobles: 105,
+  Norman: 107,
+  Olmsted: 109,
+  Otter Tail: 111,
+  Pennington: 113,
+  Pine: 115,
+  Pipestone: 117,
+  Polk: 119,
+  Pope: 121,
+  Ramsey: 123,
+  Red Lake: 125,
+  Redwood: 127,
+  Renville: 129,
+  Rice: 131,
+  Rock: 133,
+  Roseau: 135,
+  Saint Louis: 137,
+  Scott: 139,
+  Sherburne: 141,
+  Sibley: 143,
+  Stearns: 145,
+  Steele: 147,
+  Stevens: 149,
+  Swift: 151,
+  Todd: 153,
+  Traverse: 155,
+  Wabasha: 157,
+  Wadena: 159,
+  Waseca: 161,
+  Washington: 163,
+  Watonwan: 165,
+  Wilkin: 167,
+  Winona: 169,
+  Wright: 171,
+  Yellow Medicine: 173
