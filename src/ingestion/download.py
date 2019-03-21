@@ -1054,9 +1054,6 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        logging.info("Write df to StringIO")
-        del main_df
-        gc.collect()
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(index=False,
