@@ -15,7 +15,9 @@ republican_party: Republican
 no_party_affiliation: npa
 absentee_ballot_code: "'A'"
 missing_required_fields: true
-date_format: '%Y'
+date_format: 
+  - '%Y'
+  - '%Y-%m-%d hh:mm:ss'
 numeric_county: true
 name_fields:
   - FirstName
@@ -95,7 +97,7 @@ columns:
   MailState: text
   MailZipCode: text
   PhoneNumber: text
-  RegistrationDate: text
+  RegistrationDate: date
   DOBYear: date
   StateMcdCode: text
   McdName: text
@@ -250,4 +252,4 @@ county_names:
   Wilkin: 84,
   Winona: 85,
   Wright: 86,
-  "Yellow Medicine": 87,
+  "Yellow Medicine": 87

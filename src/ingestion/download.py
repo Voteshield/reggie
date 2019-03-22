@@ -531,18 +531,6 @@ class Preprocessor(Loader):
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_reg_df.to_csv()))
 
-        self.meta = {
-            "message": "georgia_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict, indent=4,
-                                         sort_keys=True, default=str),
-            "array_decoding": json.dumps(sorted_codes),
-            "election_type": json.dumps(type_dict)
-        }
-
-        return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv()))
-
-
 
     def preprocess_georgia(self):
         config = Config("georgia")
