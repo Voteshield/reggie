@@ -27,16 +27,6 @@ from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 
-
-def ohio_get_last_updated():
-
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
-                        verify=False).text
-    soup = bs4.BeautifulSoup(html, "html.parser")
-    results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
-    return max(parser.parse(a.text) for a in results)
-
-
 def get_object(key, fn):
     with open(fn, "w+") as obj:
         s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
@@ -166,13 +156,15 @@ class Loader(object):
                                 stdout=f, stderr=PIPE)
                 dl_proc.communicate()
                 dl_proc.wait()
-
+            print("here")
             p = Popen(["gunzip", chunk_storage], stdout=PIPE, stderr=PIPE)
             p.communicate()
+            print('here for waiting')
             p.wait()
             decompressed_chunk = ".".join(chunk_storage.split(".")[:-1])
             try:
-                df = pd.read_csv(decompressed_chunk)
+                print("here df")
+                df = pd.read_csv(decompressed_chunk, nrows=1000)
                 s = df.to_csv(header=not first_success)
                 first_success = True
                 logging.info("done with chunk {}".format(i))
@@ -182,12 +174,10 @@ class Loader(object):
 
             with open(main_file, 'a+') as f:
                 f.write(s)
-            self.temp_files.append(decompressed_chunk)
+            self.temp_files.append(decompressed_chunk)   
 
-        self.compress()
-        self.download_date = datetime.now().isoformat()
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO("concatenated_chunks", filename=main_file))
+                        filename=main_file)
 
     def compress(self):
         """
@@ -463,6 +453,20 @@ class Preprocessor(Loader):
 
         self.main_file.obj.seek(0)
 
+    def preprocess_ohio(self):
+        config = Config("ohio")
+        new_files = self.unpack_files(compression='unzip',
+            file_obj=self.main_file)
+        for i in new_files:
+            if "_22" in i['name']:
+                df = pd.read_csv(i['obj'])
+            else:
+                temp_df = pd.read_csv(i['obj'])
+                df = pd.concat([df, temp_df], axis=0)
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df.to_csv()))
+
+
     def preprocess_georgia(self):
         config = Config("georgia")
         logging.info("GEORGIA: loading voter and voter history file")
@@ -594,8 +598,7 @@ class Preprocessor(Loader):
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         df_voters = self.config.coerce_dates(df_voters)
-        df_voters = self.conf
-        ig.coerce_numeric(df_voters)
+        df_voters = self.config.coerce_numeric(df_voters)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
@@ -1458,7 +1461,8 @@ class Preprocessor(Loader):
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina,
-            'kansas': self.preprocess_kansas
+            'kansas': self.preprocess_kansas,
+            'ohio': self.preprocess_ohio
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
