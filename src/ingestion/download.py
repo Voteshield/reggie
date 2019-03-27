@@ -454,7 +454,6 @@ class Preprocessor(Loader):
         self.main_file.obj.seek(0)
 
     def preprocess_ohio(self):
-        config = Config("ohio")
         new_files = self.unpack_files(compression='unzip',
             file_obj=self.main_file)
         for i in new_files:

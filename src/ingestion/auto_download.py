@@ -42,7 +42,6 @@ def state_download(state):
 
     elif state == "ohio":
         today = str(ohio_get_last_updated().isoformat())[0:10]
-        print(today)
         list_files = configs['data_chunk_links']
         zipped_files = []
         for i, url in enumerate(list_files):
@@ -52,7 +51,7 @@ def state_download(state):
             response = requests.get(url, stream=True, verify=False)
             handle = open(target_path, "wb")
             for chunk in response.iter_content(chunk_size=512):
-                if chunk:  # filter out keep-alive new chunks
+                if chunk:
                     handle.write(chunk)
             handle.close()
             if i == 0:
