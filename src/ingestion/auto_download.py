@@ -54,23 +54,17 @@ def state_download(state):
                 if chunk:
                     handle.write(chunk)
             handle.close()
-            if i == 0:
-                logging.info("reading in file {}".format(url))
-                df = pd.read_csv(target_path)
-                os.remove(target_path)
-            else:
-                logging.info("reading in file {}".format(url))
-                new_df = pd.read_csv(target_path)
-                os.remove(target_path)
-                df = pd.concat([df, new_df], axis=0)
-        logging.info("reading finished, creating file item and uploading")
-        file_name = today + ".csv.gz"
-        df.to_csv(file_name, compression='gzip')
-
-        file_final = FileItem("OH file auto download", filename=file_name)
+            logging.info("downloaded {} file".format(url))
+        file_to_zip = today + ".zip"
+        logging.info("Zipping files")
+        with zipfile.ZipFile(file_to_zip, 'w') as myzip:
+            for f in zipped_files:
+                myzip.write(f)
+        logging.info("Uploading")
+        file_to_zip = FileItem("OH file auto download", filename=file_to_zip)
         loader = Loader(config_file=config_file, force_date=today,
                         clean_up_tmp_files=False)
-        loader.s3_dump(file_item=file_final)
+        loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
 
 def nc_date_grab():
