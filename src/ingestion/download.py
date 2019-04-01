@@ -463,6 +463,18 @@ class Preprocessor(Loader):
 
         self.main_file.obj.seek(0)
 
+    def preprocess_ohio(self):
+        new_files = self.unpack_files(file_obj=self.main_file)
+        for i in new_files:
+            logging.info("Loading file {}".format(i))
+            if "_22" in i['name']:
+                df = pd.read_csv(i['obj'])
+            else:
+                temp_df = pd.read_csv(i['obj'])
+                df = pd.concat([df, temp_df], axis=0)
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df.to_csv()))
+
     def preprocess_georgia(self):
         config = Config("georgia")
         logging.info("GEORGIA: loading voter and voter history file")
@@ -1458,7 +1470,8 @@ class Preprocessor(Loader):
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina,
-            'kansas': self.preprocess_kansas
+            'kansas': self.preprocess_kansas,
+            'ohio': self.preprocess_ohio
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

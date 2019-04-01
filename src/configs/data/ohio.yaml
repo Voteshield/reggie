@@ -180,6 +180,11 @@ data_chunk_links:
   - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:364
   - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:365
   - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:366
+data_file_names:
+  - SWVF_1_22
+  - SWVF_23_44
+  - SWVF_45_66
+  - SWVF_67_88
 county_names:
   adams: 1,
   allen: 2,

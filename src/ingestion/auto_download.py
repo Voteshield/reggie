@@ -43,10 +43,11 @@ def state_download(state):
     elif state == "ohio":
         today = str(ohio_get_last_updated().isoformat())[0:10]
         list_files = configs['data_chunk_links']
+        file_names = configs['data_file_names']
         zipped_files = []
         for i, url in enumerate(list_files):
             logging.info("downloading {} file".format(url))
-            target_path = "/tmp/" + state + str(i) + ".txt.gz"
+            target_path = "/tmp/" + state + "_" + file_names[i] + ".txt.gz"
             zipped_files.append(target_path)
             response = requests.get(url, stream=True, verify=False)
             handle = open(target_path, "wb")
