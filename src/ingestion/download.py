@@ -340,7 +340,7 @@ class Loader(object):
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config:
+        if "native_file_extension" in self.config & file_class != "voter_file":
             k = generate_s3_key(file_class, self.state,
                                 self.source, self.download_date,
                                 self.config["native_file_extension"])
@@ -468,9 +468,9 @@ class Preprocessor(Loader):
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
-                df = pd.read_csv(i['obj'])
+                df = pd.read_csv(i['obj'], compression='gzip')
             else:
-                temp_df = pd.read_csv(i['obj'])
+                temp_df = pd.read_csv(i['obj'], compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv()))
