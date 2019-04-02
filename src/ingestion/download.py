@@ -340,7 +340,10 @@ class Loader(object):
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config & file_class != "voter_file":
+        print("Look here")
+        print(file_class)
+        print(type(file_class))
+        if "native_file_extension" in self.config and file_class != "voter_file":
             k = generate_s3_key(file_class, self.state,
                                 self.source, self.download_date,
                                 self.config["native_file_extension"])
