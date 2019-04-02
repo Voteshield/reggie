@@ -150,45 +150,6 @@ class Loader(object):
     def clean_up(self):
         logging.info("cleaning done")
 
-    def download_src_chunks(self):
-        """
-        we expect each chunk to be a compressed (.gz) csv file
-        :return:
-        """
-        self.obj_will_download = True
-        main_file = "/tmp/chunks_concat"
-        first_success = False
-        for i, url in enumerate(self.chunk_urls):
-            logging.info("downloading chunk {} from {}".format(i, url))
-            chunk_storage = "{}.{}.gz".format(main_file, str(i))
-            with open(chunk_storage, "w+") as f:
-                dl_proc = Popen(["curl", "--insecure", "-X", "GET", url],
-                                stdout=f, stderr=PIPE)
-                dl_proc.communicate()
-                dl_proc.wait()
-
-            p = Popen(["gunzip", chunk_storage], stdout=PIPE, stderr=PIPE)
-            p.communicate()
-            p.wait()
-            decompressed_chunk = ".".join(chunk_storage.split(".")[:-1])
-            try:
-                df = pd.read_csv(decompressed_chunk)
-                s = df.to_csv(header=not first_success)
-                first_success = True
-                logging.info("done with chunk {}".format(i))
-            except ValueError:
-                logging.warning("malformed response from {}".format(url))
-                continue
-
-            with open(main_file, 'a+') as f:
-                f.write(s)
-            self.temp_files.append(decompressed_chunk)
-
-        self.compress()
-        self.download_date = datetime.now().isoformat()
-        return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO("concatenated_chunks", filename=main_file))
-
     def compress(self):
         """
         intended to be called after the consolidated (processed) file has been
