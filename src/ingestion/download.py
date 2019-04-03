@@ -430,7 +430,7 @@ class Preprocessor(Loader):
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
                 df = pd.read_csv(i['obj'], compression='gzip')
-            else:
+            elif ".txt" in i['name']:
                 temp_df = pd.read_csv(i['obj'], compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
         return FileItem(name="{}.processed".format(self.config["state"]),
