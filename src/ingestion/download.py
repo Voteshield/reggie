@@ -463,6 +463,75 @@ class Preprocessor(Loader):
 
         self.main_file.obj.seek(0)
 
+    def preprocess_minnesota(self):
+        config = Config("minnesota")
+        logging.info("Minnesota: loading voter file")
+        new_files = self.unpack_files(
+            compression='unzip', file_obj=self.main_file)
+        voter_reg_files = []
+        voter_history_files = []
+        for i in new_files:
+            if "election" in i['name'].lower():
+                voter_history_files.append(i)
+            if "voter" in i['name'].lower():
+                voter_reg_files.append(i)
+        concat_voter_reg = concat_and_delete(voter_reg_files)
+        concat_voter_hist = concat_and_delete(voter_history_files)
+        voter_reg_df = pd.read_csv(concat_voter_reg)
+        voter_hist_df = pd.read_csv(concat_voter_hist)
+        voter_hist_df.columns = self.config["hist_columns"]
+
+        voter_reg_df[self.config["voter_status"]] = np.nan
+        voter_reg_df[self.config["party_identifier"]] = np.nan
+        voter_reg_df['DOBYear'] = voter_reg_df['DOBYear'].astype(str).str[0:4]
+
+        voter_reg_df.columns = self.config["ordered_columns"]
+        voter_hist_df["election_name"] = voter_hist_df["ElectionDate"] + \
+            "_" + voter_hist_df["VotingMethod"]
+        valid_elections, counts = np.unique(voter_hist_df["election_name"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][:-2],
+                                                             "%m/%d/%Y"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+
+        voter_hist_df["array_position"] = voter_hist_df["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+
+        logging.info("Minnesota: history apply")
+        voter_groups = voter_hist_df.groupby("VoterId")
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["VotingMethod"].apply(list)
+
+        voter_reg_df = voter_reg_df.set_index(self.config["voter_id"])
+
+        voter_reg_df["all_history"] = all_history
+        voter_reg_df["vote_type"] = vote_type
+        gc.collect()
+
+        voter_reg_df = self.config.coerce_strings(voter_reg_df)
+        voter_reg_df = self.config.coerce_dates(voter_reg_df)
+        voter_reg_df = self.config.coerce_numeric(voter_reg_df)
+
+        self.meta = {
+            "message": "minnesota_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        gc.collect()
+        logging.info("Minnesota: writing out")
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(voter_reg_df.to_csv()))
+
+
     def preprocess_georgia(self):
         config = Config("georgia")
         logging.info("GEORGIA: loading voter and voter history file")
@@ -1458,7 +1527,8 @@ class Preprocessor(Loader):
             'georgia': self.preprocess_georgia,
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina,
-            'kansas': self.preprocess_kansas
+            'kansas': self.preprocess_kansas,
+            'minnesota': self.preprocess_minnesota
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

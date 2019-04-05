@@ -98,6 +98,31 @@ class TestFileBuilder(Preprocessor):
             for f in smallest_counties:
                 zf.write(f, os.path.basename(f))
 
+    def __build_minnesota(self):
+        config = Config("minnesota")
+        logging.info("Minnesota: loading voter file")
+        new_files = self.unpack_files()
+        voter_reg_files = []
+        voter_history_files = []
+        for i in new_files:
+            if "voter" in i['name'].lower():
+                voter_reg_files.append(i)
+            if "election" in i['name'].lower():
+                voter_history_files.append(i)
+        voter_df = pd.read_csv(voter_reg_files[0]['obj']).sample(n=1000)
+        voter_hist = pd.read_csv(voter_history_files[0]['obj'])
+        voter_hist = voter_hist[voter_hist[
+            'VoterId'].isin(voter_df['VoterId'])]
+        voter_df.to_csv("Voter01.txt", sep=",",
+                        header=True, index=False, encoding='utf8')
+        voter_hist.to_csv("Election01.txt", sep=",",
+                          header=True, index=False, encoding='utf8')
+
+        new_files = ["Voter01.txt", "Election01.txt"]
+        with ZipFile(self.main_file, 'w', ZIP_DEFLATED) as zf:
+            for f in new_files:
+                zf.write(f, os.path.basename(f))
+
     def __build_north_carolina(self):
         new_files = self.unpack_files()
         config = Config("north_carolina")
@@ -329,6 +354,7 @@ class TestFileBuilder(Preprocessor):
                   "missouri": self.__build_missouri,
                   "new_jersey": self.__build_new_jersey,
                   "north_carolina": self.__build_north_carolina,
+                  "minnesota": self.__build_minnesota,
                   "kansas": self.__build_kansas
                   }
 
