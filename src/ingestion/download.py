@@ -424,7 +424,6 @@ class Preprocessor(Loader):
 
         self.main_file.obj.seek(0)
 
-<<<<<<< HEAD
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
         for i in new_files:
@@ -436,6 +435,7 @@ class Preprocessor(Loader):
                 df = pd.concat([df, temp_df], axis=0)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv()))
+
     def preprocess_minnesota(self):
         config = Config("minnesota")
         logging.info("Minnesota: loading voter file")
