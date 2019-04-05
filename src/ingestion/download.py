@@ -1500,7 +1500,7 @@ class Preprocessor(Loader):
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina,
             'kansas': self.preprocess_kansas,
-            'ohio': self.preprocess_ohio
+            'ohio': self.preprocess_ohio,
             'minnesota': self.preprocess_minnesota
         }
         if self.config["state"] in routes:
