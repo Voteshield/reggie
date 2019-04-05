@@ -99,13 +99,13 @@ format:
   columnar_elections: true
 columns:
   db_logid: text
-  cde_registrant_status: char
+  cde_registrant_status: text
   cde_name_title: varchar
   text_name_first: text
   text_name_middle: text
   text_name_last: text
   cde_name_suffix: text
-  cde_gender: char
+  cde_gender: text
   text_registrant_id: int
   text_res_address_nbr: int
   text_res_address_nbr_suffix: varchar
@@ -120,7 +120,7 @@ columns:
   text_res_zip5: int
   text_res_zip4: int
   text_res_carrier_rte: varchar
-  ind_res_military: char
+  ind_res_military: text
   text_mail_address1: text
   text_mail_address2: text
   text_mail_address3: text
@@ -130,8 +130,8 @@ columns:
   text_mail_zip5: int
   text_mail_zip4: int
   text_mail_carrier_rte: varchar
-  ind_mail_military: char
-  ind_mail_foreign: char
+  ind_mail_military: text
+  ind_mail_foreign: text
   desc_party: text
   precinct_text_name: text
   precinct_text_designation: text
@@ -150,8 +150,8 @@ columns:
   text_election_code_8: text
   text_election_code_9: text
   text_election_code_10: text
-  cde_party: char
-  ind_qualified: char
+  cde_party: text
+  ind_qualified: text
   text_res_physical_address: text
   polling_place_text_name: text
   polling_place_text_address1: text
