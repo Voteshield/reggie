@@ -468,24 +468,18 @@ class Preprocessor(Loader):
         logging.info("Minnesota: loading voter file")
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
-        voter_reg_files = []
-        voter_history_files = []
+        voter_reg_df = pd.DataFrame(columns=self.config['ordered_columns'])
+        voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
-                voter_history_files.append(i)
+                voter_hist_df = pd.concat([voter_hist_df, pd.read_csv(i['obj'])], axis =0)
             if "voter" in i['name'].lower():
-                voter_reg_files.append(i)
-        concat_voter_reg = concat_and_delete(voter_reg_files)
-        concat_voter_hist = concat_and_delete(voter_history_files)
-        voter_reg_df = pd.read_csv(concat_voter_reg)
-        voter_hist_df = pd.read_csv(concat_voter_hist)
-        voter_hist_df.columns = self.config["hist_columns"]
+                voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])], axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
         voter_reg_df['DOBYear'] = voter_reg_df['DOBYear'].astype(str).str[0:4]
 
-        voter_reg_df.columns = self.config["ordered_columns"]
         voter_hist_df["election_name"] = voter_hist_df["ElectionDate"] + \
             "_" + voter_hist_df["VotingMethod"]
         valid_elections, counts = np.unique(voter_hist_df["election_name"],
@@ -530,7 +524,6 @@ class Preprocessor(Loader):
         logging.info("Minnesota: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_reg_df.to_csv()))
-
 
     def preprocess_georgia(self):
         config = Config("georgia")
