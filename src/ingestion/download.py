@@ -446,7 +446,7 @@ class Preprocessor(Loader):
         for i in new_files:
             if "election" in i['name'].lower():
                 voter_hist_df = pd.concat([voter_hist_df, pd.read_csv(i['obj'])], axis =0)
-            if "voter" in i['name'].lower():
+            elif "voter" in i['name'].lower():
                 voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])], axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
