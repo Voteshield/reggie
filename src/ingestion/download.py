@@ -387,8 +387,6 @@ class Preprocessor(Loader):
 
         first_success = False
         last_headers = None
-        file_item = FileItem("concat_file_segments_output",
-                             stringio_obj=StringIO())
 
         def list_compare(a, b):
             i = 0
