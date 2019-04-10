@@ -150,45 +150,6 @@ class Loader(object):
     def clean_up(self):
         logging.info("cleaning done")
 
-    def download_src_chunks(self):
-        """
-        we expect each chunk to be a compressed (.gz) csv file
-        :return:
-        """
-        self.obj_will_download = True
-        main_file = "/tmp/chunks_concat"
-        first_success = False
-        for i, url in enumerate(self.chunk_urls):
-            logging.info("downloading chunk {} from {}".format(i, url))
-            chunk_storage = "{}.{}.gz".format(main_file, str(i))
-            with open(chunk_storage, "w+") as f:
-                dl_proc = Popen(["curl", "--insecure", "-X", "GET", url],
-                                stdout=f, stderr=PIPE)
-                dl_proc.communicate()
-                dl_proc.wait()
-
-            p = Popen(["gunzip", chunk_storage], stdout=PIPE, stderr=PIPE)
-            p.communicate()
-            p.wait()
-            decompressed_chunk = ".".join(chunk_storage.split(".")[:-1])
-            try:
-                df = pd.read_csv(decompressed_chunk)
-                s = df.to_csv(header=not first_success)
-                first_success = True
-                logging.info("done with chunk {}".format(i))
-            except ValueError:
-                logging.warning("malformed response from {}".format(url))
-                continue
-
-            with open(main_file, 'a+') as f:
-                f.write(s)
-            self.temp_files.append(decompressed_chunk)
-
-        self.compress()
-        self.download_date = datetime.now().isoformat()
-        return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO("concatenated_chunks", filename=main_file))
-
     def compress(self):
         """
         intended to be called after the consolidated (processed) file has been
@@ -340,7 +301,7 @@ class Loader(object):
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config:
+        if "native_file_extension" in self.config and file_class != "voter_file":
             k = generate_s3_key(file_class, self.state,
                                 self.source, self.download_date,
                                 self.config["native_file_extension"])
@@ -462,6 +423,18 @@ class Preprocessor(Loader):
             self.main_file.obj.write(s)
 
         self.main_file.obj.seek(0)
+
+    def preprocess_ohio(self):
+        new_files = self.unpack_files(file_obj=self.main_file)
+        for i in new_files:
+            logging.info("Loading file {}".format(i))
+            if "_22" in i['name']:
+                df = pd.read_csv(i['obj'], compression='gzip')
+            elif ".txt" in i['name']:
+                temp_df = pd.read_csv(i['obj'], compression='gzip')
+                df = pd.concat([df, temp_df], axis=0)
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df.to_csv()))
 
     def preprocess_minnesota(self):
         config = Config("minnesota")
@@ -1521,6 +1494,7 @@ class Preprocessor(Loader):
             'new_jersey': self.preprocess_new_jersey,
             'north_carolina': self.preprocess_north_carolina,
             'kansas': self.preprocess_kansas,
+            'ohio': self.preprocess_ohio,
             'minnesota': self.preprocess_minnesota
         }
         if self.config["state"] in routes:
