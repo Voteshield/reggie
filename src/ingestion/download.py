@@ -921,8 +921,6 @@ class Preprocessor(Loader):
         combined_file = self.concat_file_segments(new_files)
 
         main_df = pd.read_csv(combined_file)
-        print("got here")
-        print(main_df.head())
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x,
                                          main_df.columns.values))
