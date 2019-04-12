@@ -387,8 +387,6 @@ class Preprocessor(Loader):
 
         first_success = False
         last_headers = None
-        file_item = FileItem("concat_file_segments_output",
-                             stringio_obj=StringIO())
 
         def list_compare(a, b):
             i = 0
@@ -400,6 +398,7 @@ class Preprocessor(Loader):
 
         file_names = sorted(file_names, key=lambda x: x["obj"].len,
                             reverse=True)
+        outfile = StringIO()
         for f in file_names:
             try:
                 if self.config["file_type"] == 'xlsx':
@@ -420,9 +419,10 @@ class Preprocessor(Loader):
                                  .format(*mismatched_headers))
             s = df.to_csv(header=not first_success, encoding='utf-8')
             first_success = True
-            self.main_file.obj.write(s)
+            outfile.write(s)
 
-        self.main_file.obj.seek(0)
+        outfile.seek(0)
+        return outfile
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
@@ -629,8 +629,7 @@ class Preprocessor(Loader):
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
         df_voters = self.config.coerce_dates(df_voters)
-        df_voters = self.conf
-        ig.coerce_numeric(df_voters)
+        df_voters = self.config.coerce_numeric(df_voters)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
@@ -913,9 +912,9 @@ class Preprocessor(Loader):
             file_obj=self.main_file, compression="unzip")
         new_files = [f for f in new_files if "LEGEND.xlsx" not in f["name"]]
 
-        self.concat_file_segments(new_files)
+        combined_file = self.concat_file_segments(new_files)
 
-        main_df = pd.read_csv(self.main_file)
+        main_df = pd.read_csv(combined_file)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x,
                                          main_df.columns.values))
