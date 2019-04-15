@@ -801,14 +801,17 @@ class Preprocessor(Loader):
         df_voters = pd.read_csv(first_file["obj"], skiprows=1, header=None,
                                 names=total_cols)
         logging.info(df_voters.shape)
-
+        logging.info(len(total_cols))
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
                                  names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
+            print("-------")
             logging.info(i["name"])
+            logging.info(new_df.shape)
             logging.info(df_voters.shape)
+            print("-------")
 
         key_delim = "_"
         df_voters["all_history"] = ''
