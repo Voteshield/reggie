@@ -796,10 +796,15 @@ class Preprocessor(Loader):
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
-        buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4"]
+        buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4",
+                       "buffer5", "buffer6", "buffer7", "buffer8", "buffer9"]
         total_cols = main_cols + history_cols + buffer_cols
+
+        headers = pd.read_csv(first_file["obj"], nrows=1).columns
+        headers = headers.tolist() + buffer_cols
         df_voters = pd.read_csv(first_file["obj"], skiprows=1, header=None,
-                                names=total_cols)
+                                names=headers)
+
         logging.info(df_voters.shape)
         logging.info(len(total_cols))
         logging.info(df_voters["REGN_NUM"].iloc[0])
@@ -861,11 +866,9 @@ class Preprocessor(Loader):
                 # add 'blank' values for the primary slots
                 df_voters[c] += key_delim + key_delim
 
-            df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3,
-                                                    '')
+            df_voters[c] = df_voters[c].str.replace(prefix + key_delim * 3, '')
             df_voters[c] = df_voters[c].str.replace('"', '')
             df_voters[c] = df_voters[c].str.replace("'", '')
-
             df_voters.all_history += " " + df_voters[c]
 
         # make into an array (null values are '' so they are ignored)
@@ -897,8 +900,9 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
-
-        df_voters.drop(columns=history_cols, inplace=True)
+        wanted_cols = self.config["ordered_columns"] + \
+                      self.config["ordered_generated_columns"]
+        df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
 
@@ -916,6 +920,7 @@ class Preprocessor(Loader):
 
         logging.info(df_voters["REGN_NUM"].iloc[0])
         logging.info(df_voters.index[0])
+        logging.info(df_voters.shape)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))

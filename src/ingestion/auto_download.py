@@ -96,8 +96,8 @@ def nc_date_grab():
     file_date_vf = parser.parse(file_date_vf).isoformat()
     return file_date_vf
 
-def ohio_get_last_updated():
 
+def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
                         verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
