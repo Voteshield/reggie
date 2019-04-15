@@ -809,9 +809,8 @@ class Preprocessor(Loader):
             df_voters = pd.concat([df_voters, new_df], axis=0)
             logging.info("-------")
             logging.info(i["name"])
-            logging.info(new_df.shape)
+            logging.info(df_voters["REGN_NUM"].iloc[0])
             logging.info(df_voters.shape)
-            logging.info(df_voters)
             logging.info(df_voters.index)
             logging.info("-------")
 
@@ -913,11 +912,8 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
-        logging.info(df_voters)
-        logging.info(df_voters.shape)
+        logging.info(df_voters["REGN_NUM"].iloc[0])
         logging.info(df_voters.index)
-        logging.info(df_voters.columns)
-        logging.info(df_voters.columns)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))
