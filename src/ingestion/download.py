@@ -807,13 +807,13 @@ class Preprocessor(Loader):
             new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
                                  names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
-            print("-------")
+            logging.info("-------")
             logging.info(i["name"])
             logging.info(new_df.shape)
             logging.info(df_voters.shape)
-            print(new_df)
-            print(df_voters)
-            print("-------")
+            logging.info(new_df)
+            logging.info(df_voters)
+            logging.info("-------")
 
         key_delim = "_"
         df_voters["all_history"] = ''
@@ -823,7 +823,7 @@ class Preprocessor(Loader):
         # also we should not compute the unique values until after, not before
         df_voters.drop(columns=buffer_cols, inplace=True)
         logging.info(df_voters.shape)
-        print(df_voters)
+        logging.info(df_voters)
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -913,6 +913,9 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
+        logging.info(df_voters.shape)
+        logging.info(df_voters)
+        
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))
