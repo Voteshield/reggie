@@ -805,21 +805,11 @@ class Preprocessor(Loader):
         df_voters = pd.read_csv(first_file["obj"], skiprows=1, header=None,
                                 names=headers)
 
-        logging.info(df_voters.shape)
-        logging.info(len(total_cols))
-        logging.info(df_voters["REGN_NUM"].iloc[0])
-        logging.info(df_voters.index[0])
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
                                  names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
-            logging.info("-------")
-            logging.info(i["name"])
-            logging.info(df_voters["REGN_NUM"].iloc[0])
-            logging.info(df_voters.index[0])
-            logging.info(df_voters.shape)
-            logging.info("-------")
 
         key_delim = "_"
         df_voters["all_history"] = ''
@@ -828,8 +818,7 @@ class Preprocessor(Loader):
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
         df_voters.drop(columns=buffer_cols, inplace=True)
-        logging.info(df_voters["REGN_NUM"].iloc[0])
-        logging.info(df_voters.index[0])
+   
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -918,9 +907,6 @@ class Preprocessor(Loader):
         pd.set_option('max_columns', 200)
         pd.set_option('max_row', 6)
 
-        logging.info(df_voters["REGN_NUM"].iloc[0])
-        logging.info(df_voters.index[0])
-        logging.info(df_voters.shape)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))
