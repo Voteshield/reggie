@@ -807,7 +807,8 @@ class Preprocessor(Loader):
             new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
                                  names=total_cols)
             df_voters = pd.concat([df_voters, new_df], axis=0)
-            logging.info(i["name"], df_voters.shape)
+            logging.info(i["name"])
+            logging.info(df_voters.shape)
 
         key_delim = "_"
         df_voters["all_history"] = ''
