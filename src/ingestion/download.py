@@ -811,6 +811,8 @@ class Preprocessor(Loader):
             logging.info(i["name"])
             logging.info(new_df.shape)
             logging.info(df_voters.shape)
+            print(new_df)
+            print(df_voters)
             print("-------")
 
         key_delim = "_"
@@ -821,6 +823,7 @@ class Preprocessor(Loader):
         # also we should not compute the unique values until after, not before
         df_voters.drop(columns=buffer_cols, inplace=True)
         logging.info(df_voters.shape)
+        print(df_voters)
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
