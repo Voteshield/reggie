@@ -1,4 +1,4 @@
-from constants import CONFIG_DIR
+from constants import CONFIG_DIR, COUNTY_ALIAS
 import yaml
 import pandas as pd
 
@@ -15,6 +15,7 @@ class Config(object):
             config_file = file_name
 
         self.data = self.load_data(config_file)
+        self.county_column = self.data[COUNTY_ALIAS]
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -50,6 +51,7 @@ class Config(object):
 
     def items(self):
         return self.data.items()
+
 
     def database_columns(self):
         return [c for c in self.data["ordered_columns"] if c not in
