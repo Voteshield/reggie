@@ -26,15 +26,7 @@ from gzip import GzipFile
 from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
-
-
-def ohio_get_last_updated():
-
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
-                        verify=False).text
-    soup = bs4.BeautifulSoup(html, "html.parser")
-    results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
-    return max(parser.parse(a.text) for a in results)
+from auto_download import ohio_get_last_updated
 
 
 def get_object(key, fn):
@@ -107,9 +99,8 @@ class Loader(object):
     """
 
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, clean_up_tmp_files=True, testing=False):
+                 force_file=None, testing=False):
         self.config_file_path = config_file
-        self.clean_up_tmp_files = clean_up_tmp_files
         config = Config(file_name=config_file)
         self.config = config
         self.chunk_urls = config[
@@ -142,13 +133,6 @@ class Loader(object):
 
     def __enter__(self):
         return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.clean_up_tmp_files:
-            self.clean_up()
-
-    def clean_up(self):
-        logging.info("cleaning done")
 
     def compress(self):
         """

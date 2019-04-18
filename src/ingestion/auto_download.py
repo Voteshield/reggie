@@ -36,8 +36,7 @@ def state_download(state):
             for f in zipped_files:
                 myzip.write(f)
         file_to_zip = FileItem("NC file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today,
-                        clean_up_tmp_files=False)
+        loader = Loader(config_file=config_file, force_date=today)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
     elif state == "ohio":
@@ -63,8 +62,7 @@ def state_download(state):
                 myzip.write(f)
         logging.info("Uploading")
         file_to_zip = FileItem("OH file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today,
-                        clean_up_tmp_files=False)
+        loader = Loader(config_file=config_file, force_date=today)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
 
