@@ -8,10 +8,6 @@ import xml.etree.ElementTree
 import logging
 from dateutil import parser
 import bs4
-import pandas as pd
-from StringIO import StringIO
-import os
-from io import BytesIO
 
 
 def state_download(state):
