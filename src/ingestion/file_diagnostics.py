@@ -2,7 +2,7 @@ import inspect
 import json
 import os
 import uuid
-from os import stat, remove
+from os import stat
 import pandas as pd
 import numpy as np
 from analysis import Snapshot, SnapshotConsistencyError
@@ -10,11 +10,11 @@ from storage import get_preceding_upload
 from configs.configs import Config
 from storage import get_raw_s3_uploads, state_from_str
 from ingestion.download import Preprocessor
-from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
+from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, \
+    RAW_FILE_PREFIX
 from storage.connections import s3
 from zipfile import ZipFile, ZIP_DEFLATED
 from pathlib import Path
-import subprocess
 from datetime import datetime
 from subprocess import Popen, PIPE
 
@@ -99,7 +99,6 @@ class TestFileBuilder(Preprocessor):
                 zf.write(f, os.path.basename(f))
 
     def __build_minnesota(self):
-        config = Config("minnesota")
         logging.info("Minnesota: loading voter file")
         new_files = self.unpack_files()
         voter_reg_files = []
@@ -125,7 +124,6 @@ class TestFileBuilder(Preprocessor):
 
     def __build_north_carolina(self):
         new_files = self.unpack_files()
-        config = Config("north_carolina")
         for i in new_files:
             if "ncvhis" in i:
                 vote_hist_file = i
@@ -279,34 +277,35 @@ class TestFileBuilder(Preprocessor):
         logging.info("Detected voter file: " + voter_file)
         logging.info("Detected history file: " + hist_file)
 
-        vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82], [82, 83], [83, 91],
-                     [91, 92], [92, 99], [99, 103], [
-                         103, 105], [105, 135], [135, 141],
-                     [141, 143], [143, 156], [156, 191], [
-                         191, 193], [193, 198], [198, 248],
-                     [248, 298], [298, 348], [348, 398], [
-            398, 448], [448, 461], [461, 463],
-            [463, 468], [468, 474], [474, 479], [
-                479, 484], [484, 489], [489, 494],
-            [494, 499], [499, 504], [504, 510], [510, 516], [516, 517], [517, 519], [519, 520]]
+        vcolspecs = [[0, 35], [35, 55], [55, 75], [75, 78], [78, 82],
+                     [82, 83], [83, 91], [91, 92], [92, 99], [99, 103],
+                     [103, 105], [105, 135], [135, 141], [141, 143],
+                     [143, 156], [156, 191], [191, 193], [193, 198],
+                     [198, 248], [248, 298], [298, 348], [348, 398],
+                     [398, 448], [448, 461], [461, 463], [463, 468],
+                     [468, 474], [474, 479], [479, 484], [484, 489],
+                     [489, 494], [494, 499], [499, 504], [504, 510],
+                     [510, 516], [516, 517], [517, 519], [519, 520]]
         hcolspecs = [[0, 13], [13, 15], [15, 20], [20, 25], [25, 38], [38, 39]]
-        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs, names=config[
-                          "ordered_columns"], na_filter=False)
+        vdf = pd.read_fwf(voter_file, chunksize=1000000, colspecs=vcolspecs,
+                          names=config["ordered_columns"], na_filter=False)
         vdf = vdf.next()
         two_small_counties = self.get_smallest_counties(vdf, count=2)
         filtered_data = self.filter_counties(vdf, counties=two_small_counties)
-        hdf = pd.read_fwf(hist_file, chunksize=1000000, colspecs=hcolspecs, names=config[
-                          "hist_columns"], na_filter=False)
+        hdf = pd.read_fwf(hist_file, chunksize=1000000, colspecs=hcolspecs,
+                          names=config["hist_columns"], na_filter=False)
         hdf = hdf.next()
         hdf = self.sample(hdf, frac=0.001)
         with open(new_files[0], 'w+') as vfile:
-            fmt = '%35s %20s %20s %3s %4s %1s %8s %1s %7s %4s %2s %30s %6s %2s %13s %35s %2s %5s %50s %50s %50s %50s %50s' \
-                  '%13s %2s %5s %6s %5s %5s %5s %5s %5s %5s %6s %6s %1s %2s %1s'
+            fmt = '%35s %20s %20s %3s %4s %1s %8s %1s %7s %4s %2s %30s %6s' \
+                  '%2s %13s %35s %2s %5s %50s %50s %50s %50s %50s %13s %2s' \
+                  '%5s %6s %5s %5s %5s %5s %5s %5s %6s %6s %1s %2s %1s'
             np.savetxt(vfile, filtered_data.values, fmt=fmt)
         p = Path(voter_file)
         temp_dir = Path(voter_file).parent.parent
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
-        with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
+        with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w',
+                     ZIP_DEFLATED) as zf:
             zf.write(voter_file, os.path.basename(new_files[0]))
         Path(voter_file).unlink()
         Path(voter_file).parent.rmdir()
@@ -315,7 +314,8 @@ class TestFileBuilder(Preprocessor):
             np.savetxt(hfile, hdf.values, fmt=fmt)
         p = Path(hist_file)
         Path(str(temp_dir) + '/' + p.parent.name[:-13]).unlink()
-        with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w', ZIP_DEFLATED) as zf:
+        with ZipFile(str(temp_dir) + '/' + p.parent.name[:-13], 'w',
+                     ZIP_DEFLATED) as zf:
             zf.write(hist_file, os.path.basename(hist_file))
         Path(hist_file).unlink()
         Path(hist_file).parent.rmdir()
