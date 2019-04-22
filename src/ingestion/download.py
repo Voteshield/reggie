@@ -23,7 +23,15 @@ from gzip import GzipFile
 from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
-from auto_download import ohio_get_last_updated
+import bs4
+
+
+def ohio_get_last_updated():
+    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
+                        verify=False).text
+    soup = bs4.BeautifulSoup(html, "html.parser")
+    results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
+    return max(parser.parse(a.text) for a in results)
 
 
 def get_object(key, fn):
