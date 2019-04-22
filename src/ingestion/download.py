@@ -42,9 +42,9 @@ def get_object(key, fn):
         s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
 
 
-def get_object_mem(key):
+def get_object_mem(key, bucket=S3_BUCKET):
     file_obj = BytesIO()
-    s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
+    s3.Bucket(bucket).download_fileobj(Key=key, Fileobj=file_obj)
     return file_obj
 
 
