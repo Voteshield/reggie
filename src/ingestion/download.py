@@ -424,6 +424,16 @@ class Preprocessor(Loader):
         outfile.seek(0)
         return outfile
 
+    def preprocess_texas(self):
+        new_files = self.unpack_files(
+            file_obj=self.main_file, compression='unzip')
+        widths = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
+                  2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        df = pd.DataFrame(columns=self.config['raw_s3_file'])
+        for i in new_files:
+            logging.info("Loading file {}".format(i['name']))
+            df = pd.read_fwf(i['obj'], widths=widths, header=None)
+
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
         for i in new_files:
@@ -445,9 +455,11 @@ class Preprocessor(Loader):
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
-                voter_hist_df = pd.concat([voter_hist_df, pd.read_csv(i['obj'])], axis=0)
+                voter_hist_df = pd.concat(
+                    [voter_hist_df, pd.read_csv(i['obj'])], axis=0)
             elif "voter" in i['name'].lower():
-                voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])], axis=0)
+                voter_reg_df = pd.concat(
+                    [voter_reg_df, pd.read_csv(i['obj'])], axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
@@ -818,7 +830,7 @@ class Preprocessor(Loader):
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
         df_voters.drop(columns=buffer_cols, inplace=True)
-   
+
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -890,7 +902,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(elections.tolist()),
         }
         wanted_cols = self.config["ordered_columns"] + \
-                      self.config["ordered_generated_columns"]
+            self.config["ordered_generated_columns"]
         df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
