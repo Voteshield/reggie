@@ -422,10 +422,17 @@ class Preprocessor(Loader):
             file_obj=self.main_file, compression='unzip')
         widths = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                   2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
-        df = pd.DataFrame(columns=self.config['raw_s3_file'])
+        df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+
         for i in new_files:
-            logging.info("Loading file {}".format(i['name']))
-            df = pd.read_fwf(i['obj'], widths=widths, header=None)
+            if "count" not in i['name']:
+                logging.info("Loading file {}".format(i['name']))
+                new_df = pd.read_fwf(
+                    i['obj'], widths=widths, header=None,
+                    columns=self.config.raw_file_columns())
+                df_voter=pd.concat([df_voter, new_df], axis=0)
+                
+        print(df_voter)
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)

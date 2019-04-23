@@ -1,0 +1,227 @@
+file_type: fwf
+state: texas
+source: boe_download
+file_class: voter_file
+voter_id: VUID
+county_identifier: County_Code
+birthday_identifier: Date_of_Birth
+voter_status: Status_Code
+voter_status_active: ACT
+voter_status_inactive: INA
+party_identifier: Party_Affiliation
+date_format: '%m/%d/%Y'
+numeric_county: false
+generated_columns:
+  all_history: int[]
+  vote_type: text[]
+has_headers: NO
+format:
+  separate_hist: true
+  separate_counties_voter_file: true
+  separate_counties_hist_file: true
+  hist_election_rows: true
+  columnar_elections: false
+name_fields:
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
+ordered_generated_columns:
+  - all_history
+  - vote_type
+address_fields:
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+primary_key:
+  - pre_date
+  - post_date
+  - Voter_ID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  VUID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+additional_snapshot_columns:
+  all_history: text[]
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - county
+hist_columns:
+  - VUID
+  - Election_Date
+  - Election_Type
+  - Election_Party
+  - Election_Voting_Method
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  County_Code: text
+  Precinct: text
+  VUID: text
+  Last_Name: text
+  First_Name: text
+  Middle_Name: text
+  Former_Last_Name: text
+  Suffix: text
+  Gender: text
+  Date_of_Birth: text
+  Permanent_House_Number: text
+  Permanent_Designator: text
+  Permanent_Directional_Prefix: text
+  Permanent_Street_Name: text
+  Permanent_Street_Type: text
+  Permanent_Directional_Suffix: text
+  Permanent_Unit_Number: text
+  Permanent_Unit_Type: text
+  Permanent_City: text
+  Permanent_Zipcode: text
+  Mailing_Address_1: text
+  Mailing_Address_2: text
+  Mailing_City: text
+  Mailing_State: text
+  Mailing_Zipcode: text
+  Effective_Date_of_Registration: text
+  Status_Code: text
+  Hispanic_Surname_Flag: text
+  Election_Date: text
+  Election_Type: int
+  Election_Party: text
+  Election_Voting_Method: text
+
+ordered_columns:
+  - County_Code
+  - Precinct
+  - VUID
+  - Last_Name
+  - First_Name
+  - Middle_Name
+  - Former_Last_Name
+  - Suffix
+  - Gender
+  - Date_of_Birth
+  - Permanent_House_Number
+  - Permanent_Designator
+  - Permanent_Directional_Prefix
+  - Permanent_Street_Name
+  - Permanent_Street_Type
+  - Permanent_Directional_Suffix
+  - Permanent_Unit_Number
+  - Permanent_Unit_Type
+  - Permanent_City
+  - Permanent_Zipcode
+  - Mailing_Address_1
+  - Mailing_Address_2
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Effective_Date_of_Registration
+  - Status_Code
+  - Hispanic_Surname_Flag
+  - Election_Date
+  - Election_Type
+  - Election_Party
+  - Election_Voting_Method
+county_names:
+  Alachua: 1
+  Baker: 2
+  Bay: 3
+  Bradford: 4
+  Brevard: 5
+  Broward: 6
+  Calhoun: 7
+  Charlotte: 8
+  Citrus: 9
+  Clay: 10
+  Collier: 11
+  Columbia: 12
+  Miami-Dade: 13
+  Desoto: 14
+  Dixie: 15
+  Duval: 16
+  Escambia: 17
+  Flagler: 18
+  Franklin: 19
+  Gadsden: 20
+  Gilchrist: 21
+  Glades: 22
+  Gulf: 23
+  Hamilton: 24
+  Hardee: 25
+  Hendry: 26
+  Hernando: 27
+  Highlands: 28
+  Hillsborough: 29
+  Holmes: 30
+  Indian_River: 31
+  Jackson: 32
+  Jefferson: 33
+  Lafayette: 34
+  Lake: 35
+  Lee: 36
+  Leon: 37
+  Levy: 38
+  Liberty: 39
+  Madison: 40
+  Manatee: 41
+  Marion: 42
+  Martin: 43
+  Monroe: 44
+  Nassau: 45
+  Okaloosa: 46
+  Okeechobee: 47
+  Orange: 48
+  Osceola: 49
+  Palm_Beach: 50
+  Pasco: 51
+  Pinellas: 52
+  Polk: 53
+  Putnam: 54
+  Santa_Rosa: 55
+  Sarasota: 56
+  Seminole: 57
+  St._Johns: 58
+  St._Lucie: 59
+  Sumter: 60
+  Suwannee: 61
+  Taylor: 62
+  Union: 63
+  Volusia: 64
+  Wakulla: 65
+  Walton: 66
+  Washington: 67
+race_options:
+  '1': american_indian_or_alaskan_native
+  '2': asian_or_pacific_islander
+  '3': black
+  '4': hispanic
+  '5': white
+  '6': other
+  '7': multi_racial
+  '9': unknown

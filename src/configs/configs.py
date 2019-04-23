@@ -51,6 +51,12 @@ class Config(object):
     def items(self):
         return self.data.items()
 
+    def raw_file_columns(self):
+        if self.data["raw_ordered_columns"]:
+            return self.data["raw_ordered_columns"]
+        else:
+            return self.data["ordered_columns"]
+
     def database_columns(self):
         return [c for c in self.data["ordered_columns"] if c not in
                 self.data["blacklist_columns"]]
