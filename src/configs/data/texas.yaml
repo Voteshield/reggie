@@ -6,11 +6,11 @@ voter_id: VUID
 county_identifier: County_Code
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
-voter_status_active: ACT
-voter_status_inactive: INA
-party_identifier: Party_Affiliation
+voter_status_active: 
+voter_status_inactive: 
+party_identifier: party_identifier
 date_format: '%m/%d/%Y'
-numeric_county: false
+numeric_county: true
 generated_columns:
   all_history: int[]
   vote_type: text[]
@@ -22,26 +22,25 @@ format:
   hist_election_rows: true
   columnar_elections: false
 name_fields:
-  - Name_Last
-  - Name_Suffix
-  - Name_First
-  - Name_Middle
+  - Last_Name
+  - First_Name
+  - Middle_Name
+  - Former_Last_Name
+  - Suffix
 ordered_generated_columns:
   - all_history
   - vote_type
 address_fields:
-  - Residence_Address_Line_1
-  - Residence_Address_Line_2
-  - Residence_City
-  - Residence_State
-  - Residence_Zipcode
-  - Mailing_Address_Line_1
-  - Mailing_Address_Line_2
-  - Mailing_Address_Line_3
-  - Mailing_City
-  - Mailing_State
-  - Mailing_Zipcode
-  - Mailing_Country
+  - Permanent_House_Number
+  - Permanent_Designator
+  - Permanent_Directional_Prefix
+  - Permanent_Street_Name
+  - Permanent_Street_Type
+  - Permanent_Directional_Suffix
+  - Permanent_Unit_Number
+  - Permanent_Unit_Type
+  - Permanent_City
+  - Permanent_Zipcode
 primary_key:
   - pre_date
   - post_date
@@ -111,9 +110,10 @@ columns:
   Status_Code: text
   Hispanic_Surname_Flag: text
   Election_Date: text
-  Election_Type: int
+  Election_Type: text
   Election_Party: text
   Election_Voting_Method: text
+  party_identifier: text
 
 ordered_columns:
   - County_Code
@@ -150,78 +150,7 @@ ordered_columns:
   - Election_Voting_Method
 county_names:
   Alachua: 1
-  Baker: 2
-  Bay: 3
-  Bradford: 4
-  Brevard: 5
-  Broward: 6
-  Calhoun: 7
-  Charlotte: 8
-  Citrus: 9
-  Clay: 10
-  Collier: 11
-  Columbia: 12
-  Miami-Dade: 13
-  Desoto: 14
-  Dixie: 15
-  Duval: 16
-  Escambia: 17
-  Flagler: 18
-  Franklin: 19
-  Gadsden: 20
-  Gilchrist: 21
-  Glades: 22
-  Gulf: 23
-  Hamilton: 24
-  Hardee: 25
-  Hendry: 26
-  Hernando: 27
-  Highlands: 28
-  Hillsborough: 29
-  Holmes: 30
-  Indian_River: 31
-  Jackson: 32
-  Jefferson: 33
-  Lafayette: 34
-  Lake: 35
-  Lee: 36
-  Leon: 37
-  Levy: 38
-  Liberty: 39
-  Madison: 40
-  Manatee: 41
-  Marion: 42
-  Martin: 43
-  Monroe: 44
-  Nassau: 45
-  Okaloosa: 46
-  Okeechobee: 47
-  Orange: 48
-  Osceola: 49
-  Palm_Beach: 50
-  Pasco: 51
-  Pinellas: 52
-  Polk: 53
-  Putnam: 54
-  Santa_Rosa: 55
-  Sarasota: 56
-  Seminole: 57
-  St._Johns: 58
-  St._Lucie: 59
-  Sumter: 60
-  Suwannee: 61
-  Taylor: 62
-  Union: 63
-  Volusia: 64
-  Wakulla: 65
-  Walton: 66
-  Washington: 67
+  
 race_options:
   '1': american_indian_or_alaskan_native
-  '2': asian_or_pacific_islander
-  '3': black
-  '4': hispanic
-  '5': white
-  '6': other
-  '7': multi_racial
-  '9': unknown
+  

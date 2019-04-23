@@ -431,7 +431,10 @@ class Preprocessor(Loader):
                     i['obj'], widths=widths, header=None,
                     columns=self.config.raw_file_columns())
                 df_voter=pd.concat([df_voter, new_df], axis=0)
-                
+        df_voter[self.config["party_identifier"]] = np.nan
+        for c in df_voter.columns:
+            print("----{}----".format(c))
+            print(df_voter[c].value_counts(dropna=False))
         print(df_voter)
 
     def preprocess_ohio(self):
@@ -1518,7 +1521,8 @@ class Preprocessor(Loader):
             'north_carolina': self.preprocess_north_carolina,
             'kansas': self.preprocess_kansas,
             'ohio': self.preprocess_ohio,
-            'minnesota': self.preprocess_minnesota
+            'minnesota': self.preprocess_minnesota,
+            'texas': self.preprocess_texas
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
