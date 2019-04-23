@@ -6,10 +6,11 @@ voter_id: VUID
 county_identifier: County_Code
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
-voter_status_active: 
-voter_status_inactive: 
+voter_status_active: V
+voter_status_suspense: S
+voter_status_cancelled: C 
 party_identifier: party_identifier
-date_format: '%m/%d/%Y'
+date_format: '%Y%m%d'
 numeric_county: true
 generated_columns:
   all_history: int[]

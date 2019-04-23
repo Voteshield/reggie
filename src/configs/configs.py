@@ -52,7 +52,7 @@ class Config(object):
         return self.data.items()
 
     def raw_file_columns(self):
-        if self.data["raw_ordered_columns"]:
+        if "raw_ordered_columns" in self.data:
             return self.data["raw_ordered_columns"]
         else:
             return self.data["ordered_columns"]
