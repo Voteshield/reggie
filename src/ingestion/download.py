@@ -24,6 +24,7 @@ from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import bs4
+import re
 
 
 def ohio_get_last_updated():
@@ -423,6 +424,20 @@ class Preprocessor(Loader):
         widths = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                   2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
+
+        """
+        unique_dates = []
+        for i in new_files:
+            if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
+                print(i['name'])
+                match = re.search(r'\_\d{8}[\_\.]', i['name'])
+                if match is not None:
+                    date = str(match.group(0))
+                    if date not in unique_dates:
+                        unique_dates.append(date)
+        logging.info("")
+        """
 
         for i in new_files:
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
@@ -430,33 +445,30 @@ class Preprocessor(Loader):
                 new_df = pd.read_fwf(
                     i['obj'], widths=widths, header=None)
                 new_df.columns = self.config.raw_file_columns()
-                df_voter = pd.concat([df_voter, new_df], axis=0)
+                if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
+                    df_voter = pd.concat([df_voter, new_df], axis=0, ignore_index=True)
+                else:
+                    df_hist = pd.concat([df_hist, new_df], axis=0, ignore_index=True)
         df_voter[self.config["party_identifier"]] = np.nan
-        
-        df_hist = df_voter[self.config["hist_columns"]].dropna(subset=['Election_Date'])
-        df_voter.drop_duplicates(subset=['VUID'], inplace=True, keep='first')
-        for c in df_voter.columns:
-            print("----{}----".format(c))
-            print(df_voter[c].value_counts(dropna=False))
 
         
-        
 
+        df_hist[self.config['hist_columns']] = df_hist[self.config['hist_columns']].replace(np.nan, '', regex=True)
+        
+        #df_hist['Election_Date'] = df_hist['Election_Date'].str.replace('A', '1', regex=True)
         df_hist["election_name"] = df_hist["Election_Date"] + \
-            "_" + df_hist['Election_Type'] + "_" + df_hist["Election_Voting_Method"] + \
-            "_" + df_hist['Election_Party']
-
-        for c in df_hist.columns:
-            print("----{}----".format(c))
-            print(df_hist[c].value_counts(dropna=False))
+            "_" + df_hist['Election_Type'] + "_" + df_hist['Election_Party']
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
-        """
+        def texas_datetime(x):
+            try:
+                return datetime.strptime(x[1][0:8], "%Y%m%d")
+            except (ValueError):
+                return datetime(1970, 1, 1)
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
-                             key=lambda x: datetime.strptime(x[1][:-2],
-                                                             "%m/%d/%Y"),
+                             key=lambda x: texas_datetime(x),
                              reverse=True)]
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
@@ -465,19 +477,34 @@ class Preprocessor(Loader):
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
-        voter_hist_df["array_position"] = voter_hist_df["election_name"].map(
+        df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
 
-        logging.info("Minnesota: history apply")
-        voter_groups = voter_hist_df.groupby("VoterId")
+        logging.info("Texas: history apply")
+        voter_groups = df_hist.groupby(self.config['voter_id'])
         all_history = voter_groups["array_position"].apply(list)
-        vote_type = voter_groups["VotingMethod"].apply(list)
-        
-        print(df_voter)
-        print(df_voter.columns)
-        print("-----------------")
-        print(df_hist.head())
-        """
+        vote_type = voter_groups["Election_Voting_Method"].apply(list)
+
+        df_voter = df_voter.set_index(self.config["voter_id"])
+
+        df_voter["all_history"] = all_history
+        df_voter["vote_type"] = vote_type
+        gc.collect()
+
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
+
+        self.meta = {
+            "message": "texas_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        gc.collect()
+        logging.info("Texas: writing out")
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df_voter.to_csv()))
         
 
     def preprocess_ohio(self):

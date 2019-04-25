@@ -91,7 +91,7 @@ columns:
   Former_Last_Name: text
   Suffix: text
   Gender: text
-  Date_of_Birth: text
+  Date_of_Birth: date
   Permanent_House_Number: text
   Permanent_Designator: text
   Permanent_Directional_Prefix: text
@@ -110,7 +110,7 @@ columns:
   Effective_Date_of_Registration: text
   Status_Code: text
   Hispanic_Surname_Flag: text
-  Election_Date: text
+  Election_Date: date
   Election_Type: text
   Election_Party: text
   Election_Voting_Method: text
@@ -145,6 +145,13 @@ ordered_columns:
   - Effective_Date_of_Registration
   - Status_Code
   - Hispanic_Surname_Flag
+  - Election_Date
+  - Election_Type
+  - Election_Party
+  - Election_Voting_Method
+
+blacklist_columns:
+  - VUID
   - Election_Date
   - Election_Type
   - Election_Party
