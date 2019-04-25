@@ -150,12 +150,6 @@ ordered_columns:
   - Election_Party
   - Election_Voting_Method
 
-blacklist_columns:
-  - VUID
-  - Election_Date
-  - Election_Type
-  - Election_Party
-  - Election_Voting_Method
 county_names:
   Alachua: 1
   

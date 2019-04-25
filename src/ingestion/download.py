@@ -24,7 +24,6 @@ from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import bs4
-import re
 
 
 def ohio_get_last_updated():
@@ -450,12 +449,7 @@ class Preprocessor(Loader):
                 else:
                     df_hist = pd.concat([df_hist, new_df], axis=0, ignore_index=True)
         df_voter[self.config["party_identifier"]] = np.nan
-
-        
-
         df_hist[self.config['hist_columns']] = df_hist[self.config['hist_columns']].replace(np.nan, '', regex=True)
-        
-        #df_hist['Election_Date'] = df_hist['Election_Date'].str.replace('A', '1', regex=True)
         df_hist["election_name"] = df_hist["Election_Date"] + \
             "_" + df_hist['Election_Type'] + "_" + df_hist['Election_Party']
 
@@ -505,7 +499,6 @@ class Preprocessor(Loader):
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voter.to_csv()))
-        
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
