@@ -34,7 +34,7 @@ class Config(object):
         return config
 
     """
-    In the following 4 methods we recreate the functionality of a dictionary, 
+    In the following 4 methods we recreate the functionality of a dictionary,
     as needed in the rest of the application.
     """
     def __getitem__(self, key):
@@ -151,8 +151,8 @@ class Config(object):
             "Date_changed",
             "Last_contact_date",
             "text_election_code_1",
-            "text_election_code_2", 
-            "text_election_code_3" ,
+            "text_election_code_2",
+            "text_election_code_3",
             "text_election_code_4",
             "text_election_code_5",
             "text_election_code_6",

@@ -2,16 +2,11 @@ from configs.configs import Config
 import requests
 import urllib2
 import zipfile
-from ingestion.download import Loader, FileItem
+from ingestion.download import Loader, FileItem, ohio_get_last_updated
 from constants import RAW_FILE_PREFIX
 import xml.etree.ElementTree
 import logging
 from dateutil import parser
-import bs4
-import pandas as pd
-from StringIO import StringIO
-import os
-from io import BytesIO
 
 
 def state_download(state):
@@ -36,8 +31,7 @@ def state_download(state):
             for f in zipped_files:
                 myzip.write(f)
         file_to_zip = FileItem("NC file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today,
-                        clean_up_tmp_files=False)
+        loader = Loader(config_file=config_file, force_date=today)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
     elif state == "ohio":
@@ -63,8 +57,7 @@ def state_download(state):
                 myzip.write(f)
         logging.info("Uploading")
         file_to_zip = FileItem("OH file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today,
-                        clean_up_tmp_files=False)
+        loader = Loader(config_file=config_file, force_date=today)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
 
@@ -95,11 +88,3 @@ def nc_date_grab():
 
     file_date_vf = parser.parse(file_date_vf).isoformat()
     return file_date_vf
-
-
-def ohio_get_last_updated():
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
-                        verify=False).text
-    soup = bs4.BeautifulSoup(html, "html.parser")
-    results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
-    return max(parser.parse(a.text) for a in results)

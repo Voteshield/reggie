@@ -2,10 +2,7 @@ import uuid
 from datetime import datetime
 from subprocess import Popen, PIPE
 from datetime import date as dt
-
-import bs4
 import pandas as pd
-import requests
 from dateutil import parser
 import json
 from constants import *
@@ -26,10 +23,10 @@ from gzip import GzipFile
 from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
+import bs4
 
 
 def ohio_get_last_updated():
-
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
                         verify=False).text
     soup = bs4.BeautifulSoup(html, "html.parser")
@@ -107,9 +104,8 @@ class Loader(object):
     """
 
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, clean_up_tmp_files=True, testing=False):
+                 force_file=None, testing=False):
         self.config_file_path = config_file
-        self.clean_up_tmp_files = clean_up_tmp_files
         config = Config(file_name=config_file)
         self.config = config
         self.chunk_urls = config[
@@ -144,11 +140,7 @@ class Loader(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.clean_up_tmp_files:
-            self.clean_up()
-
-    def clean_up(self):
-        logging.info("cleaning done")
+        return
 
     def compress(self):
         """
@@ -301,7 +293,8 @@ class Loader(object):
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config and file_class != "voter_file":
+        if "native_file_extension" in self.config and \
+           file_class != "voter_file":
             k = generate_s3_key(file_class, self.state,
                                 self.source, self.download_date,
                                 self.config["native_file_extension"])
@@ -437,7 +430,6 @@ class Preprocessor(Loader):
                         io_obj=StringIO(df.to_csv()))
 
     def preprocess_minnesota(self):
-        config = Config("minnesota")
         logging.info("Minnesota: loading voter file")
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
@@ -445,9 +437,12 @@ class Preprocessor(Loader):
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
-                voter_hist_df = pd.concat([voter_hist_df, pd.read_csv(i['obj'])], axis=0)
+                voter_hist_df = pd.concat([voter_hist_df,
+                                          pd.read_csv(i['obj'])],
+                                          axis=0)
             elif "voter" in i['name'].lower():
-                voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])], axis=0)
+                voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])],
+                                         axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
@@ -719,15 +714,18 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         for f in new_files:
-            if ".txt" in f['name'] and "._" not in f['name'] and "description" not in f['name'].lower():
+            if (".txt" in f['name']) and ("._" not in f['name']) and \
+               ("description" not in f['name'].lower()):
                 logging.info("reading kansas file from {}".format(f['name']))
                 df = pd.read_csv(f['obj'], sep="\t",
-                                 index_col=False, engine='c', error_bad_lines=False)
+                                 index_col=False, engine='c',
+                                 error_bad_lines=False)
         try:
             df.columns = self.config["ordered_columns"]
         except:
             df.columns = self.config["ordered_columns_new"]
-            for i in set(list(self.config["ordered_columns"])) - set(list(self.config["ordered_columns_new"])):
+            for i in set(list(self.config["ordered_columns"])) - \
+                    set(list(self.config["ordered_columns_new"])):
                 df[i] = None
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]].str.replace(" ", "")
@@ -818,7 +816,7 @@ class Preprocessor(Loader):
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
         df_voters.drop(columns=buffer_cols, inplace=True)
-   
+
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
             df_voters[c][null_rows] = ""
@@ -890,7 +888,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(elections.tolist()),
         }
         wanted_cols = self.config["ordered_columns"] + \
-                      self.config["ordered_generated_columns"]
+            self.config["ordered_generated_columns"]
         df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
@@ -1022,9 +1020,11 @@ class Preprocessor(Loader):
 
         self.config = Config("north_carolina")
         for i in new_files:
-            if "ncvhis" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
+            if ("ncvhis" in i['name']) and (".txt" in i['name']) and \
+               ("MACOSX" not in i['name']):
                 vote_hist_file = i
-            elif "ncvoter" in i['name'] and ".txt" in i['name'] and "MACOSX" not in i['name']:
+            elif ("ncvoter" in i['name']) and (".txt" in i['name']) and \
+                 ("MACOSX" not in i['name']):
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
                                quotechar='"')
@@ -1077,8 +1077,9 @@ class Preprocessor(Loader):
     def preprocess_missouri(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
-        preferred_files = [x for x in new_files if ("VotersList" in x["name"])
-                           and (".txt" in x["name"])]
+        preferred_files = [x for x in new_files
+                           if ("VotersList" in x["name"]) and
+                              (".txt" in x["name"])]
         if len(preferred_files) > 0:
             main_file = preferred_files[0]
         else:
@@ -1141,10 +1142,10 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config("michigan")
         new_files = self.unpack_files(file_obj=self.main_file)
-        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"]
-                       or 'EntireStateVoters' in n["name"]] + [None])[0]
-        hist_file = ([n for n in new_files if 'entire_state_h' in n["name"]
-                      or 'EntireStateVoterHistory' in n["name"]] + [None])[0]
+        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"] or
+                      'EntireStateVoters' in n["name"]] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n["name"] or
+                      'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
         logging.info("Detected voter file: " + voter_file["name"])
@@ -1306,7 +1307,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(vdf.to_csv(encoding='utf-8', index=False)))
+                        io_obj=StringIO(vdf.to_csv(encoding='utf-8',
+                                                   index=False)))
 
     def preprocess_pennsylvania(self):
         config = Config('pennsylvania')
@@ -1478,7 +1480,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(vdf.to_csv(encoding='utf-8', index=False)))
+                        io_obj=StringIO(vdf.to_csv(encoding='utf-8',
+                                                   index=False)))
 
     def execute(self):
         return self.state_router()
