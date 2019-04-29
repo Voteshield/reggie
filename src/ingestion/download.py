@@ -456,6 +456,8 @@ class Preprocessor(Loader):
                     df_voter = pd.concat([df_voter, new_df], axis=0, ignore_index=True)
                 else:
                     df_hist = pd.concat([df_hist, new_df], axis=0, ignore_index=True)
+        if df_hist.empty:
+            logging.info("This file contains no voter history")
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[self.config['hist_columns']].replace(np.nan, '', regex=True)
 
