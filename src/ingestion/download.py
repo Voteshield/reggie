@@ -420,7 +420,9 @@ class Preprocessor(Loader):
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
-        widths = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
+        widths_one = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
+                  2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        widths_two = [3, 4, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                   2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
         df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
@@ -441,17 +443,24 @@ class Preprocessor(Loader):
         for i in new_files:
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
                 logging.info("Loading file {}".format(i['name']))
-                new_df = pd.read_fwf(
-                    i['obj'], widths=widths, header=None)
+                line_length = len(i['obj'].readline())
+                print(line_length)
+                if line_length == 680:
+                    new_df = pd.read_fwf(
+                        i['obj'], widths=widths_two, header=None)
+                elif line_length == 686:
+                    new_df = pd.read_fwf(
+                        i['obj'], widths=widths_one, header=None)
                 new_df.columns = self.config.raw_file_columns()
                 if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
                     df_voter = pd.concat([df_voter, new_df], axis=0, ignore_index=True)
                 else:
                     df_hist = pd.concat([df_hist, new_df], axis=0, ignore_index=True)
-        df_voter[self.config["party_identifier"]] = np.nan
+        df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[self.config['hist_columns']].replace(np.nan, '', regex=True)
-        df_hist["election_name"] = df_hist["Election_Date"] + \
-            "_" + df_hist['Election_Type'] + "_" + df_hist['Election_Party']
+
+        df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
+            "_" + df_hist['Election_Type'].astype(str) + "_" + df_hist['Election_Party'].astype(str)
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
@@ -473,7 +482,6 @@ class Preprocessor(Loader):
 
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
-
         logging.info("Texas: history apply")
         voter_groups = df_hist.groupby(self.config['voter_id'])
         all_history = voter_groups["array_position"].apply(list)
@@ -494,7 +502,6 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
         gc.collect()
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
