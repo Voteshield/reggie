@@ -12,6 +12,8 @@ voter_status_cancelled: C
 voter_status_inactive: I
 party_identifier: party_identifier
 no_party_affiliation: npa
+democratic_party: D
+republican_party: R
 date_format: '%Y%m%d'
 numeric_county: true
 generated_columns:
