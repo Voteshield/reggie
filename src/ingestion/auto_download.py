@@ -87,5 +87,5 @@ def nc_date_grab():
         logging.info(
             "Different dates between files, reverting to voter file date")
 
-    file_date_vf = parser.parse(file_date_vf).isoformat()
+    file_date_vf = parser.parse(file_date_vf).isoformat()[0:10]
     return file_date_vf

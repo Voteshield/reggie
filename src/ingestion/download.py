@@ -25,6 +25,10 @@ from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import bs4
 import requests
+import urllib2
+import xml.etree.ElementTree
+import os
+
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
@@ -32,6 +36,32 @@ def ohio_get_last_updated():
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
+
+
+def nc_date_grab():
+    nc_file = urllib2.urlopen(
+        'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
+    data = nc_file.read()
+    nc_file.close()
+    root = xml.etree.ElementTree.fromstring(data)
+
+    def nc_parse_xml(file_name):
+        for child in root:
+            if "Contents" in child.tag:
+                z = 0
+                for i in child:
+                    if file_name in i.text:
+                        z += 1
+                        continue
+                    if z == 1:
+                        return i.text
+    file_date_vf = nc_parse_xml(file_name="data/ncvoter_Statewide.zip")
+    file_date_his = nc_parse_xml(file_name="data/ncvhis_Statewide.zip")
+    if file_date_his[0:10] != file_date_vf[0:10]:
+        logging.info(
+            "Different dates between files, reverting to voter file date")
+    file_date_vf = parser.parse(file_date_vf).isoformat()[0:10]
+    return file_date_vf
 
 
 def get_object(key, fn):
@@ -305,8 +335,10 @@ class Loader(object):
     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
-        if self.config["state"] == 'ohio' and self.obj_will_download:
-            self.download_date = ohio_get_last_updated().isoformat()
+        if self.config["state"] == 'ohio':
+            self.download_date = str(ohio_get_last_updated().isoformat())[0:10]
+        elif self.config["state"] == "north_carolina":
+            self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
         s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
