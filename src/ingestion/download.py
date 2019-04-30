@@ -24,7 +24,7 @@ from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import bs4
-
+import requests
 
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
