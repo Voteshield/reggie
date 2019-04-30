@@ -26,6 +26,7 @@ from StringIO import StringIO
 import bs4
 import requests
 
+
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
                         verify=False).text
@@ -423,23 +424,9 @@ class Preprocessor(Loader):
         widths_one = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                   2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         widths_two = [3, 4, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
-                  2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+                      2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
         df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
-
-        """
-        unique_dates = []
-        for i in new_files:
-            if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
-                print(i['name'])
-                match = re.search(r'\_\d{8}[\_\.]', i['name'])
-                if match is not None:
-                    date = str(match.group(0))
-                    if date not in unique_dates:
-                        unique_dates.append(date)
-        logging.info("")
-        """
-
         for i in new_files:
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
                 logging.info("Loading file {}".format(i['name']))
@@ -453,20 +440,26 @@ class Preprocessor(Loader):
                         i['obj'], widths=widths_one, header=None)
                 new_df.columns = self.config.raw_file_columns()
                 if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
-                    df_voter = pd.concat([df_voter, new_df], axis=0, ignore_index=True)
+                    df_voter = pd.concat(
+                        [df_voter, new_df], axis=0, ignore_index=True)
                 else:
-                    df_hist = pd.concat([df_hist, new_df], axis=0, ignore_index=True)
+                    df_hist = pd.concat([df_hist, new_df],
+                                        axis=0, ignore_index=True)
             del i['obj']
         if df_hist.empty:
             logging.info("This file contains no voter history")
         df_voter[self.config["party_identifier"]] = 'npa'
-        df_hist[self.config['hist_columns']] = df_hist[self.config['hist_columns']].replace(np.nan, '', regex=True)
+        df_hist[self.config['hist_columns']] = df_hist[
+            self.config['hist_columns']].replace(np.nan, '', regex=True)
 
         df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
-            "_" + df_hist['Election_Type'].astype(str) + "_" + df_hist['Election_Party'].astype(str)
+            "_" + \
+            df_hist['Election_Type'].astype(
+                str) + "_" + df_hist['Election_Party'].astype(str)
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
+
         def texas_datetime(x):
             try:
                 return datetime.strptime(x[1][0:8], "%Y%m%d")
