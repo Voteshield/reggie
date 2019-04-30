@@ -7,7 +7,6 @@ from constants import RAW_FILE_PREFIX
 import xml.etree.ElementTree
 import logging
 from dateutil import parser
-import os
 
 
 def state_download(state):
