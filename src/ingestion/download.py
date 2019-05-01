@@ -30,6 +30,7 @@ import xml.etree.ElementTree
 import os
 
 
+
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
                         verify=False).text
@@ -468,12 +469,11 @@ class Preprocessor(Loader):
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
-                voter_hist_df = pd.concat([voter_hist_df,
-                                          pd.read_csv(i['obj'])],
-                                          axis=0)
+                voter_hist_df = pd.concat(
+                    [voter_hist_df, pd.read_csv(i['obj'])], axis=0)
             elif "voter" in i['name'].lower():
-                voter_reg_df = pd.concat([voter_reg_df, pd.read_csv(i['obj'])],
-                                         axis=0)
+                voter_reg_df = pd.concat(
+                    [voter_reg_df, pd.read_csv(i['obj'])], axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
@@ -523,6 +523,103 @@ class Preprocessor(Loader):
         logging.info("Minnesota: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_reg_df.to_csv()))
+
+    def preprocess_colorado(self):
+        config = Config("colorado")
+        new_files = self.unpack_files(compression='unzip',
+                                      file_obj=self.main_file)
+        df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+        df_hist = pd.DataFrame(columns=self.config['hist_columns'])
+        df_master_voter = pd.DataFrame(
+            columns=self.config['master_voter_columns'])
+        master_vf_version = True
+
+        def master_to_reg_df(df):
+            df.columns = self.config['master_voter_columns']
+            df['STATUS'] = df['VOTER_STATUS']
+            df['PRECINCT'] = df['PRECINCT_CODE']
+            df['VOTER_NAME'] = df['LAST_NAME'] + ", " + df['FIRST_NAME'] + \
+                " " + df['MIDDLE_NAME']
+            df = pd.concat(
+                [df, pd.DataFrame(columns=self.config['blacklist_columns'])])
+            df = df[self.config.processed_file_columns()]
+            return(df)
+
+        for i in new_files:
+            if "Registered_Voters_List" in i['name']:
+                master_vf_version = False
+        for i in new_files:
+
+            if "Registered_Voters_List" in i['name'] and not master_vf_version:
+                logging.info("reading in {}".format(i['name']))
+                df_voter = pd.concat([df_voter, pd.read_csv(i['obj'])], axis=0)
+
+            elif "Master_Voting_History" in i['name'] and "MACOS" not in i['name']:
+                if "Voter_Details" not in i['name']:
+                    logging.info("reading in {}".format(i['name']))
+                    new_df = pd.read_csv(i['obj'], compression='gzip')
+                    df_hist = pd.concat([df_hist, new_df], axis=0)
+
+                if "Voter_Details" in i['name'] and master_vf_version:
+                    logging.info("reading in {}".format(i['name']))
+                    new_df = pd.read_csv(i['obj'], compression='gzip')
+                    new_df.columns = self.config['master_voter_columns']
+                    df_master_voter = pd.concat(
+                        [df_master_voter, new_df], axis=0)
+        if df_voter.empty:
+            df_voter = master_to_reg_df(df_master_voter)
+        if df_hist.empty:
+            raise ValueError("must supply a file containing voter history")
+        df_hist['VOTING_METHOD'] = df_hist[
+            'VOTING_METHOD'].replace(np.nan, '')
+        df_hist["ELECTION_DATE"] = pd.to_datetime(df_hist["ELECTION_DATE"],
+                                                  format="%m/%d/%Y",
+                                                  errors='coerce')
+        df_hist["election_name"] = df_hist["ELECTION_DATE"].astype(
+            str) + "_" + df_hist["VOTING_METHOD"]
+
+        valid_elections, counts = np.unique(df_hist["election_name"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][0:10],
+                                                             "%Y-%m-%d"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+
+        df_hist["array_position"] = df_hist["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+
+        logging.info("Colorado: history apply")
+        voter_groups = df_hist.groupby(self.config["voter_id"])
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["VOTING_METHOD"].apply(list)
+
+        df_voter = df_voter.set_index(self.config["voter_id"])
+
+        df_voter["all_history"] = all_history
+        df_voter["vote_type"] = vote_type
+        gc.collect()
+
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
+
+        self.meta = {
+            "message": "Colorado_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        gc.collect()
+        logging.info("Colorado: writing out")
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df_voter.to_csv()))
 
     def preprocess_georgia(self):
         config = Config("georgia")
@@ -1532,7 +1629,8 @@ class Preprocessor(Loader):
             'north_carolina': self.preprocess_north_carolina,
             'kansas': self.preprocess_kansas,
             'ohio': self.preprocess_ohio,
-            'minnesota': self.preprocess_minnesota
+            'minnesota': self.preprocess_minnesota,
+            'colorado': self.preprocess_colorado
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
