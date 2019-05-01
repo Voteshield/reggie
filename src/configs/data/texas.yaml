@@ -84,9 +84,9 @@ summary_types:
   - int
   - int
   - int
-  - text
+  - int
 columns:
-  County_Code: text
+  County_Code: int
   Precinct: text
   VUID: text
   Last_Name: text
