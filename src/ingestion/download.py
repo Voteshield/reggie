@@ -318,7 +318,6 @@ class Loader(object):
 
 
 class Preprocessor(Loader):
-
     def __init__(self, raw_s3_file, config_file, **kwargs):
 
         super(Preprocessor, self).__init__(
