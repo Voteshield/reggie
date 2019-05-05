@@ -342,11 +342,10 @@ class Loader(object):
             self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-            .put(Body=file_item.obj, ServerSideEncryption='AES256')
-        s3.Object(S3_BUCKET,
-                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
-            .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
+        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class)).put(
+            Body=file_item.obj, ServerSideEncryption='AES256')
+        s3.Object(S3_BUCKET, self.generate_key(file_class=META_FILE_PREFIX) + ".json").put(
+            Body=json.dumps(meta), ServerSideEncryption='AES256')
 
 
 class Preprocessor(Loader):

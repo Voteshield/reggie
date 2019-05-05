@@ -8,7 +8,7 @@ import numpy as np
 from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
 from configs.configs import Config
-from storage import get_raw_s3_uploads, state_from_str
+from storage import get_raw_s3_uploads, state_from_str, get_metadata_for_key
 from ingestion.download import Preprocessor
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, \
     RAW_FILE_PREFIX
@@ -376,7 +376,8 @@ class TestFileBuilder(Preprocessor):
 class ProcessedTestFileBuilder(object):
 
     def __init__(self, s3_key, compression="gzip", size=5000, randomize=False):
-        self.df, self.meta = Snapshot.load_from_s3(
+        self.meta = get_metadata_for_key(s3_key)
+        self.df = Snapshot.load_from_s3(
             s3_key, compression=compression)
         self.state = state_from_str(s3_key)
         self.randomize = randomize
