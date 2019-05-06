@@ -19,6 +19,7 @@ numeric_county: true
 generated_columns:
   all_history: int[]
   vote_type: text[]
+missing_required_fields: true
 has_headers: NO
 format:
   separate_hist: true

@@ -431,7 +431,6 @@ class Preprocessor(Loader):
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
                 logging.info("Loading file {}".format(i['name']))
                 line_length = len(i['obj'].readline())
-                print(line_length)
                 if line_length == 680:
                     new_df = pd.read_fwf(
                         i['obj'], widths=widths_two, header=None)
@@ -491,7 +490,8 @@ class Preprocessor(Loader):
 
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
-        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
+            'Permanent_Zipcode', 'Permanent_House_Number', 'Mailing_Zipcode'])
 
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),
