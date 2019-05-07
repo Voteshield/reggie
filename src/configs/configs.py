@@ -6,6 +6,7 @@ config_cache = {}
 
 
 class Config(object):
+
     def __init__(self, state=None, file_name=None):
         if state is None and file_name is None:
             raise ValueError("either state or config file must be passed")
@@ -36,6 +37,7 @@ class Config(object):
     In the following 4 methods we recreate the functionality of a dictionary,
     as needed in the rest of the application.
     """
+
     def __getitem__(self, key):
         return self.data[key]
 
@@ -60,6 +62,20 @@ class Config(object):
     def database_columns(self):
         return [c for c in self.data["ordered_columns"] if c not in
                 self.data["blacklist_columns"]]
+
+    def raw_file_columns(self):
+        """
+        raw file columns is used to set the column names in the
+        beginning of the file formatting, when the naming of the
+        columns is different from the columns in the semi-universal format.
+        :return: list of raw columns if columns are different
+        from database columns
+        """
+
+        if "raw_ordered_columns" in self.data:
+            return self.data["raw_ordered_columns"]
+        else:
+            return self.data["ordered_columns"]
 
     def processed_file_columns(self):
         return self.data["ordered_columns"]

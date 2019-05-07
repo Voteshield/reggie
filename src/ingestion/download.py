@@ -25,6 +25,11 @@ from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import bs4
 import requests
+import urllib2
+import xml.etree.ElementTree
+import os
+
+
 
 
 def ohio_get_last_updated():
@@ -33,6 +38,32 @@ def ohio_get_last_updated():
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
+
+
+def nc_date_grab():
+    nc_file = urllib2.urlopen(
+        'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
+    data = nc_file.read()
+    nc_file.close()
+    root = xml.etree.ElementTree.fromstring(data)
+
+    def nc_parse_xml(file_name):
+        for child in root:
+            if "Contents" in child.tag:
+                z = 0
+                for i in child:
+                    if file_name in i.text:
+                        z += 1
+                        continue
+                    if z == 1:
+                        return i.text
+    file_date_vf = nc_parse_xml(file_name="data/ncvoter_Statewide.zip")
+    file_date_his = nc_parse_xml(file_name="data/ncvhis_Statewide.zip")
+    if file_date_his[0:10] != file_date_vf[0:10]:
+        logging.info(
+            "Different dates between files, reverting to voter file date")
+    file_date_vf = parser.parse(file_date_vf).isoformat()[0:10]
+    return file_date_vf
 
 
 def get_object(key, fn):
@@ -125,7 +156,6 @@ class Loader(object):
             self.download_date = parser.parse(force_date).isoformat()
         else:
             self.download_date = datetime.now().isoformat()
-
         if force_file is not None:
             working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
             logging.info("copying {} to {}".format(force_file, working_file))
@@ -307,8 +337,10 @@ class Loader(object):
     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
-        if self.config["state"] == 'ohio' and self.obj_will_download:
-            self.download_date = ohio_get_last_updated().isoformat()
+        if self.config["state"] == 'ohio':
+            self.download_date = str(ohio_get_last_updated().isoformat())[0:10]
+        elif self.config["state"] == "north_carolina":
+            self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
         s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
@@ -577,6 +609,103 @@ class Preprocessor(Loader):
         logging.info("Minnesota: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_reg_df.to_csv()))
+
+    def preprocess_colorado(self):
+        config = Config("colorado")
+        new_files = self.unpack_files(compression='unzip',
+                                      file_obj=self.main_file)
+        df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+        df_hist = pd.DataFrame(columns=self.config['hist_columns'])
+        df_master_voter = pd.DataFrame(
+            columns=self.config['master_voter_columns'])
+        master_vf_version = True
+
+        def master_to_reg_df(df):
+            df.columns = self.config['master_voter_columns']
+            df['STATUS'] = df['VOTER_STATUS']
+            df['PRECINCT'] = df['PRECINCT_CODE']
+            df['VOTER_NAME'] = df['LAST_NAME'] + ", " + df['FIRST_NAME'] + \
+                " " + df['MIDDLE_NAME']
+            df = pd.concat(
+                [df, pd.DataFrame(columns=self.config['blacklist_columns'])])
+            df = df[self.config.processed_file_columns()]
+            return(df)
+
+        for i in new_files:
+            if "Registered_Voters_List" in i['name']:
+                master_vf_version = False
+        for i in new_files:
+
+            if "Registered_Voters_List" in i['name'] and not master_vf_version:
+                logging.info("reading in {}".format(i['name']))
+                df_voter = pd.concat([df_voter, pd.read_csv(i['obj'])], axis=0)
+
+            elif "Master_Voting_History" in i['name'] and "MACOS" not in i['name']:
+                if "Voter_Details" not in i['name']:
+                    logging.info("reading in {}".format(i['name']))
+                    new_df = pd.read_csv(i['obj'], compression='gzip')
+                    df_hist = pd.concat([df_hist, new_df], axis=0)
+
+                if "Voter_Details" in i['name'] and master_vf_version:
+                    logging.info("reading in {}".format(i['name']))
+                    new_df = pd.read_csv(i['obj'], compression='gzip')
+                    new_df.columns = self.config['master_voter_columns']
+                    df_master_voter = pd.concat(
+                        [df_master_voter, new_df], axis=0)
+        if df_voter.empty:
+            df_voter = master_to_reg_df(df_master_voter)
+        if df_hist.empty:
+            raise ValueError("must supply a file containing voter history")
+        df_hist['VOTING_METHOD'] = df_hist[
+            'VOTING_METHOD'].replace(np.nan, '')
+        df_hist["ELECTION_DATE"] = pd.to_datetime(df_hist["ELECTION_DATE"],
+                                                  format="%m/%d/%Y",
+                                                  errors='coerce')
+        df_hist["election_name"] = df_hist["ELECTION_DATE"].astype(
+            str) + "_" + df_hist["VOTING_METHOD"]
+
+        valid_elections, counts = np.unique(df_hist["election_name"],
+                                            return_counts=True)
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: datetime.strptime(x[1][0:10],
+                                                             "%Y-%m-%d"),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+
+        df_hist["array_position"] = df_hist["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+
+        logging.info("Colorado: history apply")
+        voter_groups = df_hist.groupby(self.config["voter_id"])
+        all_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["VOTING_METHOD"].apply(list)
+
+        df_voter = df_voter.set_index(self.config["voter_id"])
+
+        df_voter["all_history"] = all_history
+        df_voter["vote_type"] = vote_type
+        gc.collect()
+
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
+
+        self.meta = {
+            "message": "Colorado_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+
+        gc.collect()
+        logging.info("Colorado: writing out")
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df_voter.to_csv()))
 
     def preprocess_georgia(self):
         config = Config("georgia")
@@ -1587,7 +1716,8 @@ class Preprocessor(Loader):
             'kansas': self.preprocess_kansas,
             'ohio': self.preprocess_ohio,
             'minnesota': self.preprocess_minnesota,
-            'texas': self.preprocess_texas
+            'texas': self.preprocess_texas,
+            'colorado': self.preprocess_colorado
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
