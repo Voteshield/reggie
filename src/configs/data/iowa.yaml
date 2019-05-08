@@ -41,10 +41,10 @@ address_fields:
   - UNIT_TYPE
   - UNIT_NUM
   - ADDRESS_NON_STD
-  - CITY
-  - STATE
-  - ZIP_CODE
-  - ZIP_PLUS
+  - CITY_1
+  - STATE_1
+  - ZIP_CODE_1
+  - ZIP_PLUS_1
 primary_key:
   - pre_date
   - post_date
