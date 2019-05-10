@@ -287,7 +287,7 @@ class Loader(object):
         decompress a file using either unzip or gunzip, unless the file is an
         .xlsx file, in which case it is returned as is (these files are
         compressed by default, and are unreadable in their unpacked form by
-        pandas)
+        pandas) 
         :param s3_file_obj: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
         :return: a (str, bool) tuple containing the location of the processed
@@ -458,17 +458,23 @@ class Preprocessor(Loader):
         widths_two = [3, 4, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                       2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
-        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
+        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())      
+        have_length = False
         for i in new_files:
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
-                logging.info("Loading file {}".format(i['name']))
-                line_length = len(i['obj'].readline())
-                if line_length == 680:
-                    new_df = pd.read_fwf(
-                        i['obj'], widths=widths_two, header=None)
-                elif line_length == 686:
-                    new_df = pd.read_fwf(
-                        i['obj'], widths=widths_one, header=None)
+                if not have_length:
+                    line_length = len(i['obj'].readline())
+                    i['obj'].seek(0)
+                    have_length = True
+                    if line_length == 686:
+                        widths = widths_one
+                    elif line_length == 680:
+                        widths = widths_two
+                    else:
+                        raise ValueError("Width possibilities have changed")
+                    have_length = True
+                new_df = pd.read_fwf(
+                        i['obj'], widths=widths, header=None)
                 new_df.columns = self.config.raw_file_columns()
                 if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
                     df_voter = pd.concat(
@@ -483,6 +489,9 @@ class Preprocessor(Loader):
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
 
+        for i in self.config['hist_columns']:
+            print("-----------------------")
+            print(df_hist[i].value_counts())
         df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
             "_" + \
             df_hist['Election_Type'].astype(
@@ -490,22 +499,31 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
-
-        def texas_datetime(x):
-            try:
-                return datetime.strptime(x[1][0:8], "%Y%m%d")
-            except (ValueError):
-                return datetime(1970, 1, 1)
+        print("valid elections")
+        print(valid_elections)
+        def texas_datetime(x, order=False):
+            if order:
+                try:
+                    return datetime.strptime(x[1][0:8], "%Y%m%d")
+                except (ValueError):
+                    return datetime(1970, 1, 1)
+            else:
+                try:
+                    return datetime.strptime(x[0:8], "%Y%m%d").isoformat()[0:10]
+                except (ValueError):
+                    return datetime(1970, 1, 1).isoformat()[0:10]
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
-                             key=lambda x: texas_datetime(x),
+                             key=lambda x: texas_datetime(x, order=True),
                              reverse=True)]
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
-                                 "date": date_from_str(k)}
+                                 "date": texas_datetime(k)}
                              for i, k in enumerate(sorted_codes)}
+        print("sorted code dict")
+        print(sorted_codes_dict)
 
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
