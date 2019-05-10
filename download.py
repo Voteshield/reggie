@@ -1,3 +1,4 @@
+'''
 import uuid
 from datetime import datetime
 from subprocess import Popen, PIPE
@@ -7,63 +8,30 @@ from dateutil import parser
 import json
 from constants import *
 from configs.configs import Config
-from storage import generate_s3_key, date_from_str, \
-    df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
-    get_metadata_for_key, format_column_name
-from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
 import subprocess
-import gc
 from io import BytesIO
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
 from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
-import bs4
-import requests
-import urllib2
-import xml.etree.ElementTree
 import os
-
-
-
-
-def ohio_get_last_updated():
-    html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
-                        verify=False).text
-    soup = bs4.BeautifulSoup(html, "html.parser")
-    results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
-    return max(parser.parse(a.text) for a in results)
-
-
-def nc_date_grab():
-    nc_file = urllib2.urlopen(
-        'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
-    data = nc_file.read()
-    nc_file.close()
-    root = xml.etree.ElementTree.fromstring(data)
-
-    def nc_parse_xml(file_name):
-        for child in root:
-            if "Contents" in child.tag:
-                z = 0
-                for i in child:
-                    if file_name in i.text:
-                        z += 1
-                        continue
-                    if z == 1:
-                        return i.text
-    file_date_vf = nc_parse_xml(file_name="data/ncvoter_Statewide.zip")
-    file_date_his = nc_parse_xml(file_name="data/ncvhis_Statewide.zip")
-    if file_date_his[0:10] != file_date_vf[0:10]:
-        logging.info(
-            "Different dates between files, reverting to voter file date")
-    file_date_vf = parser.parse(file_date_vf).isoformat()[0:10]
-    return file_date_vf
+'''
+from StringIO import StringIO
+from configs.configs import Config
+import logging
+from zipfile import ZipFile, BadZipfile
+from py7zlib import Archive7z, FormatError
+import gc
+import pandas as pd
+import numpy as np
+from datetime import datetime
+from utilities import date_from_str
+import json
 
 
 def get_object(key, fn):
@@ -117,61 +85,62 @@ class FileItem(object):
             .format(self.name, self.obj, s)
 
 
-class Loader(object):
-    """
-    this object should be used to perform downloads directly from
-    online resources which are specified by yaml files
-    in the config directory.
+    def __enter__(self):
+        return self
 
-    A Loader uses filesystem resources for temporarily storing the files
-    on disk during the chunk concatenation process,
-    therefore __enter__ and __exit__ are defined to allow safe usage
-    of Loader in a 'with' statement:
-    for example:
-    ```
-        with Loader() as l:
-            l.download_chunks()
-            l.s3_dump()
-    ```
-    """
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return
 
-    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, testing=False):
+
+class Preprocessor():
+
+    def __init__(self, local_file, config_file, out_file, **kwargs):
+        self.main_file = FileItem("main file", filename=local_file)
+
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
-        self.chunk_urls = config[
-            CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
-        if "tmp" not in os.listdir("/"):
-            os.system("mkdir /tmp")
-        self.file_type = config["file_type"]
-        self.source = config["source"]
-        self.is_compressed = False
-        self.checksum = None
-        self.state = config["state"]
-        self.obj_will_download = False
-        self.meta = None
-        self.testing = testing
-        if force_date is not None:
-            self.download_date = parser.parse(force_date).isoformat()
-        else:
-            self.download_date = datetime.now().isoformat()
-        if force_file is not None:
-            working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-            logging.info("copying {} to {}".format(force_file, working_file))
-            shutil.copy2(force_file, working_file)
-            self.main_file = FileItem(
-                "loader_force_file", filename=working_file)
-        else:
-            self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
-
-        self.temp_files = [self.main_file]
+        self.out_file = out_file
+        self.state = config['state']
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         return
+
+    def unpack_files(self, file_obj, compression="unzip"):
+        all_files = []
+
+        def expand_recurse(s3_file_objs):
+            for f in s3_file_objs:
+                if f["name"][-1] != "/":
+                    try:
+                        decompressed_result = self.decompress(
+                            f, compression_type=compression)
+                        if decompressed_result is not None:
+                            expand_recurse(decompressed_result)
+                    except (BadZipfile, FormatError) as e:
+                        all_files.append(f)
+        if type(self.main_file) == str:
+            expand_recurse([{"name": self.main_file,
+                             "obj": open(self.main_file)}])
+        else:
+            expand_recurse([{"name": self.main_file.name,
+                             "obj": self.main_file.obj}])
+        if "format" in self.config and "ignore_files" in self.config["format"]:
+            all_files = [n for n in all_files if n.keys()[0] not in
+                         self.config["format"]["ignore_files"] and
+                         os.path.basename(n.keys()[0]) not in
+                         self.config["format"]["ignore_files"]]
+
+        all_files = [n for n in all_files if ".png" not in n["name"]]
+
+        for n in all_files:
+            if type(n["obj"]) != str:
+                n["obj"].seek(0)
+        logging.info("unpacked: - {}".format(all_files))
+        return all_files
 
     def compress(self):
         """
@@ -322,88 +291,6 @@ class Loader(object):
 
         self.is_compressed = False
         return new_files
-
-    def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config and \
-           file_class != "voter_file":
-            k = generate_s3_key(file_class, self.state,
-                                self.source, self.download_date,
-                                self.config["native_file_extension"])
-        else:
-            k = generate_s3_key(file_class, self.state, self.source,
-                                self.download_date, "csv", "gz")
-        return "testing/" + k if self.testing else k
-
-    def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
-        if not isinstance(file_item, FileItem):
-            raise ValueError("'file_item' must be of type 'FileItem'")
-        if self.config["state"] == 'ohio':
-            self.download_date = str(ohio_get_last_updated().isoformat())[0:10]
-        elif self.config["state"] == "north_carolina":
-            self.download_date = str(nc_date_grab())
-        meta = self.meta if self.meta is not None else {}
-        meta["last_updated"] = self.download_date
-        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-            .put(Body=file_item.obj, ServerSideEncryption='AES256')
-        s3.Object(S3_BUCKET,
-                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
-            .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
-
-
-class Preprocessor(Loader):
-
-    def __init__(self, raw_s3_file, config_file, filename **kwargs):
-        #goal in this class is to create the fileitem and pass it into the router
-        super(Preprocessor, self).__init__(
-            config_file=config_file, force_date=date_from_str(raw_s3_file),
-            **kwargs)
-        self.raw_s3_file = raw_s3_file
-
-        if self.raw_s3_file is not None:
-            self.main_file = self.s3_download()
-        else:
-            self.main_file = FileItem(filename=filename)
-
-
-    def s3_download(self):
-        name = "/tmp/voteshield_{}" \
-            .format(self.raw_s3_file.split("/")[-1])
-
-        return FileItem(key=self.raw_s3_file, name=name)
-
-    def unpack_files(self, file_obj, compression="unzip"):
-        all_files = []
-
-        def expand_recurse(s3_file_objs):
-            for f in s3_file_objs:
-                if f["name"][-1] != "/":
-                    try:
-                        decompressed_result = self.decompress(
-                            f, compression_type=compression)
-                        if decompressed_result is not None:
-                            expand_recurse(decompressed_result)
-                    except (BadZipfile, FormatError) as e:
-                        all_files.append(f)
-        if type(self.main_file) == str:
-            expand_recurse([{"name": self.main_file,
-                             "obj": open(self.main_file)}])
-        else:
-            expand_recurse([{"name": self.main_file.name,
-                             "obj": self.main_file.obj}])
-        if "format" in self.config and "ignore_files" in self.config["format"]:
-            all_files = [n for n in all_files if n.keys()[0] not in
-                         self.config["format"]["ignore_files"] and
-                         os.path.basename(n.keys()[0]) not in
-                         self.config["format"]["ignore_files"]]
-
-        all_files = [n for n in all_files if ".png" not in n["name"]]
-
-        for n in all_files:
-            if type(n["obj"]) != str:
-                n["obj"].seek(0)
-        self.temp_files.extend(all_files)
-        logging.info("unpacked: - {}".format(all_files))
-        return all_files
 
     def concat_file_segments(self, file_names):
         """
@@ -846,6 +733,7 @@ class Preprocessor(Loader):
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
     def preprocess_florida(self):
+        print("here again")
         logging.info("preprocessing florida")
 
         # new_files is list of dicts, i.e. [{"name":.. , "obj": <fileobj>}, ..]
@@ -924,6 +812,7 @@ class Preprocessor(Loader):
 
         gc.collect()
         logging.info("FLORIDA: writing out")
+        df_voters.to_csv("nice.csv.gz", compression='gzip')
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv()))
 
@@ -1701,6 +1590,7 @@ class Preprocessor(Loader):
                                                    index=False)))
 
     def execute(self):
+        print("here")
         return self.state_router()
 
     def state_router(self):
