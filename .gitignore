@@ -42,3 +42,4 @@ dev-one.conf
 *.rdb
 *applications/static/
 src/applications/static
+*.json
