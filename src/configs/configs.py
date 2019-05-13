@@ -54,7 +54,6 @@ class Config(object):
     def items(self):
         return self.data.items()
 
-
     def database_columns(self):
         return [c for c in self.data["ordered_columns"] if c not in
                 self.data["blacklist_columns"]]

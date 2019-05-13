@@ -21,14 +21,13 @@ from io import BytesIO
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
-from py7zlib import Archive7z, FormatError
-from StringIO import StringIO
+# from py7zlib import Archive7z, FormatError
+from io import StringIO
 import bs4
 import requests
-import urllib2
+from urllib.request import urlopen
 import xml.etree.ElementTree
 import os
-
 
 
 def ohio_get_last_updated():
@@ -40,7 +39,7 @@ def ohio_get_last_updated():
 
 
 def nc_date_grab():
-    nc_file = urllib2.urlopen(
+    nc_file = urlopen(
         'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
     data = nc_file.read()
     nc_file.close()
@@ -309,8 +308,6 @@ class Loader(object):
                 new_files = self.unzip_decompress(s3_file_obj["obj"])
             elif compression_type == "bunzip2":
                 new_files = self.bunzip2_decompress(s3_file_obj["obj"])
-            elif compression_type == "7zip":
-                new_files = self.sevenzip_decompress(s3_file_obj["obj"])
             else:
                 new_files = self.gunzip_decompress(s3_file_obj["obj"])
 
@@ -376,7 +373,7 @@ class Preprocessor(Loader):
                             f, compression_type=compression)
                         if decompressed_result is not None:
                             expand_recurse(decompressed_result)
-                    except (BadZipfile, FormatError) as e:
+                    except BadZipfile as e:
                         all_files.append(f)
         if type(self.main_file) == str:
             expand_recurse([{"name": self.main_file,
