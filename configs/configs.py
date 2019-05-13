@@ -13,7 +13,6 @@ class Config(object):
             config_file = self.config_file_from_state(state)
         else:
             config_file = file_name
-
         self.data = self.load_data(config_file)
 
     @classmethod

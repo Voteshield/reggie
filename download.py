@@ -21,6 +21,7 @@ from py7zlib import Archive7z, FormatError
 from StringIO import StringIO
 import os
 '''
+
 from StringIO import StringIO
 from configs.configs import Config
 import logging
@@ -32,27 +33,10 @@ import numpy as np
 from datetime import datetime
 from utilities import date_from_str
 import json
-
-
-def get_object(key, fn):
-    with open(fn, "w+") as obj:
-        s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
-
-
-def get_object_mem(key):
-    file_obj = BytesIO()
-    s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
-    return file_obj
-
-
-def concat_and_delete(in_list):
-    outfile = StringIO()
-
-    for f_obj in in_list:
-        s = f_obj["obj"].read()
-        outfile.write(s)
-    outfile.seek(0)
-    return outfile
+from io import BytesIO
+import os
+from subprocess
+import uuid
 
 
 class FileItem(object):
@@ -84,7 +68,6 @@ class FileItem(object):
         return "FileItem: name={}, obj={}, size={}"\
             .format(self.name, self.obj, s)
 
-
     def __enter__(self):
         return self
 
@@ -92,16 +75,33 @@ class FileItem(object):
         return
 
 
+def get_object_mem(key):
+    file_obj = BytesIO()
+    s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
+    return file_obj
+
+
+def concat_and_delete(in_list):
+    outfile = StringIO()
+
+    for f_obj in in_list:
+        s = f_obj["obj"].read()
+        outfile.write(s)
+    outfile.seek(0)
+    return outfile
+
+
 class Preprocessor():
 
-    def __init__(self, local_file, config_file, out_file, **kwargs):
+    def __init__(self, local_file, config_file, date, **kwargs):
         self.main_file = FileItem("main file", filename=local_file)
 
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
-        self.out_file = out_file
+        self.date = date
         self.state = config['state']
+        self.meta = None
 
     def __enter__(self):
         return self
@@ -141,6 +141,11 @@ class Preprocessor():
                 n["obj"].seek(0)
         logging.info("unpacked: - {}".format(all_files))
         return all_files
+
+    def dump(self):
+        self.dataframe.to_csv(self.generate_key(), compression='gzip')
+        with open(self.generate_key(meta=True), 'w') as fp:
+            json.dump(self.meta, fp)
 
     def compress(self):
         """
@@ -340,6 +345,13 @@ class Preprocessor():
         outfile.seek(0)
         return outfile
 
+    def generate_key(self, meta=False):
+        if meta:
+            name = "meta_" + self.state + "_" + self.date + ".json"
+        else:
+            name = self.state + "_" + self.date + ".csv.gz"
+        return name
+
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
@@ -421,6 +433,7 @@ class Preprocessor():
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
+        self.dataframe = df_voter
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voter.to_csv()))
@@ -434,6 +447,7 @@ class Preprocessor():
             elif ".txt" in i['name']:
                 temp_df = pd.read_csv(i['obj'], compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
+        self.dataframe = df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv()))
 
@@ -497,6 +511,7 @@ class Preprocessor():
 
         gc.collect()
         logging.info("Minnesota: writing out")
+        self.dataframe = voter_reg_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_reg_df.to_csv()))
 
@@ -594,6 +609,7 @@ class Preprocessor():
 
         gc.collect()
         logging.info("Colorado: writing out")
+        self.dataframe = df_voter
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voter.to_csv()))
 
@@ -688,7 +704,7 @@ class Preprocessor():
             "array_decoding": json.dumps(sorted_codes),
             "election_type": json.dumps(type_dict)
         }
-
+        self.dataframe = df_voters
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv()))
 
@@ -729,11 +745,12 @@ class Preprocessor():
         df_voters["all_history"] = voting_histories
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters)
+
+        self.dataframe = df_voters
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
     def preprocess_florida(self):
-        print("here again")
         logging.info("preprocessing florida")
 
         # new_files is list of dicts, i.e. [{"name":.. , "obj": <fileobj>}, ..]
@@ -812,7 +829,8 @@ class Preprocessor():
 
         gc.collect()
         logging.info("FLORIDA: writing out")
-        df_voters.to_csv("nice.csv.gz", compression='gzip')
+        self.dataframe = df_voters
+        df_voters.to_csv(self.generate_key(), compression='gzip')
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv()))
 
@@ -884,7 +902,7 @@ class Preprocessor():
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-
+        self.dataframe = df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv(encoding='utf-8',
                                                   index=False)))
@@ -1008,8 +1026,7 @@ class Preprocessor():
             "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
             "LOSST_CONTIGUOUS_CITIES", "PRECINCT", "SANITARY",
             "SCHOOL_DIRECTOR", "UNIT_NUM"])
-        pd.set_option('max_columns', 200)
-        pd.set_option('max_row', 6)
+        self.dataframe = df_voters
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
@@ -1057,7 +1074,7 @@ class Preprocessor():
             "message": "arizona_{}".format(datetime.now().isoformat()),
             "array_dates": json.dumps(elections_key)
         }
-
+        self.dataframe = main_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
                                                        index=False)))
@@ -1115,7 +1132,7 @@ class Preprocessor():
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-
+        self.dataframe = main_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(index=False,
                                                        encoding='utf-8')))
@@ -1593,7 +1610,7 @@ class Preprocessor():
         print("here")
         return self.state_router()
 
-    def state_router(self):
+    def available_states_dict(self):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
@@ -1612,6 +1629,10 @@ class Preprocessor():
             'texas': self.preprocess_texas,
             'colorado': self.preprocess_colorado
         }
+        return routes
+
+    def state_router(self):
+        routes = self.available_states_dict()
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
             logging.info("preprocessing {}".format(self.config["state"]))
@@ -1620,7 +1641,3 @@ class Preprocessor():
             raise NotImplementedError("preprocess_{} has not yet been "
                                       "implemented for the Preprocessor object"
                                       .format(self.config["state"]))
-
-
-if __name__ == '__main__':
-    print(ohio_get_last_updated())
