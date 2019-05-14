@@ -27,6 +27,8 @@ format:
   separate_counties_hist_file: true
   hist_election_rows: true
   columnar_elections: false
+featureless_date_cols:
+  - election_date
 name_fields:
   - Last_Name
   - First_Name
