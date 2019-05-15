@@ -1030,8 +1030,6 @@ class Preprocessor(Loader):
             "COMMUNITY_COLLEGE", "COMMUNITY_COLLEGE_DIRECTOR",
             "LOSST_CONTIGUOUS_CITIES", "PRECINCT", "SANITARY",
             "SCHOOL_DIRECTOR", "UNIT_NUM"])
-        pd.set_option('max_columns', 200)
-        pd.set_option('max_row', 6)
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
