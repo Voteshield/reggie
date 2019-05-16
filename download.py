@@ -35,8 +35,7 @@ from utilities import date_from_str
 import json
 from io import BytesIO
 import os
-from subprocess
-import uuid
+import subprocess
 
 
 class FileItem(object):
