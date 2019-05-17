@@ -30,8 +30,6 @@ import xml.etree.ElementTree
 import os
 
 
-
-
 def ohio_get_last_updated():
     html = requests.get("https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:STWD",
                         verify=False).text
@@ -453,15 +451,21 @@ class Preprocessor(Loader):
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
-        widths_one = [3, 10, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
-                  2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
-        widths_two = [3, 4, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
-                      2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        widths_one = [3, 10, 10, 50, 50, 50, 50,
+                      4, 1, 8, 9, 12, 2, 50, 12,
+                      2, 12, 12, 50, 9, 110, 50,
+                      50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        widths_two = [3, 4, 10, 50, 50, 50, 50,
+                      4, 1, 8, 9, 12, 2, 50, 12,
+                      2, 12, 12, 50, 9, 110, 50,
+                      50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
         df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
         have_length = False
         for i in new_files:
-            if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
+            if ("count" not in i['name'] and
+                "MACOS" not in i['name'] and
+                "DS_Store" not in i['name']):
                 if not have_length:
                     line_length = len(i['obj'].readline())
                     i['obj'].seek(0)
@@ -471,10 +475,12 @@ class Preprocessor(Loader):
                     elif line_length == 680:
                         widths = widths_two
                     else:
-                        raise ValueError("Width possibilities have changed")
+                        raise ValueError(
+                            "Width possibilities have changed,"
+                            "new width found: {}".format(line_length))
                     have_length = True
                 new_df = pd.read_fwf(
-                        i['obj'], widths=widths, header=None)
+                    i['obj'], widths=widths, header=None)
                 new_df.columns = self.config.raw_file_columns()
                 if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
                     df_voter = pd.concat(
@@ -496,46 +502,42 @@ class Preprocessor(Loader):
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
 
-        def texas_datetime(x, order=False):
-            if order:
-                try:
-                    return datetime.strptime(x[1][0:8], "%Y%m%d")
-                except (ValueError):
-                    return datetime(1970, 1, 1)
-            else:
-                try:
-                    return datetime.strptime(x[0:8], "%Y%m%d").isoformat()[0:10]
-                except (ValueError):
-                    return datetime(1970, 1, 1).isoformat()[0:10]
+        def texas_datetime(x):
+            try:
+                return datetime.strptime(x[0:8], "%Y%m%d")
+            except (ValueError):
+                return datetime(1970, 1, 1)
+
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
-                             key=lambda x: texas_datetime(x, order=True),
+                             key=lambda x: texas_datetime(x[1]),
                              reverse=True)]
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
-                                 "date": texas_datetime(k)}
+                                 "date": str(texas_datetime(k).date())}
                              for i, k in enumerate(sorted_codes)}
 
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
         logging.info("Texas: history apply")
         voter_groups = df_hist.groupby(self.config['voter_id'])
-        all_history = voter_groups["array_position"].apply(list)
+        sparse_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["Election_Voting_Method"].apply(list)
 
         df_voter = df_voter.set_index(self.config["voter_id"])
-
-        df_voter["all_history"] = all_history
+        df_voter["sparse_history"] = sparse_history
+        df_voter["all_history"] = voter_groups["election_name"].apply(list)
         df_voter["vote_type"] = vote_type
         gc.collect()
-
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
         df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
             'Permanent_Zipcode', 'Permanent_House_Number', 'Mailing_Zipcode'])
-
+        df_voter.drop(self.config['hist_columns'],
+                                 axis=1, inplace=True)
+        print(df_voter.head())
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
@@ -1366,9 +1368,9 @@ class Preprocessor(Loader):
         config = Config("michigan")
         new_files = self.unpack_files(file_obj=self.main_file)
         voter_file = ([n for n in new_files if 'entire_state_v' in n["name"] or
-                        'EntireStateVoters' in n["name"]] + [None])[0]
+                       'EntireStateVoters' in n["name"]] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n["name"] or
-                        'EntireStateVoterHistory' in n["name"]] + [None])[0]
+                      'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
         logging.info("Detected voter file: " + voter_file["name"])
