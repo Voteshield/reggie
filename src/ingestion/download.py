@@ -458,7 +458,7 @@ class Preprocessor(Loader):
         widths_two = [3, 4, 10, 50, 50, 50, 50, 4, 1, 8, 9, 12, 2, 50, 12,
                       2, 12, 12, 50, 9, 110, 50, 50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
-        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())      
+        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
         have_length = False
         for i in new_files:
             if "count" not in i['name'] and "MACOS" not in i['name'] and "DS_Store" not in i['name']:
@@ -489,9 +489,6 @@ class Preprocessor(Loader):
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
 
-        for i in self.config['hist_columns']:
-            print("-----------------------")
-            print(df_hist[i].value_counts())
         df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
             "_" + \
             df_hist['Election_Type'].astype(
@@ -499,8 +496,7 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
-        print("valid elections")
-        print(valid_elections)
+
         def texas_datetime(x, order=False):
             if order:
                 try:
@@ -522,8 +518,6 @@ class Preprocessor(Loader):
         sorted_codes_dict = {k: {"index": i, "count": counts[i],
                                  "date": texas_datetime(k)}
                              for i, k in enumerate(sorted_codes)}
-        print("sorted code dict")
-        print(sorted_codes_dict)
 
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"]))
