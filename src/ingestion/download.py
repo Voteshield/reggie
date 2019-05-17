@@ -488,7 +488,6 @@ class Preprocessor(Loader):
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
-
         df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
             "_" + \
             df_hist['Election_Type'].astype(
