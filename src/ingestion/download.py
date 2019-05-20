@@ -465,7 +465,9 @@ class Preprocessor(Loader):
         for i in new_files:
             if ("count" not in i['name'] and
                 "MACOS" not in i['name'] and
-                "DS_Store" not in i['name']):
+                "DS_Store" not in i['name'] and
+                i['obj'].len != 0):
+
                 if not have_length:
                     line_length = len(i['obj'].readline())
                     i['obj'].seek(0)
@@ -479,6 +481,7 @@ class Preprocessor(Loader):
                             "Width possibilities have changed,"
                             "new width found: {}".format(line_length))
                     have_length = True
+                logging.info("Loading file {}".format(i))
                 new_df = pd.read_fwf(
                     i['obj'], widths=widths, header=None)
                 new_df.columns = self.config.raw_file_columns()
@@ -537,7 +540,6 @@ class Preprocessor(Loader):
             'Permanent_Zipcode', 'Permanent_House_Number', 'Mailing_Zipcode'])
         df_voter.drop(self.config['hist_columns'],
                                  axis=1, inplace=True)
-        print(df_voter.head())
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
