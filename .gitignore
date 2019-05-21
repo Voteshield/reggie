@@ -1,7 +1,7 @@
 main.*.*
 venv
 .idea
-constants.pyc
+*.pyc
 *.DS_Store
 .ipynb_checkpoints
 *.ipynb
