@@ -1,4 +1,4 @@
-from constants import CONFIG_DIR
+from veggie.constants import CONFIG_DIR
 import yaml
 import pandas as pd
 

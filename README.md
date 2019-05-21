@@ -2,7 +2,9 @@
 
 Veggie is a command line interface for working with state voter registration files.
 
-## What is a Voter File
+![]
+
+## What is a Voter File?
 
 Voter files, often referred to as voter registration lists, are files kept by state governments to determine which citizens are registered and eligible for elections. Each state keeps a voter file, has different information about each voter (sometimes keeping race, gender, email, phone number, address, and other information), charges a different amount for this public file (Ohio and North Carolina are free, while some states charge more than $10k for a file), and also keeps these files in different formats. These issues make them difficult to read into R/Python/Stata and to analyze. 
 
@@ -10,7 +12,10 @@ Voter files, often referred to as voter registration lists, are files kept by st
 
 
 
-## Setup (macos/linux)
+
+## Setup 
+
+$ pip 
 - download this repo
 ```bash
 $ git clone git@github.com:Voteshield/Veggie.git 
@@ -29,3 +34,5 @@ $ source venv/bin/activate
 ```
 
 ## Use
+
+## Expected File Format by State

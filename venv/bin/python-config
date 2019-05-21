@@ -1,4 +1,4 @@
-#!/Users/tylerrichards/Documents/VoteShield/Veggie/venv/bin/python
+#!/Users/tylerrichards/Documents/VoteShield/veggie/veggie/venv/bin/python
 
 import sys
 import getopt
