@@ -2,7 +2,7 @@
 
 Veggie is a python package for reading state voter registration files.
 
-![veggie_example.gif]
+![](veggie_example.gif)
 
 ## What is a Voter File?
 
