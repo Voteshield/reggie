@@ -21,7 +21,6 @@ from io import BytesIO
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
-# from py7zlib import Archive7z, FormatError
 from io import StringIO
 import bs4
 import requests
@@ -132,7 +131,6 @@ class Loader(object):
             l.s3_dump()
     ```
     """
-
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
                  force_file=None, testing=False):
         self.config_file_path = config_file
