@@ -163,10 +163,7 @@ class Preprocessor():
             file_objs = [{"name": name, "obj": name}
                          for name in file_names]
         else:
-            logging.info("got to line 165 unzip ")
-            logging.info(file_name)
             zip_file = ZipFile(file_name)            
-            logging.info("line 167")
             file_names = zip_file.namelist()
             logging.info("decompressing unzip {} into {}".format(file_name,
                                                                  file_names))
@@ -719,7 +716,6 @@ class Preprocessor():
         # new_files is list of dicts, e.g. [{"name":.. , "obj": <fileobj>}, ..]
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
-        print(new_files)
 
         vote_history_files = []
         voter_files = []
@@ -735,7 +731,6 @@ class Preprocessor():
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
-        print(df_hist)
         df_hist.columns = self.config["hist_columns"]
         gc.collect()
 
@@ -794,7 +789,6 @@ class Preprocessor():
         gc.collect()
         logging.info("FLORIDA: writing out")
         self.dataframe = df_voters
-        logging.info(df_voters)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv()))
 
@@ -1157,6 +1151,7 @@ class Preprocessor():
             "array_decoding": json.dumps(sorted_codes),
         }
         self.is_compressed = False
+        self.dataframe = voter_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_df.to_csv(
                             index=True, encoding='utf-8')))
@@ -1221,7 +1216,7 @@ class Preprocessor():
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-
+        self.dataframe = main_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
                                                        index=False)))
@@ -1392,7 +1387,7 @@ class Preprocessor():
             "array_decoding": sorted_codes,
             "array_encoding": elec_dict
         }
-
+        self.dataframe = vdf
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
                                                    index=False)))
@@ -1491,7 +1486,7 @@ class Preprocessor():
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
-
+        self.dataframe = main_df
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
                                                        index=False)))
@@ -1565,7 +1560,7 @@ class Preprocessor():
             "array_encoding": elec_dict,
             "array_decoding": elections
         }
-
+        self.dataframe = vdf
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
                                                    index=False)))

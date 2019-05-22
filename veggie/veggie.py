@@ -5,7 +5,7 @@ import click
 
 
 def convert_voter_file(state=None, local_file=None,
-                       date=None, write_file=True):
+                       date=None, write_file=False):
     config_file = Config.config_file_from_state(state)
     date = str(datetime.datetime.strptime(date, '%Y-%m-%d').date())
     with Preprocessor(local_file,

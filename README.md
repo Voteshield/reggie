@@ -1,6 +1,6 @@
 # Veggie
 
-Veggie is a command line interface for working with state voter registration files.
+Veggie is a python package for working with state voter registration files.
 
 ![]
 
