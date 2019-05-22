@@ -1,8 +1,8 @@
 # Veggie
 
-Veggie is a python package for working with state voter registration files.
+Veggie is a python package for reading state voter registration files.
 
-![]
+![veggie_example.gif]
 
 ## What is a Voter File?
 
