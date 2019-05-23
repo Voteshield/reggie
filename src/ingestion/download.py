@@ -1315,8 +1315,11 @@ class Preprocessor(Loader):
 
         main_df = pd.read_csv(main_file["obj"], sep='\t')
 
-        # add empty columns for voter_status and party_identifier
-        main_df[self.config["voter_status"]] = np.nan
+        # convert "Voter Status" to "voter_status" for backward compatibility
+        main_df.rename(columns={"Voter Status": self.config["voter_status"]},
+                       inplace=True)
+
+        # add empty column for party_identifier
         main_df[self.config["party_identifier"]] = np.nan
 
         def add_history(main_df):
