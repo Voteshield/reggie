@@ -10,17 +10,17 @@ Veggie will take your voter file and convert it into a single compressed voter f
 
 ## Examples
 
-'''python
+```python
 from veggie import convert_voter_file
 
 nc_dataframe, metadata = convert_voter_file(state='north_carolina',
                                             local_file='nc_2018-12-22.zip',
                                             date='2018-12-22')
-'''
+```
 
-'''bash
+```bash
 veg --state north_carolina --local_file nc_2018-12-22.zip --date 2018-12-22
-'''
+```
 
 Warning: as voter files are quite large, veggie may take significant time and memory. Internally, Voteshield uses AWS instead of performing these jobs locally. Another option is to use [Colab](https://colab.research.google.com/) to perform larger jobs. 
 
@@ -33,37 +33,19 @@ Voter files, often referred to as voter registration lists, are files kept by st
 Many states keep voter history in their voter file, often kept in a separate file at the county level. Veggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. This will either be kept in an array of vote slugs, or a collection of indicies that correspond to elections held in the returned metadata.  
 
 ### Voter Slug Example
+
 {"STATE-GENERAL ELECTION 11/06/2007","GENERAL ELECTION 11/04/2008","STATE GENERAL 2010 11/02/2010"}  
+
 This represents the voter history for a single voter in New Jersey who voted in a state general election in 2007, voted in the general in 2008, and also in the general in 2010. 
-
-
-
-
-
-## Command Line Example
-
-## Python Example
-
-
-
-
-## Veggie
-
-Veggie will take a state voter file and return a compressed csv file with voter history at the row level
-
-## Example Use Case: North Carolina
-
-The North Carolina voter file is used in these examples because it is open to the public
 
 
 ## Installation 
 
-$ pip install 
-- download this repo
 ```bash
 $ pip install veggie
 ```
 
-## Use
 
 ## Expected File Format by State
+
+Veggie automatically decompresses all of the files in the provided file, and expects voter files in the format that the individual states use.
