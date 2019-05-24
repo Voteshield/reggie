@@ -494,6 +494,7 @@ class Preprocessor(Loader):
             del i['obj']
         if df_hist.empty:
             logging.info("This file contains no voter history")
+        df_voter['Effective_Date_of_Registration'] = pd.to_datetime(df_voter['Effective_Date_of_Registration'], format='%Y%m%d').dt.date.astype(str)
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
@@ -504,7 +505,6 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
-
         def texas_datetime(x):
             try:
                 return datetime.strptime(x[0:8], "%Y%m%d")
@@ -546,6 +546,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
+
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voter.to_csv()))
