@@ -464,9 +464,9 @@ class Preprocessor(Loader):
         have_length = False
         for i in new_files:
             if ("count" not in i['name'] and
-                "MACOS" not in i['name'] and
-                "DS_Store" not in i['name'] and
-                i['obj'].len != 0):
+                    "MACOS" not in i['name'] and
+                    "DS_Store" not in i['name'] and
+                    i['obj'].len != 0):
 
                 if not have_length:
                     line_length = len(i['obj'].readline())
@@ -494,7 +494,8 @@ class Preprocessor(Loader):
             del i['obj']
         if df_hist.empty:
             logging.info("This file contains no voter history")
-        df_voter['Effective_Date_of_Registration'] = pd.to_datetime(df_voter['Effective_Date_of_Registration'].astype(str), format='%Y%m%d', errors='ignore').dt.date.astype(str)
+        df_voter['Effective_Date_of_Registration'] = df_voter[
+            'Effective_Date_of_Registration'].fillna(19700101).astype(int).astype(str)
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
@@ -505,6 +506,7 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
+
         def texas_datetime(x):
             try:
                 return datetime.strptime(x[0:8], "%Y%m%d")
@@ -539,14 +541,13 @@ class Preprocessor(Loader):
         df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
             'Permanent_Zipcode', 'Permanent_House_Number', 'Mailing_Zipcode'])
         df_voter.drop(self.config['hist_columns'],
-                                 axis=1, inplace=True)
+                      axis=1, inplace=True)
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
         gc.collect()
-        print(df_voter['Effective_Date_of_Registration'].value_counts(dropna=False))
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voter.to_csv()))
