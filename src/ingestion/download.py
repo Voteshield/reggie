@@ -861,8 +861,6 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
-        print(type(self.main_file))
-        print(self.main_file)
         # new_files is list of dicts, i.e. [{"name":.. , "obj": <fileobj>}, ..]
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
