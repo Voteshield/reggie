@@ -20,7 +20,7 @@ nc_dataframe, metadata = convert_voter_file(state='north_carolina',
 ```
 ### Command Line
 ```bash
-veg --state north_carolina --local_file nc_2018-12-22.zip --date 2018-12-22
+$ veg --state north_carolina --local_file nc_2018-12-22.zip --date 2018-12-22
 
 ```
 
