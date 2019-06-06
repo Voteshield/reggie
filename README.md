@@ -1,18 +1,18 @@
-# Veggie
+# Reggie
 
-Veggie is a python package for reading state voter registration files created by Voteshield, a data analytics tool designed to protect the integrity of American elections by monitoring changes to the voter rolls.
+reggie is a python package for reading state voter registration files created by Voteshield, a data analytics tool designed to protect the integrity of American elections by monitoring changes to the voter rolls.
 
-![](veggie_example.gif)
+![](reggie_example.gif)
 
-## Using Veggie
+## Using reggie
 
-Veggie will take your voter file and convert it into a single compressed voter file along with voter history metadata. You can use it on the command line or within Python by giving the location of the file, the state, and the date of the file snapshot. The current available states are Arizona, Colorado, Florida, Georgia, Iowa, Kansas, Michigan, Minnesota, Missouri, Nevada, New Jersey, New York, North Carolina, Ohio, Pennsylvania, and Texas.
+reggie will take your voter file and convert it into a single compressed voter file along with voter history metadata. You can use it on the command line or within Python by giving the location of the file, the state, and the date of the file snapshot. The current available states are Arizona, Colorado, Florida, Georgia, Iowa, Kansas, Michigan, Minnesota, Missouri, Nevada, New Jersey, New York, North Carolina, Ohio, Pennsylvania, and Texas.
 
 ## Examples
 
 ### Python
 ```python
-from veggie import convert_voter_file
+from reggie import convert_voter_file
 
 nc_dataframe, metadata = convert_voter_file(state='north_carolina',
                                             local_file='nc_2018-12-22.zip',
@@ -20,18 +20,18 @@ nc_dataframe, metadata = convert_voter_file(state='north_carolina',
 ```
 ### Command Line
 ```bash
-$ veg --state north_carolina --local_file nc_2018-12-22.zip --date 2018-12-22
+$ reg --state north_carolina --local_file nc_2018-12-22.zip --date 2018-12-22
 
 ```
 
-Warning: as voter files are quite large, veggie may take significant time and memory. Internally, Voteshield uses AWS instead of performing these jobs locally. Another option is to use [Colab](https://colab.research.google.com/) to perform larger jobs. 
+Warning: as voter files are quite large, reggie may take significant time and memory. Internally, Voteshield uses AWS instead of performing these jobs locally. Another option is to use [Colab](https://colab.research.google.com/) to perform larger jobs. 
 
 
 
 ## Installation 
 
 ```bash
-$ pip install veggie
+$ pip install reggie
 ```
 
 
@@ -41,7 +41,7 @@ Voter files, often referred to as voter registration lists, are files kept by st
 
 ## Voter History
 
-Many states keep voter history in their voter file, often kept in a separate file at the county level. Veggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. This will either be kept in an array of vote slugs, or a collection of indicies that correspond to elections held in the returned metadata.  
+Many states keep voter history in their voter file, often kept in a separate file at the county level. Reggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. This will either be kept in an array of vote slugs, or a collection of indicies that correspond to elections held in the returned metadata.  
 
 ### Voter Slug Example
 
@@ -60,7 +60,7 @@ In some states, the all_history column is an array of integers or there is a col
 
 ## Expected File Format by State
 
-Veggie automatically decompresses all of the files in the provided file, and expects voter files in the format that the individual states use. A small sample of some state's expected format is below. 
+Reggie automatically decompresses all of the files in the provided file, and expects voter files in the format that the individual states use. A small sample of some state's expected format is below. 
 
 #### Arizona
 

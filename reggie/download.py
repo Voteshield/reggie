@@ -1,4 +1,4 @@
-from veggie.configs.configs import Config
+from reggie.configs.configs import Config
 import logging
 from zipfile import ZipFile, BadZipfile
 import gc

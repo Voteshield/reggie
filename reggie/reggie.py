@@ -1,5 +1,5 @@
-from veggie.configs.configs import Config
-from veggie.download import Preprocessor
+from reggie.configs.configs import Config
+from reggie.download import Preprocessor
 import datetime
 import click
 
