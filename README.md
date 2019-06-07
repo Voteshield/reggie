@@ -6,7 +6,7 @@ reggie is a python package for reading state voter registration files created by
 
 ## Using reggie
 
-reggie will take your voter file and convert it into a single compressed voter file along with voter history metadata. You can use it on the command line or within Python by giving the location of the file, the state, and the date of the file snapshot. The current available states are Arizona, Colorado, Florida, Georgia, Iowa, Kansas, Michigan, Minnesota, Missouri, Nevada, New Jersey, New York, North Carolina, Ohio, Pennsylvania, and Texas.
+reggie will take your voter file and convert it into a single compressed voter file along with voter history metadata. You can use it on the command line or within Python by giving the location of the file, the state, and the date of the file snapshot. The current available states are Arizona, Colorado, Florida, Georgia, Iowa, Kansas, Michigan, Minnesota, Missouri, Nevada, New Jersey, New York, North Carolina, Ohio, Pennsylvania, and Texas. Because the voter file for North Carolina is entirely public and can be found on the [state's website](https://dl.ncsbe.gov/index.html?prefix=data/), a smaller version of the NC file is included in the test_data folder. 
 
 ## Examples
 

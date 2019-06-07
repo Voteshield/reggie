@@ -9,7 +9,6 @@ experiments
 *.local
 *.gz
 *.pkl
-*.zip
 *.rdb
 
 *.json
