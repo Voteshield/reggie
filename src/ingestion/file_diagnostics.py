@@ -213,7 +213,6 @@ class TestFileBuilder(Preprocessor):
 
         # read in dataframe here, haven't figured this out yet
 
-        print(new_files)
         smaller_files = []
         for x in new_files:
             if "CD1" in x and "Part1" in x:
@@ -435,7 +434,6 @@ class DiagnosticTest(object):
             if preceding_upload["size"] is not None:
                 last_fs = preceding_upload["size"]
                 this_fs = stat(self.file_path).st_size
-                print(preceding_upload)
                 bigger_file = last_fs if last_fs > this_fs else this_fs
                 smaller_file = last_fs if last_fs <= this_fs else this_fs
                 fchange = (bigger_file - smaller_file) / bigger_file
