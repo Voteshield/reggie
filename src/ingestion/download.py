@@ -283,7 +283,7 @@ class Loader(object):
         decompress a file using either unzip or gunzip, unless the file is an
         .xlsx file, in which case it is returned as is (these files are
         compressed by default, and are unreadable in their unpacked form by
-        pandas)
+        pandas) 
         :param s3_file_obj: the path of the file to be decompressed
         :param compression_type: available options - ["unzip", "gunzip"]
         :return: a (str, bool) tuple containing the location of the processed
@@ -441,6 +441,110 @@ class Preprocessor(Loader):
 
         outfile.seek(0)
         return outfile
+
+    def preprocess_texas(self):
+        new_files = self.unpack_files(
+            file_obj=self.main_file, compression='unzip')
+        widths_one = [3, 10, 10, 50, 50, 50, 50,
+                      4, 1, 8, 9, 12, 2, 50, 12,
+                      2, 12, 12, 50, 9, 110, 50,
+                      50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        widths_two = [3, 4, 10, 50, 50, 50, 50,
+                      4, 1, 8, 9, 12, 2, 50, 12,
+                      2, 12, 12, 50, 9, 110, 50,
+                      50, 20, 20, 8, 1, 1, 8, 2, 3, 6]
+        df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
+        have_length = False
+        for i in new_files:
+            if ("count" not in i['name'] and
+                    "MACOS" not in i['name'] and
+                    "DS_Store" not in i['name'] and
+                    i['obj'].len != 0):
+
+                if not have_length:
+                    line_length = len(i['obj'].readline())
+                    i['obj'].seek(0)
+                    have_length = True
+                    if line_length == 686:
+                        widths = widths_one
+                    elif line_length == 680:
+                        widths = widths_two
+                    else:
+                        raise ValueError(
+                            "Width possibilities have changed,"
+                            "new width found: {}".format(line_length))
+                    have_length = True
+                logging.info("Loading file {}".format(i))
+                new_df = pd.read_fwf(
+                    i['obj'], widths=widths, header=None)
+                new_df.columns = self.config.raw_file_columns()
+                if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
+                    df_voter = pd.concat(
+                        [df_voter, new_df], axis=0, ignore_index=True)
+                else:
+                    df_hist = pd.concat([df_hist, new_df],
+                                        axis=0, ignore_index=True)
+            del i['obj']
+        if df_hist.empty:
+            logging.info("This file contains no voter history")
+        df_voter['Effective_Date_of_Registration'] = df_voter[
+            'Effective_Date_of_Registration'].fillna(-1).astype(int).astype(str).replace('-1', np.nan)
+        df_voter[self.config["party_identifier"]] = 'npa'
+        df_hist[self.config['hist_columns']] = df_hist[
+            self.config['hist_columns']].replace(np.nan, '', regex=True)
+        df_hist["election_name"] = df_hist["Election_Date"].astype(str) + \
+            "_" + \
+            df_hist['Election_Type'].astype(
+                str) + "_" + df_hist['Election_Party'].astype(str)
+
+        valid_elections, counts = np.unique(df_hist["election_name"],
+                                            return_counts=True)
+
+        def texas_datetime(x):
+            try:
+                return datetime.strptime(x[0:8], "%Y%m%d")
+            except (ValueError):
+                return datetime(1970, 1, 1)
+
+        date_order = [idx for idx, election in
+                      sorted(enumerate(valid_elections),
+                             key=lambda x: texas_datetime(x[1]),
+                             reverse=True)]
+        valid_elections = valid_elections[date_order]
+        counts = counts[date_order]
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+                                 "date": str(texas_datetime(k).date())}
+                             for i, k in enumerate(sorted_codes)}
+
+        df_hist["array_position"] = df_hist["election_name"].map(
+            lambda x: int(sorted_codes_dict[x]["index"]))
+        logging.info("Texas: history apply")
+        voter_groups = df_hist.groupby(self.config['voter_id'])
+        sparse_history = voter_groups["array_position"].apply(list)
+        vote_type = voter_groups["Election_Voting_Method"].apply(list)
+
+        df_voter = df_voter.set_index(self.config["voter_id"])
+        df_voter["sparse_history"] = sparse_history
+        df_voter["all_history"] = voter_groups["election_name"].apply(list)
+        df_voter["vote_type"] = vote_type
+        gc.collect()
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
+            'Permanent_Zipcode', 'Permanent_House_Number', 'Mailing_Zipcode'])
+        df_voter.drop(self.config['hist_columns'],
+                      axis=1, inplace=True)
+        self.meta = {
+            "message": "texas_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+        gc.collect()
+        logging.info("Texas: writing out")
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df_voter.to_csv()))
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
@@ -751,7 +855,6 @@ class Preprocessor(Loader):
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
-
         # new_files is list of dicts, i.e. [{"name":.. , "obj": <fileobj>}, ..]
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
@@ -1206,8 +1309,11 @@ class Preprocessor(Loader):
 
         main_df = pd.read_csv(main_file["obj"], sep='\t')
 
-        # add empty columns for voter_status and party_identifier
-        main_df[self.config["voter_status"]] = np.nan
+        # convert "Voter Status" to "voter_status" for backward compatibility
+        main_df.rename(columns={"Voter Status": self.config["voter_status"]},
+                       inplace=True)
+
+        # add empty column for party_identifier
         main_df[self.config["party_identifier"]] = np.nan
 
         def add_history(main_df):
@@ -1262,7 +1368,7 @@ class Preprocessor(Loader):
         config = Config("michigan")
         new_files = self.unpack_files(file_obj=self.main_file)
         voter_file = ([n for n in new_files if 'entire_state_v' in n["name"] or
-                      'EntireStateVoters' in n["name"]] + [None])[0]
+                       'EntireStateVoters' in n["name"]] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n["name"] or
                       'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
@@ -1621,6 +1727,7 @@ class Preprocessor(Loader):
             'kansas': self.preprocess_kansas,
             'ohio': self.preprocess_ohio,
             'minnesota': self.preprocess_minnesota,
+            'texas': self.preprocess_texas,
             'colorado': self.preprocess_colorado
         }
         if self.config["state"] in routes:

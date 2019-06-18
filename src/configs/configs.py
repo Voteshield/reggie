@@ -174,5 +174,9 @@ class Config(object):
             "text_election_code_7",
             "text_election_code_8",
             "text_election_code_9",
-            "text_election_code_10"]
+            "text_election_code_10",
+            "Election_Date",
+            "Election_Type",
+            "Election_Party",
+            "Election_Voting_Method"]
         return history_cols
