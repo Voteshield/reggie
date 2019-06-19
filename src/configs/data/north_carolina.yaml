@@ -16,6 +16,8 @@ democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB
 no_party_affiliation: UNA
+absentee_ballot_code: ABSENTEE
+provisional_ballot_code: PROVISIONAL
 date_format: '%Y'
 numeric_county: true
 party_identifier: party_cd
