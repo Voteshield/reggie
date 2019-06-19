@@ -9,6 +9,7 @@ birthday_identifier: BIRTH_YEAR
 voter_status: STATUS
 voter_status_active: Active
 voter_status_inactive: Inactive
+absentee_ballot_code: Mail
 democratic_party: DEM
 republican_party: REP
 no_party_affiliation: UAF
