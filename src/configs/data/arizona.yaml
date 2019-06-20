@@ -42,7 +42,7 @@ liberal: LIBERAL
 reform: REFORM
 americans_elect: "AMERICANS ELECT"
 absentee_ballot_code: 'A'
-valid_voting_methods: ['E','I','Y','P','F']
+valid_voting_methods: ['E','I','Y','P','F','A','N']
 voting_method_column: 'all_voting_methods'
 numeric_county: false
 date_format: '%Y'
@@ -244,27 +244,6 @@ ordered_columns:
   - text_phone_last_four
   - perm_absentee_indicator
   - desc_absentee_duration
-hist_columns:
-  - party_voted_GE04
-  - party_voted_GE06
-  - party_voted_GE2008
-  - party_voted_GE2010
-  - party_voted_GE2012
-  - party_voted_GE2014
-  - party_voted_GE2016
-  - party_voted_PE04
-  - party_voted_PE06
-  - party_voted_PE2008
-  - party_voted_PE2010
-  - party_voted_PE2012
-  - party_voted_PE2014
-  - party_voted_PE2016
-  - party_voted_PP04
-  - party_voted_PP2008
-  - party_voted_PP2012
-  - party_voted_PP2016
-  - party_voted_SE2010
-  - party_voted_SE2016
 equivalent_columns:
   occupation:
     - occupational
