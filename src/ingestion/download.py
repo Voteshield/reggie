@@ -832,6 +832,7 @@ class Preprocessor(Loader):
         df_voters = pd.read_csv(voter_file["obj"], header=None)
         df_voters.columns = self.config["ordered_columns"]
         valid_elections = df_hist.date.unique().tolist()
+        counts = df_hist.date.value_counts()
         valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
 
         # NOTE: this function only works correctly if
@@ -846,7 +847,6 @@ class Preprocessor(Loader):
                     group_idx += 1
                 else:
                     output.append('n')
-
             return output
 
         voting_histories = df_hist.groupby(self.config["voter_id"])\
@@ -856,6 +856,16 @@ class Preprocessor(Loader):
         df_voters["all_history"] = voting_histories
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters)
+
+        sorted_codes = valid_elections
+        sorted_codes_dict = {k: {"index": i, "count": counts.loc[k],
+                         "date": date_from_str(k)}
+                     for i, k in enumerate(sorted_codes)}
+        self.meta = {
+            "message": "nevada_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
