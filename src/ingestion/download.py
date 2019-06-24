@@ -870,7 +870,7 @@ class Preprocessor(Loader):
         df_voters = self.config.coerce_numeric(df_voters)
 
         sorted_codes = valid_elections
-        sorted_codes_dict = {k: {"index": i, "count": counts.loc[k],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts.loc[k]),
                          "date": date_from_str(k)}
                      for i, k in enumerate(sorted_codes)}
         self.meta = {
