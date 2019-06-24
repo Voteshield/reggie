@@ -17,15 +17,13 @@ import shutil
 import numpy as np
 import subprocess
 import gc
-from io import BytesIO
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
-from py7zlib import Archive7z, FormatError
-from StringIO import StringIO
+from io import StringIO, BytesIO
 import bs4
 import requests
-import urllib2
+from urllib.request import urlopen
 import xml.etree.ElementTree
 import os
 
@@ -39,7 +37,7 @@ def ohio_get_last_updated():
 
 
 def nc_date_grab():
-    nc_file = urllib2.urlopen(
+    nc_file = urlopen(
         'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
     data = nc_file.read()
     nc_file.close()
@@ -69,9 +67,9 @@ def get_object(key, fn):
         s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
 
 
-def get_object_mem(key):
+def get_object_mem(key, bucket=S3_BUCKET):
     file_obj = BytesIO()
-    s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
+    s3.Bucket(bucket).download_fileobj(Key=key, Fileobj=file_obj)
     return file_obj
 
 
@@ -98,8 +96,14 @@ class FileItem(object):
         if key is not None:
             self.obj = get_object_mem(key)
         elif filename is not None:
-            with open(filename) as f:
-                self.obj = StringIO(f.read())
+            try:
+                with open(filename) as f:
+                    s = f.read()
+                    self.obj = StringIO(s)
+            except UnicodeDecodeError:
+                with open(filename, 'rb') as f:
+                    s = f.read()
+                    self.obj = BytesIO(s)
         else:
             self.obj = io_obj
         self.name = name
@@ -132,7 +136,6 @@ class Loader(object):
             l.s3_dump()
     ```
     """
-
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
                  force_file=None, testing=False):
         self.config_file_path = config_file
@@ -206,15 +209,17 @@ class Loader(object):
                           os.listdir(new_loc_decomp)]
             logging.info("file_names = {}".format(file_names))
             # NY also has memory issues, so just read into csv from disk
-            file_objs = [{"name": name, "obj": name}
-                         for name in file_names]
+            file_objs = [{"name": name, "obj": name} for name in file_names]
         else:
             zip_file = ZipFile(file_name)
             file_names = zip_file.namelist()
             logging.info("decompressing unzip {} into {}".format(file_name,
                                                                  file_names))
-            file_objs = [{"name": name, "obj": StringIO(zip_file.read(name))}
-                         for name in file_names]
+            file_objs = []
+            for name in file_names:
+                file_objs.append({"name": name,
+                                  "obj": BytesIO(zip_file.read(name))})
+
         return file_objs
 
     def gunzip_decompress(self, file_name):
@@ -293,10 +298,12 @@ class Loader(object):
         decompressed
         """
 
-        logging.info("decompressing {}".format(s3_file_obj["name"]))
         new_files = None
+        inferred_compression = self.infer_compression(s3_file_obj["name"])
         if compression_type is "infer":
-            compression_type = self.infer_compression(s3_file_obj["name"])
+            compression_type = inferred_compression
+        logging.info("decompressing {} using {}".format(s3_file_obj["name"],
+                                                        compression_type))
 
         if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
            (s3_file_obj["name"].split(".")[-1] == "txt") or \
@@ -304,14 +311,17 @@ class Loader(object):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
-            if compression_type == "unzip":
-                new_files = self.unzip_decompress(s3_file_obj["obj"])
-            elif compression_type == "bunzip2":
-                new_files = self.bunzip2_decompress(s3_file_obj["obj"])
-            elif compression_type == "7zip":
-                new_files = self.sevenzip_decompress(s3_file_obj["obj"])
+            # convert to
+            if isinstance(s3_file_obj["obj"], StringIO):
+                bytes_obj = BytesIO(s3_file_obj["obj"].read().encode())
             else:
-                new_files = self.gunzip_decompress(s3_file_obj["obj"])
+                bytes_obj = s3_file_obj["obj"]
+            if compression_type == "unzip":
+                new_files = self.unzip_decompress(bytes_obj)
+            elif compression_type == "bunzip2":
+                new_files = self.bunzip2_decompress(bytes_obj)
+            else:
+                new_files = self.gunzip_decompress(bytes_obj)
 
             if compression_type is not None and new_files is not None:
                 logging.info("decompression done: {}".format(s3_file_obj))
@@ -341,15 +351,13 @@ class Loader(object):
             self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class))\
-            .put(Body=file_item.obj, ServerSideEncryption='AES256')
-        s3.Object(S3_BUCKET,
-                  self.generate_key(file_class=META_FILE_PREFIX) + ".json")\
-            .put(Body=json.dumps(meta), ServerSideEncryption='AES256')
+        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class)).put(
+            Body=file_item.obj, ServerSideEncryption='AES256')
+        s3.Object(S3_BUCKET, self.generate_key(file_class=META_FILE_PREFIX) + ".json").put(
+            Body=json.dumps(meta), ServerSideEncryption='AES256')
 
 
 class Preprocessor(Loader):
-
     def __init__(self, raw_s3_file, config_file, **kwargs):
 
         super(Preprocessor, self).__init__(
@@ -376,8 +384,12 @@ class Preprocessor(Loader):
                         decompressed_result = self.decompress(
                             f, compression_type=compression)
                         if decompressed_result is not None:
+                            print('decompression ok for {}'.format(f))
                             expand_recurse(decompressed_result)
-                    except (BadZipfile, FormatError) as e:
+                        else:
+                            print('decomp returned none for {}'.format(f))
+                    except BadZipfile as e:
+                        print('decompression failed for {}'.format(f))
                         all_files.append(f)
         if type(self.main_file) == str:
             expand_recurse([{"name": self.main_file,

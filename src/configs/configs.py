@@ -1,4 +1,4 @@
-from constants import CONFIG_DIR
+from constants import CONFIG_DIR, COUNTY_ALIAS, LOCALE_TYPE
 import yaml
 import pandas as pd
 
@@ -16,6 +16,8 @@ class Config(object):
             config_file = file_name
 
         self.data = self.load_data(config_file)
+        self.county_column = self.data[COUNTY_ALIAS]
+        self.locale_type = self.data.get(LOCALE_TYPE, "county")
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -33,10 +35,10 @@ class Config(object):
                 config_cache[config_file] = config
         return config
 
-    """
-    In the following 4 methods we recreate the functionality of a dictionary,
-    as needed in the rest of the application.
-    """
+    # """
+    # In the following 4 methods we recreate the functionality of a dictionary,
+    # as needed in the rest of the application.
+    # """
 
     def __getitem__(self, key):
         return self.data[key]
