@@ -78,7 +78,7 @@ def concat_and_delete(in_list):
 
     for f_obj in in_list:
         s = f_obj["obj"].read()
-        outfile.write(s)
+        outfile.write(s.decode())
     outfile.seek(0)
     return outfile
 
@@ -185,7 +185,7 @@ class Loader(object):
             logging.info("compressing")
             p = Popen(["gzip", "-c"], stdout=PIPE,
                       stderr=PIPE, stdin=PIPE)
-            op, err = p.communicate(self.main_file.obj.read())
+            op, err = p.communicate(self.main_file.obj.read().encode())
             self.main_file.obj.seek(0)
             self.is_compressed = True
             self.main_file.obj = BytesIO(op)
@@ -532,7 +532,7 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": str(texas_datetime(k).date())}
                              for i, k in enumerate(sorted_codes)}
 
@@ -606,7 +606,7 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
@@ -703,7 +703,7 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
@@ -797,7 +797,7 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": datetime.strptime(k[0:8], "%Y%m%d")}
                              for i, k in enumerate(sorted_codes)}
         history["array_position"] = history["Combo_history"].map(
@@ -917,7 +917,7 @@ class Preprocessor(Loader):
         valid_elections = valid_elections[date_order]
         counts = counts[date_order]
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
 
@@ -953,8 +953,8 @@ class Preprocessor(Loader):
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict),
-            "array_decoding": json.dumps(sorted_codes),
+            "array_encoding": sorted_codes_dict,
+            "array_decoding": sorted_codes,
         }
 
         gc.collect()
@@ -1007,7 +1007,7 @@ class Preprocessor(Loader):
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
             sorted_codes = unique_codes.tolist()
-            sorted_codes_dict = {k: {"index": i, "count": counts[i],
+            sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                      "date": ks_hist_date(k)}
                                  for i, k in enumerate(sorted_codes)}
 
@@ -1120,7 +1120,7 @@ class Preprocessor(Loader):
         counts = counts[count_order]
 
         # create meta
-        sorted_codes_dict = {j: {"index": i, "count": counts[i],
+        sorted_codes_dict = {j: {"index": i, "count": int(counts[i]),
                                  "date": date_from_str(j)}
                              for i, j in enumerate(elections)}
 
@@ -1236,7 +1236,7 @@ class Preprocessor(Loader):
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
         sorted_codes = unique_codes.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i]} for i, k in
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i])} for i, k in
                              enumerate(sorted_codes)}
         gc.collect()
 
@@ -1290,7 +1290,7 @@ class Preprocessor(Loader):
         counts = counts[count_order]
 
         sorted_codes = valid_elections.tolist()
-        sorted_codes_dict = {k: {"index": i, "count": counts[i],
+        sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                  "date": date_from_str(k)}
                              for i, k in enumerate(sorted_codes)}
         vote_hist["array_position"] = vote_hist["election_desc"].map(
@@ -1360,7 +1360,7 @@ class Preprocessor(Loader):
             unique_codes = unique_codes[count_order]
             counts = counts[count_order]
             sorted_codes = unique_codes.tolist()
-            sorted_codes_dict = {k: {"index": i, "count": counts[i],
+            sorted_codes_dict = {k: {"index": i, "count": int(counts[i]),
                                      "date": date_from_str(k)}
                                  for i, k in enumerate(sorted_codes)}
 
