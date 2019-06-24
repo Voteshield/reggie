@@ -139,8 +139,11 @@ class Config(object):
         for field in text_fields:
             if (field in df) and (field != self.data["voter_status"]) \
                and (field != self.data["party_identifier"]):
-                df[field] = df[field].astype(str).str.strip().str.lower()\
-                    .str.decode('utf-8', errors='ignore').str.encode('utf-8')
+                string_copy = df[field].astype(str)
+                stripped_copy = string_copy.str.strip()
+                lower_copy = stripped_copy.str.lower()
+                utf_decoded = lower_copy.str.encode('utf-8', errors='ignore')
+                df[field] = utf_decoded.str.decode('utf-8')
         return df
 
     def admissible_change_types(self):
