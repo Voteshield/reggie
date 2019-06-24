@@ -976,7 +976,7 @@ class Preprocessor(Loader):
             try:
                 elect_year = parser.parse(s[2:6]).year
             except:
-                elect_year = None
+                elect_year = -1
                 pass
             if (elect_year < 1850) or (elect_year > dt.today().year + 1):
                 elect_year = None
