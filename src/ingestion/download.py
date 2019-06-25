@@ -20,7 +20,7 @@ import gc
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
-from io import StringIO, BytesIO
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
 import bs4
 import requests
 from urllib.request import urlopen
@@ -109,9 +109,7 @@ class FileItem(object):
         self.name = name
 
     def __str__(self):
-        if isinstance(self.obj, StringIO):
-            s = self.obj.len
-        elif isinstance(self.obj, BytesIO):
+        if isinstance(self.obj, StringIO) or isinstance(self.obj, BytesIO):
             s = len(self.obj.getvalue())
         else:
             s = "unknown"
@@ -398,9 +396,9 @@ class Preprocessor(Loader):
             expand_recurse([{"name": self.main_file.name,
                              "obj": self.main_file.obj}])
         if "format" in self.config and "ignore_files" in self.config["format"]:
-            all_files = [n for n in all_files if n.keys()[0] not in
+            all_files = [n for n in all_files if list(n.keys())[0] not in
                          self.config["format"]["ignore_files"] and
-                         os.path.basename(n.keys()[0]) not in
+                         os.path.basename(list(n.keys())[0]) not in
                          self.config["format"]["ignore_files"]]
 
         all_files = [n for n in all_files if ".png" not in n["name"]]
@@ -431,8 +429,13 @@ class Preprocessor(Loader):
                     return j, k, i
                 i += 1
             return False
+        lengths = {}
 
-        file_names = sorted(file_names, key=lambda x: x["obj"].len,
+        for f in file_names:
+            lengths[f["name"]] = f["obj"].seek(SEEK_END)
+            f["obj"].seek(SEEK_SET)
+
+        file_names = sorted(file_names, key=lambda x: lengths[x["name"]],
                             reverse=True)
         outfile = StringIO()
         for f in file_names:
@@ -475,14 +478,15 @@ class Preprocessor(Loader):
         df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
         have_length = False
         for i in new_files:
+            file_len = i['obj'].seek(SEEK_END)
+            i['obj'].seek(SEEK_SET)
             if ("count" not in i['name'] and
                     "MACOS" not in i['name'] and
-                    "DS_Store" not in i['name'] and
-                    i['obj'].len != 0):
+                    "DS_Store" not in i['name'] and file_len != 0):
 
                 if not have_length:
                     line_length = len(i['obj'].readline())
-                    i['obj'].seek(0)
+                    i['obj'].seek(SEEK_END)
                     have_length = True
                     if line_length == 686:
                         widths = widths_one
@@ -976,7 +980,7 @@ class Preprocessor(Loader):
             try:
                 elect_year = parser.parse(s[2:6]).year
             except:
-                elect_year = None
+                elect_year = -1
                 pass
             if (elect_year < 1850) or (elect_year > dt.today().year + 1):
                 elect_year = None
