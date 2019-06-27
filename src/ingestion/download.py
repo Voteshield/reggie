@@ -577,6 +577,23 @@ class Preprocessor(Loader):
             elif ".txt" in i['name']:
                 temp_df = pd.read_csv(i['obj'], compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
+
+        # create history meta data
+        voting_history_cols = list(filter(
+            lambda x: any([pre in x for pre in (
+                "GENERAL-", "SPECIAL-", "PRIMARY-")]), df.columns.values))
+        total_records = df.shape[0]
+        sorted_codes = voting_history_cols
+        sorted_codes_dict = {k: {"index": i,
+                                 "count": int(
+                                    total_records - df[k].isna().sum()),
+                                 "date": date_from_str(k)}
+                            for i, k in enumerate(voting_history_cols)}
+        self.meta = {
+            "message": "ohio_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df.to_csv()))
 
