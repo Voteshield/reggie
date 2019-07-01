@@ -42,7 +42,7 @@ Voter files, often referred to as voter registration lists, are files kept by st
 
 ## Voter History
 
-Many states keep voter history in their voter file, often kept in a separate file at the county level. Reggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. The specifics of how this should be done can be [here](https://github.com/Voteshield/reggie/wiki/UVFF-and-State-Onboarding)
+Many states keep voter history in their voter file, often kept in a separate file at the county level. Reggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. The specifics of how this should be done can be found [here](https://github.com/Voteshield/reggie/wiki/UVFF-and-State-Onboarding).
 
 ## Expected File Format by State
 
