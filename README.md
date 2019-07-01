@@ -42,26 +42,11 @@ Voter files, often referred to as voter registration lists, are files kept by st
 
 ## Voter History
 
-Many states keep voter history in their voter file, often kept in a separate file at the county level. Reggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. This will either be kept in an array of vote slugs, or a collection of indicies that correspond to elections held in the returned metadata.  
-
-### Voter Slug Example
-
-{"STATE-GENERAL ELECTION 11/06/2007","GENERAL ELECTION 11/04/2008","STATE GENERAL 2010 11/02/2010"}  
-
-This represents the voter history for a single voter in New Jersey who voted in a state general election in 2007, voted in the general in 2008, and also in the general in 2010. 
-
-### Voter Metadata
-
-The metadata returned by veggie is in a state specific json format depending on what information the state provides in the voter file. These data contain the election date, number of votes in the election An example is:
-
-{\"03/15/2016_GEN\": {\"index\": 0, \"count\": 2729, \"date\": \"03/15/2016\"}
-
-In some states, the all_history column is an array of integers or there is a column called sparse history. These correspond to the index in the metadata (this is done to save storage space in our internal database and to compute interesting election level features).
-
+Many states keep voter history in their voter file, often kept in a separate file at the county level. Reggie will combine each of these files, and group the history by turning the collection of voter history into a column in the voter registration file called all_history. The specifics of how this should be done can be [here](https://github.com/Voteshield/reggie/wiki/UVFF-and-State-Onboarding)
 
 ## Expected File Format by State
 
-Reggie automatically decompresses all of the files in the provided file, and expects voter files in the format that the individual states use. A small sample of some state's expected format is below. 
+Reggie automatically decompresses all of the files in the provided file, and expects voter files in the format that the individual states use. A small sample of some state's expected input format is below. 
 
 #### Arizona
 
