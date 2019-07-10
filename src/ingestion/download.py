@@ -1423,6 +1423,15 @@ class Preprocessor(Loader):
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
 
+        def reconcile_columns(df, expected_cols):
+            for c in expected_cols:
+                if c not in df.columns:
+                    df[c] = np.nan
+            for c in df.columns:
+                if c not in expected_cols:
+                    df.drop(columns=[c], inplace=True)
+            return df
+
         logging.info("Detected voter file: " + voter_file["name"])
         logging.info("Detected history file: " + hist_file["name"])
         if(elec_codes):
@@ -1440,47 +1449,53 @@ class Preprocessor(Loader):
                          [474, 479], [479, 484], [484, 489], [489, 494],
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
-            vdf = pd.read_fwf(voter_file["obj"], colspecs=vcolspecs,
+            vdf = pd.read_fwf(voter_file["obj"],
+                              colspecs=vcolspecs,
                               names=config["fwf_voter_columns"],
                               na_filter=False)
         elif voter_file["name"][-3:] == "csv":
-            # the csv's contain their own headers
-            vdf = pd.read_csv(voter_file["obj"], na_filter=False,
+            vdf = pd.read_csv(voter_file["obj"],
+                              na_filter=False,
                               error_bad_lines=False)
-
-            # vdf.columns = config["ordered_columns"][:-1]
-            # instead, we probably want to normalize voter vile columns to new format...
-
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
 
-        # for x in ordered_columns, if x not in vdf, add x column to vdf
-        # THEN change column ordering to canonical (ordered_columns)
+        # TODO change to whatever reason code column is actually named
+        reason_code_col = "XXX"
+        if reason_code_col in vdf.columns:
+            vdf.rename(columns={reason_code_col: "reason_code"}, inplace=True)
+
+        vdf = reconcile_columns(vdf, config["columns"])
+        vdf = vdf.reindex(columns=config["ordered_columns"])
 
         logging.info("MICHIGAN: Loading historical file")
         if hist_file["name"][-3:] == "lst":
             hcolspecs = [[0, 13], [13, 15], [15, 20],
                          [20, 25], [25, 38], [38, 39]]
-            hdf = pd.read_fwf(hist_file["obj"], colspecs=hcolspecs,
-                              names=config["hist_columns"], na_filter=False)
+            hdf = pd.read_fwf(hist_file["obj"],
+                              colspecs=hcolspecs,
+                              names=config["fwf_hist_columns"],
+                              na_filter=False)
         elif hist_file["name"][-3:] == "csv":
-            hdf = pd.read_csv(hist_file["obj"], na_filter=False,
-                              error_bad_lines=False)\
-                .drop(["COUNTY_NAME", "JURISDICTION_NAME",
-                       "SCHOOL_DISTRICT_NAME"], axis=1)
-            hdf.columns = config["hist_columns"]
+            hdf = pd.read_csv(hist_file["obj"],
+                              na_filter=False,
+                              error_bad_lines=False)
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
 
-        if elec_codes:
+        if elec_codes and ("ELECTION_CODE" in hdf.columns):
+            # if hdf has "ELECTION_DATE" instead of "ELECTION_CODE",
+            # then we don't actually need to do the election lookups
             if elec_codes["name"][-3:] == "lst":
                 ecolspecs = [[0, 13], [13, 21], [21, 46]]
-                edf = pd.read_fwf(elec_codes["obj"], colspecs=ecolspecs,
+                edf = pd.read_fwf(elec_codes["obj"],
+                                  colspecs=ecolspecs,
                                   names=config["elec_code_columns"],
                                   na_filter=False)
             elif elec_codes["name"][-3:] == "csv":
+                # I'm not sure if this would actually ever happen
                 edf = pd.read_csv(elec_codes["obj"],
                                   names=config["elec_code_columns"],
                                   na_filter=False)
@@ -1488,9 +1503,9 @@ class Preprocessor(Loader):
                 raise NotImplementedError("File format not implemented. "
                                           "Contact your local code monkey")
 
+            # Election code lookups...
             edf["Date"] = edf["Date"].apply(
-                lambda x: pd.to_datetime(x, format='%m%d%Y')
-            )
+                lambda x: pd.to_datetime(x, format='%m%d%Y'))
             edf.sort_values(by=["Date"])
             edf["Date"] = edf["Date"].apply(datetime.isoformat)
             sorted_codes = map(str, edf["Election_Code"].unique().tolist())

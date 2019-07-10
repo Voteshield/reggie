@@ -204,7 +204,6 @@ ordered_columns:
   - UOCAVA_STATUS_NAME
   - party_identifier
   - reason_code
-
 fwf_voter_columns:
   - LAST_NAME
   - FIRST_NAME
@@ -244,7 +243,6 @@ fwf_voter_columns:
   - IS_PERMANENT_ABSENTEE_VOTER
   - VOTER_STATUS_TYPE_CODE
   - UOCAVA_STATUS_CODE
-
 hist_columns:
   - VOTER_IDENTIFICATION_NUMBER
   - COUNTY_CODE
@@ -262,15 +260,10 @@ fwf_hist_columns:
   - SCHOOL_DISTRICT_CODE
   - ELECTION_CODE
   - IS_ABSENTEE_VOTER
-
 elec_code_columns:
   - Election_Code
   - Date
   - Title
-
-fwf_elec_code_columns:
-  - x?
-
 county_names:
   Alcona_County: 01
   Alger_County: 02
