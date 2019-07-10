@@ -1503,9 +1503,12 @@ class Preprocessor(Loader):
                 raise NotImplementedError("File format not implemented. "
                                           "Contact your local code monkey")
 
-            # Election code lookups...
-            edf["Date"] = edf["Date"].apply(
+            # Election code lookup
+            edf["Date"] = edf["Date"].map(
                 lambda x: pd.to_datetime(x, format='%m%d%Y'))
+            hdf["ELECTION_DATE"] = hdf["ELECTION_CODE"].map(
+                lambda x: edf[edf['Election_Code'] == x]['Date'].values[0])
+
             edf.sort_values(by=["Date"])
             edf["Date"] = edf["Date"].apply(datetime.isoformat)
             sorted_codes = map(str, edf["Election_Code"].unique().tolist())
