@@ -1422,6 +1422,7 @@ class Preprocessor(Loader):
                       'EntireStateVoterHistory' in n["name"]] + [None])[0]
         elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
                       [None])[0]
+
         logging.info("Detected voter file: " + voter_file["name"])
         logging.info("Detected history file: " + hist_file["name"])
         if(elec_codes):
@@ -1440,22 +1441,23 @@ class Preprocessor(Loader):
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
             vdf = pd.read_fwf(voter_file["obj"], colspecs=vcolspecs,
-                              names=config["ordered_columns"], na_filter=False)
+                              names=config["fwf_voter_columns"],
+                              na_filter=False)
         elif voter_file["name"][-3:] == "csv":
+            # the csv's contain their own headers
             vdf = pd.read_csv(voter_file["obj"], na_filter=False,
-                              error_bad_lines=False)\
-                .drop(["COUNTY_NAME", "JURISDICTION_NAME",
-                       "SCHOOL_DISTRICT_NAME", "STATE_HOUSE_DISTRICT_NAME",
-                       "STATE_SENATE_DISTRICT_NAME",
-                       "US_CONGRESS_DISTRICT_NAME",
-                       "COUNTY_COMMISSIONER_DISTRICT_NAME",
-                       "VILLAGE_DISTRICT_NAME", "UOCAVA_STATUS_NAME"], axis=1)
-            if "PRECINCT" in vdf.columns:
-                vdf = vdf.drop(["PRECINCT"], axis=1)
-            vdf.columns = config["ordered_columns"][:-1]
+                              error_bad_lines=False)
+
+            # vdf.columns = config["ordered_columns"][:-1]
+            # instead, we probably want to normalize voter vile columns to new format...
+
         else:
             raise NotImplementedError("File format not implemented. Contact "
                                       "your local code monkey")
+
+        # for x in ordered_columns, if x not in vdf, add x column to vdf
+        # THEN change column ordering to canonical (ordered_columns)
+
         logging.info("MICHIGAN: Loading historical file")
         if hist_file["name"][-3:] == "lst":
             hcolspecs = [[0, 13], [13, 15], [15, 20],

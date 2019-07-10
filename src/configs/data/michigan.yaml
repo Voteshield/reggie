@@ -2,10 +2,10 @@ file_type: fwf
 state: michigan
 source: boe
 file_class: voter_file
-voter_id: Voter_ID
-county_identifier: county_number
-birthday_identifier: Birthyear
-voter_status: status_type
+voter_id: VOTER_IDENTIFICATION_NUMBER
+county_identifier: COUNTY_CODE
+birthday_identifier: YEAR_OF_BIRTH
+voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
 voter_status_inactive: V
 voter_status_cancelled: C
@@ -13,35 +13,35 @@ voter_status_rejected: R
 voter_status_challenged: CH
 absentee_ballot_code: 'Y'
 democratic_party: None
-no_party_affiliation: npa
 republican_party: None
+no_party_affiliation: npa
 party_identifier: party_identifier
 numeric_county: True
 date_format:
   - "%m%d%Y"
   - '%Y'
 name_fields:
-  - First_Name
-  - Middle_Name
-  - Last_Name
-  - Name_Suffix
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
 address_fields:
-  - house_number_character
-  - residence_street_character
-  - house_suffix
-  - pre-direction
-  - street_name
-  - street_type
-  - suffix_direction
-  - residence_extension
-  - city
-  - state
-  - zip
-  - mail_address_1 #if different from residential address
-  - mail_address_2
-  - mail_address_3
-  - mail_address_4
-  - mail_address_5
+  - STREET_NUMBER_PREFIX
+  - STREET_NUMBER
+  - STREET_NUMBER_SUFFIX
+  - DIRECTION_PREFIX
+  - STREET_NAME
+  - STREET_TYPE
+  - DIRECTION_SUFFIX
+  - EXTENSION
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - MAILING_ADDRESS_LINE_ONE
+  - MAILING_ADDRESS_LINE_TWO
+  - MAILING_ADDRESS_LINE_THREE
+  - MAILING_ADDRESS_LINE_FOUR
+  - MAILING_ADDRESS_LINE_FIVE
 format:
   separate_hist: true
   segmented_files: false
@@ -63,12 +63,12 @@ format:
 primary_key:
   - pre_date
   - post_date
-  - Voter_ID
+  - VOTER_IDENTIFICATION_NUMBER
   - change_type
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  Voter_ID: bigint
+  VOTER_IDENTIFICATION_NUMBER: bigint
   change_type: text
   pre_value: text
   post_value: text
@@ -76,13 +76,11 @@ base_columns:
 generated_columns:
   sparse_history: int[]
   all_history: varchar[]
-  verbose_history: varchar[]
-  coded_history: varchar[]
+  votetype_history: varchar[]
 ordered_generated_columns:
   - sparse_history
   - all_history
-  - verbose_history
-  - coded_history
+  - votetype_history
 has_headers: No
 summary_columns:
   - totals
@@ -105,96 +103,174 @@ summary_types:
   - int
   - int
 columns:
-  Voter_ID: bigint
-  First_Name: varchar
-  Middle_Name: varchar
-  Last_Name: varchar
-  Name_Suffix: varchar
-  registration_date: date
-  Birthyear: date
-  Gender: varchar
-  House_Number_Character: varchar
-  Residence_Street_Number: varchar
-  House_Suffix: varchar
-  Pre_direction: varchar
-  Street_Name: varchar
-  Street_Type: varchar
-  Suffix_Direction: varchar
-  Residence_Extension: varchar
-  City: varchar
-  Address_State: varchar
-  Zip: varchar
-  Mail_Address_1: varchar
-  Mail_Address_2: varchar
-  Mail_Address_3: varchar
-  Mail_Address_4: varchar
-  Mail_Address_5: varchar
-  county_number: int
-  Jurisdiction: int
-  Ward_Precinct: int
-  School_Code: int
-  State_House: int
-  State_Senate: int
-  US_Congress: int
-  County_Commissioner: int
-  Village_Code: int
-  Village_Precinct: int
-  School_Precinct: varchar
-  Permanent_Absentee_Ind: char
-  status_type: varchar
-  UOCAVA_Status: varchar
+  LAST_NAME: varchar
+  FIRST_NAME: varchar
+  MIDDLE_NAME: varchar
+  NAME_SUFFIX: varchar
+  YEAR_OF_BIRTH: date
+  GENDER: varchar
+  REGISTRATION_DATE: date
+  STREET_NUMBER_PREFIX: varchar
+  STREET_NUMBER: varchar
+  STREET_NUMBER_SUFFIX: varchar
+  DIRECTION_PREFIX: varchar
+  STREET_NAME: varchar
+  STREET_TYPE: varchar
+  DIRECTION_SUFFIX: varchar
+  EXTENSION: varchar
+  CITY: varchar
+  STATE: varchar
+  ZIP_CODE: varchar
+  MAILING_ADDRESS_LINE_ONE: varchar
+  MAILING_ADDRESS_LINE_TWO: varchar
+  MAILING_ADDRESS_LINE_THREE: varchar
+  MAILING_ADDRESS_LINE_FOUR: varchar
+  MAILING_ADDRESS_LINE_FIVE: varchar
+  VOTER_IDENTIFICATION_NUMBER: bigint
+  COUNTY_CODE: int
+  COUNTY_NAME: varchar
+  JURISDICTION_CODE: int
+  JURISDICTION_NAME: varchar
+  PRECINCT: varchar
+  WARD: varchar
+  SCHOOL_DISTRICT_CODE: int
+  SCHOOL_DISTRICT_NAME: varchar
+  STATE_HOUSE_DISTRICT_CODE: int
+  STATE_HOUSE_DISTRICT_NAME: varchar
+  STATE_SENATE_DISTRICT_CODE: int
+  STATE_SENATE_DISTRICT_NAME: varchar
+  US_CONGRESS_DISTRICT_CODE: int
+  US_CONGRESS_DISTRICT_NAME: varchar
+  COUNTY_COMMISSIONER_DISTRICT_CODE: int
+  COUNTY_COMMISSIONER_DISTRICT_NAME: varchar
+  VILLAGE_DISTRICT_CODE: int
+  VILLAGE_DISTRICT_NAME: varchar
+  VILLAGE_PRECINCT: varchar
+  SCHOOL_PRECINCT: varchar
+  IS_PERMANENT_ABSENTEE_VOTER: varchar
+  VOTER_STATUS_TYPE_CODE: varchar
+  UOCAVA_STATUS_CODE: varchar
+  UOCAVA_STATUS_NAME: varchar
   party_identifier: varchar
+  reason_code: varchar
 ordered_columns:
-  - Last_Name
-  - First_Name
-  - Middle_Name
-  - Name_Suffix
-  - Birthyear
-  - Gender
-  - registration_date
-  - House_Number_Character
-  - Residence_Street_Number
-  - House_Suffix
-  - Pre_direction
-  - Street_Name
-  - Street_Type
-  - Suffix_Direction
-  - Residence_Extension
-  - City
-  - Address_State
-  - Zip
-  - Mail_Address_1
-  - Mail_Address_2
-  - Mail_Address_3
-  - Mail_Address_4
-  - Mail_Address_5
-  - Voter_ID
-  - county_number
-  - Jurisdiction
-  - Ward_Precinct
-  - School_Code
-  - State_House
-  - State_Senate
-  - US_Congress
-  - County_Commissioner
-  - Village_Code
-  - Village_Precinct
-  - School_Precinct
-  - Permanent_Absentee_Ind
-  - status_type
-  - UOCAVA_Status
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
+  - YEAR_OF_BIRTH
+  - GENDER
+  - REGISTRATION_DATE
+  - STREET_NUMBER_PREFIX
+  - STREET_NUMBER
+  - STREET_NUMBER_SUFFIX
+  - DIRECTION_PREFIX
+  - STREET_NAME
+  - STREET_TYPE
+  - DIRECTION_SUFFIX
+  - EXTENSION
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - MAILING_ADDRESS_LINE_ONE
+  - MAILING_ADDRESS_LINE_TWO
+  - MAILING_ADDRESS_LINE_THREE
+  - MAILING_ADDRESS_LINE_FOUR
+  - MAILING_ADDRESS_LINE_FIVE
+  - VOTER_IDENTIFICATION_NUMBER
+  - COUNTY_CODE
+  - COUNTY_NAME
+  - JURISDICTION_CODE
+  - JURISDICTION_NAME
+  - PRECINCT
+  - WARD
+  - SCHOOL_DISTRICT_CODE
+  - SCHOOL_DISTRICT_NAME
+  - STATE_HOUSE_DISTRICT_CODE
+  - STATE_HOUSE_DISTRICT_NAME
+  - STATE_SENATE_DISTRICT_CODE
+  - STATE_SENATE_DISTRICT_NAME
+  - US_CONGRESS_DISTRICT_CODE
+  - US_CONGRESS_DISTRICT_NAME
+  - COUNTY_COMMISSIONER_DISTRICT_CODE
+  - COUNTY_COMMISSIONER_DISTRICT_NAME
+  - VILLAGE_DISTRICT_CODE
+  - VILLAGE_DISTRICT_NAME
+  - VILLAGE_PRECINCT
+  - SCHOOL_PRECINCT
+  - IS_PERMANENT_ABSENTEE_VOTER
+  - VOTER_STATUS_TYPE_CODE
+  - UOCAVA_STATUS_CODE
+  - UOCAVA_STATUS_NAME
   - party_identifier
+  - reason_code
+
+fwf_voter_columns:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
+  - YEAR_OF_BIRTH
+  - GENDER
+  - REGISTRATION_DATE
+  - STREET_NUMBER_PREFIX
+  - STREET_NUMBER
+  - STREET_NUMBER_SUFFIX
+  - DIRECTION_PREFIX
+  - STREET_NAME
+  - STREET_TYPE
+  - DIRECTION_SUFFIX
+  - EXTENSION
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - MAILING_ADDRESS_LINE_ONE
+  - MAILING_ADDRESS_LINE_TWO
+  - MAILING_ADDRESS_LINE_THREE
+  - MAILING_ADDRESS_LINE_FOUR
+  - MAILING_ADDRESS_LINE_FIVE
+  - VOTER_IDENTIFICATION_NUMBER
+  - COUNTY_CODE
+  - JURISDICTION_CODE
+  - WARD
+  - SCHOOL_DISTRICT_CODE
+  - STATE_HOUSE_DISTRICT_CODE
+  - STATE_SENATE_DISTRICT_CODE
+  - US_CONGRESS_DISTRICT_CODE
+  - COUNTY_COMMISSIONER_DISTRICT_CODE
+  - VILLAGE_DISTRICT_CODE
+  - VILLAGE_PRECINCT
+  - SCHOOL_PRECINCT
+  - IS_PERMANENT_ABSENTEE_VOTER
+  - VOTER_STATUS_TYPE_CODE
+  - UOCAVA_STATUS_CODE
+
 hist_columns:
-  - Voter_ID
-  - county_number
-  - Jurisdiction
-  - School_Code
-  - Election_Code
-  - Absentee_Voter_Indicator
+  - VOTER_IDENTIFICATION_NUMBER
+  - COUNTY_CODE
+  - COUNTY_NAME
+  - JURISDICTION_CODE
+  - JURISDICTION_NAME
+  - SCHOOL_DISTRICT_CODE
+  - SCHOOL_DISTRICT_NAME
+  - ELECTION_DATE
+  - IS_ABSENTEE_VOTER
+fwf_hist_columns:
+  - VOTER_IDENTIFICATION_NUMBER
+  - COUNTY_CODE
+  - JURISDICTION_CODE
+  - SCHOOL_DISTRICT_CODE
+  - ELECTION_CODE
+  - IS_ABSENTEE_VOTER
+
 elec_code_columns:
   - Election_Code
   - Date
   - Title
+
+fwf_elec_code_columns:
+  - x?
+
 county_names:
   Alcona_County: 01
   Alger_County: 02
