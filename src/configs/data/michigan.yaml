@@ -3,7 +3,7 @@ state: michigan
 source: boe
 file_class: voter_file
 voter_id: VOTER_IDENTIFICATION_NUMBER
-county_identifier: COUNTY_CODE
+county_identifier: JURISDICTION_CODE
 birthday_identifier: YEAR_OF_BIRTH
 voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
@@ -111,7 +111,7 @@ columns:
   GENDER: varchar
   REGISTRATION_DATE: date
   STREET_NUMBER_PREFIX: varchar
-  STREET_NUMBER: varchar
+  STREET_NUMBER: int
   STREET_NUMBER_SUFFIX: varchar
   DIRECTION_PREFIX: varchar
   STREET_NAME: varchar
@@ -120,7 +120,7 @@ columns:
   EXTENSION: varchar
   CITY: varchar
   STATE: varchar
-  ZIP_CODE: varchar
+  ZIP_CODE: int
   MAILING_ADDRESS_LINE_ONE: varchar
   MAILING_ADDRESS_LINE_TWO: varchar
   MAILING_ADDRESS_LINE_THREE: varchar
