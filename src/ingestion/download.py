@@ -1414,13 +1414,13 @@ class Preprocessor(Loader):
                                                        index=False)))
 
     def preprocess_michigan(self):
-        config = Config("michigan")
+        config = Config('michigan')
         new_files = self.unpack_files(file_obj=self.main_file)
-        voter_file = ([n for n in new_files if 'entire_state_v' in n["name"] or
-                       'EntireStateVoters' in n["name"]] + [None])[0]
-        hist_file = ([n for n in new_files if 'entire_state_h' in n["name"] or
-                      'EntireStateVoterHistory' in n["name"]] + [None])[0]
-        elec_codes = ([n for n in new_files if 'electionscd' in n["name"]] +
+        voter_file = ([n for n in new_files if 'entire_state_v' in n['name'] or
+                       'EntireStateVoters' in n['name']] + [None])[0]
+        hist_file = ([n for n in new_files if 'entire_state_h' in n['name'] or
+                      'EntireStateVoterHistory' in n['name']] + [None])[0]
+        elec_codes = ([n for n in new_files if 'electionscd' in n['name']] +
                       [None])[0]
 
         def reconcile_columns(df, expected_cols):
@@ -1432,13 +1432,8 @@ class Preprocessor(Loader):
                     df.drop(columns=[c], inplace=True)
             return df
 
-        logging.info("Detected voter file: " + voter_file["name"])
-        logging.info("Detected history file: " + hist_file["name"])
-        if(elec_codes):
-            logging.info("Detected election code file: " + elec_codes["name"])
-
-        logging.info("MICHIGAN: Loading voter file")
-        if voter_file["name"][-3:] == "lst":
+        logging.info('Loading voter file: ' + voter_file['name'])
+        if voter_file['name'][-3:] == 'lst':
             vcolspecs = [[0, 35], [35, 55], [55, 75],
                          [75, 78], [78, 82], [82, 83],
                          [83, 91], [91, 92], [92, 99], [99, 103], [103, 105],
@@ -1449,91 +1444,124 @@ class Preprocessor(Loader):
                          [474, 479], [479, 484], [484, 489], [489, 494],
                          [494, 499], [499, 504], [504, 510], [510, 516],
                          [516, 517], [517, 519]]
-            vdf = pd.read_fwf(voter_file["obj"],
+            vdf = pd.read_fwf(voter_file['obj'],
                               colspecs=vcolspecs,
-                              names=config["fwf_voter_columns"],
+                              names=config['fwf_voter_columns'],
                               na_filter=False)
-        elif voter_file["name"][-3:] == "csv":
-            vdf = pd.read_csv(voter_file["obj"],
+        elif voter_file['name'][-3:] == 'csv':
+            vdf = pd.read_csv(voter_file['obj'],
                               na_filter=False,
                               error_bad_lines=False)
         else:
-            raise NotImplementedError("File format not implemented. Contact "
-                                      "your local code monkey")
+            raise NotImplementedError('File format not implemented. Contact '
+                                      'your local code monkey')
 
         # TODO change to whatever reason code column is actually named
-        reason_code_col = "XXX"
+        reason_code_col = 'XXX'
         if reason_code_col in vdf.columns:
-            vdf.rename(columns={reason_code_col: "reason_code"}, inplace=True)
+            vdf.rename(columns={reason_code_col: 'reason_code'}, inplace=True)
 
-        vdf = reconcile_columns(vdf, config["columns"])
-        vdf = vdf.reindex(columns=config["ordered_columns"])
+        vdf = reconcile_columns(vdf, config['columns'])
+        vdf = vdf.reindex(columns=config['ordered_columns'])
 
-        logging.info("MICHIGAN: Loading historical file")
-        if hist_file["name"][-3:] == "lst":
+        logging.info('Loading history file: ' + hist_file['name'])
+        if hist_file['name'][-3:] == 'lst':
             hcolspecs = [[0, 13], [13, 15], [15, 20],
                          [20, 25], [25, 38], [38, 39]]
-            hdf = pd.read_fwf(hist_file["obj"],
+            hdf = pd.read_fwf(hist_file['obj'],
                               colspecs=hcolspecs,
-                              names=config["fwf_hist_columns"],
+                              names=config['fwf_hist_columns'],
                               na_filter=False)
-        elif hist_file["name"][-3:] == "csv":
-            hdf = pd.read_csv(hist_file["obj"],
+        elif hist_file['name'][-3:] == 'csv':
+            hdf = pd.read_csv(hist_file['obj'],
                               na_filter=False,
                               error_bad_lines=False)
         else:
-            raise NotImplementedError("File format not implemented. Contact "
-                                      "your local code monkey")
+            raise NotImplementedError('File format not implemented. Contact '
+                                      'your local code monkey')
 
-        if elec_codes and ("ELECTION_CODE" in hdf.columns):
-            # if hdf has "ELECTION_DATE" instead of "ELECTION_CODE",
-            # then we don't actually need to do the election lookups
-            if elec_codes["name"][-3:] == "lst":
-                ecolspecs = [[0, 13], [13, 21], [21, 46]]
-                edf = pd.read_fwf(elec_codes["obj"],
-                                  colspecs=ecolspecs,
-                                  names=config["elec_code_columns"],
-                                  na_filter=False)
-            elif elec_codes["name"][-3:] == "csv":
-                # I'm not sure if this would actually ever happen
-                edf = pd.read_csv(elec_codes["obj"],
-                                  names=config["elec_code_columns"],
-                                  na_filter=False)
+        # if hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
+        # then we don't actually need to do election code lookups
+        if 'ELECTION_CODE' in hdf.columns:
+
+            if elec_codes:
+                # If we have election codes in this file
+                logging.info('Loading election codes file: ' + elec_codes['name'])
+                if elec_codes['name'][-3:] == 'lst':
+                    ecolspecs = [[0, 13], [13, 21], [21, 46]]
+                    edf = pd.read_fwf(elec_codes['obj'],
+                                      colspecs=ecolspecs,
+                                      names=config['elec_code_columns'],
+                                      na_filter=False)
+                elif elec_codes['name'][-3:] == 'csv':
+                    # I'm not sure if this would actually ever happen
+                    edf = pd.read_csv(elec_codes['obj'],
+                                      names=config['elec_code_columns'],
+                                      na_filter=False)
+                else:
+                    raise NotImplementedError('File format not implemented. '
+                                              'Contact your local code monkey')
+
+                # make a code dictionary that will be stored with meta data
+                code_dict = dict()
+                for idx, row in edf.iterrows():
+                    d = row['Date'].strftime('%Y-%m-%d')
+                    code_dict[row['Election_Code']] = {
+                        'Date': d,
+                        'Slug': d + '_' + str(row['Election_Code']) + '_' + \
+                                row['Title'].replace(' ', '-').replace('_', '-')}
+
             else:
-                raise NotImplementedError("File format not implemented. "
-                                          "Contact your local code monkey")
+                # Get election codes from most recent meta data
+                this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
+                pre_date, post_date, pre_key, post_key = get_surrounding_dates(
+                    date=this_date, state=self.state, testing=self.testing)
+                nearest_meta = get_metadata_for_key(pre_key)
+                code_dict = nearest_meta["code_dict"]
 
-            # Election code lookup
-            edf["Date"] = edf["Date"].map(
-                lambda x: pd.to_datetime(x, format='%m%d%Y'))
-            hdf["ELECTION_DATE"] = hdf["ELECTION_CODE"].map(
-                lambda x: edf[edf['Election_Code'] == x]['Date'].values[0])
 
-            edf.sort_values(by=["Date"])
-            edf["Date"] = edf["Date"].apply(datetime.isoformat)
-            sorted_codes = map(str, edf["Election_Code"].unique().tolist())
-            edf["Election_Code"] = edf["Election_Code"].astype(str)
 
-            edf = edf.set_index("Election_Code")
-            edf["Title"] += '_'
-            edf["Title"] = edf["Title"] + edf["Date"].map(str)
-            counts = hdf["Election_Code"].value_counts()
-            counts.index = counts.index.map(str)
-            elec_dict = {
-                k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
-                    'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
-                for i, k in enumerate(sorted_codes)}
-        else:
-            this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
-            pre_date, post_date, pre_key, post_key = get_surrounding_dates(
-                date=this_date, state=self.state, testing=self.testing)
-            old_meta = get_metadata_for_key(pre_key)
-            sorted_codes = old_meta["array_decoding"]
-            elec_dict = old_meta["array_encoding"]
+
+                # Election code lookup
+                edf["Date"] = edf["Date"].map(
+                    lambda x: pd.to_datetime(x, format='%m%d%Y'))
+                hdf["ELECTION_DATE"] = hdf["ELECTION_CODE"].map(
+                    lambda x: edf[edf['Election_Code'] == x]['Date'].values[0])
+                hdf["ELECTION_TITLE"] = hdf["ELECTION_CODE"].map(
+                    lambda x: edf[edf['Election_Code'] == x]['Title'].values[0])
+                hdf["TITLE"] = hdf["ELECTION_DATE"] + '_' + hdf["ELECTION_TITLE"]
+
+
+                hdf_id_group = hdf.groupby('voter_id')
+                logging.info("Creating all_history array")
+                vdf['all_history'] = hdf_id_group['election_name'].apply(list)
+
+
+
+                edf.sort_values(by=["Date"])
+                edf["Date"] = edf["Date"].apply(datetime.isoformat)
+                sorted_codes = map(str, edf["Election_Code"].unique().tolist())
+                edf["Election_Code"] = edf["Election_Code"].astype(str)
+
+                edf = edf.set_index("Election_Code")
+                edf["Title"] += '_'
+                edf["Title"] = edf["Title"] + edf["Date"].map(str)
+                counts = hdf["Election_Code"].value_counts()
+                counts.index = counts.index.map(str)
+                elec_dict = {
+                    k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
+                        'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
+                    for i, k in enumerate(sorted_codes)}
+
+
+
+        # Here, don't use edf anymore; use array_encoding / array_decoding ...
+
 
         vdf = self.config.coerce_dates(vdf)
         vdf = self.config.coerce_numeric(vdf, extra_cols=["School_Precinct"])
         vdf = self.config.coerce_strings(vdf)
+
 
         hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
             hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
@@ -1597,7 +1625,8 @@ class Preprocessor(Loader):
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
             "array_decoding": sorted_codes,
-            "array_encoding": elec_dict
+            "array_encoding": elec_dict,
+            "code_dict": code_dict
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
