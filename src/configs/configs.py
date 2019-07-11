@@ -160,6 +160,7 @@ class Config(object):
             "general_history",
             "sparse_history",
             "vote_type",
+            "votetype_history"
             "all_voting_methods",
             "party_history",
             "coded_history",
