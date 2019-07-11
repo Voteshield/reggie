@@ -1522,11 +1522,12 @@ class Preprocessor(Loader):
                 this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
                 pre_date, post_date, pre_key, post_key = get_surrounding_dates(
                     date=this_date, state=self.state, testing=self.testing)
-                nearest_meta = get_metadata_for_key(pre_key)
-                elec_code_dict = nearest_meta["elec_code_dict"]
-            else:
-                raise MissingElectionCodesError(
-                    'No election code file or nearby meta data found.')
+                if pre_key is not None:
+                    nearest_meta = get_metadata_for_key(pre_key)
+                    elec_code_dict = nearest_meta["elec_code_dict"]
+                else:
+                    raise MissingElectionCodesError(
+                        'No election code file or nearby meta data found.')
 
             # Election code lookup
             hdf['ELECTION_NAME'] = hdf['ELECTION_CODE'].map(
