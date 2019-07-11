@@ -10,6 +10,7 @@ from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
     df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
     get_metadata_for_key, format_column_name
+from applications.custom_errors import MissingElectionCodesError
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -1423,15 +1424,6 @@ class Preprocessor(Loader):
         elec_codes = ([n for n in new_files if 'electionscd' in n['name']] +
                       [None])[0]
 
-        def reconcile_columns(df, expected_cols):
-            for c in expected_cols:
-                if c not in df.columns:
-                    df[c] = np.nan
-            for c in df.columns:
-                if c not in expected_cols:
-                    df.drop(columns=[c], inplace=True)
-            return df
-
         logging.info('Loading voter file: ' + voter_file['name'])
         if voter_file['name'][-3:] == 'lst':
             vcolspecs = [[0, 35], [35, 55], [55, 75],
@@ -1453,16 +1445,25 @@ class Preprocessor(Loader):
                               na_filter=False,
                               error_bad_lines=False)
         else:
-            raise NotImplementedError('File format not implemented. Contact '
-                                      'your local code monkey')
+            raise NotImplementedError('File format not implemented')
 
         # TODO change to whatever reason code column is actually named
         reason_code_col = 'XXX'
         if reason_code_col in vdf.columns:
             vdf.rename(columns={reason_code_col: 'reason_code'}, inplace=True)
 
+        def reconcile_columns(df, expected_cols):
+            for c in expected_cols:
+                if c not in df.columns:
+                    df[c] = np.nan
+            for c in df.columns:
+                if c not in expected_cols:
+                    df.drop(columns=[c], inplace=True)
+            return df
+
         vdf = reconcile_columns(vdf, config['columns'])
         vdf = vdf.reindex(columns=config['ordered_columns'])
+        vdf[config['party_identifier']] = 'npa'
 
         logging.info('Loading history file: ' + hist_file['name'])
         if hist_file['name'][-3:] == 'lst':
@@ -1476,14 +1477,20 @@ class Preprocessor(Loader):
             hdf = pd.read_csv(hist_file['obj'],
                               na_filter=False,
                               error_bad_lines=False)
+            if ('IS_ABSENTEE_VOTER' not in hdf.columns) and \
+               ('IS_PERMANENT_ABSENTEE_VOTER' in hdf.columns):
+               hdf.rename(columns={
+                          'IS_PERMANENT_ABSENTEE_VOTER': 'IS_ABSENTEE_VOTER'},
+                          inplace=True)
         else:
-            raise NotImplementedError('File format not implemented. Contact '
-                                      'your local code monkey')
+            raise NotImplementedError('File format not implemented')
 
-        # if hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
-        # then we don't actually need to do election code lookups
-        if 'ELECTION_CODE' in hdf.columns:
-
+        # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
+        # then we don't need to do election code lookups
+        if 'ELECTION_DATE' in hdf.columns:
+            hdf['ELECTION_NAME'] = pd.to_datetime(hdf['ELECTION_DATE']).map(
+                lambda x: x.strftime('%Y-%m-%d'))
+        else:
             if elec_codes:
                 # If we have election codes in this file
                 logging.info('Loading election codes file: ' + elec_codes['name'])
@@ -1499,118 +1506,53 @@ class Preprocessor(Loader):
                                       names=config['elec_code_columns'],
                                       na_filter=False)
                 else:
-                    raise NotImplementedError('File format not implemented. '
-                                              'Contact your local code monkey')
+                    raise NotImplementedError('File format not implemented')
 
                 # make a code dictionary that will be stored with meta data
-                code_dict = dict()
+                elec_code_dict = dict()
                 for idx, row in edf.iterrows():
                     d = row['Date'].strftime('%Y-%m-%d')
-                    code_dict[row['Election_Code']] = {
+                    elec_code_dict[row['Election_Code']] = {
                         'Date': d,
                         'Slug': d + '_' + str(row['Election_Code']) + '_' + \
                                 row['Title'].replace(' ', '-').replace('_', '-')}
-
             else:
                 # Get election codes from most recent meta data
                 this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
                 pre_date, post_date, pre_key, post_key = get_surrounding_dates(
                     date=this_date, state=self.state, testing=self.testing)
                 nearest_meta = get_metadata_for_key(pre_key)
-                code_dict = nearest_meta["code_dict"]
+                elec_code_dict = nearest_meta["elec_code_dict"]
+            else:
+                raise MissingElectionCodesError(
+                    'No election code file or nearby meta data found.')
 
+            # Election code lookup
+            hdf['ELECTION_NAME'] = hdf['ELECTION_CODE'].map(
+                lambda x: elec_code_dict[x]['Slug'])
 
+        # Create meta data
+        counts = hdf['ELECTION_NAME'].value_counts()
+        counts.sort_index(inplace=True)
+        sorted_codes = counts.index.to_list()
+        sorted_codes_dict = {k: {'index': i,
+                                 'count': int(counts[i]),
+                                 'date': date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
 
-
-                # Election code lookup
-                edf["Date"] = edf["Date"].map(
-                    lambda x: pd.to_datetime(x, format='%m%d%Y'))
-                hdf["ELECTION_DATE"] = hdf["ELECTION_CODE"].map(
-                    lambda x: edf[edf['Election_Code'] == x]['Date'].values[0])
-                hdf["ELECTION_TITLE"] = hdf["ELECTION_CODE"].map(
-                    lambda x: edf[edf['Election_Code'] == x]['Title'].values[0])
-                hdf["TITLE"] = hdf["ELECTION_DATE"] + '_' + hdf["ELECTION_TITLE"]
-
-
-                hdf_id_group = hdf.groupby('voter_id')
-                logging.info("Creating all_history array")
-                vdf['all_history'] = hdf_id_group['election_name'].apply(list)
-
-
-
-                edf.sort_values(by=["Date"])
-                edf["Date"] = edf["Date"].apply(datetime.isoformat)
-                sorted_codes = map(str, edf["Election_Code"].unique().tolist())
-                edf["Election_Code"] = edf["Election_Code"].astype(str)
-
-                edf = edf.set_index("Election_Code")
-                edf["Title"] += '_'
-                edf["Title"] = edf["Title"] + edf["Date"].map(str)
-                counts = hdf["Election_Code"].value_counts()
-                counts.index = counts.index.map(str)
-                elec_dict = {
-                    k: {'index': i, 'count': counts.loc[k] if k in counts else 0,
-                        'date': edf.loc[k]["Date"], 'title': edf.loc[k]["Title"]}
-                    for i, k in enumerate(sorted_codes)}
-
-
-
-        # Here, don't use edf anymore; use array_encoding / array_decoding ...
-
+        # Collect histories
+        hdf_id_groups = hdf.groupby(config['voter_id'])
+        vdf['all_history'] = hdf_id_groups['ELECTION_NAME'].apply(list)
+        vdf['votetype_history'] = hdf_id_groups['IS_ABSENTEE_VOTER'].apply(list)
+        vdf['sparse_history'] = vdf['all_history'].map(
+            lambda x: [sorted_codes_dict[k]['index'] for k in x])
 
         vdf = self.config.coerce_dates(vdf)
-        vdf = self.config.coerce_numeric(vdf, extra_cols=["School_Precinct"])
+        vdf = self.config.coerce_numeric(
+            vdf, extra_cols=['PRECINCT', 'WARD', 'VILLAGE_PRECINCT',
+                             'SCHOOL_PRECINCT'])
         vdf = self.config.coerce_strings(vdf)
 
-
-        hdf["Info"] = hdf["Election_Code"].map(str) + '_' + \
-            hdf["Absentee_Voter_Indicator"].map(str) + '_' + \
-            hdf['county_number'].map(str) + '_' + \
-            hdf["Jurisdiction"].map(str) + '_' + \
-            hdf["School_Code"].map(str)
-
-        def get_sparse_history(group):
-            sparse = []
-            for ecode in group["Election_Code"].values:
-                try:
-                    sparse.append(elec_dict[str(ecode)]['index'])
-                except KeyError:
-                    continue
-
-            return sparse
-
-        def get_all_history(group):
-            all_hist = []
-            for ecode in group["Election_Code"].values:
-                try:
-                    all_hist.append(elec_dict[str(ecode)]["title"])
-                except KeyError:
-                    continue
-
-            return all_hist
-
-        def get_coded_history(group):
-            coded = []
-            for ecode in group["Election_Code"].values:
-                coded.append(str(ecode))
-
-            return coded
-
-        vdf['tmp_id'] = vdf[self.config["voter_id"]]
-        vdf = vdf.set_index('tmp_id')
-        logging.info("Generating sparse history")
-        group = hdf.groupby(config['voter_id'])
-        vdf["sparse_history"] = group.apply(get_sparse_history)
-        logging.info("Generating all history")
-        vdf["all_history"] = group.apply(get_all_history)
-        logging.info("Generating verbose history")
-        vdf["verbose_history"] = group.apply(lambda x: x['Info'].values)
-        logging.info("Generating coded history")
-        vdf["coded_history"] = group.apply(get_coded_history)
-        vdf[config["voter_id"]] = vdf[config["voter_id"]]\
-            .astype(int, errors='ignore')
-        vdf["party_identifier"] = "npa"
-        vdf.fillna('')
 
         # get rid of stupid latin-1
         text_fields = [c for c, v in config["columns"].items()
@@ -1621,14 +1563,12 @@ class Preprocessor(Loader):
                 if vdf[field].dtype == object:
                     vdf[field] = vdf[field].str.decode("latin-1")
 
-        logging.info("Writing to csv")
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
+            "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
-            "array_encoding": elec_dict,
-            "code_dict": code_dict
+            "elec_code_dict": elec_code_dict
         }
-
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
                                                    index=False)))
