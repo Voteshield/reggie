@@ -1442,6 +1442,7 @@ class Preprocessor(Loader):
                               na_filter=False)
         elif voter_file['name'][-3:] == 'csv':
             vdf = pd.read_csv(voter_file['obj'],
+                              encoding='latin-1',
                               na_filter=False,
                               error_bad_lines=False)
         else:
@@ -1544,6 +1545,9 @@ class Preprocessor(Loader):
         hdf_id_groups = hdf.groupby(config['voter_id'])
         vdf['all_history'] = hdf_id_groups['ELECTION_NAME'].apply(list)
         vdf['votetype_history'] = hdf_id_groups['IS_ABSENTEE_VOTER'].apply(list)
+        vdf['county_history'] = hdf_id_groups['COUNTY_CODE'].apply(list)
+        vdf['jurisdiction_history'] = hdf_id_groups['JURISDICTION_CODE'].apply(list)
+        vdf['schooldistrict_history'] = hdf_id_groups['SCHOOL_DISTRICT_CODE'].apply(list)
         vdf['sparse_history'] = vdf['all_history'].map(
             lambda x: [sorted_codes_dict[k]['index'] for k in x])
 
@@ -1552,16 +1556,6 @@ class Preprocessor(Loader):
             vdf, extra_cols=['PRECINCT', 'WARD', 'VILLAGE_PRECINCT',
                              'SCHOOL_PRECINCT'])
         vdf = self.config.coerce_strings(vdf)
-
-
-        # get rid of stupid latin-1
-        text_fields = [c for c, v in config["columns"].items()
-                       if v == "text" or v == "varchar"]
-        for field in text_fields:
-            if (field in vdf) and (field != config["voter_status"]) \
-                    and (field != config["party_identifier"]):
-                if vdf[field].dtype == object:
-                    vdf[field] = vdf[field].str.decode("latin-1")
 
         self.meta = {
             "message": "michigan_{}".format(datetime.now().isoformat()),
