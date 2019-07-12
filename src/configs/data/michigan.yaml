@@ -75,13 +75,19 @@ base_columns:
   post_value: text
   party_identifier: varchar
 generated_columns:
-  sparse_history: int[]
   all_history: varchar[]
   votetype_history: varchar[]
+  county_history: int[]
+  jurisdiction_history: int[]
+  schooldistrict_history: int[]
+  sparse_history: int[]
 ordered_generated_columns:
-  - sparse_history
   - all_history
   - votetype_history
+  - county_history
+  - jurisdiction_history
+  - schooldistrict_history
+  - sparse_history
 has_headers: No
 summary_columns:
   - totals
