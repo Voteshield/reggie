@@ -3,7 +3,8 @@ state: michigan
 source: boe
 file_class: voter_file
 voter_id: VOTER_IDENTIFICATION_NUMBER
-county_identifier: JURISDICTION_CODE
+county_identifier: JURISDICTION_NAME
+locale_type: jurisdiction
 birthday_identifier: YEAR_OF_BIRTH
 voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
