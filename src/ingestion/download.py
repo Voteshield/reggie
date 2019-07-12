@@ -1501,6 +1501,7 @@ class Preprocessor(Loader):
                                       colspecs=ecolspecs,
                                       names=config['elec_code_columns'],
                                       na_filter=False)
+                    edf['Date'] = pd.to_datetime(edf['Date'], format='%m%d%Y')
                 elif elec_codes['name'][-3:] == 'csv':
                     # I'm not sure if this would actually ever happen
                     edf = pd.read_csv(elec_codes['obj'],
