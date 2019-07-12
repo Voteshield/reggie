@@ -1543,14 +1543,21 @@ class Preprocessor(Loader):
                              for i, k in enumerate(sorted_codes)}
 
         # Collect histories
+        vdf.set_index(config['voter_id'], drop=False, inplace=True)
         hdf_id_groups = hdf.groupby(config['voter_id'])
         vdf['all_history'] = hdf_id_groups['ELECTION_NAME'].apply(list)
         vdf['votetype_history'] = hdf_id_groups['IS_ABSENTEE_VOTER'].apply(list)
         vdf['county_history'] = hdf_id_groups['COUNTY_CODE'].apply(list)
         vdf['jurisdiction_history'] = hdf_id_groups['JURISDICTION_CODE'].apply(list)
         vdf['schooldistrict_history'] = hdf_id_groups['SCHOOL_DISTRICT_CODE'].apply(list)
-        vdf['sparse_history'] = vdf['all_history'].map(
-            lambda x: [sorted_codes_dict[k]['index'] for k in x])
+
+        def insert_code_bin(arr):
+            if isinstance(arr, list):
+                return [sorted_codes_dict[k]['index'] for k in arr]
+            else:
+                return np.nan
+
+        vdf['sparse_history'] = vdf['all_history'].map(insert_code_bin)
 
         vdf = self.config.coerce_dates(vdf)
         vdf = self.config.coerce_numeric(
