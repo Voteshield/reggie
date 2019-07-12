@@ -1532,7 +1532,8 @@ class Preprocessor(Loader):
 
             # Election code lookup
             hdf['ELECTION_NAME'] = hdf['ELECTION_CODE'].map(
-                lambda x: elec_code_dict[x]['Slug'])
+                lambda x: elec_code_dict[x]['Slug']
+                          if x in elec_code_dict else str(x))
 
         # Create meta data
         counts = hdf['ELECTION_NAME'].value_counts()
@@ -1554,7 +1555,8 @@ class Preprocessor(Loader):
 
         def insert_code_bin(arr):
             if isinstance(arr, list):
-                return [sorted_codes_dict[k]['index'] for k in arr]
+                return [sorted_codes_dict[k]['index'] for k in arr
+                        if k in sorted_codes_dict]
             else:
                 return np.nan
 
