@@ -12,7 +12,7 @@ voter_status_inactive: V
 voter_status_cancelled: C
 voter_status_rejected: R
 voter_status_challenged: CH
-absentee_ballot_code: 'Y'
+absentee_ballot_code: "'Y'"
 democratic_party: None
 republican_party: None
 no_party_affiliation: npa
