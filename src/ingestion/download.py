@@ -1445,6 +1445,8 @@ class Preprocessor(Loader):
                               encoding='latin-1',
                               na_filter=False,
                               error_bad_lines=False)
+            # rename 'STATE' field to not conflict with our 'state' field
+            vdf.rename(columns={'STATE': 'STATE_ADDR'}, inplace=True)
         else:
             raise NotImplementedError('File format not implemented')
 
@@ -1488,6 +1490,7 @@ class Preprocessor(Loader):
 
         # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
         # then we don't need to do election code lookups
+        elec_code_dict = dict()
         if 'ELECTION_DATE' in hdf.columns:
             hdf['ELECTION_NAME'] = pd.to_datetime(hdf['ELECTION_DATE']).map(
                 lambda x: x.strftime('%Y-%m-%d'))
@@ -1511,7 +1514,6 @@ class Preprocessor(Loader):
                     raise NotImplementedError('File format not implemented')
 
                 # make a code dictionary that will be stored with meta data
-                elec_code_dict = dict()
                 for idx, row in edf.iterrows():
                     d = row['Date'].strftime('%Y-%m-%d')
                     elec_code_dict[row['Election_Code']] = {
@@ -1525,7 +1527,10 @@ class Preprocessor(Loader):
                     date=this_date, state=self.state, testing=self.testing)
                 if pre_key is not None:
                     nearest_meta = get_metadata_for_key(pre_key)
-                    elec_code_dict = nearest_meta["elec_code_dict"]
+                    elec_code_dict = nearest_meta['elec_code_dict']
+                    if len(elec_code_dict) == 0:
+                        raise MissingElectionCodesError(
+                            'No election codes in nearby meta data.')
                 else:
                     raise MissingElectionCodesError(
                         'No election code file or nearby meta data found.')
