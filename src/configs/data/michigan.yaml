@@ -36,7 +36,7 @@ address_fields:
   - DIRECTION_SUFFIX
   - EXTENSION
   - CITY
-  - STATE
+  - STATE_ADDR
   - ZIP_CODE
   - MAILING_ADDRESS_LINE_ONE
   - MAILING_ADDRESS_LINE_TWO
@@ -70,10 +70,10 @@ base_columns:
   pre_date: timestamp
   post_date: timestamp
   VOTER_IDENTIFICATION_NUMBER: bigint
-  change_type: text
-  pre_value: text
-  post_value: text
-  party_identifier: varchar
+  change_type: varchar
+  pre_value: varchar
+  post_value: varchar
+  state: varchar
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]
@@ -102,7 +102,7 @@ summary_columns:
 summary_types:
   - int
   - timestamp
-  - text
+  - varchar
   - int
   - int
   - int
@@ -126,7 +126,7 @@ columns:
   DIRECTION_SUFFIX: varchar
   EXTENSION: varchar
   CITY: varchar
-  STATE: varchar
+  STATE_ADDR: varchar
   ZIP_CODE: int
   MAILING_ADDRESS_LINE_ONE: varchar
   MAILING_ADDRESS_LINE_TWO: varchar
@@ -177,7 +177,7 @@ ordered_columns:
   - DIRECTION_SUFFIX
   - EXTENSION
   - CITY
-  - STATE
+  - STATE_ADDR
   - ZIP_CODE
   - MAILING_ADDRESS_LINE_ONE
   - MAILING_ADDRESS_LINE_TWO
@@ -228,7 +228,7 @@ fwf_voter_columns:
   - DIRECTION_SUFFIX
   - EXTENSION
   - CITY
-  - STATE
+  - STATE_ADDR
   - ZIP_CODE
   - MAILING_ADDRESS_LINE_ONE
   - MAILING_ADDRESS_LINE_TWO
