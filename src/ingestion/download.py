@@ -1492,8 +1492,12 @@ class Preprocessor(Loader):
         # then we don't need to do election code lookups
         elec_code_dict = dict()
         if 'ELECTION_DATE' in hdf.columns:
-            hdf['ELECTION_NAME'] = pd.to_datetime(hdf['ELECTION_DATE']).map(
-                lambda x: x.strftime('%Y-%m-%d'))
+            try:
+                hdf['ELECTION_NAME'] = pd.to_datetime(hdf['ELECTION_DATE']).map(
+                    lambda x: x.strftime('%Y-%m-%d'))
+            except ValueError:
+                missing_history_dates = True
+                hdf['ELECTION_NAME'] = hdf['ELECTION_DATE']
         else:
             if elec_codes:
                 # If we have election codes in this file
@@ -1566,6 +1570,10 @@ class Preprocessor(Loader):
                 return np.nan
 
         vdf['sparse_history'] = vdf['all_history'].map(insert_code_bin)
+
+        if missing_history_dates:
+            vdf['all_history'] = None
+            vdf['sparse_history'] = None
 
         vdf = self.config.coerce_dates(vdf)
         vdf = self.config.coerce_numeric(
