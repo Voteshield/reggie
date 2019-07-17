@@ -573,9 +573,11 @@ class Preprocessor(Loader):
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
-                df = pd.read_csv(i['obj'], compression='gzip')
+                df = pd.read_csv(i['obj'], encoding='latin-1',
+                                 compression='gzip')
             elif ".txt" in i['name']:
-                temp_df = pd.read_csv(i['obj'], compression='gzip')
+                temp_df = pd.read_csv(i['obj'], encoding='latin-1',
+                                      compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
 
         # create history meta data
@@ -595,7 +597,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df.to_csv()))
+                        io_obj=StringIO(df.to_csv(encoding='utf-8')))
 
     def preprocess_minnesota(self):
         logging.info("Minnesota: loading voter file")
