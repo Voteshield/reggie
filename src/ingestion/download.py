@@ -1541,8 +1541,8 @@ class Preprocessor(Loader):
 
             # Election code lookup
             hdf['ELECTION_NAME'] = hdf['ELECTION_CODE'].map(
-                lambda x: elec_code_dict[x]['Slug']
-                          if x in elec_code_dict else str(x))
+                lambda x: elec_code_dict[str(x)]['Slug']
+                          if str(x) in elec_code_dict else str(x))
 
         # Create meta data
         counts = hdf['ELECTION_NAME'].value_counts()
