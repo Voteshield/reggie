@@ -1491,6 +1491,7 @@ class Preprocessor(Loader):
         # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
         # then we don't need to do election code lookups
         elec_code_dict = dict()
+        missing_history_dates = False
         if 'ELECTION_DATE' in hdf.columns:
             try:
                 hdf['ELECTION_NAME'] = pd.to_datetime(hdf['ELECTION_DATE']).map(
