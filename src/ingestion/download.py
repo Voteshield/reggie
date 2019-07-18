@@ -679,7 +679,7 @@ class Preprocessor(Loader):
             df = pd.concat(
                 [df, pd.DataFrame(columns=self.config['blacklist_columns'])])
             df = df[self.config.processed_file_columns()]
-            return(df)
+            return df
 
         for i in new_files:
             if "Registered_Voters_List" in i['name']:
@@ -716,6 +716,7 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
+
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
                              key=lambda x: datetime.strptime(x[1][0:10],
