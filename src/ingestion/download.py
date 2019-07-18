@@ -692,7 +692,9 @@ class Preprocessor(Loader):
 
             if "Registered_Voters_List" in i['name'] and not master_vf_version:
                 logging.info("reading in {}".format(i['name']))
-                df_voter = pd.concat([df_voter, pd.read_csv(i['obj'])], axis=0)
+                df_voter = pd.concat(
+                    [df_voter, pd.read_csv(i['obj'], encoding='latin-1')],
+                    axis=0)
 
             elif "Master_Voting_History" in i['name'] and "MACOS" not in i['name']:
                 if "Voter_Details" not in i['name']:
@@ -1303,7 +1305,7 @@ class Preprocessor(Loader):
                  ("MACOSX" not in i['name']):
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
-                               quotechar='"')
+                               quotechar='"', encoding='latin-1')
         vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
                                 quotechar='"')
 
