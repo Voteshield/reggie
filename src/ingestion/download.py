@@ -760,7 +760,7 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("Colorado: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voter.to_csv()))
+                        io_obj=StringIO(df_voter.to_csv(encoding='utf-8')))
 
     def preprocess_georgia(self):
         config = Config("georgia")
