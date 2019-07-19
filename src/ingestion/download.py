@@ -1726,7 +1726,7 @@ class Preprocessor(Loader):
         elections = hdf["election_name"].unique().tolist()
         counts = hdf["election_name"].value_counts()
         elec_dict = {
-            k: {'index': i, 'count': counts.loc[k] if k in counts else 0}
+            k: {'index': i, 'count': int(counts.loc[k]) if k in counts else 0}
             for i, k in enumerate(elections)
         }
         vdf['unabridged_status'] = vdf['status']
