@@ -344,10 +344,12 @@ class Loader(object):
     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
-        if self.config["state"] == 'ohio':
-            self.download_date = str(ohio_get_last_updated().isoformat())[0:10]
-        elif self.config["state"] == "north_carolina":
-            self.download_date = str(nc_date_grab())
+        if file_class != PROCESSED_FILE_PREFIX:
+            if self.config["state"] == 'ohio':
+                self.download_date = str(
+                    ohio_get_last_updated().isoformat())[0:10]
+            elif self.config["state"] == "north_carolina":
+                self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
         s3.Object(S3_BUCKET, self.generate_key(file_class=file_class)).put(
@@ -574,9 +576,11 @@ class Preprocessor(Loader):
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
-                df = pd.read_csv(i['obj'], compression='gzip')
+                df = pd.read_csv(i['obj'], encoding='latin-1',
+                                 compression='gzip')
             elif ".txt" in i['name']:
-                temp_df = pd.read_csv(i['obj'], compression='gzip')
+                temp_df = pd.read_csv(i['obj'], encoding='latin-1',
+                                      compression='gzip')
                 df = pd.concat([df, temp_df], axis=0)
 
         # create history meta data
@@ -596,7 +600,7 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df.to_csv()))
+                        io_obj=StringIO(df.to_csv(encoding='utf-8')))
 
     def preprocess_minnesota(self):
         logging.info("Minnesota: loading voter file")
@@ -680,7 +684,7 @@ class Preprocessor(Loader):
             df = pd.concat(
                 [df, pd.DataFrame(columns=self.config['blacklist_columns'])])
             df = df[self.config.processed_file_columns()]
-            return(df)
+            return df
 
         for i in new_files:
             if "Registered_Voters_List" in i['name']:
@@ -717,6 +721,7 @@ class Preprocessor(Loader):
 
         valid_elections, counts = np.unique(df_hist["election_name"],
                                             return_counts=True)
+
         date_order = [idx for idx, election in
                       sorted(enumerate(valid_elections),
                              key=lambda x: datetime.strptime(x[1][0:10],
