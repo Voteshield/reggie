@@ -513,7 +513,8 @@ class Preprocessor(Loader):
         if df_hist.empty:
             logging.info("This file contains no voter history")
         df_voter['Effective_Date_of_Registration'] = df_voter[
-            'Effective_Date_of_Registration'].fillna(-1).astype(int).astype(str).replace('-1', np.nan)
+            'Effective_Date_of_Registration'].fillna(-1).astype(
+                int, errors='ignore').astype(str).replace('-1', np.nan)
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
