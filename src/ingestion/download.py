@@ -1456,7 +1456,7 @@ class Preprocessor(Loader):
             raise NotImplementedError('File format not implemented')
 
         # TODO change to whatever reason code column is actually named
-        reason_code_col = 'XXX'
+        reason_code_col = 'CANCELLATION_REASON'
         if reason_code_col in vdf.columns:
             vdf.rename(columns={reason_code_col: 'reason_code'}, inplace=True)
 
