@@ -513,7 +513,8 @@ class Preprocessor(Loader):
         if df_hist.empty:
             logging.info("This file contains no voter history")
         df_voter['Effective_Date_of_Registration'] = df_voter[
-            'Effective_Date_of_Registration'].fillna(-1).astype(int).astype(str).replace('-1', np.nan)
+            'Effective_Date_of_Registration'].fillna(-1).astype(
+                int, errors='ignore').astype(str).replace('-1', np.nan)
         df_voter[self.config["party_identifier"]] = 'npa'
         df_hist[self.config['hist_columns']] = df_hist[
             self.config['hist_columns']].replace(np.nan, '', regex=True)
@@ -692,7 +693,9 @@ class Preprocessor(Loader):
 
             if "Registered_Voters_List" in i['name'] and not master_vf_version:
                 logging.info("reading in {}".format(i['name']))
-                df_voter = pd.concat([df_voter, pd.read_csv(i['obj'])], axis=0)
+                df_voter = pd.concat(
+                    [df_voter, pd.read_csv(i['obj'], encoding='latin-1')],
+                    axis=0)
 
             elif "Master_Voting_History" in i['name'] and "MACOS" not in i['name']:
                 if "Voter_Details" not in i['name']:
@@ -760,7 +763,7 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("Colorado: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voter.to_csv()))
+                        io_obj=StringIO(df_voter.to_csv(encoding='utf-8')))
 
     def preprocess_georgia(self):
         config = Config("georgia")
@@ -1303,7 +1306,7 @@ class Preprocessor(Loader):
                  ("MACOSX" not in i['name']):
                 voter_file = i
         voter_df = pd.read_csv(voter_file['obj'], sep="\t",
-                               quotechar='"')
+                               quotechar='"', encoding='latin-1')
         vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
                                 quotechar='"')
 
@@ -1724,7 +1727,7 @@ class Preprocessor(Loader):
         elections = hdf["election_name"].unique().tolist()
         counts = hdf["election_name"].value_counts()
         elec_dict = {
-            k: {'index': i, 'count': counts.loc[k] if k in counts else 0}
+            k: {'index': i, 'count': int(counts.loc[k]) if k in counts else 0}
             for i, k in enumerate(elections)
         }
         vdf['unabridged_status'] = vdf['status']
