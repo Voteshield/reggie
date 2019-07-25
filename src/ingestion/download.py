@@ -1240,12 +1240,13 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer")
-        self.main_file = filter(
-            lambda x: x["name"][-4:] != ".pdf", new_files)[0]
+        self.main_file = list(filter(
+            lambda x: x["name"][-4:] != ".pdf", new_files))[0]
         gc.collect()
         main_df = pd.read_csv(self.main_file["obj"],
                               header=None,
-                              names=config["ordered_columns"])
+                              names=config["ordered_columns"],
+                              encoding='latin-1')
         shutil.rmtree(os.path.dirname(self.main_file["name"]),
                       ignore_errors=True)
         gc.collect()
