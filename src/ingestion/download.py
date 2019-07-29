@@ -615,7 +615,8 @@ class Preprocessor(Loader):
                     [voter_hist_df, pd.read_csv(i['obj'])], axis=0)
             elif "voter" in i['name'].lower():
                 voter_reg_df = pd.concat(
-                    [voter_reg_df, pd.read_csv(i['obj'])], axis=0)
+                    [voter_reg_df, pd.read_csv(i['obj'],
+                                               encoding='latin-1')], axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
