@@ -1177,8 +1177,8 @@ class Preprocessor(Loader):
             df_voters[c].loc[df_voters[c].isnull()] = ""
 
         for c in df_voters.columns:
-            df_voters[c] = df_voters[c].astype(str).str.decode(
-                'utf-8', errors='ignore').str.encode('utf-8')
+            df_voters[c] = df_voters[c].astype(str).str.encode(
+                'utf-8', errors='ignore').str.decode('utf-8')
 
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters, extra_cols=[
