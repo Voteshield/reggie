@@ -1,4 +1,5 @@
-from constants import CONFIG_DIR, COUNTY_ALIAS, LOCALE_TYPE
+from constants import CONFIG_DIR, COUNTY_ALIAS, LOCALE_TYPE, \
+    PRIMARY_LOCALE_TYPE
 import yaml
 import pandas as pd
 
@@ -17,7 +18,8 @@ class Config(object):
 
         self.data = self.load_data(config_file)
         self.county_column = self.data[COUNTY_ALIAS]
-        self.locale_type = self.data.get(LOCALE_TYPE, "county")
+        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+
 
     @classmethod
     def config_file_from_state(cls, state):
