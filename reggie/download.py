@@ -1565,6 +1565,48 @@ class Preprocessor():
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
                                                    index=False)))
 
+    def preprocess_washington(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+        voter_file = new_files[0] if "VRDB" in new_files[0]["name"] \
+            else new_files[1]
+        hist_files = [n for n in new_files if 'History' in n["name"]]
+
+        logging.info("WASHINGTON: loading historical files")
+        df_hist = pd.read_csv(hist_file["obj"], sep="\t", header=None)
+        df_hist.columns = self.config["hist_columns"]
+        logging.info("WASHINGTON: loading main voter file")
+        df_voters = pd.read_csv(voter_file["obj"], sep="\t", header=None)
+        df_voters.columns = self.config["ordered_columns"]
+        valid_elections = df_hist.date.unique().tolist()
+        valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
+
+        # NOTE: this function only works correctly if
+        # df_hist is assumed to be sorted by date
+        def place_vote_hist(g):
+            group_idx = 0
+            output = []
+            for d in valid_elections[::-1]:
+                if group_idx < len(g.date.values) and \
+                        d == g.date.values[group_idx]:
+                    output.append(g.vote_code.values[group_idx])
+                    group_idx += 1
+                else:
+                    output.append('n')
+
+            return output
+
+        voting_histories = df_hist.groupby(self.config["voter_id"])\
+            .apply(place_vote_hist)
+        df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
+        df_voters = df_voters.set_index("tmp_id")
+        df_voters["all_history"] = voting_histories
+        df_voters = self.config.coerce_dates(df_voters)
+        df_voters = self.config.coerce_numeric(df_voters)
+
+        self.dataframe = df_voters
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(df_voters.to_csv(index=False)))c
+
     def execute(self):
         return self.state_router()
 
