@@ -1572,31 +1572,30 @@ class Preprocessor():
         hist_files = [n for n in new_files if 'History' in n["name"]]
 
         logging.info("WASHINGTON: loading historical files")
-        df_hist = pd.read_csv(hist_file["obj"], sep="\t", header=None)
-        df_hist.columns = self.config["hist_columns"]
+        hdf = pd.DataFrame()
+        for f in hist_files:
+            logging.info("Reading " + f["name"])
+            new_df = pd.read_csv(f["obj"], sep='\t', header=None)
+            new_df = self.config["hist_columns"]
+            hdf = pd.concat([hdf, new_df], axis=0)
+
         logging.info("WASHINGTON: loading main voter file")
         df_voters = pd.read_csv(voter_file["obj"], sep="\t", header=None)
         df_voters.columns = self.config["ordered_columns"]
-        valid_elections = df_hist.date.unique().tolist()
-        valid_elections.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
 
-        # NOTE: this function only works correctly if
-        # df_hist is assumed to be sorted by date
-        def place_vote_hist(g):
-            group_idx = 0
-            output = []
-            for d in valid_elections[::-1]:
-                if group_idx < len(g.date.values) and \
-                        d == g.date.values[group_idx]:
-                    output.append(g.vote_code.values[group_idx])
-                    group_idx += 1
-                else:
-                    output.append('n')
+        elections = hdf["Election_Date"].unique().tolist()
+        counts = hdf["Election_Date"].value_counts()
+        elec_dict = {
+            k: {'index': i, 'count': counts.loc[k] if k in counts else 0}
+            for i, k in enumerate(elections)
+        }
 
-            return output
+        valid_elections = hdf.date.unique().tolist()
+        valid_elections.sort(key=lambda x: strptime(x, "%Y-%m-%d"))
+        .apply(lambda x: elect_dict[x])
 
         voting_histories = df_hist.groupby(self.config["voter_id"])\
-            .apply(place_vote_hist)
+            .apply(list)
         df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
@@ -1628,6 +1627,7 @@ class Preprocessor():
             'minnesota': self.preprocess_minnesota,
             'texas': self.preprocess_texas,
             'colorado': self.preprocess_colorado
+            'washington': self.preprocess_washington
         }
         return routes
 
