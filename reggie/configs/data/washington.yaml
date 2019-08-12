@@ -1,0 +1,162 @@
+file_type: csv
+state: washington
+source: boe
+file_class: voter_file
+voter_id: StateVoterID
+county_identifier: CountyCode
+birthday_identifier: Birthdate
+voter_status: StatusCode
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: NPA
+party_identifier: party_affiliation
+date_format: '%m/%d/%Y'
+numeric_county: false
+generated_columns:
+  all_history: int[]
+  vote_type: text[]
+has_headers: NO
+format:
+  separate_hist: true
+  separate_counties_voter_file: true
+  separate_counties_hist_file: true
+  hist_election_rows: true
+  columnar_elections: false
+name_fields:
+  - Title
+  - FName
+  - MName
+  - LName
+  - NameSuffix
+ordered_generated_columns:
+  - 
+address_fields:
+  - RegStNum
+  - RegStFrac
+  - RegStName
+  - RegStType
+  - RegUnitType
+  - RegStPreDirection
+  - RegStPostDirection
+  - RegUnitNum
+  - RegCity
+  - RegState
+  - RegZipCode
+primary_key:
+  - pre_date
+  - post_date
+  - StateVoterID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  StateVoterID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+additional_snapshot_columns:
+  all_history: text[]
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - county
+hist_columns:
+  - CountyCode
+  - StateVoterID
+  - ElectionDate
+  - VotingHistoryID
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  StateVoterID:
+  CountyVoterID:
+  Title:
+  FName:
+  MName:
+  LName:
+  NameSuffix:
+  Birthdate:
+  Gender:
+  RegStNum:
+  RegStFrac:
+  RegStName:
+  RegStType:
+  RegUnitType:
+  RegStPreDirection:
+  RegStPostDirection:
+  RegUnitNum:
+  RegCity:
+  RegState:
+  RegZipCode:
+  CountyCode:
+  PrecinctCode:
+  PrecinctPart:
+  LegislativeDistrict:
+  CongressionalDistrict:
+  Mail1:
+  Mail2:
+  Mail3:
+  Mail4:
+  MailCity:
+  MailZip:
+  MailState:
+  MailCountry:
+  Registrationdate:
+  AbsenteeType:
+  LastVoted:
+  StatusCode:
+  
+ordered_columns:
+  - StateVoterID
+  - CountyVoterID
+  - Title
+  - FName
+  - MName
+  - LName
+  - NameSuffix
+  - Birthdate
+  - Gender
+  - RegStNum
+  - RegStFrac
+  - RegStName
+  - RegStType
+  - RegUnitType
+  - RegStPreDirection
+  - RegStPostDirection
+  - RegUnitNum
+  - RegCity
+  - RegState
+  - RegZipCode
+  - CountyCode
+  - PrecinctCode
+  - PrecinctPart
+  - LegislativeDistrict
+  - CongressionalDistrict
+  - Mail1
+  - Mail2
+  - Mail3
+  - Mail4
+  - MailCity
+  - MailZip
+  - MailState
+  - MailCountry
+  - Registrationdate
+  - AbsenteeType
+  - LastVoted
+  - StatusCode
+county_names:
