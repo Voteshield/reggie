@@ -1613,8 +1613,8 @@ class Preprocessor():
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(index=False)))
 
-        # create test file with
         # sparse histories - apply elect dict to all history
+        df_voters['sparse_history'] = df_voters['all_history'].apply(elect_dict)
 
     def execute(self):
         return self.state_router()

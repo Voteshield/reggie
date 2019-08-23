@@ -1,0 +1,182 @@
+file_type: txt
+state: washington
+source: boe
+file_class: voter_file
+voter_id: State_Voter_ID
+county_identifier: County_Code
+birthday_identifier: Birth_Date
+voter_status: Voter_Status
+voter_status_active: A
+voter_status_inactive: I
+voter_status_inactive2: IM
+voter_status_pending: P
+voter_status_pending_deceased: PDETH
+voter_status_pending_transfer: PDUPL
+voter_status_pending_felon: PFELN
+voter_status_active_duplicate: A-DUP
+voter_status_inactive_duplicate: I-DUP
+voter_status_inactive2_duplicate: IM-DUP
+party_identifier: NO
+date_format: '%m/%d/%Y'
+numeric_county: false
+has_headers: YES
+
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+
+name_fields:
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
+
+address_fields:
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+
+ordered_columns:
+  - State_Voter_ID
+  - County_Voter_ID
+  - Name_First
+  - Name_Middle
+  - Name_Last
+  - Name_Suffix
+  - Birth_Date
+  - Gender
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_Address_Line_3
+  - Residence_Address_Line_4
+  - Residence_Address_Line_5
+  - Residence_Address_Line_6
+  - Residence_Address_Line_7
+  - Residence_Address_Line_8
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - County_Code
+  - Precinct
+  - House_District
+  - Congressional_District
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_Address_Line_4
+  - Mailing_City
+  - Mailing_Zipcode
+  - Mailing_State
+  - Mailing_Country
+  - Registration_Date
+  - Absentee_Type
+  - Last_Vote_Date
+  - Voter_Status
+
+column_classes:
+  State_Voter_ID: character
+  County_Voter_ID: character
+  Name_First: character
+  Name_Middle: character
+  Name_Last: character
+  Name_Suffix: character
+  Birth_Date: date
+  Gender: character
+  Residence_Address_Line_1: character
+  Residence_Address_Line_2: character
+  Residence_Address_Line_3: character
+  Residence_Address_Line_4: character
+  Residence_Address_Line_5: character
+  Residence_Address_Line_6: character
+  Residence_Address_Line_7: character
+  Residence_Address_Line_8: character
+  Residence_City: character
+  Residence_State: character
+  Residence_Zipcode: character
+  County_Code: character
+  Precinct: character
+  House_District: character
+  Congressional_District: character
+  Mailing_Address_Line_1: character
+  Mailing_Address_Line_2: character
+  Mailing_Address_Line_3: character
+  Mailing_Address_Line_4: character
+  Mailing_City: character
+  Mailing_Zipcode: character
+  Mailing_State: character
+  Mailing_Country: character
+  Registration_Date: date
+  Absentee_Type: character
+  Last_Vote_Date: date
+  Voter_Status: character
+
+hist_columns:
+  - County_Code
+  - State_Voter_ID
+  - Election_Date
+  - Votig_History_ID
+  
+gender_codes:
+    male: M
+    female: F
+    unknown: U
+  
+absentee_status_codes:
+    permanent: P
+    temporary: T
+    not_absentee: N
+    unknown: U
+    vote_by_mail: V
+
+county_codes:
+    AD: Adams
+    AS: Asotin
+    BE: Benton
+    CH: Chelan
+    CM: Clallam
+    CR: Clark
+    CU: Columbia
+    CZ: Cowlitz
+    DG: Douglas
+    FE: Ferry
+    FR: Franklin
+    GA: Garfield
+    GR: Grant
+    GY: Grays Harbor
+    IS: Island
+    JE: Jefferson
+    KI: King
+    KP: Kitsap
+    KS: Kittitas
+    KT: Klickitat
+    LE: Lewis
+    LI: Lincoln
+    MA: Mason
+    OK: Okanogan
+    PA: Pacific
+    PE: Pend 
+    PI: Pierce
+    SJ: San Juan
+    SK: Skagit
+    SM: Skamania
+    SN: Snohomish
+    SP: Spokane
+    ST: Stevens
+    TH: Thurston
+    WK: Wahkiakum
+    WL: Walla Walla
+    WM: Whatcom
+    WT: Whitman
+    YA: Yakima
