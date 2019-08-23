@@ -1,0 +1,4 @@
+# Reggie Contribution
+
+Reggie is currently maintained by the engineering team at Voteshield, which is a data analytics tool designed to protect the integrity of American elections by monitoring changes to the voter rolls. There are many ways to contribute, by adding a new state to the ingestion tool, or speeding up the tool itself, or even adding more documentation.  
+If you've never contributed to OSS before and want some more personalized help, feel free to reach out to [Voteshield](https://voteshield.us) or to [Tyler Richards](http://www.tylerjrichards.com/) for individualized help. If you feel more comfortable contributing, a great place to start is in download.py where each state has its own function (e.g. preprocess_ohio).
