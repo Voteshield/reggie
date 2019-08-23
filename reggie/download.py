@@ -1594,17 +1594,27 @@ class Preprocessor():
         valid_elections.sort(key=lambda x: strptime(x, "%Y-%m-%d"))
         .apply(lambda x: elect_dict[x])
 
-        voting_histories = df_hist.groupby(self.config["voter_id"])\
+        voter_groups = hdf.groupby(self.config["voter_id"])
+        voting_histories = voter_groups["Election_Date"]\
             .apply(list)
+
+        county_histories = voter_groups["County_Code"]\
+            .apply(list)
+
         df_voters["tmp_id"] = df_voters[self.config["voter_id"]]
         df_voters = df_voters.set_index("tmp_id")
         df_voters["all_history"] = voting_histories
+        df_voters["county_history"] = county_histories
+        
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(df_voters)
 
         self.dataframe = df_voters
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv(index=False)))c
+                        io_obj=StringIO(df_voters.to_csv(index=False)))
+
+        # create test file with
+        # sparse histories - apply elect dict to all history
 
     def execute(self):
         return self.state_router()
