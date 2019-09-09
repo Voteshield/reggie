@@ -6,6 +6,7 @@ file_class: voter_file
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
+precinct_identifier: PRECINCT
 birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
 voter_status_active: Active
