@@ -7,7 +7,7 @@ file_type: csv
 state: nevada
 source: boe
 file_class: voter_file
-voter_id: VoterID
+voter_id: County_Voter_ID
 county_identifier: County
 birthday_identifier: Birth_Date
 voter_status: County_Status
@@ -33,12 +33,12 @@ address_fields:
   - Address_1
   - Address_2
   - City
-  - state
+  - State_addr
   - Zip
 primary_key:
   - pre_date
   - post_date
-  - VoterID
+  - County_Voter_ID
   - change_type
 format:
   separate_hist: true
@@ -49,15 +49,19 @@ format:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  County_Voter_ID: varchar
   change_type: text
   pre_value: text
   post_value: text
   state: varchar
 generated_columns:
   all_history: text[]
+  votetype_history: text[]
+  sparse_history: int[]
 ordered_generated_columns:
   - all_history
+  - votetype_history
+  - sparse_history
 has_headers: NO
 summary_columns:
   - totals
@@ -105,7 +109,7 @@ columns:
   Address_1: varchar
   Address_2: varchar
   City: varchar
-  state: varchar
+  State_addr: varchar
   Zip: varchar
   Phone: varchar
   Party: varchar
@@ -130,7 +134,7 @@ ordered_columns:
   - Address_1
   - Address_2
   - City
-  - state
+  - State_addr
   - Zip
   - Phone
   - Party
