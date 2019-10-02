@@ -1188,6 +1188,11 @@ class Preprocessor(Loader):
             "LOSST_CONTIGUOUS_CITIES", "PRECINCT", "SANITARY",
             "SCHOOL_DIRECTOR", "UNIT_NUM"])
 
+        # force reg num to be integer
+        df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
+                                              errors='coerce').fillna(0)
+        df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))
