@@ -1,0 +1,251 @@
+file_type: csv
+state: wisconsin
+source: boe_download
+file_class: voter_file
+voter_id: Voter Reg Number
+county_identifier: Jurisdiction
+locale_type_name: Jurisdiction
+#needs to be county here because of the querys on the population table
+locale_type: county
+primary_locale_type: Jurisdiction
+birthday_identifier: DATE_OF_BIRTH
+voter_status: voter_status
+voter_status_reason: Voter Status Reason
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: None
+republican_party: None
+no_party_affiliation: 'NULL'
+missing_required_fields: true
+absentee_ballot_code: "'Absentee'"
+date_format: '%m/%d/%Y'
+generated_columns:
+  all_history: text[]
+  votetype_history: text[]
+  sparse_history: int[]
+ordered_generated_columns:
+  - all_history
+  - votetype_history
+  - sparse_history
+numeric_county: false
+party_identifier: PARTY_AFFILIATION
+name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+address_fields:
+  - Address1
+  - Address2
+  - MailingAddress1
+  - MailingAddress2
+  - MailingCityStateZip
+  - HouseNumber
+  - StreetName
+  - UnitType
+  - UnitNumber
+  - ZipCode
+primary_key:
+  - pre_date
+  - post_date
+  - Voter Reg Number
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  Voter Reg Number: int
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+summary_columns:
+  - totals
+  - date
+  - state
+  - npa
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - text
+format:
+  separate_hist: false
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: false
+  columnar_elections: true
+columns:
+  Voter Reg Number: int
+  LastName: text
+  FirstName: text
+  MiddleName: text
+  Suffix: text
+  PhoneNumber: text
+  EmailAddress: text
+  Address1: text
+  Address2: text
+  MailingAddress1: text
+  MailingAddress2: text
+  MailingCityStateZip: text
+  HouseNumber: text
+  StreetName: text
+  UnitType: text
+  UnitNumber: text
+  ZipCode: text
+  Jurisdiction: text
+  DistrictCombo: text
+  Ward: text
+  Congressional: text
+  State Senate: text
+  State Assembly: text
+  Court of Appeals: text
+  Multi-Jurisdictional Judge: text
+  County: text
+  County Supervisory: text
+  Municipality: text
+  Aldermanic: text
+  School: text
+  High School: text
+  Sanitary: text
+  Technical College: text
+  Representational School: text
+  State: text
+  District Attorney: text
+  Circuit Court: text
+  First Class School: text
+  Incorporation: text
+  voter_status: text
+  Voter Status Reason: text
+  ApplicationDate: date
+  ApplicationSource: text
+  IsPermanentAbsentee: text
+  Voter Type: text
+  PARTY_AFFILIATION: text
+  DATE_OF_BIRTH: int
+ordered_columns:
+  - Voter Reg Number
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - PhoneNumber
+  - EmailAddress
+  - Address1
+  - Address2
+  - MailingAddress1
+  - MailingAddress2
+  - MailingCityStateZip
+  - HouseNumber
+  - StreetName
+  - UnitType
+  - UnitNumber
+  - ZipCode
+  - Jurisdiction
+  - DistrictCombo
+  - Ward
+  - Congressional
+  - State Senate
+  - State Assembly
+  - Court of Appeals
+  - Multi-Jurisdictional Judge
+  - County
+  - County Supervisory
+  - Municipality
+  - Aldermanic
+  - School
+  - High School
+  - Sanitary
+  - Technical College
+  - Representational School
+  - State
+  - District Attorney
+  - Circuit Court
+  - First Class School
+  - Incorporation
+  - voter_status
+  - Voter Status Reason
+  - ApplicationDate
+  - ApplicationSource
+  - IsPermanentAbsentee
+  - Voter Type
+  - PARTY_AFFILIATION
+  - DATE_OF_BIRTH
+has_headers: YES
+county_names:
+  - Adams
+  - Ashland
+  - At Polls
+  - Barron
+  - Bayfield
+  - Brown
+  - Buffalo
+  - Burnett
+  - Calumet
+  - Chippewa
+  - City of Ashland
+  - Clark
+  - Columbia
+  - Crawford
+  - Dane
+  - Dodge
+  - Door
+  - Douglas
+   -Dunn
+  - Eau Claire
+  - Florence
+  - Fond du Lac
+  - Forest
+  - Grant
+  - Green
+  - Green Lake
+  - Iowa
+  - Iron
+  - Jackson
+  - Jefferson
+  - Juneau
+  - Kenosha
+  - Kewaunee
+  - La Crosse
+  - Lafayette
+  - Langlade
+  - Lincoln
+  - Manitowoc
+  - Marathon
+  - Marinette
+  - Marquette
+  - Menominee
+  - Milwaukee
+  - Monroe
+  - Oconto
+  - Oneida
+  - Outagamie
+  - Ozaukee
+  - Pepin
+  - Pierce
+  - Polk
+  - Portage
+  - Price
+  - Racine
+  - Richland
+  - Rock
+  - Rusk
+  - Sauk
+  - Sawyer
+  - Shawano
+  - Sheboygan
+  - St. Croix
+  - Taylor
+  - Town of Delafield
+  - Trempealeau
+  - Vernon
+  - Vilas
+  - Walworth
+  - Washburn
+  - Washington
+  - Waukesha
+  - Waupaca
+  - Waushara
+  - Winnebago
+  - Wood

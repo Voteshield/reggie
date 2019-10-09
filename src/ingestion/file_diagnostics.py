@@ -9,7 +9,7 @@ from analysis import Snapshot, SnapshotConsistencyError
 from storage import get_preceding_upload
 from configs.configs import Config
 from storage import get_raw_s3_uploads, state_from_str, get_metadata_for_key
-from ingestion.download import Preprocessor
+from ingestion.download import Preprocessor, FileItem
 from constants import logging, S3_BUCKET, PROCESSED_FILE_PREFIX, \
     RAW_FILE_PREFIX
 from storage.connections import s3
@@ -17,6 +17,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 from pathlib import Path
 from datetime import datetime
 from subprocess import Popen, PIPE
+from io import BytesIO, StringIO
 
 
 class TestFileBuilder(Preprocessor):
@@ -47,7 +48,7 @@ class TestFileBuilder(Preprocessor):
         else:
             self.state = state
         self.config = Config(state=self.state)
-        self.local_file = local_file
+        self.s3_key = s3_key
 
     def get_smallest_counties(self, df, count=2):
         counties = df[self.config["county_identifier"]
@@ -337,6 +338,22 @@ class TestFileBuilder(Preprocessor):
         # built manually
         return
 
+    def __build_wisconsin(self):
+        new_file = self.unpack_files(self.raw_s3_file)
+        #
+        df = pd.read_csv(new_file[0]['obj'], sep='\t', nrows=1500000)
+        three_small_counties = ['Menominee County', 'Florence County', 'Iron County']
+        logging.info("three small counties " + three_small_counties[0] + three_small_counties[1] + three_small_counties[2])
+        filtered_data = self.filter_counties(df, counties=three_small_counties)
+        filtered_data.to_csv('filtered.csv', index=False, sep='\t')
+        # Because Zip isn't working ,need to split the s3 file name into the date component, then add csv
+        # Otherwise returns BadZipFile and will not create the main_file object
+        self.file_name = self.raw_s3_file.split("/")[-1]
+        self.file_name = self.file_name[:-3] + 'csv'
+        logging.info("filename: {}".format(self.file_name))
+        self.main_file = FileItem(name=self.file_name,
+                                  io_obj=StringIO(filtered_data.to_csv(index=False, sep='\t')))
+
     def build(self, file_name=None, save_local=False, save_remote=True):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
@@ -354,22 +371,25 @@ class TestFileBuilder(Preprocessor):
                   "new_jersey": self.__build_new_jersey,
                   "north_carolina": self.__build_north_carolina,
                   "minnesota": self.__build_minnesota,
-                  "kansas": self.__build_kansas
+                  "kansas": self.__build_kansas,
+                  "wisconsin": self.__build_wisconsin
                   }
 
         f = routes[self.state]
         f()
 
         if save_remote:
-            logging.info(self.test_key(file_name))
-            with open(self.main_file) as f:
-                s3.Object(
-                    S3_BUCKET, self.test_key(file_name)).put(
-                    Body=f.read(),
-                    ServerSideEncryption='AES256',
-                    Metadata={"last_updated": self.download_date})
+            s3.Object(
+                # self.file_name should be safe here, it's either modified in the state build code or
+                # is the initial filename
+                S3_BUCKET, self.test_key(name=self.file_name)).put(
+                Body=self.main_file.obj.read(),
+                ServerSideEncryption='AES256',
+                Metadata={"last_updated": self.download_date})
         if save_local:
-            os.rename(self.main_file, file_name)
+            logging.info("save local: ", self.test_key(file_name))
+            # Python 3 main_file is FileItem type and the name needs to be explicitly called.
+            os.rename(self.main_file.name, file_name)
 
 
 class ProcessedTestFileBuilder(object):
