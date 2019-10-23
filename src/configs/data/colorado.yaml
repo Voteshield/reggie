@@ -33,6 +33,11 @@ format:
   separate_counties_hist_file: false
   hist_election_rows: true
   columnar_elections: false
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - BIRTH_YEAR
 name_fields:
   - LAST_NAME
   - FIRST_NAME

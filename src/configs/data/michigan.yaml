@@ -19,6 +19,11 @@ no_party_affiliation: npa
 party_identifier: party_identifier
 numeric_county: True
 missing_required_fields: true
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - YEAR_OF_BIRTH
 date_format:
   - "%m%d%Y"
   - '%Y'
@@ -160,7 +165,10 @@ columns:
   UOCAVA_STATUS_CODE: varchar
   UOCAVA_STATUS_NAME: varchar
   party_identifier: varchar
-  reason_code: varchar
+  CANCELLATION_REASON: varchar
+  STATUS_DATE: timestamp
+  STATUS_USER_CODE: varchar
+  VOTER_ID: bigint
 ordered_columns:
   - LAST_NAME
   - FIRST_NAME
@@ -211,7 +219,10 @@ ordered_columns:
   - UOCAVA_STATUS_CODE
   - UOCAVA_STATUS_NAME
   - party_identifier
-  - reason_code
+  - CANCELLATION_REASON
+  - STATUS_DATE
+  - STATUS_USER_CODE
+  - VOTER_ID
 fwf_voter_columns:
   - LAST_NAME
   - FIRST_NAME

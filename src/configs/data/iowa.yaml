@@ -27,6 +27,11 @@ generated_columns:
 ordered_generated_columns:
   - all_history
   - sparse_history
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - BIRTHDATE
 name_fields:
   - FIRST_NAME
   - MIDDLE_NAME

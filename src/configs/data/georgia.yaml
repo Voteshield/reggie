@@ -21,6 +21,11 @@ missing_required_fields: True
 generated_columns:
   all_history: text[]
   sparse_history: int[]
+match_fields:
+  - First_name
+  - Middle_maiden_name
+  - Last_name
+  - Year_of_Birth
 name_fields:
   - Last_name
   - First_name

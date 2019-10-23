@@ -968,7 +968,8 @@ class Preprocessor(Loader):
 
         logging.info("FLORIDA: loading main voter file")
         df_voters = pd.read_csv(concat_voter_file,
-                                header=None, sep="\t")
+                                header=None, sep="\t",
+                                error_bad_lines=False)
         df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
@@ -1468,11 +1469,6 @@ class Preprocessor(Loader):
         else:
             raise NotImplementedError('File format not implemented')
 
-        # TODO change to whatever reason code column is actually named
-        reason_code_col = 'CANCELLATION_REASON'
-        if reason_code_col in vdf.columns:
-            vdf.rename(columns={reason_code_col: 'reason_code'}, inplace=True)
-
         def reconcile_columns(df, expected_cols):
             for c in expected_cols:
                 if c not in df.columns:
@@ -1482,7 +1478,24 @@ class Preprocessor(Loader):
                     df.drop(columns=[c], inplace=True)
             return df
 
+        def column_is_empty(col):
+            total_size = col.shape[0]
+            if (sum(col.isna()) == total_size) or (sum(col == '')):
+                return True
+            return False
+
+        def fill_empty_columns(df):
+            # Dummy values for newly added data fields
+            if column_is_empty(df['STATUS_USER_CODE']):
+                df['STATUS_USER_CODE'] = '_'
+            if column_is_empty(df['VOTER_ID']):
+                df['VOTER_ID'] = 0
+            if column_is_empty(df['STATUS_DATE']):
+                df['STATUS_DATE'] = '1970-01-01 00:00:00'
+            return df
+
         vdf = reconcile_columns(vdf, config['columns'])
+        vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=config['ordered_columns'])
         vdf[config['party_identifier']] = 'npa'
 

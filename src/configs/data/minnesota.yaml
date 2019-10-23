@@ -19,6 +19,11 @@ date_format:
   - '%Y'
   - '%Y-%m-%d hh:mm:ss'
 numeric_county: true
+match_fields:
+  - FirstName
+  - MiddleName
+  - LastName
+  - DOBYear
 name_fields:
   - FirstName
   - MiddleName

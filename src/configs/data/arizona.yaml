@@ -47,6 +47,11 @@ voting_method_column: 'all_voting_methods'
 numeric_county: false
 date_format: '%Y'
 party_identifier: desc_party
+match_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - year_of_birth
 name_fields:
   - cde_name_title
   - text_name_first

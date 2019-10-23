@@ -21,6 +21,11 @@ provisional_ballot_code: PROVISIONAL
 date_format: '%Y'
 numeric_county: true
 party_identifier: party_cd
+match_fields:
+  - first_name
+  - midl_name
+  - last_name
+  - birth_year
 name_fields:
   - name_prefx_cd
   - last_name

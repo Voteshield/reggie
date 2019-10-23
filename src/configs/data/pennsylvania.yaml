@@ -18,6 +18,11 @@ no_party_affiliation: NF
 birthday_identifier: dob
 date_format: '%m/%d/%Y'
 has_headers: False
+match_fields:
+  - first_name
+  - middle_name
+  - surname
+  - dob
 name_fields:
   - title
   - surname

@@ -36,6 +36,11 @@ format:
   separate_counties_hist_file: true
   hist_election_rows: true
   columnar_elections: false
+match_fields:
+  - Name_First
+  - Name_Middle
+  - Name_Last
+  - Birth_Date
 name_fields:
   - Name_Last
   - Name_Suffix

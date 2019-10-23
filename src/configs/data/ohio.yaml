@@ -15,6 +15,11 @@ no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
 numeric_county: true
 party_identifier: PARTY_AFFILIATION
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - DATE_OF_BIRTH
 name_fields:
   - LAST_NAME
   - FIRST_NAME

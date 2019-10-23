@@ -27,6 +27,11 @@ us_constitution_party: CON
 natural_law_party: NAT
 conservative_party: CNV
 socialist_party: SSP
+match_fields:
+  - first_name
+  - middle_name
+  - last_name
+  - dob
 name_fields:
   - first_name
   - middle_name

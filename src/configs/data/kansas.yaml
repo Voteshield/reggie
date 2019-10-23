@@ -16,6 +16,11 @@ date_format: '%m/%d/%Y'
 numeric_county: false
 party_identifier: desc_party
 has_headers: YES
+match_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - date_of_birth
 name_fields:
   - cde_name_title
   - text_name_first
