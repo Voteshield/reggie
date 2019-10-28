@@ -2,6 +2,7 @@ from constants import CONFIG_DIR, COUNTY_ALIAS, LOCALE_TYPE, \
     PRIMARY_LOCALE_TYPE
 import yaml
 import pandas as pd
+import json
 
 config_cache = {}
 
@@ -219,6 +220,9 @@ class Config(object):
            return True
         else:
             return False
+
+    def to_json(self):
+        return json.dumps(self.data)
 
     def is_primary_locale_type(self, locale_type):
         """
