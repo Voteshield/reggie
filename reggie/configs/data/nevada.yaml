@@ -1,0 +1,172 @@
+# Nevada voter file/history comes as a single .zip file with the date of creation in the filename- for instance
+# "VoterList.38593.DATETIME.zip".  The voter file name is "VoterList.ElgbVtr.38593.DATETIME.csv" and the history file is
+# "VoterList.VtHst.38593.DATETIME.csv". These files DO NOT contain headers.
+# Vote codes: PP = polling place, EV = early vote, MB = mail ballot (absentee),
+#             PV = provisional vote, FW = federal write-in
+file_type: csv
+state: nevada
+source: boe
+file_class: voter_file
+voter_id: County_Voter_ID
+county_identifier: County
+birthday_identifier: Birth_Date
+voter_status: County_Status
+voter_status_active: Active
+voter_status_inactive: Inactive
+voter_status_waitlist: P-17
+voter_status_null:
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation: Non-Partisan
+absentee_ballot_code: "'MB'"
+provisional_ballot_code: "'PV'"
+valid_voting_methods: ['PP','EV','FW','MB','PV']
+voting_method_column: 'all_history'
+numeric_county: false
+date_format: '%m/%d/%Y'
+party_identifier: Party
+name_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+address_fields:
+  - Address_1
+  - Address_2
+  - City
+  - State_addr
+  - Zip
+primary_key:
+  - pre_date
+  - post_date
+  - County_Voter_ID
+  - change_type
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  County_Voter_ID: varchar
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: varchar
+generated_columns:
+  all_history: text[]
+  votetype_history: text[]
+  sparse_history: int[]
+ordered_generated_columns:
+  - all_history
+  - votetype_history
+  - sparse_history
+has_headers: NO
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - Independent_American_Party
+  - Republican
+  - Democrat
+  - Non_Partisan
+  - Libertarian_Party
+  - Other_All_Others
+  - Green_Party
+  - Natural_Law_Party
+  - county
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  VoterID: int
+  County: varchar
+  First_Name: varchar
+  Middle_Name: varchar
+  Last_Name: varchar
+  Suffix: varchar
+  Birth_Date: date
+  Registration_Date: date
+  Address_1: varchar
+  Address_2: varchar
+  City: varchar
+  State_addr: varchar
+  Zip: varchar
+  Phone: varchar
+  Party: varchar
+  Congressional_District: varchar
+  Senate_District: varchar
+  Assembly_District: varchar
+  Education_District: varchar
+  Regent_District: varchar
+  Registered_Precinct: varchar
+  County_Status: varchar
+  County_Voter_ID: varchar
+  ID_Required: char
+ordered_columns:
+  - VoterID
+  - County
+  - First_Name
+  - Middle_Name
+  - Last_Name
+  - Suffix
+  - Birth_Date
+  - Registration_Date
+  - Address_1
+  - Address_2
+  - City
+  - State_addr
+  - Zip
+  - Phone
+  - Party
+  - Congressional_District
+  - Senate_District
+  - Assembly_District
+  - Education_District
+  - Regent_District
+  - Registered_Precinct
+  - County_Status
+  - County_Voter_ID
+  - ID_Required
+hist_columns:
+  - VotingHistoryID
+  - VoterID
+  - date
+  - vote_code
+county_names:
+  Carson_City: 510
+  Churchill_County: 1
+  Clark_County: 3
+  Douglas_County: 5
+  Elko_County: 7
+  Esmeralda_County: 9
+  Eureka_County: 11
+  Humboldt_County: 13
+  Lander_County: 15
+  Lincoln_County: 17
+  Lyon_County: 19
+  Mineral_County: 21
+  Nye_County: 23
+  Pershing_County: 27
+  Storey_County: 29
+  Washoe_County: 31
+  White_Pine_County: 33

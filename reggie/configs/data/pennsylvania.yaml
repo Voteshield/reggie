@@ -1,0 +1,224 @@
+file_type: txt
+state: pennsylvania
+source: boe
+file_class: voter_file
+voter_id: voter_id
+county_identifier: county
+numeric_county: False
+valid_voting_methods: ['AP', 'AB', 'P']
+absentee_ballot_code: AB
+provisional_ballot_code: P
+voter_status: voter_status
+voter_status_active: A
+voter_status_inactive: I
+party_identifier: party_identifier
+democratic_party: D
+republican_party: R
+no_party_affiliation: NF
+birthday_identifier: dob
+date_format: '%m/%d/%Y'
+has_headers: False
+name_fields:
+  - title
+  - surname
+  - first_name
+  - middle_name
+  - suffix
+address_fields:
+  - house_number
+  - house_number_suffix
+  - street_name
+  - apartment_number
+  - address_line_2
+  - city
+  - state
+  - zip
+  - mail_address_1
+  - mail_address_2
+  - mail_city
+  - mail_state
+  - mail_zip
+  - county
+  - mail_country
+format:
+  separate_hist: false
+  segmented_files: true
+primary_key:
+  - pre_date
+  - post_date
+  - voter_id
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  voter_id: varchar
+  change_type: varchar
+  pre_value: varchar
+  post_value: varchar
+  state: varchar
+generated_columns:
+  all_history: varchar[]
+  districts: varchar[]
+ordered_generated_columns:
+  - all_history
+  - districts
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - R
+  - D
+  - NF
+  - county
+summary_types:
+  - int
+  - timestamp
+  - varchar
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - varchar
+columns:
+  voter_id: varchar
+  title: varchar
+  surname: varchar
+  first_name: varchar
+  middle_name: varchar
+  suffix: varchar
+  gender: varchar
+  dob: date
+  registration_date: date
+  voter_status: varchar
+  status_change_date: date
+  party_identifier: varchar
+  house_number: varchar
+  house_number_suffix: varchar
+  street_name: varchar
+  apartment_number: varchar
+  address_line_2: varchar
+  city: varchar
+  state: varchar
+  zip: varchar
+  mail_address_1: varchar
+  mail_address_2: varchar
+  mail_city: varchar
+  mail_state: varchar
+  mail_zip: varchar
+  last_vote_date: date
+  precinct_code: varchar
+  precinct_split_id: varchar
+  date_last_changed: date
+  legacy_id: varchar
+  home_phone: varchar
+  county: varchar
+  mail_country: varchar
+ordered_columns:
+  - voter_id
+  - title
+  - surname
+  - first_name
+  - middle_name
+  - suffix
+  - gender
+  - dob
+  - registration_date
+  - voter_status
+  - status_change_date
+  - party_identifier
+  - house_number
+  - house_number_suffix
+  - street_name
+  - apartment_number
+  - address_line_2
+  - city
+  - state
+  - zip
+  - mail_address_1
+  - mail_address_2
+  - mail_city
+  - mail_state
+  - mail_zip
+  - last_vote_date
+  - precinct_code
+  - precinct_split_id
+  - date_last_changed
+  - legacy_id
+  - home_phone
+  - county
+  - mail_country
+county_names:
+  - Adams
+  - Allegheny
+  - Armstrong
+  - Beaver
+  - Bedford
+  - Berks
+  - Blair
+  - Bradford
+  - Bucks
+  - Butler
+  - Cambria
+  - Cameron
+  - Carbon
+  - Centre
+  - Chester
+  - Clarion
+  - Clearfield
+  - Clinton
+  - Columbia
+  - Crawford
+  - Cumberland
+  - Dauphin
+  - Delaware
+  - Elk
+  - Erie
+  - Fayette
+  - Forest
+  - Franklin
+  - Fulton
+  - Greene
+  - Huntingdon
+  - Indiana
+  - Jefferson
+  - Juniata
+  - Lackawanna
+  - Lancaster
+  - Lawrence
+  - Lebanon
+  - Lehigh
+  - Luzerne
+  - Lycoming
+  - McKean
+  - Mercer
+  - Mifflin
+  - Monroe
+  - Montgomery
+  - Montour
+  - Northampton
+  - Northumberland
+  - Perry
+  - Philadelphia
+  - Pike
+  - Potter
+  - Schuylkill
+  - Snyder
+  - Somerset
+  - Sullivan
+  - Susquehanna
+  - Tioga
+  - Union
+  - Venango
+  - Warren
+  - Washington
+  - Wayne
+  - Westmoreland
+  - Wyoming
+  - York
