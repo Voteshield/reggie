@@ -75,6 +75,7 @@ class Preprocessor():
         self.date = date
         self.state = config['state']
         self.meta = None
+        self.dataframe = None
 
     def __enter__(self):
         return self
@@ -309,6 +310,13 @@ class Preprocessor():
 
         outfile.seek(0)
         return outfile
+
+    def generate_key(self, meta=False):
+        if meta:
+            name = "meta_" + self.state + "_" + self.date + ".json"
+        else:
+            name = self.state + "_" + self.date + ".csv.gz"
+        return name
 
     def preprocess_texas(self):
         new_files = self.unpack_files(
@@ -1622,7 +1630,8 @@ class Preprocessor():
                                                    index=False)))
 
     def execute(self):
-        return self.state_router()
+        file_obj = self.state_router()
+        self.dataframe = pd.read_csv(file_obj.obj)
 
     def state_router(self):
         routes = {

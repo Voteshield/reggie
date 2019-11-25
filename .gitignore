@@ -1,5 +1,6 @@
 main.*.*
 venv
+venv3
 *.pyc
 *.DS_Store
 .ipynb_checkpoints
@@ -10,5 +11,8 @@ experiments
 *.gz
 *.pkl
 *.rdb
-
+.idea
 *.json
+build
+dist
+
