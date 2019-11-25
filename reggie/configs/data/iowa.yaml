@@ -6,6 +6,7 @@ file_class: voter_file
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
+precinct_identifier: PRECINCT
 birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
 voter_status_active: Active
@@ -41,10 +42,10 @@ address_fields:
   - UNIT_TYPE
   - UNIT_NUM
   - ADDRESS_NON_STD
-  - CITY
-  - STATE
-  - ZIP_CODE
-  - ZIP_PLUS
+  - CITY_1
+  - STATE_1
+  - ZIP_CODE_1
+  - ZIP_PLUS_1
 primary_key:
   - pre_date
   - post_date

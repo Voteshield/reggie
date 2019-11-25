@@ -129,7 +129,7 @@ columns:
   dob: date #Date of Birth
   gender: varchar #Gender
   enrollment: varchar #Political Party
-  otherparty: varchar #Name or Party if Voter Checks “Other” on registration form.
+  otherparty: varchar #Name or Party if Voter Checks Other on registration form.
   countycode: int #County code
   ed: int #Election district
   ld: int #Legislative district
@@ -150,8 +150,8 @@ columns:
   idmet: varchar #Identification Verification Requirement Met Flag.
   status: varchar #Voter Status Codes.
   reasoncode: varchar #Status Reason Codes
-  inact_date: date #Date Voter made ”Inactive”
-  purge_date: date #Date voter was “Purged”
+  inact_date: date #Date Voter made Inactive
+  purge_date: date #Date voter was Purged
   sboeid: varchar #Unique NYS Voter ID
   voterhistory: varchar #Voter History
 ordered_columns:

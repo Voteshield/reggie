@@ -382,3 +382,10 @@ race_options:
   Asian or Pacific Islander: asian_or_pacific_islander
   Other: other
   American Indian or Alaskan Native: american_indian_or_alaskan_native
+  WH: white
+  BH: black
+  U: unknown
+  HP: hispanic
+  AP: asian_or_pacific_islander
+  OT: other
+  AI: american_indian_or_alaskan_native

@@ -1,4 +1,5 @@
-from reggie.constants import CONFIG_DIR
+from reggie.constants import CONFIG_DIR, COUNTY_ALIAS, \
+    PRIMARY_LOCALE_TYPE
 import yaml
 import pandas as pd
 
@@ -6,6 +7,7 @@ config_cache = {}
 
 
 class Config(object):
+
     def __init__(self, state=None, file_name=None):
         if state is None and file_name is None:
             raise ValueError("either state or config file must be passed")
@@ -13,7 +15,11 @@ class Config(object):
             config_file = self.config_file_from_state(state)
         else:
             config_file = file_name
+
         self.data = self.load_data(config_file)
+        self.county_column = self.data[COUNTY_ALIAS]
+        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -31,10 +37,11 @@ class Config(object):
                 config_cache[config_file] = config
         return config
 
-    """
-    In the following 4 methods we recreate the functionality of a dictionary,
-    as needed in the rest of the application.
-    """
+    # """
+    # In the following 4 methods we recreate the functionality of a dictionary,
+    # as needed in the rest of the application.
+    # """
+
     def __getitem__(self, key):
         return self.data[key]
 
@@ -50,15 +57,23 @@ class Config(object):
     def items(self):
         return self.data.items()
 
+    def database_columns(self):
+        return [c for c in self.data["ordered_columns"] if c not in
+                self.data["blacklist_columns"]]
+
     def raw_file_columns(self):
+        """
+        raw file columns is used to set the column names in the
+        beginning of the file formatting, when the naming of the
+        columns is different from the columns in the semi-universal format.
+        :return: list of raw columns if columns are different
+        from database columns
+        """
+
         if "raw_ordered_columns" in self.data:
             return self.data["raw_ordered_columns"]
         else:
             return self.data["ordered_columns"]
-
-    def database_columns(self):
-        return [c for c in self.data["ordered_columns"] if c not in
-                self.data["blacklist_columns"]]
 
     def processed_file_columns(self):
         return self.data["ordered_columns"]
@@ -126,7 +141,11 @@ class Config(object):
         for field in text_fields:
             if (field in df) and (field != self.data["voter_status"]) \
                and (field != self.data["party_identifier"]):
-                df[field] = df[field].astype(str).str.strip().str.lower()
+                string_copy = df[field].astype(str)
+                stripped_copy = string_copy.str.strip()
+                lower_copy = stripped_copy.str.lower()
+                utf_decoded = lower_copy.str.encode('utf-8', errors='ignore')
+                df[field] = utf_decoded.str.decode('utf-8')
         return df
 
     def admissible_change_types(self):
@@ -143,6 +162,10 @@ class Config(object):
             "general_history",
             "sparse_history",
             "vote_type",
+            "votetype_history",
+            "county_history",
+            "jurisdiction_history",
+            "schooldistrict_history",
             "all_voting_methods",
             "party_history",
             "coded_history",
@@ -167,3 +190,43 @@ class Config(object):
             "Election_Party",
             "Election_Voting_Method"]
         return history_cols
+
+    def get_locale_field(self, locale_type):
+        """
+        Return field name (e.g. "county_code") for a standardized locale type.
+        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
+        :return: actual field name for this locale_type in yaml / db
+        """
+        if locale_type is None:
+            locale_type = self.primary_locale_type
+        locale_field = self.data['{}_identifier'.format(locale_type)]
+        return locale_field
+
+    def locale_type_is_numeric(self, locale_type):
+        """
+        Return whether locale type is numeric.
+        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
+        :return: True if the DB column for this locale type is numeric, False otherwise
+        """
+        # This case fixes Ohio, because county is numeric but db field is text
+        if (locale_type == 'county') and self.data['numeric_county']:
+            return True
+
+        locale_field = self.get_locale_field(locale_type)
+        field_type = self.data['columns'][locale_field]
+        if ("int" in field_type) or (field_type == "float") or \
+          (field_type == "double"):
+           return True
+        else:
+            return False
+
+    def is_primary_locale_type(self, locale_type):
+        """
+        Return whether a locale type is the primary one for this state.
+        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
+        :return: True if locale_type is the state's primary one, False otherwise
+        """
+        if locale_type is not None:
+            if self.primary_locale_type == locale_type:
+                return True
+        return False

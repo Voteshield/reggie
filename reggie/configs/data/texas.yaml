@@ -14,10 +14,13 @@ party_identifier: party_identifier
 no_party_affiliation: npa
 democratic_party: D
 republican_party: R
-date_format: '%Y%m%d'
+date_format: 
+  - '%Y%m%d'
+  - '%Y-%m-%d'
 numeric_county: true
 generated_columns:
-  all_history: int[]
+  sparse_history: int[]
+  all_history: text[]
   vote_type: text[]
 missing_required_fields: true
 has_headers: NO
@@ -27,6 +30,8 @@ format:
   separate_counties_hist_file: true
   hist_election_rows: true
   columnar_elections: false
+featureless_date_cols:
+  - election_date
 name_fields:
   - Last_Name
   - First_Name
@@ -34,6 +39,7 @@ name_fields:
   - Former_Last_Name
   - Suffix
 ordered_generated_columns:
+  - sparse_history
   - all_history
   - vote_type
 address_fields:
@@ -62,6 +68,7 @@ base_columns:
   state: text
 additional_snapshot_columns:
   all_history: text[]
+  sparse_history: int[]
   vote_type: text[]
 summary_columns:
   - totals
@@ -112,13 +119,9 @@ columns:
   Mailing_City: text
   Mailing_State: text
   Mailing_Zipcode: text
-  Effective_Date_of_Registration: text
+  Effective_Date_of_Registration: date
   Status_Code: text
   Hispanic_Surname_Flag: text
-  Election_Date: date
-  Election_Type: text
-  Election_Party: text
-  Election_Voting_Method: text
   party_identifier: text
 
 raw_ordered_columns:
@@ -184,12 +187,7 @@ ordered_columns:
   - Effective_Date_of_Registration
   - Status_Code
   - Hispanic_Surname_Flag
-  - Election_Date
-  - Election_Type
-  - Election_Party
-  - Election_Voting_Method
   - party_identifier
-
 
 county_names:
   Anderson: 1
