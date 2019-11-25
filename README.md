@@ -2,8 +2,6 @@
 
 reggie is a python package for reading state voter registration files created by Voteshield, a data analytics tool designed to protect the integrity of American elections by monitoring changes to the voter rolls.
 
-![](reggie_example.gif)
-
 ## Using reggie
 
 reggie will convert voter files into a single compressed voter file along with voter history metadata using either the command line or from within a python environment.  
@@ -30,9 +28,28 @@ Warning: as voter files are quite large, reggie may take significant time and me
 
 
 ## Installation 
-
+Reggie requires python 3.6 or greater. A good strategy is to use a virtual environment (virtualenv) with the python version you need (install a new version of python if you dont have it). For example, on a mac if you do
 ```bash
+$ python3 --version
+```
+and get version 3.6 or higher then you can create a new virtualenv located in `venv3` as follows
+```bash
+$ mkdir voter_stuff
+$ cd voter_stuff
+$ virtualenv -p /usr/bin/python3 venv3
+```
+then mount it and install with pip
+```bash
+$ source venv3/bin/activate
 $ pip install reggie
+```
+
+for the newest version, clone and build from the source
+```bash
+$ git clone git@github.com:Voteshield/reggie.git
+$ source venv3/bin/activate
+$ cd reggie
+$ python setup.py install
 ```
 
 
