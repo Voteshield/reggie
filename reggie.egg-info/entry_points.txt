@@ -1,4 +1,4 @@
 
     [console_scripts]
-    veg=veggie:convert_cli
+    reg=reggie:convert_cli
     
