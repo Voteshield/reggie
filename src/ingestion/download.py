@@ -42,18 +42,15 @@ def nc_date_grab():
         'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
     data = nc_file.read()
     nc_file.close()
-    root = xml.etree.ElementTree.fromstring(data)
+    root = xml.etree.ElementTree.fromstring(data.decode('utf-8'))
 
     def nc_parse_xml(file_name):
-        for child in root:
-            if "Contents" in child.tag:
-                z = 0
-                for i in child:
-                    if file_name in i.text:
-                        z += 1
-                        continue
-                    if z == 1:
-                        return i.text
+        z = 0
+        for child in root.itertext():
+                if z == 1:
+                    return child
+                if file_name in child:
+                    z += 1
 
     file_date_vf = nc_parse_xml(file_name="data/ncvoter_Statewide.zip")
     file_date_his = nc_parse_xml(file_name="data/ncvhis_Statewide.zip")
