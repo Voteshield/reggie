@@ -7,7 +7,7 @@ county_identifier: Jurisdiction
 locale_type_name: Jurisdiction
 #needs to be county here because of the querys on the population table
 locale_type: county
-primary_locale_type: Jurisdiction
+# primary_locale_type: Jurisdiction
 birthday_identifier: DATE_OF_BIRTH
 voter_status: voter_status
 voter_status_reason: Voter Status Reason
