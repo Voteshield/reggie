@@ -755,7 +755,10 @@ class Preprocessor(Loader):
 
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
-        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
+            "HOUSE_NUM", "UNIT_NUM", "RESIDENTIAL_ZIP_CODE",
+            "RESIDENTIAL_ZIP_PLUS", "MAILING_ZIP_CODE", "MAILING_ZIP_PLUS",
+            "PRECINCT_NAME", "PRECINCT", "MAILING_ADDRESS_3", "PHONE_NUM"])
 
         self.meta = {
             "message": "Colorado_{}".format(datetime.now().isoformat()),
