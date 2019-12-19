@@ -7,9 +7,8 @@ county_identifier: County_Code
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
 voter_status_active: V
-voter_status_suspense: S
+voter_status_inactive: S
 voter_status_cancelled: C 
-voter_status_inactive: I
 party_identifier: party_identifier
 no_party_affiliation: npa
 democratic_party: D
