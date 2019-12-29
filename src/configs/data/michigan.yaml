@@ -3,8 +3,10 @@ state: michigan
 source: boe
 file_class: voter_file
 voter_id: VOTER_IDENTIFICATION_NUMBER
-county_identifier: JURISDICTION_CODE
-locale_type: jurisdiction
+jurisdiction_identifier: JURISDICTION_CODE
+primary_locale_identifier: JURISDICTION_CODE
+numeric_primary_locale: true
+primary_locale_type: jurisdiction
 birthday_identifier: YEAR_OF_BIRTH
 voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
@@ -17,7 +19,6 @@ democratic_party: None
 republican_party: None
 no_party_affiliation: npa
 party_identifier: party_identifier
-numeric_county: True
 missing_required_fields: true
 match_fields:
   - FIRST_NAME
@@ -104,7 +105,7 @@ summary_columns:
   - ages_50_64
   - ages_65_130
   - npa
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

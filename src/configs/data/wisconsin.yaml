@@ -3,11 +3,10 @@ state: wisconsin
 source: boe_download
 file_class: voter_file
 voter_id: Voter Reg Number
-county_identifier: Jurisdiction
-locale_type_name: Jurisdiction
-#needs to be county here because of the querys on the population table
-locale_type: county
-# primary_locale_type: Jurisdiction
+jurisdiction_identifier: Jurisdiction
+primary_locale_identifier: Jurisdiction
+numeric_primary_locale: false
+primary_locale_type: jurisdiction
 birthday_identifier: DATE_OF_BIRTH
 voter_status: voter_status
 voter_status_reason: Voter Status Reason
@@ -27,7 +26,6 @@ ordered_generated_columns:
   - all_history
   - votetype_history
   - sparse_history
-numeric_county: false
 party_identifier: PARTY_AFFILIATION
 name_fields:
   - LastName
@@ -63,7 +61,7 @@ summary_columns:
   - date
   - state
   - npa
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

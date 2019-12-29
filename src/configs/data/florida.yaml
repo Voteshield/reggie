@@ -5,6 +5,8 @@ source: boe
 file_class: voter_file
 voter_id: Voter_ID
 county_identifier: County_Code
+primary_locale_identifier: County_Code
+numeric_primary_locale: false
 birthday_identifier: Birth_Date
 voter_status: Voter_Status
 voter_status_active: ACT
@@ -25,7 +27,6 @@ independence_party: IDP
 americas_independent_party: AIP
 party_identifier: Party_Affiliation
 date_format: '%m/%d/%Y'
-numeric_county: false
 generated_columns:
   all_history: int[]
   vote_type: text[]
@@ -97,7 +98,7 @@ summary_columns:
   - INT
   - IDP
   - AIP
-  - county
+  - locale
 hist_columns:
   - county
   - VoterID

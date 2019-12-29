@@ -5,6 +5,8 @@ source: boe_download
 file_class: voter_file
 voter_id: VOTER_ID
 county_identifier: COUNTY
+primary_locale_identifier: COUNTY
+numeric_primary_locale: false
 birthday_identifier: BIRTH_YEAR
 voter_status: STATUS
 voter_status_active: Active
@@ -23,7 +25,6 @@ has_headers: YES
 date_format: 
   - '%m/%d/%Y'
   - '%Y'
-numeric_county: false
 generated_columns:
   all_history: int[]
   vote_type: text[]
@@ -93,8 +94,7 @@ summary_columns:
   - GRN
   - UNI
   - APV
-  - county
-
+  - locale
 hist_columns:
   - VOTER_ID
   - ELECTION_TYPE
@@ -103,7 +103,6 @@ hist_columns:
   - VOTING_METHOD
   - PARTY
   - COUNTY_NAME
-
 summary_types:
   - int
   - timestamp

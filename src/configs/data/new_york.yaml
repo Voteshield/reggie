@@ -7,6 +7,8 @@ source: boe
 file_class: voter_file
 voter_id: sboeid
 county_identifier: countycode
+primary_locale_identifier: countycode
+numeric_primary_locale: true
 birthday_identifier: dob
 voter_status: status
 voter_status_active: ACTIVE
@@ -27,7 +29,6 @@ womens_equality_party: WEP
 working_families_party: WOR
 other_parties: OTH
 no_party_affiliation: BLK
-numeric_county: true
 date_format: '%Y%m%d'
 party_identifier: enrollment
 gender_identifier: gender
@@ -91,7 +92,7 @@ summary_columns:
   - WOR
   - OTH
   - BLK
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

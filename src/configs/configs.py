@@ -1,4 +1,4 @@
-from constants import CONFIG_DIR, COUNTY_ALIAS, LOCALE_TYPE, \
+from constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, \
     PRIMARY_LOCALE_TYPE
 import yaml
 import pandas as pd
@@ -18,7 +18,7 @@ class Config(object):
             config_file = file_name
 
         self.data = self.load_data(config_file)
-        self.county_column = self.data[COUNTY_ALIAS]
+        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
 
 
@@ -210,14 +210,15 @@ class Config(object):
         :return: True if the DB column for this locale type is numeric, False otherwise
         """
         # This case fixes Ohio, because county is numeric but db field is text
-        if (locale_type == 'county') and self.data['numeric_county']:
+        if (locale_type == self.primary_locale_type) and \
+          self.data['numeric_primary_locale']:
             return True
 
         locale_field = self.get_locale_field(locale_type)
         field_type = self.data['columns'][locale_field]
         if ("int" in field_type) or (field_type == "float") or \
           (field_type == "double"):
-           return True
+            return True
         else:
             return False
 

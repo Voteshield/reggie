@@ -51,22 +51,22 @@ class TestFileBuilder(Preprocessor):
         self.s3_key = s3_key
 
     def get_smallest_counties(self, df, count=2):
-        counties = df[self.config["county_identifier"]
+        counties = df[self.config["primary_locale_identifier"]
                       ].value_counts().reset_index()
         counties["county"] = counties[counties.columns[0]]
-        counties["count"] = counties[self.config["county_identifier"]]
+        counties["count"] = counties[self.config["primary_locale_identifier"]]
         counties.drop(
             columns=[
                 counties.columns[0],
-                self.config["county_identifier"]],
+                self.config["primary_locale_identifier"]],
             inplace=True)
         small_counties = counties.values[-count:, 0]
         return small_counties
 
     def filter_counties(self, df, counties):
         filtered_data = df[(
-            df[self.config["county_identifier"]] == counties[0]) |
-            (df[self.config["county_identifier"]] == counties[1])]
+            df[self.config["primary_locale_identifier"]] == counties[0]) |
+            (df[self.config["primary_locale_identifier"]] == counties[1])]
         filtered_data.reset_index(inplace=True, drop=True)
         return filtered_data
 

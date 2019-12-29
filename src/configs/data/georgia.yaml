@@ -5,6 +5,8 @@ source: boe
 file_class: voter_file
 voter_id: Registration_Number
 county_identifier: County_code
+primary_locale_identifier: County_code
+numeric_primary_locale: false
 birthday_identifier: Year_of_Birth
 voter_status: Voter_status
 voter_status_active: A
@@ -13,7 +15,6 @@ party_identifier: party_identifier
 democratic_party: None
 republican_party: None
 no_party_affiliation: npa
-numeric_county: false
 date_format:
   - '%Y'
   - '%Y%m%d'
@@ -68,7 +69,7 @@ summary_columns:
   - totals
   - date
   - state
-  - county
+  - locale
   - ages_18_34
   - ages_35_49
   - ages_50_64

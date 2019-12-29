@@ -5,6 +5,8 @@ native_file_extension: zip
 file_class: voter_file
 voter_id: SOS_VOTERID
 county_identifier: COUNTY_NUMBER
+primary_locale_identifier: COUNTY_NUMBER
+numeric_primary_locale: true
 birthday_identifier: DATE_OF_BIRTH
 voter_status: VOTER_STATUS
 voter_status_active: ACTIVE
@@ -13,7 +15,6 @@ democratic_party: D
 republican_party: R
 no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
-numeric_county: true
 party_identifier: PARTY_AFFILIATION
 match_fields:
   - FIRST_NAME
@@ -69,7 +70,7 @@ summary_columns:
   - l
   - c
   - n
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

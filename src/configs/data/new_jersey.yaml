@@ -5,6 +5,8 @@ file_class: voter_file
 has_headers: False
 voter_id: voter_id
 county_identifier: county
+primary_locale_identifier: county
+numeric_primary_locale: false
 birthday_identifier: dob
 voter_status: status
 voter_status_active: Active
@@ -15,7 +17,6 @@ voter_status_pending: Pending #minors
 voter_status_inactive_need_id: Inactive Confirmation-Need ID #funneling this and IF into I
 voter_status_inactive_confirmation: Inactive Confirmation #havent voted in several elections
 date_format: "%m/%d/%Y"
-numeric_county: False
 party_identifier: party_code
 democratic_party: DEM
 republican_party: REP
@@ -89,7 +90,7 @@ summary_columns:
   - GRE
   - SSP
   - NAT
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

@@ -23,6 +23,8 @@ source: boe
 file_class: voter_file
 voter_id: text_registrant_id
 county_identifier: county
+primary_locale_identifier: county
+numeric_primary_locale: false
 birthday_identifier: year_of_birth
 voter_status: cde_registrant_status
 voter_status_active: 'A   '
@@ -44,7 +46,6 @@ americans_elect: "AMERICANS ELECT"
 absentee_ballot_code: 'A'
 valid_voting_methods: ['E','I','Y','P','F','A','N']
 voting_method_column: 'all_voting_methods'
-numeric_county: false
 date_format: '%Y'
 party_identifier: desc_party
 match_fields:
@@ -127,7 +128,7 @@ summary_columns:
   - Liberal
   - Reform
   - Americans_Elect
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

@@ -4,6 +4,8 @@ source: boe_download
 file_class: voter_file
 voter_id: VUID
 county_identifier: County_Code
+primary_locale_identifier: County_Code
+numeric_primary_locale: true
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
 voter_status_active: V
@@ -16,7 +18,6 @@ republican_party: R
 date_format: 
   - '%Y%m%d'
   - '%Y-%m-%d'
-numeric_county: true
 generated_columns:
   sparse_history: int[]
   all_history: text[]
@@ -82,7 +83,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - county
+  - locale
 hist_columns:
   - Election_Date
   - Election_Type

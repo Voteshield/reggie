@@ -5,6 +5,8 @@ native_file_extension: zip
 file_class: voter_file
 voter_id: ncid
 county_identifier: county_id
+primary_locale_identifier: county_id
+numeric_primary_locale: true
 birthday_identifier: birth_year
 voter_status: status_cd
 voter_status_active: A
@@ -19,7 +21,6 @@ no_party_affiliation: UNA
 absentee_ballot_code: ABSENTEE
 provisional_ballot_code: PROVISIONAL
 date_format: '%Y'
-numeric_county: true
 party_identifier: party_cd
 match_fields:
   - first_name
@@ -69,7 +70,7 @@ summary_columns:
   - UNA
   - DEM
   - LIB
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

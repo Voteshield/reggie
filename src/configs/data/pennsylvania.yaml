@@ -4,7 +4,8 @@ source: boe
 file_class: voter_file
 voter_id: voter_id
 county_identifier: county
-numeric_county: False
+primary_locale_identifier: county
+numeric_primary_locale: false
 valid_voting_methods: ['AP', 'AB', 'P']
 absentee_ballot_code: AB
 provisional_ballot_code: P
@@ -78,7 +79,7 @@ summary_columns:
   - R
   - D
   - NF
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

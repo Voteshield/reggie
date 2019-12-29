@@ -6,6 +6,8 @@ file_class: voter_file
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
+primary_locale_identifier: COUNTY
+numeric_primary_locale: false
 precinct_identifier: PRECINCT
 birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
@@ -19,7 +21,6 @@ republican_party: REP
 libertarian_party: LIB
 no_party_affiliation: NP
 party_identifier: PARTY
-numeric_county: false
 date_format: '%m/%d/%Y'
 generated_columns:
   all_history: text[]
@@ -77,7 +78,7 @@ summary_columns:
   - DEM
   - OTH
   - LIB
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

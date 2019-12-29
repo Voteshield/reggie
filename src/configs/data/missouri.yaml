@@ -6,8 +6,9 @@ source: boe
 file_class: voter_file
 voter_id: Voter ID
 county_identifier: County
+primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: Birthdate
-numeric_county: false
 date_format: '%m/%d/%Y'
 voter_status: voter_status
 voter_status_active: Active
@@ -77,7 +78,7 @@ summary_columns:
   - ages_50_64
   - ages_65_130
   - npa
-  - county
+  - locale
 summary_types:
   - int
   - timestamp
