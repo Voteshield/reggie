@@ -1376,7 +1376,7 @@ class Preprocessor(Loader):
         else:
             main_file = new_files[0]
 
-        main_df = pd.read_csv(main_file["obj"], sep='\t')
+        main_df = pd.read_csv(main_file["obj"], sep='\t', error_bad_lines=False)
 
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(columns={"Voter Status": self.config["voter_status"]},
