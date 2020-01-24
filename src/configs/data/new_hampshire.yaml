@@ -1,0 +1,172 @@
+file_type: xlsx
+state: new_hampshire
+source: boe
+file_class: voter_file
+voter_id: id_voter
+county_identifier: County
+primary_locale_identifier: County
+numeric_primary_locale: false
+birthday_identifier: birth_date
+voter_status: voter_status
+voter_status_active: active
+voter_status_inactive: inactive
+party_identifier: cd_party
+democratic_party: DEM
+republican_party: REP
+libertarian_party: LIB
+no_party_affiliation: UND
+absentee_ballot_code: "'Absentee'"
+date_format: '%m/%d/%Y'
+name_fields:
+  - nm_last
+  - nm_first
+  - nm_mid
+  - nm_suff
+address_fields:
+  - ad_num
+  - ad_num_suffix_a
+  - ad_num_suffix_b
+  - ad_str1
+  - ad_unit
+  - ad_str2
+  - ad_str3
+  - ad_city
+  - ad_mail_city
+  - ad_st
+  - ad_zip5
+primary_key:
+  - pre_date
+  - post_date
+  - id_voter
+  - change_type
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+has_headers: YES
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  id_voter: int
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+summary_columns:
+  - totals
+  - date
+  - state
+  - dem
+  - rep
+  - und
+  - locale
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - text
+columns:
+  id_voter: int
+  nm_last: text
+  nm_first: text
+  nm_mid: text
+  nm_suff: text
+  cd_party: text
+  ad_num: int
+  ad_num_suffix_a: text
+  ad_num_suffix_b: text
+  ad_str1: text
+  ad_unit: text
+  ad_str2: text
+  ad_str3: text
+  ad_city: text
+  ad_mail_city: text
+  ad_st: text
+  ad_zip5: int
+  mail_num: int
+  mail_num_suffix_a: text
+  mail_num_suffix_b: text
+  mail_str1: text
+  mail_unit: text
+  mail_str2: text
+  mail_str3: text
+  mail_city: text
+  mail_st: text
+  mail_zip5: int
+  ward: int
+  County: text
+  birth_date: int
+  voter_status: text
+ordered_columns:
+  - id_voter
+  - nm_last
+  - nm_first
+  - nm_mid
+  - nm_suff
+  - cd_party
+  - ad_num
+  - ad_num_suffix_a
+  - ad_num_suffix_b
+  - ad_str1
+  - ad_unit
+  - ad_str2
+  - ad_str3
+  - ad_city
+  - ad_mail_city
+  - ad_st
+  - ad_zip5
+  - mail_num
+  - mail_num_suffix_a
+  - mail_num_suffix_b
+  - mail_str1
+  - mail_unit
+  - mail_str2
+  - mail_str3
+  - mail_city
+  - mail_st
+  - mail_zip5
+  - ward
+  - County
+  - birth_date
+  - voter_status
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  election_type_history: text[]
+  election_category_history: text[]
+  votetype_history: text[]
+  party_history: text[]
+  town_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - election_type_history
+  - election_category_history
+  - votetype_history
+  - party_history
+  - town_history
+hist_columns:
+  - id_voter
+  - election_date
+  - election_name
+  - election_type
+  - election_category
+  - ballot_type
+  - cd_part_voted
+  - town
+county_names:
+  belknap
+  carroll
+  cheshire
+  coos
+  grafton
+  hillsborough
+  merrimack
+  rockingham
+  strafford  
+  sullivan

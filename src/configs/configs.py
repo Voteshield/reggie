@@ -189,7 +189,10 @@ class Config(object):
             "Election_Date",
             "Election_Type",
             "Election_Party",
-            "Election_Voting_Method"]
+            "Election_Voting_Method",
+            "election_type_history",
+            "election_category_history",
+            "town_history"]
         return history_cols
 
     def get_locale_field(self, locale_type):
