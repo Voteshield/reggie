@@ -692,26 +692,31 @@ class Preprocessor(Loader):
         for i in new_files:
             if "Registered_Voters_List" in i['name']:
                 master_vf_version = False
+
         for i in new_files:
+            if "Public" not in i['name']:
 
-            if "Registered_Voters_List" in i['name'] and not master_vf_version:
-                logging.info("reading in {}".format(i['name']))
-                df_voter = pd.concat(
-                    [df_voter, pd.read_csv(i['obj'], encoding='latin-1')],
-                    axis=0)
-
-            elif "Master_Voting_History" in i['name'] and "MACOS" not in i['name']:
-                if "Voter_Details" not in i['name']:
+                if "Registered_Voters_List" in i['name'] and not master_vf_version:
                     logging.info("reading in {}".format(i['name']))
-                    new_df = pd.read_csv(i['obj'], compression='gzip')
-                    df_hist = pd.concat([df_hist, new_df], axis=0)
+                    df_voter = pd.concat(
+                        [df_voter, pd.read_csv(i['obj'], encoding='latin-1',
+                                               error_bad_lines=False)], axis=0)
 
-                if "Voter_Details" in i['name'] and master_vf_version:
-                    logging.info("reading in {}".format(i['name']))
-                    new_df = pd.read_csv(i['obj'], compression='gzip')
-                    new_df.columns = self.config['master_voter_columns']
-                    df_master_voter = pd.concat(
-                        [df_master_voter, new_df], axis=0)
+                elif ( (("Voting_History" in i['name']) or \
+                        ("Coordinated_Voter_Details" in i['name'])) and \
+                       ("MACOS" not in i['name']) ):
+                    if "Voter_Details" not in i['name']:
+                        logging.info("reading in {}".format(i['name']))
+                        new_df = pd.read_csv(i['obj'], compression='gzip')
+                        df_hist = pd.concat([df_hist, new_df], axis=0)
+
+                    if "Voter_Details" in i['name'] and master_vf_version:
+                        logging.info("reading in {}".format(i['name']))
+                        new_df = pd.read_csv(i['obj'], compression='gzip')
+                        new_df.columns = self.config['master_voter_columns']
+                        df_master_voter = pd.concat(
+                            [df_master_voter, new_df], axis=0)
+
         if df_voter.empty:
             df_voter = master_to_reg_df(df_master_voter)
         if df_hist.empty:
@@ -721,6 +726,7 @@ class Preprocessor(Loader):
         df_hist["ELECTION_DATE"] = pd.to_datetime(df_hist["ELECTION_DATE"],
                                                   format="%m/%d/%Y",
                                                   errors='coerce')
+        df_hist.dropna(subset=["ELECTION_DATE"], inplace=True)
         df_hist["election_name"] = df_hist["ELECTION_DATE"].astype(
             str) + "_" + df_hist["VOTING_METHOD"]
 
