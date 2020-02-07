@@ -10,7 +10,8 @@ from configs.configs import Config
 from storage import generate_s3_key, date_from_str, \
     df_to_postgres_array_string, strcol_to_array, get_surrounding_dates, \
     get_metadata_for_key, format_column_name
-from applications.custom_errors import MissingElectionCodesError
+from applications.custom_errors import MissingElectionCodesError, \
+    TooManyMalformedLines
 from storage import s3, normalize_columns
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -27,6 +28,7 @@ import requests
 from urllib.request import urlopen
 import xml.etree.ElementTree
 import os
+import sys
 
 
 def ohio_get_last_updated():
@@ -80,6 +82,24 @@ def concat_and_delete(in_list):
         outfile.write(s.decode())
     outfile.seek(0)
     return outfile
+
+
+class ErrorLog(object):
+    """
+    Allow us to catch and count number of error lines skipped during read_csv,
+    by redirecting stderr to this error log object.
+    """
+    def __init__(self):
+        self.error_string = ''
+
+    def write(self, data):
+        self.error_string += data
+
+    def count_skipped_lines(self):
+        return self.error_string.count('Skipping')
+
+    def print_log_string(self):
+        logging.info(self.error_string)
 
 
 class FileItem(object):
@@ -467,6 +487,37 @@ class Preprocessor(Loader):
         outfile.seek(0)
         return outfile
 
+    def read_csv_count_error_lines(self, file_obj, **kwargs):
+        """
+        Run pandas read_csv while redirecting stderr so we can keep a
+        count of how many lines are malformed without erroring out.
+        :param file_obj: file object to be read
+        :param **kwargs: kwargs for read_csv()
+        :return: dataframe read from file
+        """
+        sys.stderr.flush()
+        original_stderr = sys.stderr
+        sys.stderr = ErrorLog()
+
+        df = pd.read_csv(file_obj, **kwargs)
+        num_skipped = sys.stderr.count_skipped_lines()
+        sys.stderr.print_log_string()   # still print original warning output
+        sys.stderr = original_stderr
+
+        logging.info(
+            "WARNING: pandas.read_csv() skipped a total of {} lines, which " \
+            "had an unexpected number of fields.""".format(num_skipped))
+
+        if num_skipped > MAX_MALFORMED_LINES_ALLOWED:
+
+            raise TooManyMalformedLines(
+                "ERROR: Because pandas.read_csv() skipped more than {} lines, " \
+                "aborting file preprocess. Please manually examine the file " \
+                "to see if the formatting is as expected.".format(
+                    MAX_MALFORMED_LINES_ALLOWED))
+
+        return df
+
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
@@ -578,11 +629,12 @@ class Preprocessor(Loader):
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
-                df = pd.read_csv(i['obj'], encoding='latin-1',
-                                 compression='gzip')
+                df = self.read_csv_count_error_lines(i['obj'], encoding='latin-1',
+                    compression='gzip', error_bad_lines=False)
             elif ".txt" in i['name']:
-                temp_df = pd.read_csv(i['obj'], encoding='latin-1',
-                                      compression='gzip')
+                temp_df = self.read_csv_count_error_lines(
+                    i['obj'], encoding='latin-1', compression='gzip',
+                    error_bad_lines=False)
                 df = pd.concat([df, temp_df], axis=0)
 
         # create history meta data
@@ -613,11 +665,14 @@ class Preprocessor(Loader):
         for i in new_files:
             if "election" in i['name'].lower():
                 voter_hist_df = pd.concat(
-                    [voter_hist_df, pd.read_csv(i['obj'])], axis=0)
+                    [voter_hist_df, self.read_csv_count_error_lines(
+                        i['obj'], error_bad_lines=False)],
+                    axis=0)
             elif "voter" in i['name'].lower():
                 voter_reg_df = pd.concat(
-                    [voter_reg_df, pd.read_csv(i['obj'],
-                                               encoding='latin-1')], axis=0)
+                    [voter_reg_df, self.read_csv_count_error_lines(
+                        i['obj'], encoding='latin-1', error_bad_lines=False)],
+                    axis=0)
 
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
@@ -699,20 +754,22 @@ class Preprocessor(Loader):
                 if "Registered_Voters_List" in i['name'] and not master_vf_version:
                     logging.info("reading in {}".format(i['name']))
                     df_voter = pd.concat(
-                        [df_voter, pd.read_csv(i['obj'], encoding='latin-1',
-                                               error_bad_lines=False)], axis=0)
+                        [df_voter, self.read_csv_count_error_lines(i['obj'],
+                            encoding='latin-1', error_bad_lines=False)], axis=0)
 
                 elif ( (("Voting_History" in i['name']) or \
                         ("Coordinated_Voter_Details" in i['name'])) and \
                        ("MACOS" not in i['name']) ):
                     if "Voter_Details" not in i['name']:
                         logging.info("reading in {}".format(i['name']))
-                        new_df = pd.read_csv(i['obj'], compression='gzip')
+                        new_df = self.read_csv_count_error_lines(i['obj'],
+                            compression='gzip', error_bad_lines=False)
                         df_hist = pd.concat([df_hist, new_df], axis=0)
 
                     if "Voter_Details" in i['name'] and master_vf_version:
                         logging.info("reading in {}".format(i['name']))
-                        new_df = pd.read_csv(i['obj'], compression='gzip')
+                        new_df = self.read_csv_count_error_lines(
+                            i['obj'], compression='gzip', error_bad_lines=False)
                         new_df.columns = self.config['master_voter_columns']
                         df_master_voter = pd.concat(
                             [df_master_voter, new_df], axis=0)
@@ -786,8 +843,9 @@ class Preprocessor(Loader):
         for i in new_files:
             if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
-                df_voters = pd.read_csv(i["obj"], sep="|", quotechar='"',
-                                        quoting=3, error_bad_lines=False)
+                df_voters = self.read_csv_count_error_lines(
+                    i["obj"], sep="|", quotechar='"', quoting=3,
+                    error_bad_lines=False)
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters[
                     'Registration_Number'].astype(str).str.zfill(8)
@@ -798,8 +856,8 @@ class Preprocessor(Loader):
 
         logging.info("Performing GA history manipulation")
 
-        history = pd.read_csv(concat_history_file, sep="  ",
-                              names=['Concat_str', 'Other'])
+        history = self.read_csv_count_error_lines(concat_history_file, sep="  ",
+                              names=['Concat_str', 'Other'], error_bad_lines=False)
 
         history['County_Number'] = history['Concat_str'].str[0:3]
         history['Registration_Number'] = history['Concat_str'].str[3:11]
@@ -879,9 +937,11 @@ class Preprocessor(Loader):
         hist_file = new_files[0] if "VtHst" in new_files[0]["name"] else \
             new_files[1]
 
-        df_hist = pd.read_csv(hist_file["obj"], header=None)
+        df_hist = self.read_csv_count_error_lines(hist_file["obj"], header=None,
+            error_bad_lines=False)
         df_hist.columns = self.config["hist_columns"]
-        df_voters = pd.read_csv(voter_file["obj"], header=None)
+        df_voters = self.read_csv_count_error_lines(voter_file["obj"], header=None,
+            error_bad_lines=False)
         df_voters.columns = self.config["ordered_columns"]
 
         sorted_codes = df_hist.date.unique().tolist()
@@ -973,9 +1033,8 @@ class Preprocessor(Loader):
         gc.collect()
 
         logging.info("FLORIDA: loading main voter file")
-        df_voters = pd.read_csv(concat_voter_file,
-                                header=None, sep="\t",
-                                error_bad_lines=False)
+        df_voters = self.read_csv_count_error_lines(concat_voter_file, header=None,
+            sep="\t", error_bad_lines=False)
         df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
@@ -1012,9 +1071,8 @@ class Preprocessor(Loader):
             if (".txt" in f['name']) and ("._" not in f['name']) and \
                     ("description" not in f['name'].lower()):
                 logging.info("reading kansas file from {}".format(f['name']))
-                df = pd.read_csv(f['obj'], sep="\t",
-                                 index_col=False, engine='c',
-                                 error_bad_lines=False)
+                df = self.read_csv_count_error_lines(f['obj'], sep="\t",
+                    index_col=False, engine='c', error_bad_lines=False)
         try:
             df.columns = self.config["ordered_columns"]
         except:
@@ -1095,13 +1153,13 @@ class Preprocessor(Loader):
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
         headers = headers.tolist() + buffer_cols
-        df_voters = pd.read_csv(first_file["obj"], skiprows=1, header=None,
-                                names=headers)
+        df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
+            header=None, names=headers, error_bad_lines=False)
 
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
-            new_df = pd.read_csv(i["obj"], header=None, skiprows=skiprows,
-                                 names=total_cols)
+            new_df = self.read_csv_count_error_lines(i["obj"], header=None,
+                skiprows=skiprows, names=total_cols, error_bad_lines=False)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
         key_delim = "_"
@@ -1212,7 +1270,7 @@ class Preprocessor(Loader):
 
         combined_file = self.concat_file_segments(new_files)
 
-        main_df = pd.read_csv(combined_file)
+        main_df = self.read_csv_count_error_lines(combined_file, error_bad_lines=False)
 
         voting_action_cols = list(filter(lambda x: "party_voted" in x,
                                          main_df.columns.values))
@@ -1259,10 +1317,9 @@ class Preprocessor(Loader):
         self.main_file = list(filter(
             lambda x: x["name"][-4:] != ".pdf", new_files))[0]
         gc.collect()
-        main_df = pd.read_csv(self.main_file["obj"],
-                              header=None,
-                              names=config["ordered_columns"],
-                              encoding='latin-1')
+        main_df = self.read_csv_count_error_lines(
+            self.main_file["obj"], header=None, names=config["ordered_columns"],
+            encoding='latin-1', error_bad_lines=False)
         shutil.rmtree(os.path.dirname(self.main_file["name"]),
                       ignore_errors=True)
         gc.collect()
@@ -1323,10 +1380,10 @@ class Preprocessor(Loader):
             elif ("ncvoter" in i['name']) and (".txt" in i['name']) and \
                     ("MACOSX" not in i['name']):
                 voter_file = i
-        voter_df = pd.read_csv(voter_file['obj'], sep="\t",
-                               quotechar='"', encoding='latin-1')
-        vote_hist = pd.read_csv(vote_hist_file['obj'], sep="\t",
-                                quotechar='"')
+        voter_df = self.read_csv_count_error_lines(voter_file['obj'], sep="\t",
+            quotechar='"', encoding='latin-1', error_bad_lines=False)
+        vote_hist = self.read_csv_count_error_lines(vote_hist_file['obj'], sep="\t",
+            quotechar='"', error_bad_lines=False)
 
         voter_df.columns = self.config["ordered_columns"]
         vote_hist.columns = self.config["hist_columns"]
@@ -1382,7 +1439,8 @@ class Preprocessor(Loader):
         else:
             main_file = new_files[0]
 
-        main_df = pd.read_csv(main_file["obj"], sep='\t', error_bad_lines=False)
+        main_df = self.read_csv_count_error_lines(
+            main_file["obj"], sep='\t', error_bad_lines=False)
 
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(columns={"Voter Status": self.config["voter_status"]},
@@ -1466,10 +1524,8 @@ class Preprocessor(Loader):
                               names=config['fwf_voter_columns'],
                               na_filter=False)
         elif voter_file['name'][-3:] == 'csv':
-            vdf = pd.read_csv(voter_file['obj'],
-                              encoding='latin-1',
-                              na_filter=False,
-                              error_bad_lines=False)
+            vdf = self.read_csv_count_error_lines(voter_file['obj'],
+                encoding='latin-1', na_filter=False, error_bad_lines=False)
             # rename 'STATE' field to not conflict with our 'state' field
             vdf.rename(columns={'STATE': 'STATE_ADDR'}, inplace=True)
         else:
@@ -1514,9 +1570,8 @@ class Preprocessor(Loader):
                               names=config['fwf_hist_columns'],
                               na_filter=False)
         elif hist_file['name'][-3:] == 'csv':
-            hdf = pd.read_csv(hist_file['obj'],
-                              na_filter=False,
-                              error_bad_lines=False)
+            hdf = self.read_csv_count_error_lines(
+                hist_file['obj'], na_filter=False, error_bad_lines=False)
             if ('IS_ABSENTEE_VOTER' not in hdf.columns) and \
                     ('IS_PERMANENT_ABSENTEE_VOTER' in hdf.columns):
                 hdf.rename(columns={
@@ -1549,9 +1604,9 @@ class Preprocessor(Loader):
                     edf['Date'] = pd.to_datetime(edf['Date'], format='%m%d%Y')
                 elif elec_codes['name'][-3:] == 'csv':
                     # I'm not sure if this would actually ever happen
-                    edf = pd.read_csv(elec_codes['obj'],
-                                      names=config['elec_code_columns'],
-                                      na_filter=False)
+                    edf = self.read_csv_count_error_lines(
+                        elec_codes['obj'], names=config['elec_code_columns'],
+                        na_filter=False, error_bad_lines=False)
                 else:
                     raise NotImplementedError('File format not implemented')
 
@@ -1659,13 +1714,17 @@ class Preprocessor(Loader):
                 types = next(f for f in zone_types if c in f["name"].lower())
             except StopIteration:
                 continue
-            df = pd.read_csv(voter_file["obj"], sep='\t', names=dfcols)
-            edf = pd.read_csv(election_map["obj"], sep='\t',
-                              names=['county', 'number', 'title', 'date'])
-            zdf = pd.read_csv(zones['obj'], sep='\t',
-                              names=['county', 'number', 'code', 'title'])
-            tdf = pd.read_csv(types['obj'], sep='\t',
-                              names=['county', 'number', 'abbr', 'title'])
+            df = self.read_csv_count_error_lines(
+                voter_file["obj"], sep='\t', names=dfcols, error_bad_lines=False)
+            edf = self.read_csv_count_error_lines(
+                election_map["obj"], sep='\t',
+                names=['county', 'number', 'title', 'date'], error_bad_lines=False)
+            zdf = self.read_csv_count_error_lines(
+                zones['obj'], sep='\t', names=['county', 'number', 'code', 'title'],
+                error_bad_lines=False)
+            tdf = self.read_csv_count_error_lines(
+                types['obj'], sep='\t', names=['county', 'number', 'abbr', 'title'],
+                error_bad_lines=False)
             df = df.replace('"')
             edf = edf.replace('"')
             zdf = zdf.replace('"')
@@ -1738,19 +1797,18 @@ class Preprocessor(Loader):
         hdf = pd.DataFrame()
         for f in voter_files:
             logging.info("Reading " + f["name"])
-            new_df = pd.read_csv(f["obj"], sep='|',
-                                 names=config['ordered_columns'],
-                                 low_memory=False)
+            new_df = self.read_csv_count_error_lines(
+                f["obj"], sep='|', names=config['ordered_columns'],
+                low_memory=False, error_bad_lines=False)
             new_df = self.config.coerce_dates(new_df)
             new_df = self.config.coerce_numeric(new_df, extra_cols=[
                 "regional_school", "fire", "apt_no"])
             vdf = pd.concat([vdf, new_df], axis=0)
         for f in hist_files:
             logging.info("Reading " + f["name"])
-            new_df = pd.read_csv(f["obj"], sep='|',
-                                 names=config['hist_columns'],
-                                 index_col=False,
-                                 low_memory=False)
+            new_df = self.read_csv_count_error_lines(
+                f["obj"], sep='|', names=config['hist_columns'], index_col=False,
+                low_memory=False, error_bad_lines=False)
             new_df = self.config.coerce_numeric(
                 new_df, col_list='hist_columns_type')
             hdf = pd.concat([hdf, new_df], axis=0)
@@ -1814,7 +1872,8 @@ class Preprocessor(Loader):
         else:
             main_file = new_files[0]
 
-        main_df = pd.read_csv(main_file["obj"], sep='\t')
+        main_df = self.read_csv_count_error_lines(
+            main_file["obj"], sep='\t', error_bad_lines=False)
 
         logging.info("dataframe memory usage: {}".format(main_df.memory_usage(deep=True).sum()))
         # convert "Voter Status" to "voter_status" for backward compatibility
@@ -1917,7 +1976,8 @@ class Preprocessor(Loader):
                     if '.xlsx' in f['name']:
                         hist_df = pd.read_excel(f['obj'])
                     else:
-                        hist_df = pd.read_csv(f['obj'], error_bad_lines=False)
+                        hist_df = self.read_csv_count_error_lines(
+                            f['obj'], error_bad_lines=False)
                     hist_df.drop_duplicates(inplace=True)
 
                 elif ('checklist' in f['name'].lower()) or \
@@ -1926,7 +1986,8 @@ class Preprocessor(Loader):
                     if '.xlsx' in f['name']:
                         voters_df = pd.read_excel(f['obj'])
                     else:
-                        voters_df = pd.read_csv(f['obj'], error_bad_lines=False)
+                        voters_df = self.read_csv_count_error_lines(
+                            f['obj'], error_bad_lines=False)
 
         # add dummy columns for birthday and voter_status
         voters_df[self.config['birthday_identifier']] = 0
