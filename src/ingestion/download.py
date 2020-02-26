@@ -497,12 +497,15 @@ class Preprocessor(Loader):
         """
         sys.stderr.flush()
         original_stderr = sys.stderr
-        sys.stderr = ErrorLog()
 
-        df = pd.read_csv(file_obj, **kwargs)
-        num_skipped = sys.stderr.count_skipped_lines()
-        sys.stderr.print_log_string()   # still print original warning output
-        sys.stderr = original_stderr
+        try:
+            sys.stderr = ErrorLog()
+            df = pd.read_csv(file_obj, **kwargs)
+            num_skipped = sys.stderr.count_skipped_lines()
+            sys.stderr.print_log_string()   # still print original warning output
+            sys.stderr = original_stderr
+        except Exception as e:
+            logging.error(e)
 
         logging.info(
             "WARNING: pandas.read_csv() skipped a total of {} lines, which " \
@@ -1072,7 +1075,8 @@ class Preprocessor(Loader):
                     ("description" not in f['name'].lower()):
                 logging.info("reading kansas file from {}".format(f['name']))
                 df = self.read_csv_count_error_lines(f['obj'], sep="\t",
-                    index_col=False, engine='c', error_bad_lines=False)
+                    index_col=False, engine='c', error_bad_lines=False,
+                    encoding='latin-1')
         try:
             df.columns = self.config["ordered_columns"]
         except:
