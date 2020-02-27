@@ -5,6 +5,7 @@
 #             PV = provisional vote, FW = federal write-in
 file_type: csv
 state: nevada
+abbreviation: nv
 source: boe
 file_class: voter_file
 voter_id: County_Voter_ID

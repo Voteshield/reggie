@@ -1,5 +1,6 @@
 file_type: csv
 state: new_jersey
+abbreviation: nj
 source: boe
 file_class: voter_file
 has_headers: False

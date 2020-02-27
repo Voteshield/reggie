@@ -1,5 +1,6 @@
 file_type: fwf
 state: michigan
+abbreviation: mi
 source: boe
 file_class: voter_file
 voter_id: VOTER_IDENTIFICATION_NUMBER

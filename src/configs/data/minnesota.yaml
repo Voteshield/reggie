@@ -1,5 +1,6 @@
 file_type: csv
 state: minnesota
+abbreviation: mn
 source: boe_download
 file_class: voter_file
 voter_id: VoterId

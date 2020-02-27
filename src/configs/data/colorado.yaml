@@ -1,6 +1,7 @@
 #Colorado has two types of files, one that is a master list with voter reg info and voting history info, another with just voter reg info
 file_type: csv
 state: colorado
+abbreviation: co
 source: boe_download
 file_class: voter_file
 voter_id: VOTER_ID

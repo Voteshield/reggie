@@ -1,6 +1,7 @@
 #Florida provides two .zip files: Voter Extract and Voter History. Depending on the vintage they will have different naming conventions (most recently the files are "Voter_Registration_20180510.zip" and "Voter_History_20180510.zip". Both zips contain 67 separate .txt files, one for each county. "ALA_20061010.txt" would be for Alachua county from Oct 10 2006. These files DO NOT have headers.
 file_type: csv
 state: florida
+abbreviation: fl
 source: boe
 file_class: voter_file
 voter_id: Voter_ID

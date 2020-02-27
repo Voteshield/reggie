@@ -1,5 +1,6 @@
 file_type: txt
 state: pennsylvania
+abbreviation: pa
 source: boe
 file_class: voter_file
 voter_id: voter_id

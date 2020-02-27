@@ -1,5 +1,6 @@
 file_type: txt
 state: kansas
+abbreviation: ks
 source: boe
 file_class: voter_file
 voter_id: text_registrant_id

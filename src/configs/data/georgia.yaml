@@ -1,6 +1,7 @@
 #this is not done yet at all, needs to be reformatted
 file_type: csv
 state: georgia
+abbreviation: ga
 source: boe
 file_class: voter_file
 voter_id: Registration_Number

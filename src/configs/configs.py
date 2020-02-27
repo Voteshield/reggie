@@ -1,5 +1,5 @@
 from constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, \
-    PRIMARY_LOCALE_TYPE
+    PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
 import json
@@ -17,7 +17,9 @@ class Config(object):
         else:
             config_file = file_name
 
-        self.data = self.load_data(config_file)
+        self.data = self.load_data(config_file, self.infer_locale_file(
+            config_file))
+
         self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
 
@@ -26,8 +28,21 @@ class Config(object):
     def config_file_from_state(cls, state):
         return "{}{}.yaml".format(CONFIG_DIR, state)
 
+
     @classmethod
-    def load_data(cls, config_file):
+    def infer_locale_file(cls, config_file):
+        """
+        If it exists in the expected location, load json with mapping from
+        primary locale database values to primary locale display names.
+        :param config_file: state's yaml file
+        :return: presumed location of locale file
+        """
+        state = config_file.split('/')[-1].split('.')[0]
+        return "{}/{}.json".format(LOCALE_DIR, state)
+
+
+    @classmethod
+    def load_data(cls, config_file, locale_file):
 
         global config_cache
         if config_file in config_cache:
@@ -35,6 +50,18 @@ class Config(object):
         else:
             with open(config_file) as f:
                 config = yaml.load(f)
+
+                # add primary locale dict to config object
+                try:
+                    with open(locale_file) as f:
+                        locale_data = json.load(f)
+                    locale_dict = {}
+                    for locale in locale_data:
+                        locale_dict[locale['id']] = locale['name']
+                except:
+                    locale_dict = None
+                config[PRIMARY_LOCALE_NAMES] = locale_dict
+
                 config_cache[config_file] = config
         return config
 

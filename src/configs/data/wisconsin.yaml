@@ -1,5 +1,6 @@
 file_type: csv
 state: wisconsin
+abbreviation: wi
 source: boe_download
 file_class: voter_file
 voter_id: Voter Reg Number

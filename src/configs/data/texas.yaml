@@ -1,5 +1,6 @@
 file_type: fwf
 state: texas
+abbreviation: tx
 source: boe_download
 file_class: voter_file
 voter_id: VUID

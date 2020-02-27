@@ -2,6 +2,7 @@
 # for instance "PSR_VotersList_04022018_7-46-27 AM.zip". These files contain headers.
 file_type: csv
 state: missouri
+abbreviation: mo
 source: boe
 file_class: voter_file
 voter_id: Voter ID

@@ -1,5 +1,6 @@
 file_type: csv
 state: ohio
+abbreviation: oh
 source: boe_download
 native_file_extension: zip
 file_class: voter_file

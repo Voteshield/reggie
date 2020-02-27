@@ -3,6 +3,7 @@
 # may have heterogeneous history codes within their history field.
 file_type: CSV
 state: new_york
+abbreviation: ny
 source: boe
 file_class: voter_file
 voter_id: sboeid

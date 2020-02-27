@@ -1,5 +1,6 @@
 file_type: xlsx
 state: new_hampshire
+abbreviation: nh
 source: boe
 file_class: voter_file
 voter_id: id_voter
