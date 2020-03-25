@@ -844,7 +844,7 @@ class Preprocessor(Loader):
             compression='unzip', file_obj=self.main_file)
         vh_files = []
         for i in new_files:
-            if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
+            if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 df_voters = self.read_csv_count_error_lines(
                     i["obj"], sep="|", quotechar='"', quoting=3,
