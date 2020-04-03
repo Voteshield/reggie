@@ -397,6 +397,12 @@ class Preprocessor(Loader):
     def unpack_files(self, file_obj, compression="unzip"):
         all_files = []
 
+        def filter_unnecessary_files(files):
+            unnecessary = [".png", "MACOS", "DS_Store"]
+            for item in unnecessary:
+                files = [n for n in files if item not in n["name"]]
+            return files
+
         def expand_recurse(s3_file_objs):
             for f in s3_file_objs:
                 if f["name"][-1] != "/":
@@ -424,7 +430,7 @@ class Preprocessor(Loader):
                          os.path.basename(list(n.keys())[0]) not in
                          self.config["format"]["ignore_files"]]
 
-        all_files = [n for n in all_files if ".png" not in n["name"]]
+        all_files = filter_unnecessary_files(all_files)
 
         for n in all_files:
             if type(n["obj"]) != str:
@@ -521,6 +527,15 @@ class Preprocessor(Loader):
 
         return df
 
+    def reconcile_columns(self, df, expected_cols):
+        for c in expected_cols:
+            if c not in df.columns:
+                df[c] = np.nan
+        for c in df.columns:
+            if c not in expected_cols:
+                df.drop(columns=[c], inplace=True)
+        return df
+
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
@@ -538,9 +553,7 @@ class Preprocessor(Loader):
         for i in new_files:
             file_len = i['obj'].seek(SEEK_END)
             i['obj'].seek(SEEK_SET)
-            if ("count" not in i['name'] and
-                    "MACOS" not in i['name'] and
-                    "DS_Store" not in i['name'] and file_len != 0):
+            if ("count" not in i['name'] and file_len != 0):
 
                 if not have_length:
                     line_length = len(i['obj'].readline())
@@ -761,8 +774,7 @@ class Preprocessor(Loader):
                             encoding='latin-1', error_bad_lines=False)], axis=0)
 
                 elif ( (("Voting_History" in i['name']) or \
-                        ("Coordinated_Voter_Details" in i['name'])) and \
-                       ("MACOS" not in i['name']) ):
+                        ("Coordinated_Voter_Details" in i['name'])) ):
                     if "Voter_Details" not in i['name']:
                         logging.info("reading in {}".format(i['name']))
                         new_df = self.read_csv_count_error_lines(i['obj'],
@@ -1267,6 +1279,113 @@ class Preprocessor(Loader):
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)))
 
+    def preprocess_arizona2(self):
+
+        def file_is_active(filename):
+            for word in ['Canceled', 'Suspense', 'Inactive']:
+                if word in filename:
+                    return False
+            return True
+
+        def add_files_to_main_df(main_df, file_list):
+            alias_dict = self.config['column_aliases']
+            for f in file_list:
+                new_df = pd.read_excel(f['obj'])
+
+                for c in new_df.columns:
+                    # files vary in consistent use of spaces in headers,
+                    # and some headers have different aliases for headers
+                    if c.replace(' ', '') in alias_dict.keys():
+                        new_df.rename(
+                            columns={c: alias_dict[c.replace(' ', '')]},
+                            inplace=True)
+                    else:
+                        new_df.rename(columns={c: c.replace(' ', '')},
+                                      inplace=True)
+
+                main_df = pd.concat([main_df, new_df], sort=False)
+            return main_df
+
+        def insert_code_bin(arr):
+            return [sorted_codes_dict[k]['index'] for k in arr]
+
+        new_files = self.unpack_files(file_obj=self.main_file,
+                                      compression="unzip")
+        active_files = [f for f in new_files if file_is_active(f['name'])]
+        other_files = [f for f in new_files if not file_is_active(f['name'])]
+
+        main_df = pd.DataFrame()
+        main_df = add_files_to_main_df(main_df, active_files)
+        main_df = add_files_to_main_df(main_df, other_files)
+
+        main_df = self.config.coerce_dates(main_df)
+        main_df = self.config.coerce_strings(main_df)
+        main_df = self.config.coerce_numeric(main_df, extra_cols=[
+            'HouseNumber', 'UnitNumber', 'ResidenceZip', 'MailingZip',
+            'Phone', 'PrecinctPart', 'VRAZVoterID'])
+
+        voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
+        history_columns = [c for c in main_df.columns if c[0].isdigit()]
+
+        to_normalize = history_columns + \
+                       [self.config['party_identifier'], self.config['voter_status']]
+        for c in to_normalize:
+            s = main_df[c].astype(str).str.strip().str.lower()
+            s = s.str.encode('utf-8', errors='ignore').str.decode('utf-8')
+            main_df.loc[(~main_df[c].isna()), c] = s.loc[(~main_df[c].isna())]
+        for c in history_columns:
+            main_df[c] = main_df[c].str.replace(' - ', '_')
+
+        main_df[self.config['party_identifier']] = \
+            main_df[self.config['party_identifier']].map(
+                lambda x: self.config['party_aliases'][x] \
+                          if x in self.config['party_aliases'] else x)
+
+        # handle history:
+        sorted_codes = history_columns[::-1]
+        hist_df = main_df[sorted_codes]
+        voter_df = main_df[voter_columns]
+        counts = (~hist_df.isna()).sum()
+        sorted_codes_dict = {k: {'index': int(i),
+                                 'count': int(counts[i]),
+                                 'date': date_from_str(k)}
+                             for i, k in enumerate(sorted_codes)}
+
+        hist_df.loc[:, 'vote_codes'] = pd.Series(hist_df.values.tolist())
+        hist_df.loc[:, 'vote_codes'] = hist_df.loc[:, 'vote_codes'].map(
+            lambda x: [c for c in x if c is not np.nan])
+        voter_df.loc[:, 'votetype_history'] = hist_df.loc[:, 'vote_codes'].map(
+            lambda x: [c.split('_')[0] for c in x])
+        voter_df.loc[:, 'party_history'] = hist_df.loc[:, 'vote_codes'].map(
+            lambda x: [c.split('_')[1]
+                       if len(c.split('_')) > 1
+                       else self.config['no_party_affiliation']
+                       for c in x])
+
+        hist_df.drop(columns=['vote_codes'], inplace=True)
+        for c in hist_df.columns:
+            hist_df.loc[:, c] = hist_df.loc[:, c].map(
+                lambda x: c if x is not np.nan else np.nan)
+        voter_df.loc[:, 'all_history'] = pd.Series(hist_df.values.tolist())
+        voter_df.loc[:, 'all_history'] = voter_df.loc[:, 'all_history'].map(
+            lambda x: [c for c in x if c is not np.nan])
+        voter_df.loc[:, 'sparse_history'] =  voter_df.loc[:, 'all_history'].map(
+            insert_code_bin)
+
+        expected_cols = self.config['ordered_columns'] + \
+                        self.config['ordered_generated_columns']
+        voter_df = self.reconcile_columns(voter_df, expected_cols)
+        voter_df = voter_df[expected_cols]
+
+        self.meta = {
+            "message": "arizona2_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
+        return FileItem(name="{}.processed".format(self.config["state"]),
+                        io_obj=StringIO(voter_df.to_csv(encoding='utf-8',
+                                                        index=False)))
+
     def preprocess_arizona(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
@@ -1378,11 +1497,9 @@ class Preprocessor(Loader):
 
         self.config = Config("north_carolina")
         for i in new_files:
-            if ("ncvhis" in i['name']) and (".txt" in i['name']) and \
-                    ("MACOSX" not in i['name']):
+            if ("ncvhis" in i['name']) and (".txt" in i['name']):
                 vote_hist_file = i
-            elif ("ncvoter" in i['name']) and (".txt" in i['name']) and \
-                    ("MACOSX" not in i['name']):
+            elif ("ncvoter" in i['name']) and (".txt" in i['name']):
                 voter_file = i
         voter_df = self.read_csv_count_error_lines(voter_file['obj'], sep="\t",
             quotechar='"', encoding='latin-1', error_bad_lines=False)
@@ -1535,15 +1652,6 @@ class Preprocessor(Loader):
         else:
             raise NotImplementedError('File format not implemented')
 
-        def reconcile_columns(df, expected_cols):
-            for c in expected_cols:
-                if c not in df.columns:
-                    df[c] = np.nan
-            for c in df.columns:
-                if c not in expected_cols:
-                    df.drop(columns=[c], inplace=True)
-            return df
-
         def column_is_empty(col):
             total_size = col.shape[0]
             if (sum(col.isna()) == total_size) or (sum(col == '')):
@@ -1560,7 +1668,7 @@ class Preprocessor(Loader):
                 df['STATUS_DATE'] = '1970-01-01 00:00:00'
             return df
 
-        vdf = reconcile_columns(vdf, config['columns'])
+        vdf = self.reconcile_columns(vdf, config['columns'])
         vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=config['ordered_columns'])
         vdf[config['party_identifier']] = 'npa'
@@ -2045,6 +2153,7 @@ class Preprocessor(Loader):
         routes = {
             'nevada': self.preprocess_nevada,
             'arizona': self.preprocess_arizona,
+            'arizona2': self.preprocess_arizona2,
             'florida': self.preprocess_florida,
             'new_york': self.preprocess_new_york,
             'michigan': self.preprocess_michigan,

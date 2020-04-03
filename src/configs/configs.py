@@ -114,10 +114,17 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
+        def catch_floats(x):
+            if '.' in x:
+                return str(int(float(x)))
+            else:
+                return x
+
         date_fields = [c for c, v in self.data[col_list].items() if
                        v == "date" or v == "timestamp"]
         for field in date_fields:
             df[field] = df[field].apply(str)
+            df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
                                            format=self.data["date_format"],

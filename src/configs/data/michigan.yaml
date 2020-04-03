@@ -21,6 +21,7 @@ republican_party: None
 no_party_affiliation: npa
 party_identifier: party_identifier
 missing_required_fields: true
+reason_code: cancellation_reason
 match_fields:
   - FIRST_NAME
   - MIDDLE_NAME
@@ -285,3 +286,7 @@ elec_code_columns:
   - Election_Code
   - Date
   - Title
+cancel_data_fields:
+  - CANCELLATION_REASON
+  - STATUS_DATE
+  - STATUS_USER_CODE

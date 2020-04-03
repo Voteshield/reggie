@@ -1,0 +1,214 @@
+# Config for Arizona files after Jan 2020 database switch.
+# All files remain .xlsx files.
+# Headers have changed somewhat, as has the entire voter ID system.
+# Additionally, the "canceled" / "suspended" / active" files each have
+# a slightly different set of headers, so the "columns" defined below
+# are a concatenation of those sets (normalized as best as possible).
+file_type: xlsx
+state: arizona2
+abbreviation: az
+source: boe
+file_class: voter_file
+voter_id: RegistrantID
+county_identifier: County
+primary_locale_identifier: County
+numeric_primary_locale: false
+birthday_identifier: DOB
+voter_status: Status
+voter_status_active: active
+voter_status_inactive: inactive
+voter_status_suspense: suspense
+voter_status_cancelled: canceled
+party_identifier: Party
+democratic_party: dem
+republican_party: rep
+no_party_affiliation:  pnd
+independent: ind
+other: oth
+libertarian: lbt
+green: grn
+party_aliases:
+    republican: rep
+    democratic: dem
+    party not designated: pnd
+    independent: ind
+    other: oth
+    libertarian: lbt
+    green: grn
+    liberal: lib
+absentee_ballot_code: "'a'"
+provisional_ballot_code: "'pv'"
+valid_voting_methods: ['e', 'a', 'p', 'pv']
+date_format:
+  - '%Y-%m-%d %H:%M:%S'
+  - '%Y'
+reason_code: statusreason
+has_headers: YES
+format:
+  separate_hist: false
+  segmented_files: true
+match_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - DOB
+name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - ResidenceAddress
+  - ResidenceCity
+  - ResidenceState
+  - ResidenceZip
+primary_key:
+  - pre_date
+  - post_date
+  - RegistrantID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  RegistrantID: int
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - dem
+  - rep
+  - pnd
+  - oth
+  - ind
+  - lbt
+  - grn
+  - locale
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+    RegistrantID: int
+    RegistrationDate: date
+    EffectiveDateofChange: date
+    DOB: date
+    LastName: text
+    FirstName: text
+    MiddleName: text
+    Suffix: text
+    Status: text
+    StatusReason: text
+    County: text
+    HouseNumber: text
+    StreetPrefix: text
+    StreetName: text
+    StreetType: text
+    StreetSuffix: text
+    UnitType: text
+    UnitNumber: text
+    ResidenceAddress: text
+    ResidenceCity: text
+    ResidenceState: text
+    ResidenceZip: text
+    MailingAddress: text
+    MailingAddress2: text
+    MailingCity: text
+    MailingState: text
+    MailingZip: text
+    MailingCountry: text
+    Party: text
+    PEVL: text
+    Phone: text
+    Occupation: text
+    PrecinctPart: text
+    Congressional: text
+    BoardofSupervisors: text
+    Legislative: text
+    Municipal: text
+    Precinct: text
+    VRAZVoterID: text
+ordered_columns:
+  - RegistrantID
+  - RegistrationDate
+  - EffectiveDateofChange
+  - DOB
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - Status
+  - StatusReason
+  - County
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - ResidenceAddress
+  - ResidenceCity
+  - ResidenceState
+  - ResidenceZip
+  - MailingAddress
+  - MailingAddress2
+  - MailingCity
+  - MailingState
+  - MailingZip
+  - MailingCountry
+  - Party
+  - PEVL
+  - Phone
+  - Occupation
+  - PrecinctPart
+  - Congressional
+  - BoardofSupervisors
+  - Legislative
+  - Municipal
+  - Precinct
+  - VRAZVoterID
+column_aliases:
+    Id: RegistrantID
+    DOB(Restricted): DOB
+    NameSuffix: Suffix
+    MailingAddressLine2: MailingAddress2
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+  party_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+  - party_history
+cancel_data_fields:
+  - StatusReason
+  - EffectiveDateofChange
