@@ -115,7 +115,7 @@ class Config(object):
         :return: modified dataframe
         """
         def catch_floats(x):
-            if '.' in x:
+            if '.0' == x[-2:]:
                 return str(int(float(x)))
             else:
                 return x
