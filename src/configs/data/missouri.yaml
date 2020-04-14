@@ -29,6 +29,10 @@ name_fields:
   - Middle Name
   - Last Name
   - Suffix
+standard_name_fields:
+  - First Name
+  - Middle Name
+  - Last Name
 address_fields:
   - House Number
   - House Suffix

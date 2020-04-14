@@ -36,6 +36,10 @@ name_fields:
   - First_Name
   - Middle_Name
   - Last_Name
+standard_name_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
 address_fields:
   - Address_1
   - Address_2

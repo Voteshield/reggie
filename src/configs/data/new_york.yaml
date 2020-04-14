@@ -43,6 +43,10 @@ name_fields:
   - middlename
   - lastname
   - namesuffix
+standard_name_fields:
+  - firstname
+  - middlename
+  - lastname
 address_fields:
   - raddnumber
   - rapartment

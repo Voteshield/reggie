@@ -31,6 +31,10 @@ name_fields:
   - MiddleName
   - LastName
   - NameSuffix
+standard_name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
 address_fields:
   - HouseNumber
   - StreetName

@@ -39,6 +39,10 @@ name_fields:
   - middle_name
   - last_name
   - suffix
+standard_name_fields:
+  - first_name
+  - middle_name
+  - last_name
 address_fields:
   - street_number
   - suff_a

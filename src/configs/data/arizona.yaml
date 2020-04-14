@@ -60,6 +60,10 @@ name_fields:
   - text_name_middle
   - text_name_last
   - cde_name_suffix
+standard_name_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
 address_fields:
   - text_res_address_nbr
   - text_res_address_nbr_suffix

@@ -33,6 +33,10 @@ name_fields:
   - FirstName
   - MiddleName
   - Suffix
+standard_name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
 address_fields:
   - Address1
   - Address2

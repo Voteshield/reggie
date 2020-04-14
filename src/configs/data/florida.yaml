@@ -48,6 +48,10 @@ name_fields:
   - Name_Suffix
   - Name_First
   - Name_Middle
+standard_name_fields:
+  - Name_Last
+  - Name_First
+  - Name_Middle
 ordered_generated_columns:
   - all_history
   - vote_type

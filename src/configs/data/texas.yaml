@@ -44,6 +44,10 @@ name_fields:
   - Middle_Name
   - Former_Last_Name
   - Suffix
+standard_name_fields:
+  - Last_Name
+  - First_Name
+  - Middle_Name
 ordered_generated_columns:
   - sparse_history
   - all_history

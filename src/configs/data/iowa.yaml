@@ -39,6 +39,11 @@ name_fields:
   - MIDDLE_NAME
   - LAST_NAME
   - NAME_SUFFIX
+standard_name_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+
 address_fields:
   - HOUSE_NUM
   - HOUSE_SUFFIX

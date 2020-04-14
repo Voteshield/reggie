@@ -35,6 +35,10 @@ name_fields:
   - FIRST_NAME
   - MIDDLE_NAME
   - NAME_SUFFIX
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
 address_fields:
   - STREET_NUMBER_PREFIX
   - STREET_NUMBER

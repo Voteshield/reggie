@@ -46,6 +46,10 @@ name_fields:
   - MIDDLE_NAME
   - NAME_SUFFIX
   - VOTER_NAME
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
 ordered_generated_columns:
   - all_history
   - vote_type

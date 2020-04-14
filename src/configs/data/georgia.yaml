@@ -34,6 +34,10 @@ name_fields:
   - Middle_maiden_name
   - Name_suffix
   - Name_title
+standard_name_fields:
+  - Last_name
+  - First_name
+  - Middle_maiden_name
 address_fields:
   - Residence_house_number
   - Residence_street_name

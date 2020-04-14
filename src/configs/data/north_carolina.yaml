@@ -34,6 +34,10 @@ name_fields:
   - first_name
   - midl_name
   - name_sufx_cd
+standard_name_fields:
+  - last_name
+  - first_name
+  - midl_name
 address_fields:
   - res_street_address
   - res_city_desc

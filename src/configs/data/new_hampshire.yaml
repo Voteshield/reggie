@@ -23,6 +23,10 @@ name_fields:
   - nm_first
   - nm_mid
   - nm_suff
+standard_name_fields:
+  - nm_last
+  - nm_first
+  - nm_mid
 address_fields:
   - ad_num
   - ad_num_suffix_a

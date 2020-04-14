@@ -26,6 +26,10 @@ name_fields:
   - LAST_NAME
   - FIRST_NAME
   - MIDDLE_NAME
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
 address_fields:
   - RESIDENTIAL_ADDRESS1
   - RESIDENTIAL_SECONDARY_ADDR
