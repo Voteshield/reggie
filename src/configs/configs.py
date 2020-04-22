@@ -3,6 +3,7 @@ from constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, \
 import yaml
 import pandas as pd
 import json
+from datetime import datetime
 
 config_cache = {}
 
@@ -120,8 +121,21 @@ class Config(object):
             else:
                 return x
 
+        def disallow_future_dates(x, max_year):
+            if (type(x) != str) and (x.year > max_year):
+                return pd.Timestamp(x.year-100, x.month, x.day)
+            return x
+
+        def disallow_past_dates(x, min_year=1910):
+            if (type(x) != str) and (x.year < min_year):
+                return pd.NaT
+            return x
+
+        min_voter_age = 17
+
         date_fields = [c for c, v in self.data[col_list].items() if
                        v == "date" or v == "timestamp"]
+        date_fields = [x for x in date_fields if x in df.columns]
         for field in date_fields:
             df[field] = df[field].apply(str)
             df[field] = df[field].map(catch_floats)
@@ -136,6 +150,15 @@ class Config(object):
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
                         break
+
+            if field == self.data['birthday_identifier']:
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year - min_voter_age))
+            else:
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year))
+
+            df[field] = df[field].map(disallow_past_dates)
         return df
 
     def coerce_numeric(self, df, extra_cols=None, col_list="columns"):
@@ -153,6 +176,10 @@ class Config(object):
                           if "int" in v or v == "float" or v == "double"]
         int_fields = [c for c, v in self.data[col_list].items()
                       if "int" in v]
+        numeric_fields = [x for x in numeric_fields if x in df.columns]
+        int_fields = [x for x in int_fields if x in df.columns]
+        if extra_cols is not None:
+            extra_cols = [x for x in extra_cols if x in df.columns]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
         for field in int_fields:
