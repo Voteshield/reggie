@@ -785,6 +785,8 @@ class Preprocessor(Loader):
                         logging.info("reading in {}".format(i['name']))
                         new_df = self.read_csv_count_error_lines(
                             i['obj'], compression='gzip', error_bad_lines=False)
+                        if len(new_df.columns) < len(self.config['master_voter_columns']):
+                            new_df.insert(10, 'PHONE_NUM', np.nan)
                         new_df.columns = self.config['master_voter_columns']
                         df_master_voter = pd.concat(
                             [df_master_voter, new_df], axis=0)
@@ -825,7 +827,9 @@ class Preprocessor(Loader):
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["VOTING_METHOD"].apply(list)
 
+        df_voter.dropna(subset=[self.config["voter_id"]], inplace=True)
         df_voter = df_voter.set_index(self.config["voter_id"])
+        df_voter.sort_index(inplace=True)
 
         df_voter["all_history"] = all_history
         df_voter["vote_type"] = vote_type
