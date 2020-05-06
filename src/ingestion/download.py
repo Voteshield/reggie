@@ -1165,13 +1165,17 @@ class Preprocessor(Loader):
                                                   index=False)))
 
     def preprocess_iowa(self):
+        def is_first_file(fname):
+            if "CD1" in fname:
+                if ("Part1" in fname) or ("Part 1" in fname):
+                        return True
+            return False
+
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
-        first_file = [f for f in new_files if "CD1" in f["name"] and
-                      "Part1" in f["name"]][0]
-        remaining_files = [f for f in new_files if "CD1" not in f["name"] or
-                           "Part1" not in f["name"]]
+        first_file = [f for f in new_files if is_first_file(f["name"])][0]
+        remaining_files = [f for f in new_files if not is_first_file(f["name"])]
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
