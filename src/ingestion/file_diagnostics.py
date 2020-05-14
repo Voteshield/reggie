@@ -18,6 +18,7 @@ from pathlib import Path
 from datetime import datetime
 from subprocess import Popen, PIPE
 from io import BytesIO, StringIO
+import errno
 
 
 class TestFileBuilder(Preprocessor):
@@ -37,6 +38,8 @@ class TestFileBuilder(Preprocessor):
                 logging.info("No s3 files found for {}".format(state))
                 raise ValueError("no local file or valid s3 key provided to"
                                  "generate test file")
+            else:
+                self.local_file = local_file
 
         config_file = Config.config_file_from_state(state)
         super(TestFileBuilder, self).__init__(
@@ -354,7 +357,32 @@ class TestFileBuilder(Preprocessor):
         self.main_file = FileItem(name=self.file_name,
                                   io_obj=StringIO(filtered_data.to_csv(index=False, sep='\t')))
 
-    def build(self, file_name=None, save_local=False, save_remote=True):
+    # might need to modify for s3 download
+    def __build_virginia(self):
+        new_files = self.unpack_files(self.local_file) if self.raw_s3_file is None else \
+            self.unpack_files(self.raw_s3_file)
+        new_file = [f for f in new_files if "list" in f['name'].lower()]
+        if self.raw_s3_file is None:
+            # self.file_name = self.local_file.split('/')[-2] + '/' + self.local_file.split('/')[-1]
+            self.file_name = self.local_file.split('/')[-1]
+            self.file_name = self.file_name[:-3] + 'csv'
+        elif self.raw_s3_file:
+            self.file_name = self.raw_s3_file.split("/")[-1]
+            self.file_name = self.file_name[:-3] + 'csv'
+        else:
+            raise ValueError("no local file or valid s3 key provided to"
+                             "generate test file")
+        new_file = new_file[0]['obj']
+        df = pd.read_csv(new_file, error_bad_lines=False, encoding="ISO-8859-1")
+        two_small_counties = self.get_smallest_counties(df, count=2)
+        filtered_data = self.filter_counties(df, counties=two_small_counties)
+        # filtered_data.to_csv('filtered.csv', index=False)
+        # print("after it all")
+        self.main_file = FileItem(name=self.file_name,
+                                  io_obj=StringIO(filtered_data.to_csv(index=False)))
+
+    # flipped local and remote
+    def build(self, file_name=None, save_local=True, save_remote=False):
         if file_name is None:
             file_name = self.raw_s3_file.split("/")[-1] \
                 if self.raw_s3_file is not None else \
@@ -372,7 +400,8 @@ class TestFileBuilder(Preprocessor):
                   "north_carolina": self.__build_north_carolina,
                   "minnesota": self.__build_minnesota,
                   "kansas": self.__build_kansas,
-                  "wisconsin": self.__build_wisconsin
+                  "wisconsin": self.__build_wisconsin,
+                  "virginia": self.__build_virginia
                   }
 
         f = routes[self.state]
@@ -387,9 +416,18 @@ class TestFileBuilder(Preprocessor):
                 ServerSideEncryption='AES256',
                 Metadata={"last_updated": self.download_date})
         if save_local:
-            logging.info("save local: ", self.test_key(file_name))
             # Python 3 main_file is FileItem type and the name needs to be explicitly called.
-            os.rename(self.main_file.name, file_name)
+
+            logging.info("filename: {}".format(self.test_key(self.file_name)))
+            # creates a local test directory if not exists
+            if not os.path.exists(os.path.dirname(self.test_key(self.file_name))):
+                try:
+                    os.makedirs(os.path.dirname(self.test_key(self.file_name)))
+                except OSError as exc:  # Guard against race condition
+                    if exc.errno != errno.EEXIST:
+                        raise
+            with open(self.test_key(self.file_name), "w") as f:
+                f.write(self.main_file.obj.read())
 
 
 class ProcessedTestFileBuilder(object):
