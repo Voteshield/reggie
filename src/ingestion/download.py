@@ -2031,6 +2031,12 @@ class Preprocessor(Loader):
             else:
                 return np.nan
 
+        def handle_date(d):
+            possible_date = date_from_str(d)
+            if possible_date is None:
+                return ''
+            return pd.to_datetime(possible_date).strftime('%m/%d/%Y')
+
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression='infer')
         voter_files = [n for n in new_files if 'vlist' in n['name']]
@@ -2067,8 +2073,7 @@ class Preprocessor(Loader):
         counts = hist_df['election_name'].value_counts()
         sorted_codes_dict = {k: {'index': int(i),
                                  'count': int(counts[k]),
-                                 'date': pd.to_datetime(
-                                    date_from_str(k)).strftime('%m/%d/%Y')}
+                                 'date': handle_date(k)}
                              for i, k in enumerate(sorted_codes)}
 
         hist_df.sort_values('election_name', inplace=True)
