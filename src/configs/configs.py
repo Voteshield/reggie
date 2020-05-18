@@ -23,12 +23,11 @@ class Config(object):
 
         self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
-
+        self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
 
     @classmethod
     def config_file_from_state(cls, state):
         return "{}{}.yaml".format(CONFIG_DIR, state)
-
 
     @classmethod
     def infer_locale_file(cls, config_file):
@@ -40,7 +39,6 @@ class Config(object):
         """
         state = config_file.split('/')[-1].split('.')[0]
         return "{}/{}.json".format(LOCALE_DIR, state)
-
 
     @classmethod
     def load_data(cls, config_file, locale_file):
