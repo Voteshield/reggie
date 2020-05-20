@@ -9,6 +9,7 @@ primary_locale_identifier: Jurisdiction
 numeric_primary_locale: false
 primary_locale_type: jurisdiction
 birthday_identifier: DATE_OF_BIRTH
+early_voter_identifier: IsPermanentAbsentee
 voter_status: voter_status
 voter_status_reason: Voter Status Reason
 voter_status_active: Active

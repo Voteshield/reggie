@@ -27,6 +27,7 @@ county_identifier: county
 primary_locale_identifier: county
 numeric_primary_locale: false
 birthday_identifier: year_of_birth
+early_voter_identifier: perm_absentee_indicator
 voter_status: cde_registrant_status
 voter_status_active: 'A   '
 voter_status_inactive: 'I   '

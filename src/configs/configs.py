@@ -1,5 +1,6 @@
-from constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, \
-    PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
+from constants import CONFIG_DIR, CORE_CHANGE_TYPES, EARLY_VOTER_CHANGE_TYPE, \
+    PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, PRIMARY_LOCALE_TYPE, \
+    PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
 import json
@@ -24,6 +25,11 @@ class Config(object):
         self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
         self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
+
+        if "early_voter_identifier" in self.data:
+            self.change_types = CORE_CHANGE_TYPES + [EARLY_VOTER_CHANGE_TYPE]
+        else:
+            self.change_types = CORE_CHANGE_TYPES
 
     @classmethod
     def config_file_from_state(cls, state):

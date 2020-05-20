@@ -9,6 +9,7 @@ county_identifier: county_id
 primary_locale_identifier: county_id
 numeric_primary_locale: true
 birthday_identifier: birth_year
+early_voter_identifier: absent_ind
 voter_status: status_cd
 voter_status_active: A
 voter_status_inactive: I
