@@ -44,6 +44,10 @@ address_fields:
   - City
   - state
   - ZipCode
+  - MailAddress
+  - MailCity
+  - MailState
+  - MailZipCode
 primary_key:
   - pre_date
   - post_date

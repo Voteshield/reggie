@@ -58,6 +58,11 @@ address_fields:
   - STATE_1
   - ZIP_CODE_1
   - ZIP_PLUS_1
+  - MAILING_ADDRESS
+  - CITY_2
+  - STATE_2
+  - ZIP_CODE_2
+  - ZIP_PLUS_2
 primary_key:
   - pre_date
   - post_date

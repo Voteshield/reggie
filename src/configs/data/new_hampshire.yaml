@@ -39,6 +39,16 @@ address_fields:
   - ad_mail_city
   - ad_st
   - ad_zip5
+  - mail_num
+  - mail_num_suffix_a
+  - mail_num_suffix_b
+  - mail_str1
+  - mail_unit
+  - mail_str2
+  - mail_str3
+  - mail_city
+  - mail_st
+  - mail_zip5
 primary_key:
   - pre_date
   - post_date

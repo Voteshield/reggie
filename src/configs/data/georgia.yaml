@@ -45,6 +45,15 @@ address_fields:
   - Residence_apt_unit_nbr
   - Residence_city
   - Residence_zipcode
+  - Mail_house_nbr
+  - Mail_street_name
+  - Mail_apt_unit_nbr
+  - Mail_city
+  - Mail_state
+  - Mail_zip_code
+  - Mail_address_2
+  - Mail_address_3
+  - Mail_country
 primary_key:
   - pre_date
   - post_date

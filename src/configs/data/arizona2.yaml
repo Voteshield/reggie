@@ -74,6 +74,12 @@ address_fields:
   - ResidenceCity
   - ResidenceState
   - ResidenceZip
+  - MailingAddress
+  - MailingAddress2
+  - MailingCity
+  - MailingState
+  - MailingZip
+  - MailingCountry
 primary_key:
   - pre_date
   - post_date

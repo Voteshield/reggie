@@ -52,6 +52,17 @@ address_fields:
   - city
   - municipality
   - zip
+  - mailing_street_number
+  - mailing_suffix_a
+  - mailing_suffix_b
+  - mailing_street_name
+  - mailing_apt_no
+  - mailing_address_line_1
+  - mailing_address_line_2
+  - mailing-city
+  - mailing_state
+  - mailing_country
+  - mailing_zip_code
 format:
   separate_hist: True
   segmented_files: false

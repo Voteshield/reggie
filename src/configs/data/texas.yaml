@@ -63,6 +63,11 @@ address_fields:
   - Permanent_Unit_Type
   - Permanent_City
   - Permanent_Zipcode
+  - Mailing_Address_1
+  - Mailing_Address_2
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
 primary_key:
   - pre_date
   - post_date

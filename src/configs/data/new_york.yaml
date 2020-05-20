@@ -54,6 +54,10 @@ address_fields:
   - rcity
   - rzip5
   - rzip4
+  - mailadd1
+  - mailadd2
+  - mailadd3
+  - mailadd4
 format:
   separate_hist: false
   segmented_files: false
