@@ -1,0 +1,216 @@
+#Washington has three types of separate txt files. Registered Voter Files, separated by three Voter_Status codes (Active, Inactive, Cancelled) (name: #NOT PROVIDED VOTER FILE); Voting History (name: ex: 2015-2016_VotingHistoryExtract.txt); Districts and Precincts excel file codes (2018.10.02-Districts_Precincts.xlsx)
+
+file_type: .txt
+state: washington
+source: boe
+file_class: voter_file
+voter_id: Voter_ID
+county_identifier: County_Name
+birthday_identifier: Birth_Date
+voter_status: Voter_Status
+party_identifier: Last_Vote_Date
+date_format: '%m/%d/%Y'
+numeric_county: false
+has_headers: true
+fixed_width: false
+
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+  separate_district_lookup_file: true
+  vote_history_type:
+
+name_fields:
+  Name_First
+  Name_Last
+  Name_Suffix
+  Birth_Date
+
+address_fields:
+  Street_Number
+  Street_Name
+  Street_Type
+  Residence_Unit_Type
+  Pre_Direction
+  Post_Direction
+  Residence_Unit_Number
+  Residence_City
+  Residence_State
+  Residence_Zipcode
+  Mailing_Address_Line_1
+  Mailing_Address_Line_2
+  Mailing_Address_Line_3
+  Mailing_Address_Line_4
+  Mailing_City
+  Mailing_Zipcode
+  Mailing_Country
+
+column_names:
+  State_ID
+  Voter_ID
+  Name_Prefix
+  Name_First
+  Name_Last
+  Name_Suffix
+  Birth_Date
+  Gender
+  Street_Number
+  Street_Name
+  Street_Type
+  Residence_Unit_Type
+  Pre_Direction
+  Post_Direction
+  Residence_Unit_Number
+  Residence_City
+  Residence_State
+  Residence_Zipcode
+  County_Name
+  Precinct_Code
+  Precinct_Name
+  Legislative_District
+  Congressional_District
+  Mailing_Address_Line_1
+  Mailing_Address_Line_2
+  Mailing_Address_Line_3
+  Mailing_Address_Line_4
+  Mailing_City
+  Mailing_Zipcode
+  Mailing_Country
+  Registration_Date
+  Absentee
+  Last_Vote_Date
+  Voter_Status
+
+column_classes:
+  State_ID: numeric
+  Voter_ID: numeric
+  #Title:
+  Name_First: character
+  Name_Last: character
+  Name_Suffix: character
+  Birth_Date: date
+  Gender: character
+  Street_Number: numeric
+  Street_Name: character
+  Street_Type: character
+  Residence_Unit_Type: character
+  Pre_Direction: character
+  Post_Direction: character
+  Residence_Unit_Number: numeric
+  Residence_City: character
+  Residence_State: character
+  Residence_Zipcode: numeric
+  County_Code: character
+  Precinct_Code: numeric
+  Precinct_Name: character
+  Legislative_District: character
+  Congressional_District: character
+  Mailing_Address_Line_1: character
+  Mailing_Address_Line_2: character
+  Mailing_Address_Line_3: character
+  Mailing_Address_Line_4: character
+  Mailing_City: character
+  Mailing_Zipcode: numeric
+  Mailing_Country: character
+  Registration_Date: date
+  Absentee: character
+  Last_Vote_Date: date
+  Voter_Status: character
+
+column_classes (districts and precincts files):
+  County_Code: character
+  County_Name: character
+  District_Type: character
+  District_ID: numeric
+  District_Code: numeric
+  District_Name: character
+  Precinct_Code: numeric
+  Precinct_Name: character
+  Precinct_Part: numeric
+
+column_names_districts:
+  County_Code
+  County_Name
+  District_Type
+  District_ID
+  District_Code
+  District_Name
+  Precinct_Code
+  Precinct_Name
+  Precinct_Part
+
+ounty_codes:
+Adams: AD
+Asotin: AS
+Benton: BE
+Chelan: CH
+Clallam: CM
+Clark: CR
+Columbia: CU
+Cowlitz: CZ
+Douglas: DG
+Ferry: FE
+Franklin: FR
+Garfield: GA
+Grant: GR
+Grays Harbor: GY
+Island: IS
+Jefferson: JE
+King: KI
+Kitsap: KP
+Kittitas: KS
+Klickitat: KT
+Lewis: LE
+Lincoln: LI
+Mason: MA
+Okanogan: OK
+Pacific: PA
+Pend Oreille: PE
+Pierce: PI
+San Juan: SJ
+Skagit: SK
+Skamania: SM
+Snohomish: SN
+Spokane: SP
+Stevens: ST
+Thurston: TH
+Wahkiakum: WK
+Walla Walla: WL
+Whatcom: WM
+Whitman: WT
+Yakima: YA
+
+
+status_codes:
+  active: A
+  inactive: I
+  inactive_other: IM
+  cancel: C
+  cancelled_duplicate: CD
+  cancelled_felon: CF
+  cancelled_deceased: CS
+  cancelled_transferred: CT
+
+gender_codes:
+  Male: M
+  Female: F
+  Unknown: U
+
+race_codes:
+  Not_Provided: NP
+
+party_codes:
+  Not_Provided: NP
+
+num_party_codes:
+  Not_Provided: NP
+
+
+
+
+
+
+

@@ -164,7 +164,7 @@ class Preprocessor():
             file_objs = [{"name": name, "obj": name}
                          for name in file_names]
         else:
-            zip_file = ZipFile(file_name)            
+            zip_file = ZipFile(file_name)
             file_names = zip_file.namelist()
             logging.info("decompressing unzip {} into {}".format(file_name,
                                                                  file_names))
@@ -237,9 +237,9 @@ class Preprocessor():
         if compression_type is "infer":
             compression_type = self.infer_compression(s3_file_obj["name"])
 
-        if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
-           (s3_file_obj["name"].split(".")[-1] == "txt") or \
-           (s3_file_obj["name"].split(".")[-1] == "pdf"):
+        if (s3_file_obj["name"].split(".")[-1].lower() == "xlsx") or \
+           (s3_file_obj["name"].split(".")[-1].lower() == "txt") or \
+           (s3_file_obj["name"].split(".")[-1].lower() == "pdf"):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -1660,4 +1660,3 @@ class Preprocessor():
             raise NotImplementedError("preprocess_{} has not yet been "
                                       "implemented for the Preprocessor object"
                                       .format(self.config["state"]))
-
