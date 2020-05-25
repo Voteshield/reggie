@@ -1,5 +1,4 @@
 #Washington has three types of separate txt files. Registered Voter Files, separated by three Voter_Status codes (Active, Inactive, Cancelled) (name: #NOT PROVIDED VOTER FILE); Voting History (name: ex: 2015-2016_VotingHistoryExtract.txt); Districts and Precincts excel file codes (2018.10.02-Districts_Precincts.xlsx)
-
 file_type: .txt
 state: washington
 source: boe
@@ -207,10 +206,3 @@ party_codes:
 
 num_party_codes:
   Not_Provided: NP
-
-
-
-
-
-
-
