@@ -3,12 +3,12 @@ file_type: .txt
 state: washington
 source: boe
 file_class: voter_file
-voter_id: Voter_ID
-county_identifier: County_Name
-birthday_identifier: Birth_Date
-voter_status: Voter_Status
-party_identifier: Last_Vote_Date
-date_format: '%m/%d/%Y'
+voter_id: StateVoterID
+county_identifier: CountyCode
+birthday_identifier: Birthdate
+voter_status: StatusCode
+party_identifier: false
+date_format: '%Y/%m/%d'
 numeric_county: false
 has_headers: true
 fixed_width: false
@@ -23,165 +23,174 @@ format:
   vote_history_type:
 
 name_fields:
-  Name_First
-  Name_Last
-  Name_Suffix
-  Birth_Date
+  - Title
+  - FName
+  - MName
+  - LName
+  - NameSuffix
 
 address_fields:
-  Street_Number
-  Street_Name
-  Street_Type
-  Residence_Unit_Type
-  Pre_Direction
-  Post_Direction
-  Residence_Unit_Number
-  Residence_City
-  Residence_State
-  Residence_Zipcode
-  Mailing_Address_Line_1
-  Mailing_Address_Line_2
-  Mailing_Address_Line_3
-  Mailing_Address_Line_4
-  Mailing_City
-  Mailing_Zipcode
-  Mailing_Country
+  - RegStNum
+  - RegStFrac
+  - RegStName
+  - RegStType
+  - RegUnitType
+  - RegStPreDirection
+  - RegStPostDirection
+  - RegUnitNum
+  - RegCity
+  - RegState
+  - RegZipCode
+  - Mail1
+  - Mail2
+  - Mail3
+  - Mail4
+  - MailCity
+  - MailZip
+  - MailCountry
 
 column_names:
-  State_ID
-  Voter_ID
-  Name_Prefix
-  Name_First
-  Name_Last
-  Name_Suffix
-  Birth_Date
-  Gender
-  Street_Number
-  Street_Name
-  Street_Type
-  Residence_Unit_Type
-  Pre_Direction
-  Post_Direction
-  Residence_Unit_Number
-  Residence_City
-  Residence_State
-  Residence_Zipcode
-  County_Name
-  Precinct_Code
-  Precinct_Name
-  Legislative_District
-  Congressional_District
-  Mailing_Address_Line_1
-  Mailing_Address_Line_2
-  Mailing_Address_Line_3
-  Mailing_Address_Line_4
-  Mailing_City
-  Mailing_Zipcode
-  Mailing_Country
-  Registration_Date
-  Absentee
-  Last_Vote_Date
-  Voter_Status
+  - StateVoterID
+  # Obsolete as of 2012
+  # - CountyVoterID
+  - Title
+  - FName
+  - MName
+  - LName
+  - NameSuffix
+  - Birthdate
+  - Gender
+  - RegStNum
+  - RegStFrac
+  - RegStName
+  - RegStType
+  - RegUnitType
+  - RegStPreDirection
+  - RegStPostDirection
+  - RegUnitNum
+  - RegCity
+  - RegState
+  - RegZipCode
+  - CountyCode
+  - PrecinctCode
+  - PrecinctPart
+  - LegislativeDistrict
+  - CongressionalDistrict
+  - Mail1
+  - Mail2
+  - Mail3
+  - Mail4
+  - MailCity
+  - MailZip
+  - MailState
+  - MailCountry
+  - Registrationdate
+  # AbsenteeType obsolete as of 2011
+  # - AbsenteeType: character
+  - LastVoted
+  # As of 2012, Statuscode
+  - StatusCode
 
 column_classes:
-  State_ID: numeric
-  Voter_ID: numeric
-  #Title:
-  Name_First: character
-  Name_Last: character
-  Name_Suffix: character
-  Birth_Date: date
+  StateVoterID: character
+  CountyVoterID: character
+  Title: character
+  FName: character
+  MName: character
+  LName: character
+  NameSuffix: character
+  Birthdate: date
   Gender: character
-  Street_Number: numeric
-  Street_Name: character
-  Street_Type: character
-  Residence_Unit_Type: character
-  Pre_Direction: character
-  Post_Direction: character
-  Residence_Unit_Number: numeric
-  Residence_City: character
-  Residence_State: character
-  Residence_Zipcode: numeric
-  County_Code: character
-  Precinct_Code: numeric
-  Precinct_Name: character
-  Legislative_District: character
-  Congressional_District: character
-  Mailing_Address_Line_1: character
-  Mailing_Address_Line_2: character
-  Mailing_Address_Line_3: character
-  Mailing_Address_Line_4: character
-  Mailing_City: character
-  Mailing_Zipcode: numeric
-  Mailing_Country: character
-  Registration_Date: date
-  Absentee: character
-  Last_Vote_Date: date
-  Voter_Status: character
+  RegStNum: character
+  RegStFrac: character
+  RegStName: character
+  RegStType: character
+  RegUnitType: character
+  RegStPreDirection: character
+  RegStPostDirection: character
+  RegUnitNum: character
+  RegCity: character
+  RegState: character
+  RegZipCode: character
+  CountyCode: character
+  PrecinctCode: character
+  PrecinctPart: character
+  LegislativeDistrict: character
+  CongressionalDistrict: character
+  Mail1: character
+  Mail2: character
+  Mail3: character
+  Mail4: character
+  MailCity: character
+  MailZip: character
+  MailCountry: character
+  Registrationdate: date
+  AbsenteeType: character
+  LastVoted: date
+  StatusCode: character
 
 column_classes (districts and precincts files):
-  County_Code: character
-  County_Name: character
-  District_Type: character
-  District_ID: numeric
-  District_Code: numeric
-  District_Name: character
-  Precinct_Code: numeric
-  Precinct_Name: character
-  Precinct_Part: numeric
+  CountyCode: character
+  County: character
+  DistrictType: character
+  DistrictID: character
+  DistrictCode: character
+  DistrictName: character
+  PrecinctCode: character
+  PrecinctName: character
+  PrecinctPart: character
 
 column_names_districts:
-  County_Code
-  County_Name
-  District_Type
-  District_ID
-  District_Code
-  District_Name
-  Precinct_Code
-  Precinct_Name
-  Precinct_Part
+  CountyCode
+  County
+  DistrictType
+  DistrictID
+  DistrictCode
+  DistrictName
+  PrecinctCode
+  PrecinctName
+  PrecinctPart
 
-ounty_codes:
-Adams: AD
-Asotin: AS
-Benton: BE
-Chelan: CH
-Clallam: CM
-Clark: CR
-Columbia: CU
-Cowlitz: CZ
-Douglas: DG
-Ferry: FE
-Franklin: FR
-Garfield: GA
-Grant: GR
-Grays Harbor: GY
-Island: IS
-Jefferson: JE
-King: KI
-Kitsap: KP
-Kittitas: KS
-Klickitat: KT
-Lewis: LE
-Lincoln: LI
-Mason: MA
-Okanogan: OK
-Pacific: PA
-Pend Oreille: PE
-Pierce: PI
-San Juan: SJ
-Skagit: SK
-Skamania: SM
-Snohomish: SN
-Spokane: SP
-Stevens: ST
-Thurston: TH
-Wahkiakum: WK
-Walla Walla: WL
-Whatcom: WM
-Whitman: WT
-Yakima: YA
-
+county_codes:
+  Adams: AD
+  Asotin: AS
+  Benton: BE
+  Chelan: CH
+  Clallam: CM
+  Clark: CR
+  Columbia: CU
+  Cowlitz: CZ
+  Douglas: DG
+  Ferry: FE
+  Franklin: FR
+  Garfield: GA
+  Grant: GR
+  Grays Harbor: GY
+  Island: IS
+  Jefferson: JE
+  King: KI
+  Kitsap: KP
+  Kittitas: KS
+  Klickitat: KT
+  Lewis: LE
+  Lincoln: LI
+  Mason: MA
+  Okanogan: OK
+  Pacific: PA
+  Pend Oreille: PE
+  Pierce: PI
+  San Juan: SJ
+  Skagit: SK
+  Skamania: SM
+  Snohomish: SN
+  Spokane: SP
+  Stevens: ST
+  Thurston: TH
+  Wahkiakum: WK
+  Walla Walla: WL
+  Whatcom: WM
+  Whitman: WT
+  Yakima: YA
 
 status_codes:
   active: A
