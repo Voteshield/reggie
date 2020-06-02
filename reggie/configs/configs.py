@@ -112,6 +112,7 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
+
         extra_cols = [] if extra_cols is None else extra_cols
         numeric_fields = [c for c, v in self.data[col_list].items()
                           if "int" in v or v == "float" or v == "double"]
@@ -126,20 +127,28 @@ class Config(object):
                                       errors='coerce').fillna(df[field])
         return df
 
-    def coerce_strings(self, df):
+    def coerce_strings(self, df, extra_cols=None, exclude=None, col_list="columns"):
         """
         takes all columns with text or varchar labels in the config,
         strips out whitespace and converts text to all lowercase
         NOTE: does not convert voter_status or party_identifier,
               since those are typically defined as capitalized
         :param df: dataframe to modify
+        :param extra_cols: extra columns to add
+        :param exclude: columns to exclude
+        :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-        text_fields = [c for c, v in self.data["columns"].items()
+        text_fields = [c for c, v in self.data[col_list].items()
                        if v == "text" or "char" in v]
+        if extra_cols is not None:
+            text_fields = text_fields + extra_cols
+
         for field in text_fields:
-            if (field in df) and (field != self.data["voter_status"]) \
-               and (field != self.data["party_identifier"]):
+            if (field in df) \
+            and (field != self.data["voter_status"]) \
+            and (field != self.data["party_identifier"]) \
+            and (field not in exclude):
                 string_copy = df[field].astype(str)
                 stripped_copy = string_copy.str.strip()
                 lower_copy = stripped_copy.str.lower()

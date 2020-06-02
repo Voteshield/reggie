@@ -1637,22 +1637,94 @@ class Preprocessor():
         df_hist = pd.concat([pd.read_csv(n['obj'], sep='\t', encoding='latin-1', dtype=str) \
                                 for n in hist_files], ignore_index=True)
 
+        # --- handling the voter history file --- #
+
+        # can't find voter history documentation in any yaml, hardcoding column name
+        election_dates = pd.to_datetime(df_hist.loc[:,'ElectionDate'], errors='coerce').dt
+
+        elections, counts = np.unique(election_dates.date, return_counts=True)
+        sorted_elections_dict = {k.strftime('%m/%d/%Y'): {'index': i,
+                                                   'count': int(counts[i]),
+                                                   'date': str(pd.to_datetime(k, format='%Y-%m-%d').date())}
+             for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict.keys())
+
+        df_hist.loc[:, 'ElectionDate'] = election_dates.strftime('%m/%d/%Y')
+        df_hist.loc[:, 'array_position'] = df_hist.loc[:, 'ElectionDate'].map(
+            lambda x: int(sorted_elections_dict[x]['index']))
+
+        voter_groups = df_hist.groupby(self.config['voter_id'])
+        all_history = (voter_groups['array_position']
+            .apply(list)
+            .rename('all_history')
+            .rename_axis(self.config['voter_id']))
+
+
+        # --- handling the voter file --- #
+
         df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_strings(df_voter,
+            exclude=[self.config['county_identifier'], self.config['voter_id']],
+            col_list='column_classes')
 
-        df_hist.ElectionDate = pd.to_datetime(df_hist.ElectionDate).dt.strftime(self.config['date_format'])
+        # there have been columns with the same name but different
+        # capitalization between years of the voter file history
+        # the changes do not seem to be well defined
 
-        #print(df_voter.head(100))
-        #print(df_hist.head(100))
+        # e.g. a voter file from 2018 is different from the 2012 documentation
+        # but doesn't have all the changes listed in the 2019 documentation
+        # much of the back-end code in config.py is case sensitive
+        # but if that was changed this problem would be solved without
+        # potentially having many versions of WA's yaml file
 
+        # otherwise a solution could be converting everything to lowercase
+        # df_voter.columns = df_voter.columns.str.lower()
+        # df_voter = df_voter.loc[:,[n.lower() for n in self.config['column_names']]]
 
-        #logging.info("Voter files - {}".format(voter_files))
-        #logging.info("History files - {}".format(hist_files))
+        # some columns have become obsolete
+        df_voter = df_voter.loc[:,[n for n in self.config['column_names']]]
+        df_voter = df_voter.set_index(self.config['voter_id'])
 
-        return FileItem(name=self.config['state'], io_obj=StringIO('this, is, a, csv'))
+        df_voter.loc[:,'county_name'] = df_voter.loc[:,self.config['county_identifier']].map(
+            {v:c.lower() for c, v in self.config['county_codes'].items()})
+        df_voter.loc[:,'status'] = df_voter.loc[:,self.config['voter_status']].map(
+            {v:c for c, v in self.config['status_codes'].items()})
+        df_voter.loc[:,'Gender'] = df_voter.loc[:,'Gender'].map(
+            {v.lower():c.lower() for c, v in self.config['gender_codes'].items()})
+
+        # add voter history
+        df_voter = df_voter.join(all_history)
+
+        self.meta = {
+            'message': 'washington_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+        self.is_compressed = False
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def execute(self):
+
+        dates = [c for c, v in self.config['column_classes'].items() if v == 'date']
+        dtypes = {}
+        for c, v in self.config['column_classes'].items():
+            if v == 'text' or 'char' in v:
+                dtypes[c] = str
+            if v == 'float' or v == 'double':
+                dtypes[c] = float
+            if v == 'int':
+                dtypes[c] = int
+            if v == 'date':
+                dtypes[c] = object
+
         file_obj = self.state_router()
-        self.dataframe = pd.read_csv(file_obj.obj)
+        self.dataframe = pd.read_csv(file_obj.obj,
+            dtype=dtypes,
+            parse_dates=dates,
+            infer_datetime_format=True)
 
     def state_router(self):
         routes = {

@@ -7,7 +7,7 @@ voter_id: StateVoterID
 county_identifier: CountyCode
 birthday_identifier: Birthdate
 voter_status: StatusCode
-party_identifier: false
+party_identifier: NA
 date_format: '%Y/%m/%d'
 numeric_county: false
 has_headers: true
@@ -20,7 +20,7 @@ format:
   hist_election_rows: true
   columnar_elections: false
   separate_district_lookup_file: true
-  vote_history_type:
+  vote_history_type: false
 
 name_fields:
   - Title
@@ -141,15 +141,15 @@ column_classes (districts and precincts files):
   PrecinctPart: character
 
 column_names_districts:
-  CountyCode
-  County
-  DistrictType
-  DistrictID
-  DistrictCode
-  DistrictName
-  PrecinctCode
-  PrecinctName
-  PrecinctPart
+  - CountyCode
+  - County
+  - DistrictType
+  - DistrictID
+  - DistrictCode
+  - DistrictName
+  - PrecinctCode
+  - PrecinctName
+  - PrecinctPart
 
 county_codes:
   Adams: AD
