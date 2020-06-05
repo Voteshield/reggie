@@ -1667,30 +1667,15 @@ class Preprocessor():
             exclude=[self.config['county_identifier'], self.config['voter_id']],
             col_list='column_classes')
 
-        # there have been columns with the same name but different
-        # capitalization between years of the voter file history
-        # the changes do not seem to be well defined
-
-        # e.g. a voter file from 2018 is different from the 2012 documentation
-        # but doesn't have all the changes listed in the 2019 documentation
-        # much of the back-end code in config.py is case sensitive
-        # but if that was changed this problem would be solved without
-        # potentially having many versions of WA's yaml file
-
         # otherwise a solution could be converting everything to lowercase
-        # df_voter.columns = df_voter.columns.str.lower()
-        # df_voter = df_voter.loc[:,[n.lower() for n in self.config['column_names']]]
 
         # some columns have become obsolete
         df_voter = df_voter.loc[:,[n for n in self.config['column_names']]]
         df_voter = df_voter.set_index(self.config['voter_id'])
 
+        # adding county name column from YAML keys
         df_voter.loc[:,'county_name'] = df_voter.loc[:,self.config['county_identifier']].map(
             {v:c.lower() for c, v in self.config['county_codes'].items()})
-        df_voter.loc[:,'status'] = df_voter.loc[:,self.config['voter_status']].map(
-            {v:c for c, v in self.config['status_codes'].items()})
-        df_voter.loc[:,'Gender'] = df_voter.loc[:,'Gender'].map(
-            {v.lower():c.lower() for c, v in self.config['gender_codes'].items()})
 
         # add voter history
         df_voter = df_voter.join(all_history)
@@ -1728,22 +1713,22 @@ class Preprocessor():
 
     def state_router(self):
         routes = {
-            'arizona': self.preprocess_arizona,
-            'colorado': self.preprocess_colorado,
-            'florida': self.preprocess_florida,
-            'georgia': self.preprocess_georgia,
-            'iowa': self.preprocess_iowa,
-            'kansas': self.preprocess_kansas,
-            'michigan': self.preprocess_michigan,
-            'minnesota': self.preprocess_minnesota,
-            'missouri': self.preprocess_missouri,
             'nevada': self.preprocess_nevada,
-            'new_jersey': self.preprocess_new_jersey,
+            'arizona': self.preprocess_arizona,
+            'florida': self.preprocess_florida,
             'new_york': self.preprocess_new_york,
-            'north_carolina': self.preprocess_north_carolina,
-            'ohio': self.preprocess_ohio,
+            'michigan': self.preprocess_michigan,
+            'missouri': self.preprocess_missouri,
+            'iowa': self.preprocess_iowa,
             'pennsylvania': self.preprocess_pennsylvania,
+            'georgia': self.preprocess_georgia,
+            'new_jersey': self.preprocess_new_jersey,
+            'north_carolina': self.preprocess_north_carolina,
+            'kansas': self.preprocess_kansas,
+            'ohio': self.preprocess_ohio,
+            'minnesota': self.preprocess_minnesota,
             'texas': self.preprocess_texas,
+            'colorado': self.preprocess_colorado,
             'washington': self.preprocess_washington
         }
         if self.config["state"] in routes:
