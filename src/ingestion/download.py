@@ -2039,8 +2039,8 @@ class Preprocessor(Loader):
 
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression='infer')
-        voter_files = [n for n in new_files if 'vlist' in n['name']]
-        hist_files = [n for n in new_files if 'ehist' in n['name']]
+        voter_files = [n for n in new_files if 'vlist' in n['name'].lower()]
+        hist_files = [n for n in new_files if 'ehist' in n['name'].lower()]
 
         voter_df = combine_dfs(voter_files)
         hist_df = combine_dfs(hist_files)
