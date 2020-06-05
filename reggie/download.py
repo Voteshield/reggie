@@ -93,9 +93,8 @@ class Preprocessor():
                         if decompressed_result is not None:
                             expand_recurse(decompressed_result)
                     except BadZipfile as e:
-                        # logging.info(f)
-                        f["obj"] = StringIO(f["obj"].read(
-                            ).decode(encoding='utf-8', errors='ignore'))
+                        logging.info(f)
+                        f["obj"] = StringIO(f["obj"].read().decode(encoding='utf-8', errors='ignore'))
                         all_files.append(f)
 
         if type(file_obj) == str:
