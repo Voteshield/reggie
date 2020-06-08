@@ -1690,6 +1690,11 @@ class Preprocessor():
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_west_virginia(self):
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO('This, is, a, string')))
+
     def execute(self):
 
         dates = [c for c, v in self.config['column_classes'].items() if v == 'date']
@@ -1728,7 +1733,8 @@ class Preprocessor():
             'minnesota': self.preprocess_minnesota,
             'texas': self.preprocess_texas,
             'colorado': self.preprocess_colorado,
-            'washington': self.preprocess_washington
+            'washington': self.preprocess_washington,
+            'west_virginia': self.preprocess_west_virginia
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

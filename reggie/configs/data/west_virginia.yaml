@@ -1,0 +1,102 @@
+# West Virginia has the Voter File all in one file called "Statewide" with the date is was extracted
+# all histories are separated by election
+
+file_type: .txt
+delimiter: ','
+state: west_virginia
+source: boe
+file_class: voter_file
+voter_id: Voter_ID
+county_identifier: County_Name
+birthday_identifier: NA
+voter_status: NA
+party_identifier: Party_Affiliation
+date_format: '%m/%d/%Y'
+numeric_county: FALSE
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Single'
+
+name_fields:
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+
+address_fields:
+  - Residence_Line1
+  - Residence_City
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+
+column_names:
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+  - Residence_Line1
+  - Residence_City
+  - Residence_Zipcode
+  - Precinct_Split
+  - Precinct_Code
+  - County_Name
+  - Mailing_Address_Line_1
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+  - Registration_Date
+  - Party_Affiliation
+  - House_District
+  - Senate_District
+
+column_classes:
+  Voter_ID: character
+  Name_Last: character
+  Name_First: character
+  Name_Middle: character
+  Name_Suffix: character
+  Residence_Line1: character
+  Residence_City: character
+  Residence_Zipcode: character
+  Precinct_Split: character
+  Precinct_Code: character
+  County_Name: character
+  Mailing_Address_Line_1: character
+  Mailing_City: character
+  Mailing_State: character
+  Mailing_Zipcode: character
+  Mailing_Country: character
+  Registration_Date: date
+  Party_Affiliation: character
+  House_District: character
+  Senate_District: character
+
+
+status_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+party_codes:
+  Not_Provided: NP
+
+num_party_codes: 9
