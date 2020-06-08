@@ -47,10 +47,12 @@ class FileItem(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         return
 
+
 def get_object_mem(key):
     file_obj = BytesIO()
     s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=file_obj)
     return file_obj
+
 
 def concat_and_delete(in_list):
     outfile = StringIO()
@@ -61,10 +63,12 @@ def concat_and_delete(in_list):
     outfile.seek(0)
     return outfile
 
+
 class Preprocessor():
 
     def __init__(self, local_file, config_file, date, **kwargs):
         self.main_file = FileItem("main file", filename=local_file)
+
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
@@ -193,6 +197,7 @@ class Preprocessor():
                              os.path.dirname(file_name)))
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
+
 
     def infer_compression(self, file_name):
         """

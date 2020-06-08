@@ -112,7 +112,6 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-
         extra_cols = [] if extra_cols is None else extra_cols
         numeric_fields = [c for c, v in self.data[col_list].items()
                           if "int" in v or v == "float" or v == "double"]
