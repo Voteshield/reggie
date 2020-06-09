@@ -1691,7 +1691,6 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_west_virginia(self):
-
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO('This, is, a, string')))
 
