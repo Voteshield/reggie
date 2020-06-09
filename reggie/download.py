@@ -1696,10 +1696,10 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def execute(self):
-
-        dates = [c for c, v in self.config['column_classes'].items() if v == 'date']
+        cols = 'columns' if 'columns' in config.keys() else 'column_classes'
+        dates = [c for c, v in self.config[cols].items() if v == 'date']
         dtypes = {}
-        for c, v in self.config['column_classes'].items():
+        for c, v in self.config[cols].items():
             if v == 'text' or 'char' in v:
                 dtypes[c] = str
             if v == 'float' or v == 'double':
