@@ -1740,6 +1740,9 @@ class Preprocessor():
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_oregon(self):
+        return
+
     def execute(self):
         cols = 'columns' if 'columns' in self.config.keys() else 'column_classes'
         dates = [c for c, v in self.config[cols].items() if v == 'date']
