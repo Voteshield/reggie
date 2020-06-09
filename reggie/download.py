@@ -1729,8 +1729,8 @@ class Preprocessor():
         df_voter = df_voter.set_index(self.config['voter_id'])
 
         self.meta = {
-            'message': 'west_virginia_{}'.format(datetime.now().isoformat()),
-#           vote history not available
+            'message': 'west_virginia_{}'.format(datetime.now().isoformat())
+# vote history not available
 #            'array_encoding': json.dumps(),
 #            'array_decoding': json.dumps()
         }
