@@ -1691,14 +1691,56 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_west_virginia(self):
+        new_files = [n for n in self.unpack_files(self.main_file, compression='unzip')]
+
+        # only one voter file, no voter history
+        voter_file = [n for n in new_files if 'wv' in n['name'].lower()][0]
+
+        df_voter = pd.read_csv(voter_file['obj'], sep='|',
+            encoding='latin-1',
+            dtype=str,
+            header=0, names=self.config['column_names'])
+
+        # --- handling voter file --- #
+
+        gender_conversion_dict = {}
+        for c, v in self.config['gender_codes'].items():
+            for i in v:
+                if i is None:
+                    gender_conversion_dict[' '] = c
+                gender_conversion_dict[i] = c
+
+        df_voter.loc[:, 'SEX'] = df_voter.loc[:, 'SEX'].map(gender_conversion_dict)
+
+        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']],
+            col_list='column_classes')
+
+        # coerce_strings does not convert party_identifier but conversion is needed in this instance
+        df_voter.loc[:,self.config['party_identifier']] = (df_voter
+            .loc[:,self.config['party_identifier']]
+            .str.lower().str.replace('\W', ' ').str.strip())
+
+        df_voter = df_voter.set_index(self.config['voter_id'])
+
+        self.meta = {
+            'message': 'west_virginia_{}'.format(datetime.now().isoformat()),
+#           vote history not available
+#            'array_encoding': json.dumps(),
+#            'array_decoding': json.dumps()
+        }
+
+        self.is_compressed = False
+
         return FileItem(name='{}.processed'.format(self.config['state']),
-                        io_obj=StringIO('This, is, a, string')))
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def execute(self):
 
-        dates = [c for c, v in self.config['column_classes'].items() if v == 'date']
+        cols = 'columns' if 'columns' in self.config.keys() else 'column_classes'
+        dates = [c for c, v in self.config[cols].items() if v == 'date']
         dtypes = {}
-        for c, v in self.config['column_classes'].items():
+        for c, v in self.config[cols].items():
             if v == 'text' or 'char' in v:
                 dtypes[c] = str
             if v == 'float' or v == 'double':

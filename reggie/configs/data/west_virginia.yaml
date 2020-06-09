@@ -1,101 +1,152 @@
-# West Virginia has the Voter File all in one file called "Statewide" with the date is was extracted
-# all histories are separated by election
+# West Virginia has one .txt file
+
 file_type: .txt
-delimiter: ','
+delimiter: '|'
 state: west_virginia
 source: boe
 file_class: voter_file
-voter_id: Voter_ID
+voter_id: ID_VOTER
 county_identifier: County_Name
-birthday_identifier: NA
-voter_status: NA
-party_identifier: Party_Affiliation
+birthday_identifier: DATE.OF.BIRTH
+voter_status: Status
+party_identifier: PartyAffiliation
 date_format: '%m/%d/%Y'
 numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
-separate_hispanic_origin: FALSE
+separate_hispanic_orign: FALSE
 
 format:
-  separate_hist: TRUE
+  separate_hist: FALSE
   separate_counties_voter_file: FALSE
   separate_counties_hist_file: FALSE
   hist_election_rows: FALSE
   columnar_elections: FALSE
   separate_district_lookup_file: FALSE
-  vote_history_type: 'Single'
+  vote_history_type: null
 
 name_fields:
-  - Name_Last
-  - Name_First
-  - Name_Middle
-  - Name_Suffix
+  - FIRST.NAME
+  - Mid
+  - LAST.NAME
+  - Suffix
 
 address_fields:
-  - Residence_Line1
-  - Residence_City
-  - Residence_Zipcode
-  - Mailing_Address_Line_1
-  - Mailing_City
-  - Mailing_State
-  - Mailing_Zipcode
-  - Mailing_Country
+  - HOUSE.NO
+  - STREET
+  - STREET2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - MAIL.HOUSE.NO
+  - MAIL.STREET
+  - MAIL.STREET2
+  - MAIL.UNIT
+  - MAIL.CITY
+  - MAIL.STATE
+  - MAIL.ZIP
 
 column_names:
-  - Voter_ID
-  - Name_Last
-  - Name_First
-  - Name_Middle
-  - Name_Suffix
-  - Residence_Line1
-  - Residence_City
-  - Residence_Zipcode
-  - Precinct_Split
-  - Precinct_Code
+  - ID_VOTER
   - County_Name
-  - Mailing_Address_Line_1
-  - Mailing_City
-  - Mailing_State
-  - Mailing_Zipcode
-  - Mailing_Country
-  - Registration_Date
-  - Party_Affiliation
-  - House_District
-  - Senate_District
+  - FIRST.NAME
+  - Mid
+  - LAST.NAME
+  - Suffix
+  - DATE.OF.BIRTH
+  - SEX
+  - HOUSE.NO
+  - STREET
+  - STREET2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - MAIL.HOUSE.NO
+  - MAIL.STREET
+  - MAIL.STREET2
+  - MAIL.UNIT
+  - MAIL.CITY
+  - MAIL.STATE
+  - MAIL.ZIP
+  - REGISTRATION.DATE
+  - PartyAffiliation
+  - Status
+  - Congressional.District
+  - Senatorial.District
+  - Delegate.District
+  - Magisterial.District
+  - Precinct_Number
+  - POLL_NAME
 
 column_classes:
-  Voter_ID: character
-  Name_Last: character
-  Name_First: character
-  Name_Middle: character
-  Name_Suffix: character
-  Residence_Line1: character
-  Residence_City: character
-  Residence_Zipcode: character
-  Precinct_Split: character
-  Precinct_Code: character
+  ID_VOTER: character
   County_Name: character
-  Mailing_Address_Line_1: character
-  Mailing_City: character
-  Mailing_State: character
-  Mailing_Zipcode: character
-  Mailing_Country: character
-  Registration_Date: date
-  Party_Affiliation: character
-  House_District: character
-  Senate_District: character
+  FIRST.NAME: character
+  Mid: character
+  LAST.NAME: character
+  Suffix: character
+  DATE.OF.BIRTH: date
+  SEX: character
+  HOUSE.NO: character
+  STREET: character
+  STREET2: character
+  UNIT: character
+  CITY: character
+  STATE: character
+  ZIP: character
+  MAIL.HOUSE.NO: character
+  MAIL.STREET: character
+  MAIL.STREET2: character
+  MAIL.UNIT: character
+  MAIL.CITY: character
+  MAIL.STATE: character
+  MAIL.ZIP: character
+  REGISTRATION.DATE: date
+  PartyAffiliation: character
+  Status: character
+  Congressional.District: character
+  Senatorial.District: character
+  Delegate.District: character
+  Magisterial.District: character
+  Precinct_Number: character
+  POLL_NAME: character
 
+county_codes:
+  Not_Provided: NP
 
 status_codes:
-  Not_Provided: NP
+  active: Active
+  inactive: Inactive
 
 gender_codes:
-  Not_Provided: NP
+  Male:
+    - M
+    - m
+  Female:
+    - F
+    - f
+  Unknown:
+    - N
+    - nan
+    -
 
 race_codes:
   Not_Provided: NP
 
 party_codes:
-  Not_Provided: NP
+  no_party_affiliation:
+    - no party affiliation
+    - unaffiliated
+  democratic_party: democrat
+  republican_party: republican
+  green_party: green
+  libertarian_party: libertarian
+  mountain_party: mountain
+  independent:
+    - independent
+    - independent party
+  other: other
 
-num_party_codes: 9
+num_party_codes: 230
