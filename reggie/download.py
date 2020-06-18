@@ -1647,42 +1647,49 @@ class Preprocessor():
         election_dates = pd.to_datetime(df_hist.loc[:,'ElectionDate'], errors='coerce').dt
 
         elections, counts = np.unique(election_dates.date, return_counts=True)
-        sorted_elections_dict = {k.strftime('%m/%d/%Y'): {'index': i,
-                                                   'count': int(counts[i]),
-                                                   'date': str(pd.to_datetime(k, format='%Y-%m-%d').date())}
+        sorted_elections_dict = {str(k): {'index': i,
+                                          'count': int(counts[i]),
+                                          'date': k.strftime('%m/%d/%Y')}
              for i, k in enumerate(elections)}
         sorted_elections = list(sorted_elections_dict.keys())
 
-        df_hist.loc[:, 'ElectionDate'] = election_dates.strftime('%m/%d/%Y')
-        df_hist.loc[:, 'array_position'] = df_hist.loc[:, 'ElectionDate'].map(
+        df_hist.loc[:, 'all_history'] = election_dates.date.apply(str)
+        df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(
             lambda x: int(sorted_elections_dict[x]['index']))
 
         voter_groups = df_hist.groupby(self.config['voter_id'])
-        all_history = (voter_groups['array_position']
+        all_history = (voter_groups['all_history']
             .apply(list)
-            .rename('all_history')
             .rename_axis(self.config['voter_id']))
-
+        sparse_history = (voter_groups['sparse_history']
+            .apply(list)
+            .rename_axis(self.config['voter_id']))
+        df_hist = pd.concat([all_history, sparse_history], axis=1)
 
         # --- handling the voter file --- #
-
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
-        df_voter = self.config.coerce_strings(df_voter,
-            exclude=[self.config['county_identifier'], self.config['voter_id']],
-            col_list='column_classes')
-
-        # otherwise a solution could be converting everything to lowercase
 
         # some columns have become obsolete
         df_voter = df_voter.loc[:,[n for n in self.config['column_names']]]
         df_voter = df_voter.set_index(self.config['voter_id'])
+
+        # pandas loads any numeric column with NaN values as floats
+        # causing formatting trouble during execute() with a few columns
+        # all columns in this df should be text but int is ok for a few
+        # saw this solution in other states (arizona & texas)
+        to_numeric = [df_voter.loc[:,col].str.isnumeric().all() for col in df_voter.columns]
+        df_voter.loc[:,to_numeric] = df_voter.loc[:,to_numeric].fillna(-1).astype(int)
+
+        df_voter = self.config.coerce_strings(df_voter,
+            exclude=[self.config['county_identifier'], self.config['voter_id']],
+            col_list='column_classes')
+        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
 
         # adding county name column from YAML keys
         df_voter.loc[:,'county_name'] = df_voter.loc[:,self.config['county_identifier']].map(
             {v:c.lower() for c, v in self.config['county_codes'].items()})
 
         # add voter history
-        df_voter = df_voter.join(all_history)
+        df_voter = df_voter.join(df_hist)
 
         self.meta = {
             'message': 'washington_{}'.format(datetime.now().isoformat()),
@@ -1744,24 +1751,8 @@ class Preprocessor():
         return
 
     def execute(self):
-        cols = 'columns' if 'columns' in self.config.keys() else 'column_classes'
-        dates = [c for c, v in self.config[cols].items() if v == 'date']
-        dtypes = {}
-        for c, v in self.config[cols].items():
-            if v == 'text' or 'char' in v:
-                dtypes[c] = str
-            if v == 'float' or v == 'double':
-                dtypes[c] = float
-            if v == 'int':
-                dtypes[c] = int
-            if v == 'date':
-                dtypes[c] = object
-
         file_obj = self.state_router()
-        self.dataframe = pd.read_csv(file_obj.obj,
-            dtype=dtypes,
-            parse_dates=dates,
-            infer_datetime_format=True)
+        self.dataframe = pd.read_csv(file_obj.obj)
 
     def state_router(self):
         routes = {
