@@ -7,6 +7,8 @@ voter_id: StateVoterID
 county_identifier: CountyCode
 birthday_identifier: Birthdate
 voter_status: StatusCode
+voter_status_active: A
+voter_status_inactive: I
 party_identifier: NA
 date_format: '%Y/%m/%d'
 numeric_county: false
@@ -86,14 +88,15 @@ column_names:
   - MailCountry
   - Registrationdate
   # AbsenteeType obsolete as of 2011
-  # - AbsenteeType: character
+  # - AbsenteeType
   - LastVoted
   # As of 2012, Statuscode
   - StatusCode
 
 column_classes:
   StateVoterID: character
-  CountyVoterID: character
+# Obsolete as of 2012
+#  CountyVoterID: character
   Title: character
   FName: character
   MName: character
@@ -125,7 +128,8 @@ column_classes:
   MailZip: character
   MailCountry: character
   Registrationdate: date
-  AbsenteeType: character
+# AbsenteeType obsolete as of 2011
+# AbsenteeType: character
   LastVoted: date
   StatusCode: character
 
