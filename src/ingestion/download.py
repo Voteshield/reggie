@@ -332,7 +332,9 @@ class Loader(object):
 
         if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
                 (s3_file_obj["name"].split(".")[-1] == "txt") or \
-                (s3_file_obj["name"].split(".")[-1] == "pdf"):
+                (s3_file_obj["name"].split(".")[-1] == "pdf") or \
+                (s3_file_obj["name"].split(".")[-1] == "png") or \
+                ("MACOS" in s3_file_obj["name"]):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
