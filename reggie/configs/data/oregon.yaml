@@ -1,4 +1,4 @@
-#Oregon has one voting export file or voter file 
+#Oregon has one voting export file or voter file
 #(name: Ex-RegisteredVoters-nkramer-2019-02-07-131641.txt) updated last 02/15/2019
 #1726 voters not listed on report
 
@@ -24,7 +24,7 @@ format:
   separate_counties_hist_file: FALSE
   hist_election_rows: FALSE
   columnar_elections: TRUE
-  separate_district_lookup_file: FALSE 
+  separate_district_lookup_file: FALSE
   vote_history_type: 'Serial'
 
 
@@ -103,46 +103,46 @@ column_names:
   - X
 
 column_classes:
-  VOTER_ID: character         
-  FIRST_NAME: character       
-  MIDDLE_NAME: character      
-  LAST_NAME: character        
-  NAME_SUFFIX: character      
-  BIRTH_DATE: date       
-  CONFIDENTIAL: character     
-  EFF_REGN_DATE: date    
-  STATUS: character           
-  PARTY_CODE: character       
-  PHONE_NUM: character        
-  UNLISTED: character         
-  COUNTY: character           
-  RES_ADDRESS_1: character    
-  RES_ADDRESS_2: character    
-  HOUSE_NUM: character        
-  HOUSE_SUFFIX: character     
-  PRE_DIRECTION: character    
-  STREET_NAME: character      
-  STREET_TYPE: character      
-  POST_DIRECTION: character   
-  UNIT_TYPE: character        
-  UNIT_NUM: character         
-  ADDR_NON_STD: character     
-  CITY: character             
-  STATE: character            
-  ZIP_CODE: character         
-  ZIP_PLUS_FOUR: character    
-  EFF_ADDRESS_1: character    
-  EFF_ADDRESS_2: character    
-  EFF_ADDRESS_3: character    
-  EFF_ADDRESS_4: character    
-  EFF_CITY: character         
-  EFF_STATE: character        
-  EFF_ZIP_CODE: character     
+  VOTER_ID: character
+  FIRST_NAME: character
+  MIDDLE_NAME: character
+  LAST_NAME: character
+  NAME_SUFFIX: character
+  BIRTH_DATE: character       
+  CONFIDENTIAL: character
+  EFF_REGN_DATE: date
+  STATUS: character
+  PARTY_CODE: character
+  PHONE_NUM: character
+  UNLISTED: character
+  COUNTY: character
+  RES_ADDRESS_1: character
+  RES_ADDRESS_2: character
+  HOUSE_NUM: character
+  HOUSE_SUFFIX: character
+  PRE_DIRECTION: character
+  STREET_NAME: character
+  STREET_TYPE: character
+  POST_DIRECTION: character
+  UNIT_TYPE: character
+  UNIT_NUM: character
+  ADDR_NON_STD: character
+  CITY: character
+  STATE: character
+  ZIP_CODE: character
+  ZIP_PLUS_FOUR: character
+  EFF_ADDRESS_1: character
+  EFF_ADDRESS_2: character
+  EFF_ADDRESS_3: character
+  EFF_ADDRESS_4: character
+  EFF_CITY: character
+  EFF_STATE: character
+  EFF_ZIP_CODE: character
   EFF_ZIP_PLUS_FOUR: character
-  ABSENTEE_TYPE: character    
-  PRECINCT_NAME: character    
-  PRECINCT: character         
-  SPLIT: character            
+  ABSENTEE_TYPE: character
+  PRECINCT_NAME: character
+  PRECINCT: character
+  SPLIT: character
   X: character
 
 party_codes:
@@ -156,12 +156,12 @@ party_codes:
   green_party: PGP
   progressive_party: PRO
   working_families_party_of_OR: WFP
-  active_but_protected: ACP 
+  active_but_protected: ACP
 
 num_party_codes: 12
 
-race_codes: 
-  Not_Provided: NP 
+race_codes:
+  Not_Provided: NP
 
 gender_codes:
   Not_Provided: NP
@@ -208,11 +208,3 @@ voter_status_codes:
   Active: A
   Inactive: I
   Active_But_Protected: ACP
-  
-
-
-  
-
-
-
-
