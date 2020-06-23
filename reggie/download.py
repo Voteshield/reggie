@@ -1748,6 +1748,14 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_oregon(self):
+        new_files = [f for f in
+                     self.unpack_files(self.main_file, compression='unzip')
+                     if 'readme' not in f['name'].lower()]
+
+        voter_file = [n for n in new_files if 'registeredvoters' in n['name'].lower()][0]
+        # don't have access to them yet
+        # hist_files = ...
+
         return
 
     def preprocess_oklahoma(self):
@@ -1761,6 +1769,8 @@ class Preprocessor():
 
         voter_file = [n for n in new_files if 'statewide' in n['name'].lower()][0]
         hist_files = [n for n in new_files if 'history' in n['name'].lower()]
+
+        # --- handling voter history --- #
 
         hist_config = self.config['vote_history']
         election_config = hist_config['elections']
@@ -1807,7 +1817,6 @@ class Preprocessor():
             .str.split('\s').str.join('_'))
         df_hist.loc[:,'election_date'] = pd.to_datetime(df_hist.loc[:,'election_date'].replace('NP', pd.NaT)).dt.strftime('%m/%d/%Y')
 
-
         election_dates_dict = df_hist.groupby('all_history')['election_date'].first().to_dict()
         elections, counts = np.unique(df_hist.loc[:,'all_history'], return_counts=True)
 
@@ -1833,7 +1842,7 @@ class Preprocessor():
             [all_history, sparse_history, votetype_history,
              party_history, precinct_history], axis=1)
 
-        print(df_hist.head())
+        # --- handling voter file --- #
 
         df_voter = pd.read_csv(voter_file['obj'], dtype=str)
         df_voter.columns = df_voter.columns.str.replace('[^\w]', '.')
@@ -1850,11 +1859,7 @@ class Preprocessor():
         df_voter.loc[:,self.config['voter_id']] = df_voter.loc[:,self.config['voter_id']].str.zfill(9).astype(str)
         df_voter = df_voter.set_index(self.config['voter_id'])
 
-        print(df_voter.head())
-
         df_voter = df_voter.join(df_hist)
-
-        print(df_voter.head())
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
