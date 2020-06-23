@@ -126,7 +126,7 @@ class Config(object):
                                       errors='coerce').fillna(df[field])
         return df
 
-    def coerce_strings(self, df, extra_cols=None, exclude=None, col_list="columns"):
+    def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
         """
         takes all columns with text or varchar labels in the config,
         strips out whitespace and converts text to all lowercase
