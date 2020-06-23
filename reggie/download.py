@@ -77,6 +77,8 @@ class Preprocessor():
         self.meta = None
         self.dataframe = None
 
+        self.data = None
+
     def __enter__(self):
         return self
 
@@ -1756,7 +1758,34 @@ class Preprocessor():
         # don't have access to them yet
         # hist_files = ...
 
-        return
+        # --- handling voter file --- #
+
+        df_voter = (pd.read_csv(voter_file['obj'], sep='\t', dtype=str)
+                    .dropna(how='all', axis=1))
+
+        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_strings(df_voter,
+                                              exclude=['STATE'],
+                                              col_list='column_classes')
+        df_voter = self.config.coerce_numeric(df_voter,
+                                              col_list='column_classes')
+
+        df_voter.loc[:,self.config['voter_id']] = df_voter.loc[:,self.config['voter_id']].str.zfill(9).astype('str')
+        df_voter.loc[:,'UNLISTED'] = df_voter.loc[:,'UNLISTED'].map({'yes':True, 'no':False})
+        # when vote history is received
+        # df_voter = df_voter.set_index(self.config['voter_id'])
+
+        self.meta = {
+            'message': 'oregon_{}'.format(datetime.now().isoformat()),
+            # vote history not available yet
+            # 'array_encoding': json.dumps(),
+            # 'array_decoding': json.dumps()
+        }
+
+        self.is_compressed = False
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=None, encoding='latin-1')))
 
     def preprocess_oklahoma(self):
         return
@@ -1824,6 +1853,8 @@ class Preprocessor():
                                           'count': int(counts[i]),
                                           'date': election_dates_dict[k]}
                                  for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict.keys())
+
         df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(
             lambda x: int(sorted_elections_dict[x]['index']))
 
@@ -1860,6 +1891,14 @@ class Preprocessor():
         df_voter = df_voter.set_index(self.config['voter_id'])
 
         df_voter = df_voter.join(df_hist)
+
+        self.meta = {
+            'message': 'wyoming_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+        self.is_compressed = False
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
