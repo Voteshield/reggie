@@ -1,0 +1,262 @@
+# Oklahoma has one zip file for voter files (name: CTYSW_VR_20190301085525.zip). 
+# There are 77 separate (per county) voter filee (ex name: CTY01_vr.csv)
+
+file_type: .csv
+delimiter: ','
+state: oklahoma
+source: boe
+file_class: voter_file
+voter_id: VoterID
+county_identifier: null
+birthday_identifier: DateOfBirth
+voter_status: Status
+party_identifier: PolitalAff
+date_format: '%m/%d/%Y'
+numeric_county: TRUE
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: TRUE
+  separate_counties_hist_file: TRUE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Sporadic'
+
+name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+
+address_fields:
+  - StreetNum
+  - StreetDir
+  - StreetName
+  - StreetType
+  - BldgNum
+  - City
+  - Zip
+  - MailStreet1
+  - MailStreet2
+  - MailCity
+  - MailState
+  - MailZip
+
+column_names:
+  - Precinct
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - VoterID
+  - PolitalAff
+  - Status
+  - StreetNum
+  - StreetDir
+  - StreetName
+  - StreetType
+  - BldgNum
+  - City
+  - Zip
+  - DateOfBirth
+  - OriginalRegistration
+  - MailStreet1
+  - MailStreet2
+  - MailCity
+  - MailState
+  - MailZip
+  - Muni
+  - MuniSub
+  - School
+  - SchoolSub
+  - TechCenter
+  - TechCenterSub
+  - CountyComm
+  - VoterHist1
+  - HistMethod1
+  - VoterHist2
+  - HistMethod2
+  - VoterHist3
+  - HistMethod3
+  - VoterHist4
+  - HistMethod4
+  - VoterHist5
+  - HistMethod5
+  - VoterHist6
+  - HistMethod6
+  - VoterHist7
+  - HistMethod7
+  - VoterHist8
+  - HistMethod8
+  - VoterHist9
+  - HistMethod9
+  - VoterHist10
+  - HistMethod10
+
+column_classes:
+  Precinct: character
+  LastName: character
+  FirstName: character
+  MiddleName: character
+  Suffix: character
+  VoterID: character
+  PolitalAff: character
+  Status: character
+  StreetNum: character
+  StreetDir: character
+  StreetName: character
+  StreetType: character
+  BldgNum: character
+  City: character
+  Zip: character
+  DateOfBirth: date
+  OriginalRegistration: date
+  MailStreet1: character
+  MailStreet2: character
+  MailCity: character
+  MailState: character
+  MailZip: character
+  Muni: character
+  MuniSub: character
+  School: character
+  SchoolSub: character
+  TechCenter: character
+  TechCenterSub: character
+  CountyComm: character
+  VoterHist1: date
+  HistMethod1: character
+  VoterHist2: date
+  HistMethod2: character
+  VoterHist3: date
+  HistMethod3: character
+  VoterHist4: date
+  HistMethod4: character
+  VoterHist5: date
+  HistMethod5: character
+  VoterHist6: date
+  HistMethod6: character
+  VoterHist7: date
+  HistMethod7: character
+  VoterHist8: date
+  HistMethod8: character
+  VoterHist9: date
+  HistMethod9: character
+  VoterHist10: date
+  HistMethod10: character
+
+ballot_type_classes:
+  in_person: IP
+  absentee: AB
+  absentee_in_person: AI
+  physically_incap: PI
+  absentee_care_of_PI: CI
+  absentee_emergency_incap: EI
+  absentee_military: MI
+  absentee_overseas: OV
+  absentee_nursing_home: NH
+
+county_codes:
+  Adair: 01
+  Alfalfa: 02
+  Atoka: 03
+  Beaver: 04
+  Beckham: 05
+  Blaine: 06
+  Bryan: 07
+  Caddo: 08
+  Canadian: 09
+  Carter: 10
+  Cherokee: 11
+  Choctaw: 12
+  Cimarron: 13
+  Cleveland: 14
+  Coal: 15
+  Comanche: 16
+  Cotton: 17
+  Craig: 18
+  Creek: 19
+  Custer: 20
+  Delaware: 21
+  Dewey: 22
+  Ellis: 23
+  Garfield: 24
+  Garvin: 25
+  Grady: 26
+  Grant: 27
+  Greer: 28
+  Harmon: 29
+  Harper: 30
+  Haskell: 31
+  Hughes: 32
+  Jackson: 33
+  Jefferson: 34
+  Johnston: 35
+  Kay: 36
+  Kingfisher: 37
+  Kiowa: 38
+  Latimer: 39
+  Le Flore: 40
+  Lincoln: 41
+  Logan: 42
+  Love: 43
+  McClain: 44
+  McCurtain: 45
+  McIntosh: 46
+  Major: 47
+  Marshall: 48
+  Mayes: 49
+  Murray: 50
+  Muskogee: 51
+  Noble: 52
+  Nowata: 53
+  Okfuskee: 54
+  Oklahoma: 55
+  Okmulgee: 56
+  Osage: 57
+  Ottawa: 58
+  Pawnee: 59
+  Payne: 60
+  Pittsburg: 61
+  Pontotoc: 62
+  Pottawatomie: 63
+  Pushmataha: 64
+  Roger Mills: 65
+  Rogers: 66
+  Seminole: 67
+  Sequoyah: 68
+  Stephens: 69
+  Texas: 70
+  Tillman: 71
+  Tulsa: 72
+  Wagoner: 73
+  Washington: 74
+  Washita: 75
+  Woods: 76
+  Woodward: 77
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  Active: A
+  Inactive: I
+
+party_codes:
+  democratic_party: DEM
+  republican_party: REP
+  libertarian_party: LIB
+  no_party_affiliated: IND
+
+num_party_codes: 4
+
+
+
+
+

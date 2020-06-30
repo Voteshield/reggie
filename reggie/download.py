@@ -241,6 +241,7 @@ class Preprocessor():
 
         if (s3_file_obj["name"].split(".")[-1].lower() == "xlsx") or \
            (s3_file_obj["name"].split(".")[-1].lower() == "txt") or \
+           (s3_file_obj["name"].split(".")[-1].lower() == "csv") or \
            (s3_file_obj["name"].split(".")[-1].lower() == "pdf"):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
@@ -1788,7 +1789,51 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=None, encoding='latin-1')))
 
     def preprocess_oklahoma(self):
-        return
+        new_files = self.unpack_files(self.main_file)
+
+        voter_files = [n for n in new_files if 'vr.csv' in n['name'].lower()]
+        hist_files = [n for n in new_files if 'vh.csv' in n['name'].lower()]
+        precinct_file = [n for n in new_files if 'precinct' in n['name'].lower()]
+
+        # --- handling the vote history file --- #
+
+        df_hist = pd.concat([pd.read_csv(n['obj'], dtype=str) for n in hist_files],
+                            ignore_index=True)
+
+        election_dates = pd.to_datetime(df_hist.loc[:,'ElectionDate'], errors='coerce').dt
+        elections, counts = np.unique(election_dates.date, return_counts=True)
+        sorted_elections_dict = {str(k): {'index': i,
+                                          'count': int(counts[i]),
+                                          'date': k.strftime('%m/%d/%Y')}
+                                 for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict.keys())
+
+        df_hist.loc[:, 'all_history'] = election_dates.date.apply(str)
+        df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(
+            lambda x: int(sorted_elections_dict[x]['index']))
+
+        voter_groups = df_hist.groupby(self.config['voter_id'])
+        all_history = (voter_groups['all_history'].apply(list))
+        sparse_history = (voter_groups['sparse_history'].apply(list))
+        votetype_history = (voter_groups['VotingMethod'].apply(list).rename('votetype_history'))
+        df_hist = pd.concat([all_history, sparse_history, votetype_history], axis=1)
+
+        # --- handling the voter file --- #
+
+        df_voter = pd.concat([pd.read_csv(n['obj'], dtype=str) for n in voter_files],
+                             ignore_index=True)
+
+        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']],
+                                              col_list='column_classes')
+        df_voter = self.config.coerce_numeric(df_voter, col_list='column_classes')
+        df_voter = df_voter.loc[:, ~df_voter.columns.str.contains('Hist\w+\d')]
+        df_voter = df_voter.set_index(self.config['voter_id'])
+
+        df_voter = df_voter.join(df_hist)
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_arkansas(self):
         return
@@ -1877,8 +1922,6 @@ class Preprocessor():
 
         df_voter = pd.read_csv(voter_file['obj'], dtype=str)
         df_voter.columns = df_voter.columns.str.replace('[^\w]', '.')
-        df_voter.loc[:,self.config['voter_id']] = (df_voter.loc[:,self.config['voter_id']]
-            .str.zfill(9))
 
         df_voter = self.config.coerce_strings(df_voter,
             exclude=[self.config['voter_id']], col_list='column_classes')
