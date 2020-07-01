@@ -2003,7 +2003,7 @@ class Preprocessor(Loader):
             for format_str in self.config['date_format']:
                 formatted = pd.to_datetime(df[field], format=format_str,
                                            errors='coerce')
-                if len(formatted.unique()) > 1:
+                if len(formatted[~formatted.isna()]) > (0.5 * len(formatted)):
                     df[field] = formatted
                     break
             return df
