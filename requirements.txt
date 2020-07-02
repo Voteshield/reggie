@@ -3,3 +3,4 @@ click
 numpy
 zipfile2
 pyyaml
+boto3
