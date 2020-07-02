@@ -1,5 +1,5 @@
 from reggie.configs.configs import Config
-from reggie.download import Preprocessor
+from reggie.ingestion.download import Preprocessor
 import datetime
 import click
 
