@@ -1,0 +1,643 @@
+
+file_type: .csv
+delimiter: ','
+state: arkansas
+source: boe
+ile_class: voter_file
+voter_id: VoterID
+county_identifier: County
+birthday_identifier: date_of_birth
+voter_status: CDE_REGISTRANT_STATUS
+party_identifier: CDE_PARTY
+date_format: '%m/%d/%Y'
+numeric_county: FALSE
+has_headers: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: FALSE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: null
+
+name_fields:
+  - TEXT_NAME_LAST
+  - TEXT_NAME_FIRST
+  - TEXT_NAME_MIDDLE
+  - CDE_NAME_SUFFIX
+  - CDE_NAME_TITLE
+
+adress_fields:
+  - TEXT_REGISTRANT_ADDRESS_NBR
+  - TEXT_RES_ADDRESS_NBR_SUFFIX
+  - CDE_STREET_DIR_PREFIX
+  - TEXT_STREET_NAME
+  - DESC_STREET_TYPE
+  - CDE_STREET_DIR_SUFFIX
+  - DESC_UNIT_TYPE
+  - TEXT_RES_UNIT_NUBR
+  - TEXT_RES_CITY
+  - CDE_RES_STATE
+  - TEXT_RES_ZIP5
+  - TEXT_RES_ZIP4
+  - IND_MAIL
+  - TEXT_MAIL_ADDRESS1
+  - TEXT_MAIL_ADDRESS2
+  - TEXT_MAIL_ADDRESS3
+  - TEXT_MAIL_ADDRESS4
+  - TEXT_MAIL_ZIP5
+  - TEXT_MAIL_ZIP4
+
+column_names:
+  - County
+  - Voter_ID
+  - KEY_REGISTRANT
+  - CDE_REGISTRANT_STATUS
+  - CDE-REGISTRANT_REASON
+  - date_of_birth
+  - date_of_registration
+  - CDE_NAME_TITLE
+  - TEXT_NAME_LAST
+  - TEXT_NAME_FIRST
+  - TEXT_NAME_MIDDLE
+  - CDE_NAME_SUFFIX
+  - TEXT_REGISTRANT_ADDRESS_NBR
+  - TEXT_RES_ADDRESS_NBR_SUFFIX
+  - CDE_STREET_DIR_PREFIX
+  - TEXT_STREET_NAME
+  - DESC_STREET_TYPE
+  - CDE_STREET_DIR_SUFFIX
+  - DESC_UNIT_TYPE
+  - TEXT_RES_UNIT_NUBR
+  - TEXT_RES_CITY
+  - CDE_RES_STATE
+  - TEXT_RES_ZIP5
+  - TEXT_RES_ZIP4
+  - IND_MAIL
+  - TEXT_MAIL_ADDRESS1
+  - TEXT_MAIL_ADDRESS2
+  - TEXT_MAIL_ADDRESS3
+  - TEXT_MAIL_ADDRESS4
+  - TEXT_MAIL_ZIP5
+  - TEXT_MAIL_ZIP4
+  - PrecinctName
+  - PrecinctDesignationCode
+  - PrecinctPartName
+  - PrecinctPartDesignationCode
+  - CDE_PARTY
+  - date_of_party_affiliation
+  - TEXT_PHONE_AREA_CODE
+  - TEXT_PHONE_EXCHANGE
+  - TEXT_PHONE_LAST_FOUR
+  - TEXT_RES_PHYSICAL_ADDRESS
+  - WaterBoardDistrict
+  - CongressionalDistrict
+  - StateSenateDistrict
+  - StateRepresentativeDistrict
+  - CourtOfAppealsDistrict
+  - JudicialDistrictSubdivision
+  - DistrictCourtDistrict
+  - TownshipDistrict
+  - JusticeOfThePeaceDistrict
+  - SchoolDistrict
+  - SchoolDistrictZone
+  - MunicipalityDistrict
+  - WardDistrict
+  - LeveeDistrict
+  - SuburbanImprovementDistrict
+  - SubordinateServicesDistrict
+  - TechnicalSchoolDistrict
+  - VolunteerFireDistrict
+  - DateLastVoted
+
+column_classes:
+  County: character
+  Voter_ID: character
+  KEY_REGISTRANT: character
+  CDE_REGISTRANT_STATUS: character
+  CDE_REGISTRANT_REASON: character
+  date_of_birth: date
+  date_of_registration: character
+  CDE_NAME_TITLE: character
+  TEXT_NAME_LAST: character
+  TEXT_NAME_FIRST: character
+  TEXT_NAME_MIDDLE: character
+  CDE_NAME_SUFFIX: character
+  TEXT_REGISTRANT_ADDRESS_NBR: character
+  TEXT_RES_ADDRESS_NBR_SUFFIX: character
+  CDE_STREET_DIR_PREFIX: character
+  TEXT_STREET_NAME: character
+  DESC_STREET_TYPE: character
+  CDE_STREET_DIR_SUFFIX: character
+  DESC_UNIT_TYPE: character
+  TEXT_RES_UNIT_NUBR: character
+  TEXT_RES_CITY: character
+  CDE_RES_STATE: character
+  TEXT_RES_ZIP5: character
+  TEXT_RES_ZIP4: character
+  IND_MAIL: character
+  TEXT_MAIL_ADDRESS1: character
+  TEXT_MAIL_ADDRESS2: character
+  TEXT_MAIL_ADDRESS3: character
+  TEXT_MAIL_ADDRESS4: character
+  TEXT_MAIL_ZIP5: character
+  TEXT_MAIL_ZIP4: character
+  PrecinctName: character
+  PrecinctDesignationCode: character
+  PrecinctPartName: character
+  PrecinctPartDesignationCode: character
+  CDE_PARTY: character
+  date_of_party_affiliation: date
+  TEXT_PHONE_AREA_CODE: character
+  TEXT_PHONE_EXCHANGE: character
+  TEXT_PHONE_LAST_FOUR: character
+  TEXT_RES_PHYSICAL_ADDRESS: character
+  WaterBoardDistrict: character
+  CongressionalDistrict: character
+  StateSenateDistrict: character
+  StateRepresentativeDistrict: character
+  CourtOfAppealsDistrict: character
+  JudicialDistrictSubdivision: character
+  DistrictCourtDistrict: character
+  TownshipDistrict: character
+  JusticeOfThePeaceDistrict: character
+  SchoolDistrict: character
+  SchoolDistrictZone: character
+  MunicipalityDistrict: character
+  WardDistrict: character
+  LeveeDistrict: character
+  SuburbanImprovementDistrict: character
+  SubordinateServicesDistrict: character
+  TechnicalSchoolDistrict: character
+  VolunteerFireDistrict: character
+  DateLastVoted: date
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  Active: A
+  Inactive: I
+  Not_Eligible: N
+  Removable: R
+  Suspense: S
+  Not_Registered: NR
+
+residence_state_codes:
+  Alaska: AK
+  American Samoa: AS
+  Arizona: AZ
+  Arkansas: AR
+  California: CA
+  Colorado: CO
+  Connecticut: CT
+  Delaware: DE
+  District Of Columbia: DC
+  Federated States Of Micronesia: FM
+  Florida: FL
+  Georgia: GA
+  Guam: GU
+  Hawaii: HI
+  Idaho: ID
+  Illinois: IL
+  Indiana: IN
+  Iowa: IA
+  Kansas: KS
+  Kentucky: KY
+  Louisiana: LA
+  Maine: ME
+  Marshall Islands: MH
+  Maryland: MD
+  Massachusetts: MA
+  Michigan: MI
+  Minnesota: MN
+  Mississippi: MS
+  Missouri: MO
+  Montana: MT
+  Nebraska: NE
+  Nevada: NV
+  New Hampshire: NH
+  New Jersey: NJ
+  New Mexico: NM
+  New York: NY
+  North Carolina: NC
+  North Dakota: ND
+  Northern Mariana Islands: MP
+  Ohio: OH
+  Oklahoma: OK
+  Oregon: OR
+  Palau: PW
+  Pennsylvania: PA
+  Puerto Rico: PR
+  Rhode Island: RI
+  South Carolina: SC
+  South Dakota: SD
+  Tennessee: TN
+  Texas: TX
+  Utah: UT
+  Vermont: VT
+  Virgin Islands: VI
+  Virginia: VA
+  Washington: WA
+  West Virginia: WV
+  Wisconsin: WI
+  Wyoming: WY
+  Alabama: AL
+  Armed Forces Europe: AE
+  Armed Forces Americas: AA
+  Armed Forces Pacific: AP
+
+Reg_Reason_Code:
+  Re_Activated : INC
+  Unprecinctable_Address: ADD
+  Mental_Incompentence_Judgement: AMI
+  No_Valid_Precinct: ANP
+  ReActive_ReRegistered: ARG
+  ReActive_Voted: AVC
+  Voter_Request: AVR
+  ReActive_RecordUpdate: AVU
+  Became_18: B18
+  NoConfResponse: CNR
+  Convicted_Felon: CON
+  ConfUndeliverable: CUN
+  Inactive_2_Elecs: IFC
+  Precinct_Change: PCH
+  Registered: REG
+  Request_By_Voter: RQV
+  Sent_Twice: STW
+  Under_18: U18
+  Verification_Sent: VER
+  Death_Notification: XDE
+  Moved_Out_County: XMO
+  Federal_Voter: FV
+  Conversion_Issue: XCV
+  Duplicate_Registration: DUP
+  Voting_Right_Elsewhere: ACR
+  Not_US_Citizen: NUC
+  Odd_Year_Mailing: OYM
+  Election_Cut_Off: CUT
+
+party_codes:
+  democratic_party: D
+  republican_party: R
+  libertarian_party: L
+  no_party_affiliated: I
+  green_party: G
+  reform_party: RF
+  nonpartisan_judicial: NP
+  optional: O
+  Non: NON
+  IM: IM
+  Y: Y
+  special_ballot: S
+
+votetype_codes:
+  polling_place: P
+  absentee: A
+  early: E
+  provisional: V
+  provisial_absentee: B
+  provisional_early: Y
+  new_former_resident: F
+
+county_codes:
+  Arkansas: '01'
+  Ashley: '02'
+  Baxter: '03'
+  Benton: '04'
+  Boone: '05'
+  Bradley: '06'
+  Calhoun: '07'
+  Carroll: '08'
+  Chicot: '09'
+  Clark: '10'
+  Clay: '11'
+  Cleburne: '12'
+  Cleveland: '13'
+  Columbia: '14'
+  Conway: '15'
+  Craighead: '16'
+  Crawford: '17'
+  Crittenden: '18'
+  Cross: '19'
+  Dallas: '20'
+  Desha: '21'
+  Drew: '22'
+  Faulkner: '23'
+  Franklin: '24'
+  Fulton: '25'
+  Garland: '26'
+  Grant: '27'
+  Greene: '28'
+  Hempstead: '29'
+  Hot Spring: '30'
+  Howard: '31'
+  Independence: '32'
+  Izard: '33'
+  Jackson: '34'
+  Jefferson: '35'
+  Johnson: '36'
+  Lafayette: '37'
+  Lawrence: '38'
+  Lee: '39'
+  Lincoln: '40'
+  Little River: '41'
+  Logan: '42'
+  Lonoke: '43'
+  Madison: '44'
+  Marion: '45'
+  Miller: '46'
+  Mississippi: '47'
+  Monroe: '48'
+  Montgomery: '49'
+  Nevada: '50'
+  Newton: '51'
+  Ouachita: '52'
+  Perry: '53'
+  Phillips: '54'
+  Pike: '55'
+  Poinsett: '56'
+  Polk: '57'
+  Pope: '58'
+  Prairie: '59'
+  Pulaski: '60'
+  Randolph: '61'
+  Saline: '63'
+  Scott: '64'
+  Searcy: '65'
+  Sebastian: '66'
+  Sevier: '67'
+  Sharp: '68'
+  St. Francis: '62'
+  Stone: '69'
+  Union: '70'
+  Van Buren: '71'
+  Washington: '72'
+  White: '73'
+  Woodruff: '74'
+  Yell: '75'
+
+school_district_codes:
+  Alma School District: '01'
+  Alpena School District: '02'
+  Smackover-Norphlet School Dist: '39'
+  Arkadelphia School District: '04'
+  Armorel School District: '05'
+  Ashdown School District: '06'
+  Atkins School District: '07'
+  Augusta School District: '08'
+  Bald Knob School District: '09'
+  Barton-Lexa School District: '10'
+  Batesville School District: '11'
+  Bauxite School District: '12'
+  Bay School District: '13'
+  Bearden School District: '14'
+  Beebe School District: '15'
+  Benton School District: '16'
+  Bentonville School District: '17'
+  Bergman School District: '18'
+  Berryville School District: '19'
+  Bismarck School District: '20'
+  Black Rock School District: '21'
+  Blevins School District: '22'
+  Blytheville School District: '23'
+  Booneville School District: '24'
+  Cossatot River: '249'
+  Cossatot River School District: '249'
+  Bradford School District: '25'
+  Bradley School District: '26'
+  Brinkley School District: '27'
+  Brookland School District: '28'
+  Bryant School District: '29'
+  Buffalo Is. Central Sch. Dist.: '30'
+  Cabot School District: '31'
+  Caddo Hills School District: '32'
+  Calico Rock School District: '33'
+  Camden Fairview School Dist.: '34'
+  Carlisle School District: '35'
+  Cave City School District: '36'
+  Cedar Ridge School District: '37'
+  Cedarville School District: '38'
+  Centerpoint School District: '39'
+  Charleston School District: '40'
+  Clarendon School District: '41'
+  Clarksville School District: '42'
+  Cleveland County School Dist.: '43'
+  Clinton School District: '44'
+  Concord School District: '45'
+  Conway School District: '46'
+  Corning School District: '47'
+  Cotter School District: '48'
+  County Line School District: '49'
+  Cross County School District: '50'
+  Crossett School District: '51'
+  Cushman School District: '52'
+  Cutter-Morning Star Sch. Dist.: '53'
+  Danville School District: '54'
+  Dardanelle School District: '55'
+  Decatur School District: '56'
+  Deer / Mt Juda School District: '57'
+  Delight School District: '58'
+  South Pike County School Dist.: '58'
+  Dequeen School District: '59'
+  Dermott School District: '60'
+  Des Arc School District: '61'
+  Dewitt School District: '63'
+  Dierks School District: '64'
+  Dollarway School District: '65'
+  Dover School District: '66'
+  Drew Central School District: '67'
+  Dumas School District: '68'
+  Earle School District: '69'
+  East End School District-Bigel: '70'
+  East Poinsett Co. School Dist.: '71'
+  El Dorado School District: '72'
+  Elaine School District: '73'
+  Elkins School District: '74'
+  Emerson/Taylor School District: '75'
+  England School District: '76'
+  Eudora School District: '77'
+  Eureka Springs School District: '78'
+  Farmington School District: '79'
+  Fayetteville School District: '80'
+  Flippin School District: '81'
+  Fordyce School District: '82'
+  Foreman School District: '83'
+  Forrest City School District: '84'
+  Fort Smith School District: '85'
+  Fouke School District: '86'
+  Fountain Lake School District: '87'
+  Genoa Central School District: '88'
+  Gentry School District: '89'
+  Glen Rose School District: '90'
+  Gosnell School District: '91'
+  Gravette School District: '92'
+  Green Forest School District: '93'
+  Greenbrier School District: '94'
+  Greene Co. Tech School Dist.: '95'
+  Greenland School District: '96'
+  Greenwood School District: '97'
+  Gurdon School District: '98'
+  Guy-Perkins School District: '99'
+  Hackett School District: '100'
+  Hamburg School District: '101'
+  Hampton School District: '102'
+  Harmony Grove School District-: '103'
+  Harmony Grove School District-: '104'
+  Harrisburg School District: '105'
+  Harrison School District: '106'
+  Hackett/Hartford SD: '107'
+  Hartford School District: '107'
+  Hazen School District: '108'
+  Heber Springs School District: '109'
+  Hector School District: '110'
+  Helena/ W.Helena School Dist.: '111'
+  Hermitage School District: '112'
+  Highland School District: '113'
+  Hillcrest School District: '114'
+  Hope School District: '115'
+  Horatio School District: '116'
+  Hot Springs School District: '117'
+  Hoxie School District: '118'
+  Hughes School District: '119'
+  Huntsville School District: '120'
+  Izard Co. Cons. School Dist.: '121'
+  Jackson Co. School District: '122'
+  Jasper School District: '123'
+  Jessieville School District: '124'
+  Jonesboro School District: '125'
+  Junction City School District: '126'
+  Kirby School District: '127'
+  Lafayette Co. School District: '128'
+  Lake Hamilton School District: '129'
+  Lakeside School District-Hot S: '130'
+  Lakeside School District-Lake : '131'
+  Lamar School District: '132'
+  Lavaca School District: '133'
+  Lead Hill School District: '134'
+  Lee County School District: '135'
+  Lincoln School District: '136'
+  Little Rock School District: '137'
+  Lonoke School District: '139'
+  Magazine School District: '140'
+  Magnet Cove School Dist.: '141'
+  Magnolia School District: '142'
+  Malvern School District: '143'
+  Mammoth Spring School District: '144'
+  Manila School District: '145'
+  Mansfield School District: '146'
+  Marion School District: '147'
+  Marked Tree School District: '148'
+  Marmaduke School District: '149'
+  Marvell School District: '150'
+  Mayflower School District: '151'
+  Maynard School District: '152'
+  Mccrory School District: '153'
+  Mcgehee School District: '154'
+  Melbourne School District: '155'
+  Mena School District: '156'
+  Midland School District: '157'
+  Mineral Springs School Dist.: '158'
+  Monticello School District: '159'
+  Mount Ida School District: '160'
+  Mountain Home School District: '161'
+  Mountain Pine School District: '162'
+  Mountain View School District: '163'
+  Mountainburg School District: '164'
+  Mt. Vernon/Enola School Dist.: '165'
+  Mulberry School District: '166'
+  Murfreesboro School District: '167'
+  Nashville School District: '168'
+  Nemo Vista School District: '169'
+  Nettleton School District: '170'
+  Nevada School District: '171'
+  Newport Special School Distric: '172'
+  Norfork School District: '173'
+  Norphlet School District: '174'
+  North Little Rock School Distr: '175'
+  Omaha School District: '176'
+  Osceola School District: '177'
+  Ouachita River School District: '178'
+  Ouachita School District: '179'
+  Ozark Mountain School District: '180'
+  Ozark School District: '181'
+  Palestine-Wheatley School Dist: '182'
+  Pangburn School District: '183'
+  Paragould School District: '184'
+  Paris School District: '185'
+  Parkers Chapel School District: '186'
+  Pea Ridge School District: '188'
+  Perryville School District: '189'
+  Piggott School District: '190'
+  Pine Bluff School District: '191'
+  Pocahontas School District: '192'
+  Pottsville School District: '193'
+  Poyen School District: '194'
+  Prairie Grove School District: '195'
+  Prescott School District: '196'
+  Pulaski County Special School : '197'
+  Quitman School District: '198'
+  Rector School District: '199'
+  Riverside School District: '200'
+  Riverview School District: '201'
+  Rogers School District: '202'
+  Rose Bud School District: '203'
+  Russellville School District: '204'
+  Salem School District: '205'
+  Scranton School District: '206'
+  Searcy County School District: '207'
+  Searcy School District: '208'
+  Sheridan School District: '209'
+  Shirley School District: '210'
+  Siloam Springs School District: '211'
+  Sloan-Hendrix School District: '212'
+  Smackover School District: '213'
+  Smackover School District NIU: '213'
+  South Conway County School Dis: '214'
+  South Mississippi County Schoo: '215'
+  South Side School District: '216'
+  Southside School District: '217'
+  Spring Hill School District: '218'
+  Springdale School District: '219'
+  Star City School District: '220'
+  Stephens School District: '221'
+  Strong - Huttig School Distric: '222'
+  Stuttgart School District: '223'
+  Texarkana School District: '225'
+  Trumann School District: '226'
+  Turrell School District: '227'
+  Twin Rivers School District: '228'
+  Two Rivers School District: '229'
+  Valley Springs School District: '230'
+  Valley View School District: '231'
+  Van Buren School District: '232'
+  Van Cove School District: '233'
+  Vilonia School District: '234'
+  Viola School District: '235'
+  Waldron School District: '237'
+  Walnut Ridge School District: '238'
+  Warren School District: '239'
+  Watson Chapel School District: '240'
+  Weiner School District: '241'
+  West Fork School District: '242'
+  West Memphis School District: '243'
+  West Side School District-Gree: '244'
+  Western Yell Co. School Dist.: '245'
+  Westside School District/Johns: '246'
+  Westside School District-Jones: '247'
+  White Co. Central School Dist.: '248'
+  White Hall School District: '249'
+  Wickes School District: '250'
+  Wonderview School District: '251'
+  Woodlawn School District: '252'
+  Wynne School District: '253'
+  Yellville-Summit School Dist.: '254'
+  Lawrence County School Dist.: '255'
+  Emerson-Taylor-Bradley Sch Dis: '256'
+  ETB: '270'

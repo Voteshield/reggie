@@ -1793,7 +1793,7 @@ class Preprocessor():
 
         voter_files = [n for n in new_files if 'vr.csv' in n['name'].lower()]
         hist_files = [n for n in new_files if 'vh.csv' in n['name'].lower()]
-        precinct_file = [n for n in new_files if 'precinct' in n['name'].lower()]
+        precinct_file = [n for n in new_files if 'precinct' in n['name'].lower()][0]
 
         # --- handling the vote history file --- #
 
@@ -1836,7 +1836,79 @@ class Preprocessor():
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_arkansas(self):
-        return
+        new_files = self.unpack_files(self.main_file)
+
+        voter_file = [n for n in new_files if 'vr.csv' == n['name'].lower()][0]
+        hist_file = [n for n in new_files if 'vh.csv' == n['name'].lower()][0]
+
+        # --- handling the vote history file --- #
+        df_hist = pd.read_csv(hist_file['obj'], dtype=str)
+
+        counties = {d[1]: d[0] for d in self.config['county_codes'].items()}
+        votetype = {d[1]: d[0] for d in self.config['votetype_codes'].items()}
+        party = {d[1]: d[0] for d in self.config['party_codes'].items()}
+
+        elections = (df_hist.columns.str
+                     .extract('(\w*\d{2,4}\w*)(?=County|Party|How)', expand=False)
+                     .drop_duplicates()
+                     .dropna())
+        elections = pd.Series(df_hist.loc[:, elections].dropna(how='all', axis=1).columns)
+        election_counts = (df_hist.sort_values(self.config['voter_id'])
+                           .loc[:, elections]
+                           .count()
+                           .values)
+        election_years = pd.to_datetime(('20' + elections.str.extract('(\d{2}(?!\d))', expand=False))).dt.year
+
+        elections_zip = zip(elections, election_counts, election_years)
+        sorted_elections_dict = {k[0]: {'index': i,
+                                        'count': k[1],
+                                        'date': k[2]}
+                                 for i, k in enumerate(elections_zip)}
+
+        electiondfs = []
+        for e in elections:
+            eparty, ecounty, evotetype = e + 'PartyVoted', e + 'CountyVotedIn', e + 'HowVoted'
+            electiondf = df_hist.loc[:, [self.config['voter_id']]].join(
+                df_hist.loc[:, [e, eparty, ecounty, evotetype]])
+            electiondf = electiondf.loc[~electiondf[e].isna(),:]
+            electiondf.loc[:, e] = e
+            electiondf = electiondf.rename(
+                {e:'all_history',
+                 eparty: 'party_history',
+                 ecounty: 'county_history',
+                 evotetype: 'votetype_history'}, axis=1)
+
+            electiondfs.append(electiondf)
+
+        df_hist = pd.concat(electiondfs, ignore_index=True)
+
+        df_hist.loc[:, ['party_history', 'county_history','votetype_history']] = pd.concat(
+            [df_hist.party_history.str.strip().map(party),
+             df_hist.county_history.str.strip().map(counties),
+             df_hist.votetype_history.str.strip().map(votetype)],
+            axis = 1)
+        df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(
+            lambda x: int(sorted_elections_dict[x]['index']))
+
+        df_hist = df_hist.fillna('NP')
+
+        voter_groups = df_hist.groupby(self.config['voter_id'])
+
+        df_hist = pd.concat([voter_groups[c].apply(list) for c in df_hist.columns[1:]], axis=1)
+
+        # --- handling the voter file --- #
+        df_voter = pd.read_csv(voter_file['obj'], dtype=str)
+
+        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_numeric(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_strings(df_voter,
+                                              exclude=[self.config['voter_id']],
+                                              col_list='column_classes')
+
+        df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_wyoming(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
