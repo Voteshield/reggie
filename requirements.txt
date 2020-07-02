@@ -4,3 +4,6 @@ numpy
 zipfile2
 pyyaml
 boto3
+requests<2.21,>=2.20.0
+xlrd
+bs4
