@@ -1863,7 +1863,7 @@ class Preprocessor():
 
         elections_zip = zip(elections, election_counts, election_years)
         sorted_elections_dict = {k[0]: {'index': i,
-                                        'count': k[1],
+                                        'count': int(k[1]),
                                         'date': k[2]}
                                  for i, k in enumerate(elections_zip)}
         sorted_elections = list(sorted_elections_dict.keys())
