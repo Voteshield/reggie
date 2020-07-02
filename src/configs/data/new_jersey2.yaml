@@ -1,0 +1,177 @@
+file_type: csv
+state: new_jersey2
+abbreviation: nj
+source: boe
+file_class: voter_file
+has_headers: true
+format:
+  separate_hist: true
+  segmented_files: true
+voter_id: id
+county_identifier: county
+primary_locale_identifier: county
+numeric_primary_locale: false
+birthday_identifier: dob
+date_format:
+  - "%m/%d/%y"
+  - "%Y-%m-%d"
+voter_status: status
+voter_status_active: Active
+voter_status_inactive: Inactive
+voter_status_pending: Pending
+party_identifier: party
+democratic_party: Democratic
+republican_party: Republican
+no_party_affiliation: Unaffiliated
+green_party: Green Party
+libertarian_party: Libertarian
+absentee_ballot_code: "'Mail In'"
+provisional_ballot_code: "'Provisional'"
+valid_voting_methods: ['Machine', 'Mail In', 'Provisional', 'Emergency']
+match_fields:
+  - last
+  - first
+  - middle
+  - dob
+name_fields:
+  - last
+  - first
+  - middle
+  - suffix
+standard_name_fields:
+  - last
+  - first
+  - middle
+address_fields:
+  - street_num
+  - street_pre
+  - street_post
+  - street_base
+  - street_suff
+  - street_name
+  - apt_unit
+  - city
+  - zip
+primary_key:
+  - pre_date
+  - post_date
+  - id
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  id: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - unaffiliated
+  - democratic
+  - republican
+  - us_constitution_party
+  - libertarian
+  - conservative_party
+  - green_party
+  - socialist_party
+  - natural_law_party
+  - reform_party
+  - locale
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  id: text
+  leg_id: int
+  party: text
+  status: text
+  last: text
+  first: text
+  middle: text
+  suffix: text
+  dob: date
+  street_num: int
+  street_pre: text
+  street_post: text
+  street_base: text
+  street_suff: text
+  street_name: text
+  apt_unit: text
+  city: text
+  zip: int
+  county: text
+  municipality: text
+  ward: text
+  district: text
+  congressional: text
+  legislative: text
+  freeholder: text
+  school: text
+  fire: text
+  unabridged_status: text
+  gender: text
+  registration_date: date
+ordered_columns:
+  - id
+  - leg_id
+  - party
+  - status
+  - last
+  - first
+  - middle
+  - suffix
+  - dob
+  - street_num
+  - street_pre
+  - street_post
+  - street_base
+  - street_suff
+  - street_name
+  - apt_unit
+  - city
+  - zip
+  - county
+  - municipality
+  - ward
+  - district
+  - congressional
+  - legislative
+  - freeholder
+  - school
+  - fire
+  - unabridged_status
+  - gender
+  - registration_date
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+  party_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+  - party_history

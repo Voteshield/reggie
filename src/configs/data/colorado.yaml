@@ -1,0 +1,506 @@
+#Colorado has two types of files, one that is a master list with voter reg info and voting history info, another with just voter reg info
+file_type: csv
+state: colorado
+abbreviation: co
+source: boe_download
+file_class: voter_file
+voter_id: VOTER_ID
+county_identifier: COUNTY
+primary_locale_identifier: COUNTY
+numeric_primary_locale: false
+birthday_identifier: BIRTH_YEAR
+voter_status: STATUS
+voter_status_active: Active
+voter_status_inactive: Inactive
+absentee_ballot_code: Mail
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: UAF
+green_party: GRN
+libertarian_party: LBR
+american_constitution_party: ACN
+unity_party: UNI
+socialist_party: APV
+party_identifier: PARTY
+has_headers: YES
+date_format: 
+  - '%m/%d/%Y'
+  - '%Y'
+generated_columns:
+  all_history: int[]
+  vote_type: text[]
+format:
+  separate_hist: true
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: true
+  columnar_elections: false
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - BIRTH_YEAR
+name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
+  - VOTER_NAME
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+ordered_generated_columns:
+  - all_history
+  - vote_type
+address_fields:
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - UNIT_TYPE
+  - UNIT_NUM
+  - RESIDENTIAL_ADDRESS
+  - RESIDENTIAL_CITY
+  - RESIDENTIAL_STATE
+  - RESIDENTIAL_ZIP_CODE
+  - RESIDENTIAL_ZIP_PLUS
+  - MAILING_ADDRESS_1
+  - MAILING_ADDRESS_2
+  - MAILING_ADDRESS_3
+  - MAILING_CITY
+  - MAILING_STATE
+  - MAILING_ZIP_CODE
+  - MAILING_ZIP_PLUS
+  - MAILING_COUNTRY
+primary_key:
+  - pre_date
+  - post_date
+  - VOTER_ID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  VOTER_ID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+additional_snapshot_columns:
+  all_history: text[]
+  vote_type: text[]
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - REP
+  - DEM
+  - UAF
+  - LBR
+  - ACN
+  - GRN
+  - UNI
+  - APV
+  - locale
+hist_columns:
+  - VOTER_ID
+  - ELECTION_TYPE
+  - ELECTION_DATE
+  - ELECTION_DESCRIPTION
+  - VOTING_METHOD
+  - PARTY
+  - COUNTY_NAME
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  VOTER_ID: text
+  COUNTY: text
+  LAST_NAME: text
+  FIRST_NAME: text
+  MIDDLE_NAME: text
+  NAME_SUFFIX: text
+  VOTER_NAME: text
+  PRECINCT_NAME: text
+  HOUSE_NUM: int
+  HOUSE_SUFFIX: text
+  PRE_DIR: text
+  STREET_NAME: text
+  STREET_TYPE: text
+  POST_DIR: text
+  UNIT_TYPE: text
+  UNIT_NUM: text
+  RESIDENTIAL_ADDRESS: text
+  RESIDENTIAL_CITY: text
+  RESIDENTIAL_STATE: text
+  RESIDENTIAL_ZIP_CODE: text
+  RESIDENTIAL_ZIP_PLUS: text
+  EFFECTIVE_DATE: date
+  REGISTRATION_DATE: date
+  STATUS: text
+  STATUS_REASON: text
+  BIRTH_YEAR: date
+  GENDER: text
+  PRECINCT: text
+  PARTY: text
+  PHONE_NUM: text
+  MAILING_ADDRESS_1: text
+  MAILING_ADDRESS_2: text
+  MAILING_ADDRESS_3: text
+  MAILING_CITY: text
+  MAILING_STATE: text
+  MAILING_ZIP_CODE: text
+  MAILING_ZIP_PLUS: text
+  MAILING_COUNTRY: text
+  CONGRESSIONAL: text
+  STATE_SENATE: text
+  STATE_HOUSE: text
+
+ordered_columns:
+  - VOTER_ID
+  - COUNTY
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
+  - VOTER_NAME
+  - PRECINCT_NAME
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - UNIT_TYPE
+  - UNIT_NUM
+  - RESIDENTIAL_ADDRESS
+  - RESIDENTIAL_CITY
+  - RESIDENTIAL_STATE
+  - RESIDENTIAL_ZIP_CODE
+  - RESIDENTIAL_ZIP_PLUS
+  - EFFECTIVE_DATE
+  - REGISTRATION_DATE
+  - STATUS
+  - STATUS_REASON
+  - BIRTH_YEAR
+  - GENDER
+  - PRECINCT
+  - PARTY
+  - PHONE_NUM
+  - MAILING_ADDRESS_1
+  - MAILING_ADDRESS_2
+  - MAILING_ADDRESS_3
+  - MAILING_CITY
+  - MAILING_STATE
+  - MAILING_ZIP_CODE
+  - MAILING_ZIP_PLUS
+  - MAILING_COUNTRY
+  - CONGRESSIONAL
+  - STATE_SENATE
+  - STATE_HOUSE
+
+raw_ordered_columns:
+  - VOTER_ID
+  - COUNTY_CODE
+  - COUNTY
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - NAME_SUFFIX
+  - VOTER_NAME
+  - STATUS_CODE
+  - PRECINCT_NAME
+  - ADDRESS_LIBRARY_ID
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - UNIT_TYPE
+  - UNIT_NUM
+  - ADDRESS_NON_STD
+  - RESIDENTIAL_ADDRESS
+  - RESIDENTIAL_CITY
+  - RESIDENTIAL_STATE
+  - RESIDENTIAL_ZIP_CODE
+  - RESIDENTIAL_ZIP_PLUS
+  - EFFECTIVE_DATE
+  - REGISTRATION_DATE
+  - STATUS
+  - STATUS_REASON
+  - BIRTH_YEAR
+  - GENDER
+  - PRECINCT
+  - SPLIT
+  - VOTER_STATUS_ID
+  - PARTY
+  - PARTY_AFFILIATION_DATE
+  - PHONE_NUM
+  - MAILING_ADDRESS_1
+  - MAILING_ADDRESS_2
+  - MAILING_ADDRESS_3
+  - MAILING_CITY
+  - MAILING_STATE
+  - MAILING_ZIP_CODE
+  - MAILING_ZIP_PLUS
+  - MAILING_COUNTRY
+  - SPL_ID
+  - PERMANENT_MAIL_IN_VOTER
+  - CONGRESSIONAL
+  - STATE_SENATE
+  - STATE_HOUSE
+  - ID_REQUIRED
+
+county_names:
+  - Adams
+  - Alamosa
+  - Arapahoe
+  - Archuleta
+  - Baca
+  - Bent
+  - Boulder
+  - Broomfield
+  - Chaffee
+  - Cheyenne
+  - Clear Creek
+  - Conejos
+  - Costilla
+  - Crowley
+  - Custer
+  - Delta
+  - Denver
+  - Dolores
+  - Douglas
+  - Eagle
+  - Elbert
+  - El Paso
+  - Fremont
+  - Garfield
+  - Gilpin
+  - Grand
+  - Gunnison
+  - Hinsdale
+  - Huerfano
+  - Jackson
+  - Jefferson
+  - Kiowa
+  - Kit Carson
+  - Lake
+  - La Plata
+  - Larimer
+  - Las Animas
+  - Lincoln
+  - Logan
+  - Mesa
+  - Mineral
+  - Moffat
+  - Montezuma
+  - Montrose
+  - Morgan
+  - Otero
+  - Ouray
+  - Park
+  - Phillips
+  - Pitkin
+  - Prowers
+  - Pueblo
+  - Rio Blanco
+  - Rio Grande
+  - Routt
+  - Saguache
+  - San Juan
+  - San Miguel
+  - Sedgwick
+  - Summit
+  - Teller
+  - Washington
+  - Weld
+  - Yuma
+master_voter_columns:
+  - VOTER_ID
+  - COUNTY
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - NAME_SUFFIX
+  - REGISTRATION_DATE
+  - EFFECTIVE_DATE
+  - LAST_UPDATED_DATE
+  - OLD_VOTER_ID
+  - PHONE_NUM
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - UNIT_TYPE
+  - UNIT_NUM
+  - RESIDENTIAL_ADDRESS
+  - RESIDENTIAL_CITY
+  - RESIDENTIAL_STATE
+  - RESIDENTIAL_ZIP_CODE
+  - RESIDENTIAL_ZIP_PLUS
+  - MAILING_ADDRESS_1
+  - MAILING_ADDRESS_2
+  - MAILING_ADDRESS_3
+  - MAILING_CITY
+  - MAILING_STATE
+  - MAILING_ZIP_CODE
+  - MAILING_ZIP_PLUS
+  - MAILING_COUNTRY
+  - VOTER_STATUS
+  - STATUS_REASON
+  - PARTY
+  - GENDER
+  - BIRTH_YEAR
+  - PRECINCT_CODE
+  - PRECINCT_NAME
+  - FEDERAL
+  - CONGRESSIONAL
+  - STATEWIDE
+  - STATE_BOARD_OF_EDUCATION_-_AT_LARGE
+  - STATE_BOARD_OF_EDUCATION
+  - UNIVERSITY_OF_COLORADO_REGENTS_-_AT_LARGE
+  - UNIVERSITY_OF_COLORADO_REGENTS
+  - STATE_SENATE
+  - STATE_HOUSE
+  - JUDICIAL
+  - REGIONAL_TRANSPORTATION
+  - CONSOLIDATED_REGIONAL_TRANSPORTATION
+  - COUNTY_COMMISSIONER
+  - COUNTYWIDE
+  - MUNICIPALITY
+  - CITY_2
+  - CITY_WARD_AND_PRECINCT
+  - CITY_SUB
+  - COUNCIL
+  - CITY_WARD/DISTRICT
+  - SCHOOL
+  - SCHOOL_PRECINCT
+  - COMMUNITY_COLLEGE/JUNIOR_COLLEGE_2
+  - COMMUNITY_COLLEGE/JUNIOR_COLLEGE
+  - AIRPORT_AUTHORITY
+  - AMBULANCE
+  - AMBULANCE_2
+  - ANNEXATION
+  - BOND_DEBT_AND_DEBT_SERVICE
+  - BOND_DEBT_AND_DEBT_SERVICE_2
+  - BUSINESS_IMPROVEMENT
+  - CEMETERY_2
+  - CEMETERY
+  - CONSERVATION
+  - CONSERVATION_2
+  - CONSERVATION_3
+  - COUNTY_HOUSING_AUTHORITY
+  - COUNTY_ROAD
+  - DC_-_CAP_RESERVE
+  - DC_-_DEBT_SERVICE
+  - DC_-_INSURANCE_RESERVE
+  - DEVELOPMENT_AUTHORITY
+  - DOWNTOWN_DEVELOPMENT_AUTHORITY
+  - DRAINAGE
+  - DRAINAGE_AND_FLOOD_CONTROL
+  - DRAINAGE_AND_FLOOD_CONTROL_2
+  - EMERGENCY_TELEPHONE_SERVICE_AUTHORITY
+  - FIRE_PROTECTION
+  - FIRE_PROTECTION_2
+  - FIRE_PROTECTION_3
+  - FIRE_PROTECTION_SUB
+  - FOOTBALL_STADIUM
+  - GENERAL_IMPROVEMENT
+  - GROUNDWATER_MANAGEMENT
+  - GROUNDWATER_MANAGEMENT_2
+  - HEALTH_SERVICE/HOSPITAL_AUTHORITY
+  - HIGHWAY_AUTHORITY
+  - HOSPITAL_AUTHORITY
+  - HOSPITAL_AUTHORITY_2
+  - HOUSING_AUTHORITY
+  - IMPROVEMENT_2
+  - IRRIGATION
+  - LAW_ENFORCEMENT_AUTHORITY
+  - LIBRARY
+  - LIBRARY_SUB
+  - LOCAL_IMPROVEMENT
+  - LOCAL_MARKETING
+  - MAJOR_LEAGUE_BASEBALL_STADIUM
+  - METROPOLITAN
+  - METROPOLITAN_2
+  - METROPOLITAN_3
+  - METROPOLITAN_SUB
+  - MISCELLANEOUS_GENERAL_IMPROVEMENT
+  - MISCELLANEOUS_OTHER
+  - PARK_AND_RECREATION
+  - PARK_AND_RECREATION_2
+  - PARK_AND_RECREATION_3
+  - PARK_AND_RECREATION_4
+  - PARK_AND_RECREATION_5
+  - PARK_AND_RECREATION_SUB
+  - PROPOSED
+  - PROPOSED_2
+  - PUBLIC_IMPROVEMENT
+  - PUBLIC_IMPROVEMENT_2
+  - RECREATION/TRANSLATOR
+  - REGIONAL_HOUSING_AUTHORITY
+  - REGIONAL_SERVICE_AUTHORITY
+  - RIVER_POWER_AUTHORITY
+  - ROAD_AND_BRIDGE
+  - SANITATION
+  - SANITATION_2
+  - SCIENTIFIC_CULTURAL_FACILITIES
+  - SCIENTIFIC_CULTURAL_FACILITIES_SUB
+  - SEWER_IMPROVEMENT
+  - SOIL_CONSERVATION_TAX_AREA
+  - SPECIAL_IMPROVEMENT
+  - SPECIAL_IMPROVEMENT_MAINTENANCE
+  - TAX_AREA
+  - TRANSPORTATION_AUTHORITY_2
+  - TRANSPORTATION_AUTHORITY
+  - UNINCORPORATED
+  - UNINCORPORATED_2
+  - URBAN_RENEWAL/REINVESTMENT_AUTHORITY
+  - WATER_AND_SANITATION
+  - WATER_AND_SANITATION_2
+  - WATER_AND_SANITATION_3
+  - WATER_CONSERVANCY
+  - WATER_CONSERVANCY_2
+  - WATER_CONSERVANCY_3
+  - WATER_CONSERVATION
+  - WATER_CONSERVATION_2
+  - WATER
+  - WATER_2
+  - WATER_SUB
+  - WATER_QUALITY_AUTHORITY
+  - WEED_AND_PEST_CONTROL
+blacklist_columns:
+  - 'ADDRESS_LIBRARY_ID'
+  - 'ADDRESS_NON_STD'
+  - 'COUNTY_CODE'
+  - 'ID_REQUIRED'
+  - 'PARTY_AFFILIATION_DATE'
+  - 'PERMANENT_MAIL_IN_VOTER'
+  - 'SPLIT'
+  - 'SPL_ID'
+  - 'STATUS_CODE'
+  - 'VOTER_STATUS_ID'

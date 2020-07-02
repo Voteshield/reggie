@@ -1,0 +1,402 @@
+[
+  {
+    "name": "Alamance",
+    "id": "1"
+  },
+  {
+    "name": "Alexander",
+    "id": "2"
+  },
+  {
+    "name": "Alleghany",
+    "id": "3"
+  },
+  {
+    "name": "Anson",
+    "id": "4"
+  },
+  {
+    "name": "Ashe",
+    "id": "5"
+  },
+  {
+    "name": "Avery",
+    "id": "6"
+  },
+  {
+    "name": "Beaufort",
+    "id": "7"
+  },
+  {
+    "name": "Bertie",
+    "id": "8"
+  },
+  {
+    "name": "Bladen",
+    "id": "9"
+  },
+  {
+    "name": "Brunswick",
+    "id": "10"
+  },
+  {
+    "name": "Buncombe",
+    "id": "11"
+  },
+  {
+    "name": "Burke",
+    "id": "12"
+  },
+  {
+    "name": "Cabarrus",
+    "id": "13"
+  },
+  {
+    "name": "Caldwell",
+    "id": "14"
+  },
+  {
+    "name": "Camden",
+    "id": "15"
+  },
+  {
+    "name": "Carteret",
+    "id": "16"
+  },
+  {
+    "name": "Caswell",
+    "id": "17"
+  },
+  {
+    "name": "Catawba",
+    "id": "18"
+  },
+  {
+    "name": "Chatham",
+    "id": "19"
+  },
+  {
+    "name": "Cherokee",
+    "id": "20"
+  },
+  {
+    "name": "Chowan",
+    "id": "21"
+  },
+  {
+    "name": "Clay",
+    "id": "22"
+  },
+  {
+    "name": "Cleveland",
+    "id": "23"
+  },
+  {
+    "name": "Columbus",
+    "id": "24"
+  },
+  {
+    "name": "Craven",
+    "id": "25"
+  },
+  {
+    "name": "Cumberland",
+    "id": "26"
+  },
+  {
+    "name": "Currituck",
+    "id": "27"
+  },
+  {
+    "name": "Dare",
+    "id": "28"
+  },
+  {
+    "name": "Davidson",
+    "id": "29"
+  },
+  {
+    "name": "Davie",
+    "id": "30"
+  },
+  {
+    "name": "Duplin",
+    "id": "31"
+  },
+  {
+    "name": "Durham",
+    "id": "32"
+  },
+  {
+    "name": "Edgecombe",
+    "id": "33"
+  },
+  {
+    "name": "Forsyth",
+    "id": "34"
+  },
+  {
+    "name": "Franklin",
+    "id": "35"
+  },
+  {
+    "name": "Gaston",
+    "id": "36"
+  },
+  {
+    "name": "Gates",
+    "id": "37"
+  },
+  {
+    "name": "Graham",
+    "id": "38"
+  },
+  {
+    "name": "Granville",
+    "id": "39"
+  },
+  {
+    "name": "Greene",
+    "id": "40"
+  },
+  {
+    "name": "Guilford",
+    "id": "41"
+  },
+  {
+    "name": "Halifax",
+    "id": "42"
+  },
+  {
+    "name": "Harnett",
+    "id": "43"
+  },
+  {
+    "name": "Haywood",
+    "id": "44"
+  },
+  {
+    "name": "Henderson",
+    "id": "45"
+  },
+  {
+    "name": "Hertford",
+    "id": "46"
+  },
+  {
+    "name": "Hoke",
+    "id": "47"
+  },
+  {
+    "name": "Hyde",
+    "id": "48"
+  },
+  {
+    "name": "Iredell",
+    "id": "49"
+  },
+  {
+    "name": "Jackson",
+    "id": "50"
+  },
+  {
+    "name": "Johnston",
+    "id": "51"
+  },
+  {
+    "name": "Jones",
+    "id": "52"
+  },
+  {
+    "name": "Lee",
+    "id": "53"
+  },
+  {
+    "name": "Lenoir",
+    "id": "54"
+  },
+  {
+    "name": "Lincoln",
+    "id": "55"
+  },
+  {
+    "name": "Macon",
+    "id": "56"
+  },
+  {
+    "name": "Madison",
+    "id": "57"
+  },
+  {
+    "name": "Martin",
+    "id": "58"
+  },
+  {
+    "name": "Mcdowell",
+    "id": "59"
+  },
+  {
+    "name": "Mecklenburg",
+    "id": "60"
+  },
+  {
+    "name": "Mitchell",
+    "id": "61"
+  },
+  {
+    "name": "Montgomery",
+    "id": "62"
+  },
+  {
+    "name": "Moore",
+    "id": "63"
+  },
+  {
+    "name": "Nash",
+    "id": "64"
+  },
+  {
+    "name": "Newhanover",
+    "id": "65"
+  },
+  {
+    "name": "Northampton",
+    "id": "66"
+  },
+  {
+    "name": "Onslow",
+    "id": "67"
+  },
+  {
+    "name": "Orange",
+    "id": "68"
+  },
+  {
+    "name": "Pamlico",
+    "id": "69"
+  },
+  {
+    "name": "Pasquotank",
+    "id": "70"
+  },
+  {
+    "name": "Pender",
+    "id": "71"
+  },
+  {
+    "name": "Perquimans",
+    "id": "72"
+  },
+  {
+    "name": "Person",
+    "id": "73"
+  },
+  {
+    "name": "Pitt",
+    "id": "74"
+  },
+  {
+    "name": "Polk",
+    "id": "75"
+  },
+  {
+    "name": "Randolph",
+    "id": "76"
+  },
+  {
+    "name": "Richmond",
+    "id": "77"
+  },
+  {
+    "name": "Robeson",
+    "id": "78"
+  },
+  {
+    "name": "Rockingham",
+    "id": "79"
+  },
+  {
+    "name": "Rowan",
+    "id": "80"
+  },
+  {
+    "name": "Rutherford",
+    "id": "81"
+  },
+  {
+    "name": "Sampson",
+    "id": "82"
+  },
+  {
+    "name": "Scotland",
+    "id": "83"
+  },
+  {
+    "name": "Stanly",
+    "id": "84"
+  },
+  {
+    "name": "Stokes",
+    "id": "85"
+  },
+  {
+    "name": "Surry",
+    "id": "86"
+  },
+  {
+    "name": "Swain",
+    "id": "87"
+  },
+  {
+    "name": "Transylvania",
+    "id": "88"
+  },
+  {
+    "name": "Tyrrell",
+    "id": "89"
+  },
+  {
+    "name": "Union",
+    "id": "90"
+  },
+  {
+    "name": "Vance",
+    "id": "91"
+  },
+  {
+    "name": "Wake",
+    "id": "92"
+  },
+  {
+    "name": "Warren",
+    "id": "93"
+  },
+  {
+    "name": "Washington",
+    "id": "94"
+  },
+  {
+    "name": "Watauga",
+    "id": "95"
+  },
+  {
+    "name": "Wayne",
+    "id": "96"
+  },
+  {
+    "name": "Wilkes",
+    "id": "97"
+  },
+  {
+    "name": "Wilson",
+    "id": "98"
+  },
+  {
+    "name": "Yadkin",
+    "id": "99"
+  },
+  {
+    "name": "Yancey",
+    "id": "0"
+  }
+]
