@@ -1745,8 +1745,6 @@ class Preprocessor():
 #            'array_decoding': json.dumps()
         }
 
-        self.is_compressed = False
-
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
@@ -1782,8 +1780,6 @@ class Preprocessor():
             # 'array_encoding': json.dumps(),
             # 'array_decoding': json.dumps()
         }
-
-        self.is_compressed = False
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=None, encoding='latin-1')))
@@ -1832,6 +1828,12 @@ class Preprocessor():
 
         df_voter = df_voter.join(df_hist)
 
+        self.meta = {
+            'message': 'oklahoma_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+            }
+
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
@@ -1864,6 +1866,7 @@ class Preprocessor():
                                         'count': k[1],
                                         'date': k[2]}
                                  for i, k in enumerate(elections_zip)}
+        sorted_elections = list(sorted_elections_dict.keys())
 
         electiondfs = []
         for e in elections:
@@ -1906,6 +1909,12 @@ class Preprocessor():
                                               col_list='column_classes')
 
         df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
+
+        self.meta = {
+            'message': 'arkansas_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
