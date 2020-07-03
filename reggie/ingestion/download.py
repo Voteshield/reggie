@@ -388,6 +388,19 @@ class Loader(object):
                 file_class=META_FILE_PREFIX) + ".json").put(
                 Body=json.dumps(meta), ServerSideEncryption='AES256')
 
+    def generate_local_key(self, meta=False):
+        if meta:
+            name = "meta_" + self.state + "_" + self.date + ".json"
+        else:
+            name = self.state + "_" + self.date + ".csv.gz"
+        return name
+
+    def local_dump(self, file_item):
+        # preprocessor.locale_dump(file_item=preprocessor.main_file)
+        self.dataframe.to_csv(self.generate_local_key(), compression='gzip')
+        with open(self.generate_local_key(meta=True), 'w') as fp:
+            json.dump(self.meta, fp)
+
 
 class Preprocessor(Loader):
     def __init__(self, raw_s3_file, config_file, **kwargs):

@@ -22,6 +22,7 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = PROJECT_DIR + "/configs/data/"
 LOCALE_DIR = PROJECT_DIR + "/configs/{}/".format(PRIMARY_LOCALE_NAMES)
 CONFIG_OHIO_FILE = CONFIG_DIR + "ohio.yaml"
+CONFIG_CHUNK_URLS = "data_chunk_links"
 
 ADDRESS_CHANGE_TYPE = "address"
 NAME_CHANGE_TYPE = "name"
