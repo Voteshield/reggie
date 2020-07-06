@@ -1,3 +1,4 @@
 include README.md
 include *.yaml
 recursive-include reggie/configs/data *
+recursive-include reggie/configs/primary_locale_names *
