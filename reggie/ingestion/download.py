@@ -399,7 +399,7 @@ class Loader(object):
         return pd.read_csv(file_item.obj)
 
     def local_dump(self, file_item):
-        df = output_dataframe(file_item)
+        df = self.output_dataframe(file_item)
         df.to_csv(self.generate_local_key(), compression='gzip')
         with open(self.generate_local_key(meta=True), 'w') as fp:
             json.dump(self.meta, fp)
