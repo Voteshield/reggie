@@ -403,10 +403,13 @@ class Loader(object):
 
 
 class Preprocessor(Loader):
-    def __init__(self, raw_s3_file, config_file, **kwargs):
+    def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
+
+        if force_date is None:
+            force_date = date_from_str(raw_s3_file)
 
         super(Preprocessor, self).__init__(
-            config_file=config_file, force_date=date_from_str(raw_s3_file),
+            config_file=config_file, force_date=force_date,
             **kwargs)
         self.raw_s3_file = raw_s3_file
 
@@ -538,9 +541,11 @@ class Preprocessor(Loader):
         except Exception as e:
             logging.error(e)
 
-        logging.info(
-            "WARNING: pandas.read_csv() skipped a total of {} lines, which " \
-            "had an unexpected number of fields.""".format(num_skipped))
+        if num_skipped > 0:
+            logging.info(
+                "WARNING: pandas.read_csv() skipped a total of {} lines, " \
+                "which had an unexpected number of fields.""".format(
+                    num_skipped))
 
         if num_skipped > MAX_MALFORMED_LINES_ALLOWED:
 
