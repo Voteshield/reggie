@@ -390,14 +390,17 @@ class Loader(object):
 
     def generate_local_key(self, meta=False):
         if meta:
-            name = "meta_" + self.state + "_" + self.date + ".json"
+            name = "meta_" + self.state + "_" + self.download_date + ".json"
         else:
-            name = self.state + "_" + self.date + ".csv.gz"
+            name = self.state + "_" + self.download_date + ".csv.gz"
         return name
 
+    def output_dataframe(self, file_item):
+        return pd.read_csv(file_item.obj)
+
     def local_dump(self, file_item):
-        # preprocessor.locale_dump(file_item=preprocessor.main_file)
-        self.dataframe.to_csv(self.generate_local_key(), compression='gzip')
+        df = output_dataframe(file_item)
+        df.to_csv(self.generate_local_key(), compression='gzip')
         with open(self.generate_local_key(meta=True), 'w') as fp:
             json.dump(self.meta, fp)
 
