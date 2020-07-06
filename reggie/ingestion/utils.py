@@ -4,8 +4,8 @@ import re
 
 from botocore.exceptions import ClientError
 
-from configs.configs import Config
-from constants import META_FILE_PREFIX, NULL_CHAR, PROCESSED_FILE_PREFIX, \
+from reggie.configs.configs import Config
+from reggie.constants import META_FILE_PREFIX, NULL_CHAR, PROCESSED_FILE_PREFIX, \
     RAW_FILE_PREFIX, S3_BUCKET
 
 

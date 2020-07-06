@@ -5,10 +5,10 @@ from datetime import date as dt
 import pandas as pd
 from dateutil import parser
 import json
-from constants import *
-from configs.configs import Config
+from reggie.constants import *
+from reggie.configs.configs import Config
 
-from ingestion.utils import date_from_str, df_to_postgres_array_string, \
+from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
     format_column_name, generate_s3_key, get_metadata_for_key, \
     get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
     s3, strcol_to_array, TooManyMalformedLines
