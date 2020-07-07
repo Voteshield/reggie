@@ -18,9 +18,9 @@ LOCALE_TYPE = "locale_type"
 PRIMARY_LOCALE_TYPE = "primary_locale_type"
 PRIMARY_LOCALE_NAMES = "primary_locale_names"
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_DIR = PROJECT_DIR + "/configs/data/"
-LOCALE_DIR = PROJECT_DIR + "/configs/{}/".format(PRIMARY_LOCALE_NAMES)
+REGGIE_PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_DIR = REGGIE_PROJECT_DIR + "/configs/data/"
+LOCALE_DIR = REGGIE_PROJECT_DIR + "/configs/{}/".format(PRIMARY_LOCALE_NAMES)
 CONFIG_OHIO_FILE = CONFIG_DIR + "ohio.yaml"
 CONFIG_CHUNK_URLS = "data_chunk_links"
 
