@@ -1,4 +1,4 @@
-from reggie.constants import CONFIG_DIR, CORE_CHANGE_TYPES, \
+from reggie.reggie_constants import CONFIG_DIR, CORE_CHANGE_TYPES, \
     EARLY_VOTER_CHANGE_TYPE, PRIMARY_LOCALE_ALIAS, LOCALE_TYPE, \
     PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml

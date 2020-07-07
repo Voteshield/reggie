@@ -5,8 +5,8 @@ import re
 from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
-from reggie.constants import META_FILE_PREFIX, NULL_CHAR, PROCESSED_FILE_PREFIX, \
-    RAW_FILE_PREFIX, S3_BUCKET
+from reggie.reggie_constants import META_FILE_PREFIX, NULL_CHAR, \
+    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, S3_BUCKET
 
 
 s3 = boto3.resource("s3")

@@ -2,7 +2,7 @@ from reggie.configs.configs import Config
 import requests
 import zipfile
 from reggie.ingestion.download import Loader, FileItem, ohio_get_last_updated, nc_date_grab
-from reggie.constants import RAW_FILE_PREFIX
+from reggie.reggie_constants import RAW_FILE_PREFIX
 import logging
 
 

@@ -5,7 +5,7 @@ from datetime import date as dt
 import pandas as pd
 from dateutil import parser
 import json
-from reggie.constants import *
+from reggie.reggie_constants import *
 from reggie.configs.configs import Config
 
 from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
