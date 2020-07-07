@@ -11,8 +11,6 @@ def setup_reggie():
 setup_reggie()
 
 
-S3_BUCKET = os.environ.get("S3_BUCKET")
-
 PRIMARY_LOCALE_ALIAS = "primary_locale_identifier"
 LOCALE_TYPE = "locale_type"
 PRIMARY_LOCALE_TYPE = "primary_locale_type"

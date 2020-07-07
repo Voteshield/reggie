@@ -63,14 +63,14 @@ def nc_date_grab():
     return file_date_vf
 
 
-def get_object(key, fn):
+def get_object(key, fn, s3_bucket):
     with open(fn, "w+") as obj:
-        s3.Bucket(S3_BUCKET).download_fileobj(Key=key, Fileobj=obj)
+        s3.Bucket(s3_bucket).download_fileobj(Key=key, Fileobj=obj)
 
 
-def get_object_mem(key, bucket=S3_BUCKET):
+def get_object_mem(key, s3_bucket):
     file_obj = BytesIO()
-    s3.Bucket(bucket).download_fileobj(Key=key, Fileobj=file_obj)
+    s3.Bucket(s3_bucket).download_fileobj(Key=key, Fileobj=file_obj)
     return file_obj
 
 
@@ -370,7 +370,7 @@ class Loader(object):
                                 self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
-    def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
+    def s3_dump(self, file_item, s3_bucket, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
         if file_class != PROCESSED_FILE_PREFIX:
@@ -381,10 +381,10 @@ class Loader(object):
                 self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        s3.Object(S3_BUCKET, self.generate_key(file_class=file_class)).put(
+        s3.Object(s3_bucket, self.generate_key(file_class=file_class)).put(
             Body=file_item.obj, ServerSideEncryption='AES256')
         if file_class != RAW_FILE_PREFIX:
-            s3.Object(S3_BUCKET, self.generate_key(
+            s3.Object(s3_bucket, self.generate_key(
                 file_class=META_FILE_PREFIX) + ".json").put(
                 Body=json.dumps(meta), ServerSideEncryption='AES256')
 

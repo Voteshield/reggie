@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
 from reggie.reggie_constants import META_FILE_PREFIX, NULL_CHAR, \
-    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, S3_BUCKET
+    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
 
 
 s3 = boto3.resource("s3")
@@ -76,7 +76,7 @@ def strcol_to_array(str_col, delim=","):
         .replace("]", "").str.split(delim)
 
 
-def get_s3_uploads(state, file_class, source, testing=False):
+def get_s3_uploads(state, file_class, source, s3_bucket, testing=False):
     """
     returns any files uploaded to s3 for a state, fileclass, source, and
     whether or not you are testing
@@ -92,20 +92,20 @@ def get_s3_uploads(state, file_class, source, testing=False):
         prefix = "{}/{}/{}".format(file_class, state, source)
     else:
         prefix = "testing/{}/{}/".format(file_class, state)
-    keys = [a for a in s3.Bucket(S3_BUCKET).objects.filter(Prefix=prefix)
+    keys = [a for a in s3.Bucket(s3_bucket).objects.filter(Prefix=prefix)
             if a.key[-1] != "/"]
     return keys
 
 
-def get_processed_s3_uploads(state, testing=False):
+def get_processed_s3_uploads(state, s3_bucket, testing=False):
     configs = Config(state=state)
     keys = get_s3_uploads(configs["state"], configs["file_class"],
-                          configs["source"], testing)
+                          configs["source"], s3_bucket, testing)
     return keys
 
 
-def pull_sorted_upload_keys(state, testing=False):
-    keys = get_processed_s3_uploads(state, testing)
+def pull_sorted_upload_keys(state, s3_bucket, testing=False):
+    keys = get_processed_s3_uploads(state, s3_bucket, testing)
     return sorted([k.key for k in keys],
                   key=lambda x: parser.parse(date_from_str(x)))
 
@@ -155,18 +155,17 @@ def get_surrounding_dates(date,
     return pre_date, post_date, pre_key, post_key
 
 
-def get_metadata_for_key(k):
+def get_metadata_for_key(k, s3_bucket):
     """
     Get complimentary metadata for an s3 object.
     :param k: a processed file
     :return:
     """
-    bucket = S3_BUCKET
     if k[-4:] == 'json':
         meta_key = k
         meta = {}
     else:
-        obj = s3.Object(bucket, k).get()
+        obj = s3.Object(s3_bucket, k).get()
         dir_array = k.split("/")
         if dir_array[0] == "testing":
             k_0 = "/".join(k.split("/")[2:])
@@ -177,7 +176,7 @@ def get_metadata_for_key(k):
         meta = obj["Metadata"]
 
     try:
-        meta_obj = s3.Object(bucket, meta_key).get()
+        meta_obj = s3.Object(s3_bucket, meta_key).get()
         meta_temp = json.loads(meta_obj["Body"].read().decode("utf-8") )
         for k in meta_temp:
             if type(meta_temp[k]) == str\
