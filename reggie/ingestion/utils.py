@@ -2,6 +2,7 @@ import boto3
 import json
 import re
 
+from dateutil import parser
 from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
