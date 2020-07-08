@@ -66,7 +66,7 @@ def concat_and_delete(in_list):
 
 class Preprocessor():
 
-    def __init__(self, local_file, config_file, date):
+    def __init__(self, local_file, config_file, date, **kwargs):
         self.main_file = FileItem("main file", filename=local_file)
 
         self.config_file_path = config_file
@@ -76,8 +76,6 @@ class Preprocessor():
         self.state = config['state']
         self.meta = None
         self.dataframe = None
-
-        self.data = None
 
     def __enter__(self):
         return self
@@ -2033,6 +2031,8 @@ class Preprocessor():
         hist_file = [n for n in new_files if 'history.txt' in n['name'].lower()][0]
         voter_file = [n for n in new_files if 'voter.txt' in n['name'].lower()][0]
 
+        # --- handling voter history --- #
+
         df_hist = pd.read_csv(hist_file['obj'], skiprows=1, sep='|', dtype=str)
 
         election_keys = ['election_names',
@@ -2068,6 +2068,8 @@ class Preprocessor():
 
         voter_groups = election_df.sort_values('date', ascending=True).groupby(self.config['voter_id'])
         df_hist = pd.concat([voter_groups[c].apply(list) for c in election_df.columns if 'history' in c], axis=1)
+
+        # --- handling vote file --- #
 
         df_voter = pd.read_csv(voter_file['obj'], sep='|', skiprows=1, dtype=str)
         df_voter = self.config.coerce_strings(df_voter,
