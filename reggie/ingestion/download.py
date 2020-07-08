@@ -107,13 +107,13 @@ class FileItem(object):
     in this case, name is always a string and obj is a StringIO/BytesIO object
     """
 
-    def __init__(self, name, key=None, filename=None, io_obj=None):
+    def __init__(self, name, key=None, filename=None, io_obj=None, s3_bucket=""):
         if not any([key, filename, io_obj]):
             raise ValueError("must supply at least one key,"
                              " filename, or io_obj but "
                              "all are none")
         if key is not None:
-            self.obj = get_object_mem(key)
+            self.obj = get_object_mem(key, s3_bucket)
         elif filename is not None:
             try:
                 with open(filename) as f:
@@ -155,7 +155,7 @@ class Loader(object):
     """
 
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, testing=False):
+                 force_file=None, testing=False, s3_bucket=""):
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
@@ -171,6 +171,7 @@ class Loader(object):
         self.obj_will_download = False
         self.meta = None
         self.testing = testing
+        self.s3_bucket = s3_bucket
         if force_date is not None:
             self.download_date = parser.parse(force_date).isoformat()
         else:
@@ -180,7 +181,9 @@ class Loader(object):
             logging.info("copying {} to {}".format(force_file, working_file))
             shutil.copy2(force_file, working_file)
             self.main_file = FileItem(
-                "loader_force_file", filename=working_file)
+                "loader_force_file",
+                filename=working_file,
+                s3_bucket=self.s3_bucket)
         else:
             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
@@ -370,7 +373,7 @@ class Loader(object):
                                 self.download_date, "csv", "gz")
         return "testing/" + k if self.testing else k
 
-    def s3_dump(self, file_item, s3_bucket, file_class=PROCESSED_FILE_PREFIX):
+    def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
         if file_class != PROCESSED_FILE_PREFIX:
@@ -381,10 +384,10 @@ class Loader(object):
                 self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        s3.Object(s3_bucket, self.generate_key(file_class=file_class)).put(
+        s3.Object(self.s3_bucket, self.generate_key(file_class=file_class)).put(
             Body=file_item.obj, ServerSideEncryption='AES256')
         if file_class != RAW_FILE_PREFIX:
-            s3.Object(s3_bucket, self.generate_key(
+            s3.Object(self.s3_bucket, self.generate_key(
                 file_class=META_FILE_PREFIX) + ".json").put(
                 Body=json.dumps(meta), ServerSideEncryption='AES256')
 
@@ -423,7 +426,9 @@ class Preprocessor(Loader):
         name = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
 
-        return FileItem(key=self.raw_s3_file, name=name)
+        return FileItem(key=self.raw_s3_file,
+                        name=name,
+                        s3_bucket=self.s3_bucket)
 
     def unpack_files(self, file_obj, compression="unzip"):
         all_files = []
@@ -671,7 +676,8 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("Texas: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voter.to_csv()))
+                        io_obj=StringIO(df_voter.to_csv()),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
@@ -703,7 +709,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df.to_csv(encoding='utf-8')))
+                        io_obj=StringIO(df.to_csv(encoding='utf-8')),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_minnesota(self):
         logging.info("Minnesota: loading voter file")
@@ -770,7 +777,8 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("Minnesota: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(voter_reg_df.to_csv()))
+                        io_obj=StringIO(voter_reg_df.to_csv()),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_colorado(self):
         config = Config("colorado")
@@ -884,7 +892,8 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("Colorado: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voter.to_csv(encoding='utf-8')))
+                        io_obj=StringIO(df_voter.to_csv(encoding='utf-8')),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_georgia(self):
         config = Config("georgia")
@@ -980,7 +989,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv()))
+                        io_obj=StringIO(df_voters.to_csv()),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
@@ -1033,7 +1043,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv(index=False)))
+                        io_obj=StringIO(df_voters.to_csv(index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_florida(self):
         logging.info("preprocessing florida")
@@ -1114,7 +1125,8 @@ class Preprocessor(Loader):
         gc.collect()
         logging.info("FLORIDA: writing out")
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df_voters.to_csv()))
+                        io_obj=StringIO(df_voters.to_csv()),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_kansas(self):
         new_files = self.unpack_files(
@@ -1186,8 +1198,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(df.to_csv(encoding='utf-8',
-                                                  index=False)))
+                        io_obj=StringIO(df.to_csv(encoding='utf-8',index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_iowa(self):
         def is_first_file(fname):
@@ -1318,7 +1330,8 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
-                                                         index=False)))
+                                                         index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_arizona2(self):
 
@@ -1430,7 +1443,8 @@ class Preprocessor(Loader):
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_df.to_csv(encoding='utf-8',
-                                                        index=False)))
+                                                        index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_arizona(self):
         new_files = self.unpack_files(
@@ -1477,7 +1491,8 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
-                                                       index=False)))
+                                                       index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_new_york(self):
         config = Config("new_york")
@@ -1535,7 +1550,8 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(index=False,
-                                                       encoding='utf-8')))
+                                                       encoding='utf-8')),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_north_carolina(self):
         new_files = self.unpack_files(
@@ -1593,7 +1609,8 @@ class Preprocessor(Loader):
         self.is_compressed = False
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_df.to_csv(
-                            index=True, encoding='utf-8')))
+                            index=True, encoding='utf-8')),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_missouri(self):
         new_files = self.unpack_files(
@@ -1662,7 +1679,8 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
-                                                       index=False)))
+                                                       index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_michigan(self):
         config = Config('michigan')
@@ -1779,9 +1797,9 @@ class Preprocessor(Loader):
                 # Get election codes from most recent meta data
                 this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
                 pre_date, post_date, pre_key, post_key = get_surrounding_dates(
-                    date=this_date, state=self.state, testing=self.testing)
+                    this_date, self.state, self.s3_bucket, testing=self.testing)
                 if pre_key is not None:
-                    nearest_meta = get_metadata_for_key(pre_key)
+                    nearest_meta = get_metadata_for_key(pre_key, self.s3_bucket)
                     elec_code_dict = nearest_meta['elec_code_dict']
                     if len(elec_code_dict) == 0:
                         raise MissingElectionCodesError(
@@ -1840,7 +1858,8 @@ class Preprocessor(Loader):
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
-                                                   index=False)))
+                                                   index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_pennsylvania(self):
         config = Config('pennsylvania')
@@ -1943,7 +1962,8 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(main_df.to_csv(encoding='utf-8',
-                                                       index=False)))
+                                                       index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_new_jersey(self):
         new_files = self.unpack_files(file_obj=self.main_file)
@@ -2016,7 +2036,8 @@ class Preprocessor(Loader):
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(vdf.to_csv(encoding='utf-8',
-                                                   index=False)))
+                                                   index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_new_jersey2(self):
 
@@ -2130,7 +2151,8 @@ class Preprocessor(Loader):
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(voter_df.to_csv(encoding='utf-8',
-                                                        index=False)))
+                                                        index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_wisconsin(self):
         new_files = self.unpack_files(
@@ -2233,7 +2255,9 @@ class Preprocessor(Loader):
         logging.info("Wisconsin: writing out")
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(main_df.to_csv(encoding='utf-8', index=False)))
+                        io_obj=StringIO(main_df.to_csv(encoding='utf-8',
+                                                       index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_new_hampshire(self):
         config = Config('new_hampshire')
@@ -2304,7 +2328,8 @@ class Preprocessor(Loader):
             "array_decoding": json.dumps(sorted_codes),
         }
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(voters_df.to_csv(index=False)))
+                        io_obj=StringIO(voters_df.to_csv(index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def preprocess_virginia(self):
         new_files = self.unpack_files(file_obj=self.main_file,
@@ -2377,7 +2402,8 @@ class Preprocessor(Loader):
         }
 
         return FileItem(name="{}.processed".format(self.config["state"]),
-                        io_obj=StringIO(voters_df.to_csv(index=False)))
+                        io_obj=StringIO(voters_df.to_csv(index=False)),
+                        s3_bucket=self.s3_bucket)
 
     def execute(self):
         return self.state_router()

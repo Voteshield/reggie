@@ -6,7 +6,7 @@ from reggie.reggie_constants import RAW_FILE_PREFIX
 import logging
 
 
-def state_download(state):
+def state_download(state, s3_bucket):
     config_file = Config.config_file_from_state(state=state)
     configs = Config(file_name=config_file)
 
@@ -27,8 +27,12 @@ def state_download(state):
         with zipfile.ZipFile(file_to_zip, 'w') as myzip:
             for f in zipped_files:
                 myzip.write(f)
-        file_to_zip = FileItem("NC file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today)
+        file_to_zip = FileItem(
+            "NC file auto download",
+            filename=file_to_zip,
+            s3_bucket=s3_bucket)
+        loader = Loader(config_file=config_file, force_date=today,
+                        s3_bucket=s3_bucket)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
     elif state == "ohio":
@@ -53,6 +57,10 @@ def state_download(state):
             for f in zipped_files:
                 myzip.write(f)
         logging.info("Uploading")
-        file_to_zip = FileItem("OH file auto download", filename=file_to_zip)
-        loader = Loader(config_file=config_file, force_date=today)
+        file_to_zip = FileItem(
+            "OH file auto download",
+            filename=file_to_zip,
+            s3_bucket=s3_bucket)
+        loader = Loader(config_file=config_file, force_date=today,
+                        s3_bucket=s3_bucket)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)

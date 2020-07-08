@@ -112,11 +112,12 @@ def pull_sorted_upload_keys(state, s3_bucket, testing=False):
 
 def get_surrounding_dates(date,
                           state,
+                          s3_bucket,
                           testing=False):
     this_date = date
     pre_date = None
     post_date = None
-    keys = pull_sorted_upload_keys(state=state, testing=testing)
+    keys = pull_sorted_upload_keys(state, s3_bucket, testing=testing)
 
     pre_key = None
     post_key = None
