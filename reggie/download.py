@@ -2027,9 +2027,6 @@ class Preprocessor():
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
-    def preprocess_south_dakota(self):
-        return
-
     def preprocess_rhode_island(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
 
@@ -2117,8 +2114,7 @@ class Preprocessor():
             'oklahoma': self.preprocess_oklahoma,
             'arkansas': self.preprocess_arkansas,
             'wyoming': self.preprocess_wyoming,
-            'rhode_island': self.preprocess_rhode_island,
-            'south_dakota': self.preprocess_south_dakota
+            'rhode_island': self.preprocess_rhode_island
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
