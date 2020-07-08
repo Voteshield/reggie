@@ -66,7 +66,7 @@ def concat_and_delete(in_list):
 
 class Preprocessor():
 
-    def __init__(self, local_file, config_file, date, **kwargs):
+    def __init__(self, local_file, config_file, date):
         self.main_file = FileItem("main file", filename=local_file)
 
         self.config_file_path = config_file
@@ -2027,6 +2027,68 @@ class Preprocessor():
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_south_dakota(self):
+        return
+
+    def preprocess_rhode_island(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+
+        hist_file = [n for n in new_files if 'history.txt' in n['name'].lower()][0]
+        voter_file = [n for n in new_files if 'voter.txt' in n['name'].lower()][0]
+
+        df_hist = pd.read_csv(hist_file['obj'], skiprows=1, sep='|', dtype=str)
+
+        election_keys = ['election_names',
+                         'election_dates',
+                         'election_precints',
+                         'election_party',
+                         'election_votetype']
+
+        election_dfs = []
+        for election in zip(*[self.config[k] for k in election_keys]):
+            cols = [self.config['voter_id']] + list(election)
+            election_df = df_hist.loc[:, cols].dropna()
+            election_df.columns = [self.config['voter_id'], 'all_history', 'date', 'precinct_history', 'party_history', 'votetype_history']
+            election_dfs.append(election_df)
+
+        election_df = pd.concat(election_dfs, ignore_index=True)
+
+        year = pd.to_datetime(election_df.date).dt.year.astype(str)
+        names = election_df.all_history.str.lower().str.replace(' ', '_')
+
+        election_df.loc[:, 'all_history'] = names + '_' + year
+        election_df.loc[:, 'date'] = pd.to_datetime(election_df.date)
+
+        elections, counts = np.unique(election_df.sort_values('date').apply(lambda x:(x.date, x.all_history), axis=1),
+                                      return_counts=True)
+        sorted_elections_dict = {k[1]: {'index': i,
+                                        'count': int(counts[i]),
+                                        'date': k[0].strftime('%m/%d/%Y')}
+                                         for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict.keys())
+        election_df.loc[:, 'sparse_history'] = election_df.loc[:, 'all_history'].map(
+            lambda x: int(sorted_elections_dict[x]['index']))
+
+        voter_groups = election_df.sort_values('date', ascending=True).groupby(self.config['voter_id'])
+        df_hist = pd.concat([voter_groups[c].apply(list) for c in election_df.columns if 'history' in c], axis=1)
+
+        df_voter = pd.read_csv(voter_file['obj'], sep='|', skiprows=1, dtype=str)
+        df_voter = self.config.coerce_strings(df_voter,
+            exclude=[self.config['voter_id']])
+        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+
+        df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
+
+        self.meta = {
+            'message': 'rhode_island_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
+
     def execute(self):
         file_obj = self.state_router()
         self.dataframe = pd.read_csv(file_obj.obj)
@@ -2054,7 +2116,9 @@ class Preprocessor():
             'oregon': self.preprocess_oregon,
             'oklahoma': self.preprocess_oklahoma,
             'arkansas': self.preprocess_arkansas,
-            'wyoming': self.preprocess_wyoming
+            'wyoming': self.preprocess_wyoming,
+            'rhode_island': self.preprocess_rhode_island,
+            'south_dakota': self.preprocess_south_dakota
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

@@ -31,4 +31,3 @@ def convert_cli(state, local_file, date, write_file):
         date = datetime.datetime.today().date().isoformat()
     convert_voter_file(state=state, local_file=local_file,
                        date=date, write_file=write_file)
-

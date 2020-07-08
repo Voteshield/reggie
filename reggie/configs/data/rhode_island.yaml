@@ -1,0 +1,339 @@
+# Rhode Island comes with four files - two html data definition files and two .txt files (Voter.txt and VoterHistory.txt)
+
+file_type: .txt
+delimiter: '|'
+state: rhode_island
+source: boe
+file_class: voter_file
+voter_id: VOTER ID
+county_identifier: null
+birthday_identifier: YEAR OF BIRTH
+voter_status: STATUS CODE
+party_identifier: PARTY CODE
+date_format: '%m/%d/%Y'
+numeric_county: FALSE
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: null
+
+name_fields:
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - PREFIX
+  - SUFFIX
+
+address_fields:
+  - STREET NUMBER
+  - STREET NAME
+  - STREET NAME 2
+  - ZIP CODE
+  - ZIP4 CODE
+  - CITY
+  - UNIT
+  - SUFFIX A
+  - SUFFIX B
+  - STATE
+  - CARRIER CODE
+  - POSTAL CITY
+  - MAILING STREET NUMBER
+  - MAILING STREET NAME 1
+  - MAILING STREET NAME 2
+  - MAILING ZIP CODE
+  - MAILING CITY
+  - MAILING UNIT
+  - MAILING SUFFIX A
+  - MAILING SUFFIX B
+  - MAILING STATE
+  - MAILING COUNTRY
+
+
+column_names:
+  - VOTER ID
+  - STATUS CODE
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - PREFIX
+  - SUFFIX
+  - STREET NUMBER
+  - STREET NAME
+  - STREET NAME 2
+  - ZIP CODE
+  - ZIP4 CODE
+  - CITY
+  - UNIT
+  - SUFFIX A
+  - SUFFIX B
+  - STATE
+  - CARRIER CODE
+  - POSTAL CITY
+  - MAILING STREET NUMBER
+  - MAILING STREET NAME 1
+  - MAILING STREET NAME 2
+  - MAILING ZIP CODE
+  - MAILING CITY
+  - MAILING UNIT
+  - MAILING SUFFIX A
+  - MAILING SUFFIX B
+  - MAILING STATE
+  - MAILING COUNTRY
+  - MAILING CARRIER CODE
+  - PARTY CODE
+  - SPECIAL STATUS CODE
+  - DATE EFFECTIVE
+  - DATE OF PRIVILEGE
+  - SEX
+  - DATE ACCEPTED
+  - DATE OF STATUS CHANGE
+  - YEAR OF BIRTH
+  - OFF REASON CODE
+  - DATE LAST ACTIVE
+  - CONGRESSIONAL DISTRICT
+  - STATE SENATE DISTRICT
+  - STATE REP DISTRICT
+  - PRECINCT
+  - WARD/COUNCIL
+  - WARD DISTRICT
+  - SCHOOL COMMITTEE DISTRICT
+  - SPECIAL DISTRICT
+  - FIRE DISTRICT
+  - PHONE NUMBER
+  - EMAIL
+
+columns:
+  VOTER ID: character
+  STATUS CODE: character
+  LAST NAME: character
+  FIRST NAME: character
+  MIDDLE NAME: character
+  PREFIX: character
+  SUFFIX: character
+  STREET NUMBER: character
+  STREET NAME: character
+  STREET NAME 2: character
+  ZIP CODE: character
+  ZIP4 CODE: character
+  CITY: character
+  UNIT: character
+  SUFFIX A: character
+  SUFFIX B: character
+  STATE: character
+  CARRIER CODE: character
+  POSTAL CITY: character
+  MAILING STREET NUMBER: character
+  MAILING STREET NAME 1: character
+  MAILING STREET NAME 2: character
+  MAILING ZIP CODE: character
+  MAILING CITY: character
+  MAILING UNIT: character
+  MAILING SUFFIX A: character
+  MAILING SUFFIX B: character
+  MAILING STATE: character
+  MAILING COUNTRY: character
+  MAILING CARRIER CODE: character
+  PARTY CODE: character
+  SPECIAL STATUS CODE: character
+  DATE EFFECTIVE: date
+  DATE OF PRIVILEGE: date
+  SEX: character
+  DATE ACCEPTED: date
+  DATE OF STATUS CHANGE: date
+  YEAR OF BIRTH: character
+  OFF REASON CODE: character
+  DATE LAST ACTIVE: date
+  CONGRESSIONAL DISTRICT: character
+  STATE SENATE DISTRICT: character
+  STATE REP DISTRICT: character
+  PRECINCT: character
+  WARD/COUNCIL: character
+  WARD DISTRICT: character
+  SCHOOL COMMITTEE DISTRICT: character
+  SPECIAL DISTRICT: character
+  FIRE DISTRICT: character
+  PHONE NUMBER: character
+  EMAIL: character
+
+standard_colnames:
+  - Voter_ID
+  - Voter_Status
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Prefix
+  - Name_Suffix
+  - House_Number
+  - Street_Name
+  - PO_box
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Residence_City
+  - Unit_Number
+  - House_Suffix
+  - House_Suffix_2
+  - Residence_State
+  - Residence_Carrier
+  - Postal_City
+  - Mailing_House_Num
+  - Mailing_StreetName
+  - Mailing_PO_box
+  - Mailing_Zipcode
+  - Mailing_City
+  - Mailing_Unit_Num
+  - Mailing_HouseSuffix_1
+  - Mailing_HouseSuffix_2
+  - Mailing_State
+  - Mailing_Country
+  - Mailing_Carrier
+  - Party_Affiliation
+  - Special_Status
+  - Effective_Date
+  - Privilege_Date
+  - Sex
+  - Accepted_Date
+  - Registration_Change_Date
+  - Birth_Year
+  - Voter_Status_Reason
+  - Date_Last_Active
+  - Congressional_District
+  - Senate_District_Code
+  - Senate_Rep_Code
+  - Precinct_Code
+  - Ward_Code
+  - District_Code
+  - School_Committee_Code
+  - Special_Voter_District
+  - Fire_District_Code
+  - Phone_Number
+  - Email_Address
+
+standard_colpairs:
+  VOTER ID: Voter_ID
+  STATUS CODE: Voter_Status
+  LAST NAME: Name_Last
+  FIRST NAME: Name_First
+  MIDDLE NAME: Name_Middle
+  PREFIX: Name_Prefix
+  SUFFIX: Name_Suffix
+  STREET NUMBER: House_Number
+  STREET NAME: Street_Name
+  STREET NAME 2: PO_box
+  ZIP CODE: Residence_Zipcode
+  ZIP4 CODE: Residence_Zipcode_Plus
+  CITY: Residence_City
+  UNIT: Unit_Number
+  SUFFIX A: House_Suffix
+  SUFFIX B:   House_Suffix_2
+  STATE: Residence_State
+  CARRIER CODE: Residence_Carrier
+  POSTAL CITY: Postal_City
+  MAILING STREET NUMBER: Mailing_House_Num
+  MAILING STREET NAME 1: Mailing_StreetName
+  MAILING STREET NAME 2: Mailing_PO_box
+  MAILING ZIP CODE: Mailing_Zipcode
+  MAILING CITY: Mailing_City
+  MAILING UNIT: Mailing_Unit_Num
+  MAILING SUFFIX A: Mailing_HouseSuffix_1
+  MAILING SUFFIX B: Mailing_HouseSuffix_2
+  MAILING STATE: Mailing_State
+  MAILING COUNTRY: Mailing_Country
+  MAILING CARRIER CODE: Mailing_Carrier
+  PARTY CODE: Party_Affiliation
+  SPECIAL STATUS CODE: Special_Status
+  DATE EFFECTIVE: Effective_Date
+  DATE OF PRIVILEGE: Privilege_Date
+  SEX: Sex
+  DATE ACCEPTED: Accepted_Date
+  DATE OF STATUS CHANGE: Registration_Change_Date
+  YEAR OF BIRTH: Birth_Year
+  OFF REASON CODE: Voter_Status_Reason
+  DATE LAST ACTIVE: Date_Last_Active
+  CONGRESSIONAL DISTRICT: Congressional_District
+  STATE SENATE DISTRICT: Senate_District_Code
+  STATE REP DISTRICT: Senate_Rep_Code
+  PRECINCT: Precinct_Code
+  WARD/COUNCIL: Ward_Code
+  WARD DISTRICT: District_Code
+  SCHOOL COMMITTEE DISTRICT: School_Committee_Code
+  SPECIAL DISTRICT: Special_Voter_District
+  FIRE DISTRICT: Fire_District_Code
+  PHONE NUMBER: Phone_Number
+  EMAIL: Email_Address
+
+status_codes:
+   active: A
+   active_with_NCOA_change: AC
+   inactive: I
+   pending: P
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+party_codes:
+  democratic_party: D
+  republican_party: R
+  no_party_affiliation: U
+
+num_party_codes: 3
+
+election_names:
+    - 'ELECTION 1'
+    - 'ELECTION 2'
+    - 'ELECTION 3'
+    - 'ELECTION 4'
+    - 'ELECTION 5'
+    - 'ELECTION 6'
+    - 'ELECTION 7'
+    - 'ELECTION 8'
+
+election_dates:
+    - 'DATE 1'
+    - 'DATE 2'
+    - 'DATE 3'
+    - 'DATE 4'
+    - 'DATE 5'
+    - 'DATE 6'
+    - 'DATE 7'
+    - 'DATE 8'
+
+election_precints:
+    - 'PRECINCT 1'
+    - 'PRECINCT 2'
+    - 'PRECINCT 3'
+    - 'PRECINCT 4'
+    - 'PRECINCT 5'
+    - 'PRECINCT 6'
+    - 'PRECINCT 7'
+    - 'PRECINCT 8'
+
+election_party:
+    - 'PARTY 1'
+    - 'PARTY 2'
+    - 'PARTY 3'
+    - 'PARTY 4'
+    - 'PARTY 5'
+    - 'PARTY 6'
+    - 'PARTY 7'
+    - 'PARTY 8'
+
+election_votetype:
+    - 'TYPE 1'
+    - 'TYPE 2'
+    - 'TYPE 3'
+    - 'TYPE 4'
+    - 'TYPE 5'
+    - 'TYPE 6'
+    - 'TYPE 7'
+    - 'TYPE 8'
