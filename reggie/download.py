@@ -2088,6 +2088,54 @@ class Preprocessor():
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_south_dakota(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+
+        voter_file = [n for n in new_files if 'searchexport' in n['name'].lower()][0]
+        hist_file = [n for n in new_files if 'history' in n['name'].lower()][0]
+
+        # --- handling voter history --- #
+
+        df_hist = pd.read_csv(hist_file['obj'], dtype=str).rename(self.config['election_columns'], axis=1)
+
+        df_hist.loc[:, 'all_history'] = df_hist.date + '_' + df_hist.election.str.lower()
+
+        elections = (df_hist.groupby(['all_history', 'date'])[self.config['voter_id']]
+                     .count().reset_index()
+                     .values)
+        sorted_elections_dict = {k[0]: {'index': i,
+                                        'count': int(k[2]),
+                                        'date': k[1]}
+                                 for i, k in  enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict.keys())
+
+        df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(
+            lambda x: sorted_elections_dict[x]['index'])
+
+        voter_groups = df_hist.groupby(self.config['voter_id'])
+        df_hist = pd.concat(
+            [voter_groups[c].apply(list) for c in
+             ['all_history', 'sparse_history', 'votetype_history']], axis=1)
+
+        # --- handling voter file --- #
+
+        df_voter = pd.read_csv(voter_file['obj'], skiprows=2, dtype=str)
+        df_voter = self.config.coerce_strings(df_voter,
+            exclude=[self.config['voter_id']])
+        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+
+        df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
+
+        self.meta = {
+            'message': 'south_dakota_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
+
     def execute(self):
         file_obj = self.state_router()
         self.dataframe = pd.read_csv(file_obj.obj)
@@ -2116,7 +2164,8 @@ class Preprocessor():
             'oklahoma': self.preprocess_oklahoma,
             'arkansas': self.preprocess_arkansas,
             'wyoming': self.preprocess_wyoming,
-            'rhode_island': self.preprocess_rhode_island
+            'rhode_island': self.preprocess_rhode_island,
+            'south_dakota': self.preprocess_south_dakota
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
