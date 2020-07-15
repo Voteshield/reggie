@@ -1,10 +1,13 @@
 #Florida provides two .zip files: Voter Extract and Voter History. Depending on the vintage they will have different naming conventions (most recently the files are "Voter_Registration_20180510.zip" and "Voter_History_20180510.zip". Both zips contain 67 separate .txt files, one for each county. "ALA_20061010.txt" would be for Alachua county from Oct 10 2006. These files DO NOT have headers.
 file_type: csv
 state: florida
+abbreviation: fl
 source: boe
 file_class: voter_file
 voter_id: Voter_ID
 county_identifier: County_Code
+primary_locale_identifier: County_Code
+numeric_primary_locale: false
 birthday_identifier: Birth_Date
 voter_status: Voter_Status
 voter_status_active: ACT
@@ -25,7 +28,6 @@ independence_party: IDP
 americas_independent_party: AIP
 party_identifier: Party_Affiliation
 date_format: '%m/%d/%Y'
-numeric_county: false
 generated_columns:
   all_history: int[]
   vote_type: text[]
@@ -36,9 +38,18 @@ format:
   separate_counties_hist_file: true
   hist_election_rows: true
   columnar_elections: false
+match_fields:
+  - Name_First
+  - Name_Middle
+  - Name_Last
+  - Birth_Date
 name_fields:
   - Name_Last
   - Name_Suffix
+  - Name_First
+  - Name_Middle
+standard_name_fields:
+  - Name_Last
   - Name_First
   - Name_Middle
 ordered_generated_columns:
@@ -92,7 +103,7 @@ summary_columns:
   - INT
   - IDP
   - AIP
-  - county
+  - locale
 hist_columns:
   - county
   - VoterID

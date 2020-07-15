@@ -1,10 +1,13 @@
 file_type: csv
 state: ohio
+abbreviation: oh
 source: boe_download
 native_file_extension: zip
 file_class: voter_file
 voter_id: SOS_VOTERID
 county_identifier: COUNTY_NUMBER
+primary_locale_identifier: COUNTY_NUMBER
+numeric_primary_locale: true
 birthday_identifier: DATE_OF_BIRTH
 voter_status: VOTER_STATUS
 voter_status_active: ACTIVE
@@ -13,9 +16,17 @@ democratic_party: D
 republican_party: R
 no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
-numeric_county: true
 party_identifier: PARTY_AFFILIATION
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - DATE_OF_BIRTH
 name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+standard_name_fields:
   - LAST_NAME
   - FIRST_NAME
   - MIDDLE_NAME
@@ -64,7 +75,7 @@ summary_columns:
   - l
   - c
   - n
-  - county
+  - locale
 summary_types:
   - int
   - timestamp
@@ -176,10 +187,10 @@ blacklist_columns:
   - CAREER_CENTER
 has_headers: YES
 data_chunk_links:
-  - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:363
-  - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:364
-  - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:365
-  - https://www6.sos.state.oh.us/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:366
+  - https://www6.ohiosos.gov/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:363
+  - https://www6.ohiosos.gov/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:364
+  - https://www6.ohiosos.gov/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:365
+  - https://www6.ohiosos.gov/ords/f?p=VOTERFTP:DOWNLOAD::FILE:NO:2:P2_PRODUCT_NUMBER:366
 data_file_names:
   - SWVF_1_22
   - SWVF_23_44

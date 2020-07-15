@@ -1,15 +1,17 @@
 file_type: fwf
 state: texas
+abbreviation: tx
 source: boe_download
 file_class: voter_file
 voter_id: VUID
 county_identifier: County_Code
+primary_locale_identifier: County_Code
+numeric_primary_locale: true
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
 voter_status_active: V
-voter_status_suspense: S
+voter_status_inactive: S
 voter_status_cancelled: C 
-voter_status_inactive: I
 party_identifier: party_identifier
 no_party_affiliation: npa
 democratic_party: D
@@ -17,7 +19,6 @@ republican_party: R
 date_format: 
   - '%Y%m%d'
   - '%Y-%m-%d'
-numeric_county: true
 generated_columns:
   sparse_history: int[]
   all_history: text[]
@@ -32,12 +33,21 @@ format:
   columnar_elections: false
 featureless_date_cols:
   - election_date
+match_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+  - Date_of_Birth
 name_fields:
   - Last_Name
   - First_Name
   - Middle_Name
   - Former_Last_Name
   - Suffix
+standard_name_fields:
+  - Last_Name
+  - First_Name
+  - Middle_Name
 ordered_generated_columns:
   - sparse_history
   - all_history
@@ -53,6 +63,11 @@ address_fields:
   - Permanent_Unit_Type
   - Permanent_City
   - Permanent_Zipcode
+  - Mailing_Address_1
+  - Mailing_Address_2
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
 primary_key:
   - pre_date
   - post_date
@@ -78,7 +93,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - county
+  - locale
 hist_columns:
   - Election_Date
   - Election_Type

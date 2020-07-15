@@ -1,11 +1,15 @@
 file_type: fwf
 state: michigan
+abbreviation: mi
 source: boe
 file_class: voter_file
 voter_id: VOTER_IDENTIFICATION_NUMBER
-county_identifier: JURISDICTION_CODE
-locale_type: jurisdiction
+jurisdiction_identifier: JURISDICTION_CODE
+primary_locale_identifier: JURISDICTION_CODE
+numeric_primary_locale: true
+primary_locale_type: jurisdiction
 birthday_identifier: YEAR_OF_BIRTH
+early_voter_identifier: IS_PERMANENT_ABSENTEE_VOTER
 voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
 voter_status_inactive: V
@@ -17,8 +21,13 @@ democratic_party: None
 republican_party: None
 no_party_affiliation: npa
 party_identifier: party_identifier
-numeric_county: True
 missing_required_fields: true
+reason_code: cancellation_reason
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - YEAR_OF_BIRTH
 date_format:
   - "%m%d%Y"
   - '%Y'
@@ -27,6 +36,10 @@ name_fields:
   - FIRST_NAME
   - MIDDLE_NAME
   - NAME_SUFFIX
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
 address_fields:
   - STREET_NUMBER_PREFIX
   - STREET_NUMBER
@@ -99,7 +112,7 @@ summary_columns:
   - ages_50_64
   - ages_65_130
   - npa
-  - county
+  - locale
 summary_types:
   - int
   - timestamp
@@ -160,7 +173,10 @@ columns:
   UOCAVA_STATUS_CODE: varchar
   UOCAVA_STATUS_NAME: varchar
   party_identifier: varchar
-  reason_code: varchar
+  CANCELLATION_REASON: varchar
+  STATUS_DATE: timestamp
+  STATUS_USER_CODE: varchar
+  VOTER_ID: bigint
 ordered_columns:
   - LAST_NAME
   - FIRST_NAME
@@ -211,7 +227,10 @@ ordered_columns:
   - UOCAVA_STATUS_CODE
   - UOCAVA_STATUS_NAME
   - party_identifier
-  - reason_code
+  - CANCELLATION_REASON
+  - STATUS_DATE
+  - STATUS_USER_CODE
+  - VOTER_ID
 fwf_voter_columns:
   - LAST_NAME
   - FIRST_NAME
@@ -272,3 +291,7 @@ elec_code_columns:
   - Election_Code
   - Date
   - Title
+cancel_data_fields:
+  - CANCELLATION_REASON
+  - STATUS_DATE
+  - STATUS_USER_CODE
