@@ -1,3 +1,11 @@
+# The Wisconsin voter file is missing several fields commonly found in other files:
+# 1. Date of birth is not found in these files so a dummy variable was made so that it was possible to process this
+#    file in the same way as the other states'
+# 2. Voter_Status is only active or inactive in WI, but for our purposes Inactive in WI is more similar to the cancelled
+#    status in other states
+# 3. WI also manages their history in a unique way. They add columns to their files for each election, so the files
+#    have a potentially variable (typically increasing) number of columns
+
 file_type: csv
 state: wisconsin
 abbreviation: wi
