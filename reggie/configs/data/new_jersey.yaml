@@ -1,10 +1,13 @@
 file_type: csv
 state: new_jersey
+abbreviation: nj
 source: boe
 file_class: voter_file
 has_headers: False
 voter_id: voter_id
 county_identifier: county
+primary_locale_identifier: county
+numeric_primary_locale: false
 birthday_identifier: dob
 voter_status: status
 voter_status_active: Active
@@ -15,7 +18,6 @@ voter_status_pending: Pending #minors
 voter_status_inactive_need_id: Inactive Confirmation-Need ID #funneling this and IF into I
 voter_status_inactive_confirmation: Inactive Confirmation #havent voted in several elections
 date_format: "%m/%d/%Y"
-numeric_county: False
 party_identifier: party_code
 democratic_party: DEM
 republican_party: REP
@@ -27,11 +29,20 @@ us_constitution_party: CON
 natural_law_party: NAT
 conservative_party: CNV
 socialist_party: SSP
+match_fields:
+  - first_name
+  - middle_name
+  - last_name
+  - dob
 name_fields:
   - first_name
   - middle_name
   - last_name
   - suffix
+standard_name_fields:
+  - first_name
+  - middle_name
+  - last_name
 address_fields:
   - street_number
   - suff_a
@@ -41,6 +52,17 @@ address_fields:
   - city
   - municipality
   - zip
+  - mailing_street_number
+  - mailing_suffix_a
+  - mailing_suffix_b
+  - mailing_street_name
+  - mailing_apt_no
+  - mailing_address_line_1
+  - mailing_address_line_2
+  - mailing-city
+  - mailing_state
+  - mailing_country
+  - mailing_zip_code
 format:
   separate_hist: True
   segmented_files: false
@@ -84,7 +106,7 @@ summary_columns:
   - GRE
   - SSP
   - NAT
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

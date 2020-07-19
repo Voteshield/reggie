@@ -1,10 +1,12 @@
 file_type: txt
 state: pennsylvania
+abbreviation: pa
 source: boe
 file_class: voter_file
 voter_id: voter_id
 county_identifier: county
-numeric_county: False
+primary_locale_identifier: county
+numeric_primary_locale: false
 valid_voting_methods: ['AP', 'AB', 'P']
 absentee_ballot_code: AB
 provisional_ballot_code: P
@@ -18,12 +20,21 @@ no_party_affiliation: NF
 birthday_identifier: dob
 date_format: '%m/%d/%Y'
 has_headers: False
+match_fields:
+  - first_name
+  - middle_name
+  - surname
+  - dob
 name_fields:
   - title
   - surname
   - first_name
   - middle_name
   - suffix
+standard_name_fields:
+  - surname
+  - first_name
+  - middle_name
 address_fields:
   - house_number
   - house_number_suffix
@@ -73,7 +84,7 @@ summary_columns:
   - R
   - D
   - NF
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

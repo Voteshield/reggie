@@ -5,10 +5,13 @@
 #             PV = provisional vote, FW = federal write-in
 file_type: csv
 state: nevada
+abbreviation: nv
 source: boe
 file_class: voter_file
 voter_id: County_Voter_ID
 county_identifier: County
+primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: Birth_Date
 voter_status: County_Status
 voter_status_active: Active
@@ -22,10 +25,18 @@ absentee_ballot_code: "'MB'"
 provisional_ballot_code: "'PV'"
 valid_voting_methods: ['PP','EV','FW','MB','PV']
 voting_method_column: 'all_history'
-numeric_county: false
 date_format: '%m/%d/%Y'
 party_identifier: Party
+match_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+  - Birth_Date
 name_fields:
+  - First_Name
+  - Middle_Name
+  - Last_Name
+standard_name_fields:
   - First_Name
   - Middle_Name
   - Last_Name
@@ -79,7 +90,7 @@ summary_columns:
   - Other_All_Others
   - Green_Party
   - Natural_Law_Party
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

@@ -1,7 +1,9 @@
-from reggie.constants import CONFIG_DIR, COUNTY_ALIAS, \
-    PRIMARY_LOCALE_TYPE
+from reggie.reggie_constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, \
+    LOCALE_TYPE, PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
+import json
+from datetime import datetime
 
 config_cache = {}
 
@@ -16,17 +18,30 @@ class Config(object):
         else:
             config_file = file_name
 
-        self.data = self.load_data(config_file)
-        self.county_column = self.data[COUNTY_ALIAS]
-        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+        self.data = self.load_data(config_file, self.infer_locale_file(
+            config_file))
 
+        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
+        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+        self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
 
     @classmethod
     def config_file_from_state(cls, state):
         return "{}{}.yaml".format(CONFIG_DIR, state)
 
     @classmethod
-    def load_data(cls, config_file):
+    def infer_locale_file(cls, config_file):
+        """
+        If it exists in the expected location, load json with mapping from
+        primary locale database values to primary locale display names.
+        :param config_file: state's yaml file
+        :return: presumed location of locale file
+        """
+        state = config_file.split('/')[-1].split('.')[0]
+        return "{}/{}.json".format(LOCALE_DIR, state)
+
+    @classmethod
+    def load_data(cls, config_file, locale_file):
 
         global config_cache
         if config_file in config_cache:
@@ -34,6 +49,18 @@ class Config(object):
         else:
             with open(config_file) as f:
                 config = yaml.load(f)
+
+                # add primary locale dict to config object
+                try:
+                    with open(locale_file) as f:
+                        locale_data = json.load(f)
+                    locale_dict = {}
+                    for locale in locale_data:
+                        locale_dict[locale['id']] = locale['name']
+                except:
+                    locale_dict = None
+                config[PRIMARY_LOCALE_NAMES] = locale_dict
+
                 config_cache[config_file] = config
         return config
 
@@ -86,10 +113,30 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
+        def catch_floats(x):
+            if '.0' == x[-2:]:
+                return str(int(float(x)))
+            else:
+                return x
+
+        def disallow_future_dates(x, max_year):
+            if (type(x) != str) and (x.year > max_year):
+                return pd.Timestamp(x.year-100, x.month, x.day)
+            return x
+
+        def disallow_past_dates(x, min_year=1910):
+            if (type(x) != str) and (x.year < min_year):
+                return pd.NaT
+            return x
+
+        min_voter_age = 17
+
         date_fields = [c for c, v in self.data[col_list].items() if
                        v == "date" or v == "timestamp"]
+        date_fields = [x for x in date_fields if x in df.columns]
         for field in date_fields:
             df[field] = df[field].apply(str)
+            df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
                     errors='coerce').dt.strftime(self.data['date_format'])
@@ -100,6 +147,15 @@ class Config(object):
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
                         break
+
+            if field == self.data['birthday_identifier']:
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year - min_voter_age))
+            else:
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year))
+
+            df[field] = df[field].map(disallow_past_dates)
         return df
 
     def coerce_numeric(self, df, extra_cols=None, col_list="columns"):
@@ -117,6 +173,10 @@ class Config(object):
                           if "int" in v or v == "float" or v == "double"]
         int_fields = [c for c, v in self.data[col_list].items()
                       if "int" in v]
+        numeric_fields = [x for x in numeric_fields if x in df.columns]
+        int_fields = [x for x in int_fields if x in df.columns]
+        if extra_cols is not None:
+            extra_cols = [x for x in extra_cols if x in df.columns]
         for field in numeric_fields:
             df[field] = pd.to_numeric(df[field], errors='coerce')
         for field in int_fields:
@@ -195,7 +255,10 @@ class Config(object):
             "Election_Date",
             "Election_Type",
             "Election_Party",
-            "Election_Voting_Method"]
+            "Election_Voting_Method",
+            "election_type_history",
+            "election_category_history",
+            "town_history"]
         return history_cols
 
     def get_locale_field(self, locale_type):
@@ -216,16 +279,20 @@ class Config(object):
         :return: True if the DB column for this locale type is numeric, False otherwise
         """
         # This case fixes Ohio, because county is numeric but db field is text
-        if (locale_type == 'county') and self.data['numeric_county']:
+        if (locale_type == self.primary_locale_type) and \
+          self.data['numeric_primary_locale']:
             return True
 
         locale_field = self.get_locale_field(locale_type)
         field_type = self.data['columns'][locale_field]
         if ("int" in field_type) or (field_type == "float") or \
           (field_type == "double"):
-           return True
+            return True
         else:
             return False
+
+    def to_json(self):
+        return json.dumps(self.data)
 
     def is_primary_locale_type(self, locale_type):
         """

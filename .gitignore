@@ -12,7 +12,6 @@ experiments
 *.pkl
 *.rdb
 .idea
-*.json
 build
 dist
 

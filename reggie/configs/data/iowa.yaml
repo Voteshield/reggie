@@ -1,11 +1,14 @@
 #Florida provides two _zip files: Voter Extract and Voter History_ Depending on the vintage they will have different naming conventions (most recently the files are "Voter_Registration_20180510_zip" and "Voter_History_20180510_zip"_ Both zips contain 67 separate _txt files, one for each county_ "ALA_20061010_txt" would be for Alachua county from Oct 10 2006_ These files DO NOT have headers_
 file_type: txt
 state: iowa
+abbreviation: ia
 source: boe
 file_class: voter_file
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
+primary_locale_identifier: COUNTY
+numeric_primary_locale: false
 precinct_identifier: PRECINCT
 birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
@@ -19,7 +22,6 @@ republican_party: REP
 libertarian_party: LIB
 no_party_affiliation: NP
 party_identifier: PARTY
-numeric_county: false
 date_format: '%m/%d/%Y'
 generated_columns:
   all_history: text[]
@@ -27,11 +29,21 @@ generated_columns:
 ordered_generated_columns:
   - all_history
   - sparse_history
+match_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - BIRTHDATE
 name_fields:
   - FIRST_NAME
   - MIDDLE_NAME
   - LAST_NAME
   - NAME_SUFFIX
+standard_name_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+
 address_fields:
   - HOUSE_NUM
   - HOUSE_SUFFIX
@@ -46,6 +58,11 @@ address_fields:
   - STATE_1
   - ZIP_CODE_1
   - ZIP_PLUS_1
+  - MAILING_ADDRESS
+  - CITY_2
+  - STATE_2
+  - ZIP_CODE_2
+  - ZIP_PLUS_2
 primary_key:
   - pre_date
   - post_date
@@ -72,7 +89,7 @@ summary_columns:
   - DEM
   - OTH
   - LIB
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

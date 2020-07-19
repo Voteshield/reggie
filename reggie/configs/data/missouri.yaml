@@ -2,12 +2,14 @@
 # for instance "PSR_VotersList_04022018_7-46-27 AM.zip". These files contain headers.
 file_type: csv
 state: missouri
+abbreviation: mo
 source: boe
 file_class: voter_file
 voter_id: Voter ID
 county_identifier: County
+primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: Birthdate
-numeric_county: false
 date_format: '%m/%d/%Y'
 voter_status: voter_status
 voter_status_active: Active
@@ -17,11 +19,20 @@ democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: npa
 missing_required_fields: true
+match_fields:
+  - First Name
+  - Middle Name
+  - Last Name
+  - Birthdate
 name_fields:
   - First Name
   - Middle Name
   - Last Name
   - Suffix
+standard_name_fields:
+  - First Name
+  - Middle Name
+  - Last Name
 address_fields:
   - House Number
   - House Suffix
@@ -72,7 +83,7 @@ summary_columns:
   - ages_50_64
   - ages_65_130
   - npa
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

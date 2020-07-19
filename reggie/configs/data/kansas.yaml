@@ -1,9 +1,12 @@
 file_type: txt
 state: kansas
+abbreviation: ks
 source: boe
 file_class: voter_file
 voter_id: text_registrant_id
 county_identifier: db_logid
+primary_locale_identifier: db_logid
+numeric_primary_locale: false
 birthday_identifier: date_of_birth
 voter_status: cde_registrant_status
 voter_status_active: A
@@ -13,15 +16,23 @@ republican_party: Republican
 libertarian_party: Libertarian
 no_party_affiliation: Unaffiliated
 date_format: '%m/%d/%Y'
-numeric_county: false
 party_identifier: desc_party
 has_headers: YES
+match_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - date_of_birth
 name_fields:
   - cde_name_title
   - text_name_first
   - text_name_middle
   - text_name_last
   - cde_name_suffix
+standard_name_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
 address_fields:
   - text_res_address_nbr
   - text_res_address_nbr_suffix
@@ -73,7 +84,7 @@ summary_columns:
   - Republican 
   - Libertarian
   - Unaffiliated
-  - county
+  - locale
 summary_types:
   - int
   - timestamp

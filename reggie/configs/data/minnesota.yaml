@@ -1,9 +1,12 @@
 file_type: csv
 state: minnesota
+abbreviation: mn
 source: boe_download
 file_class: voter_file
 voter_id: VoterId
 county_identifier: CountyCode
+primary_locale_identifier: CountyCode
+numeric_primary_locale: true
 birthday_identifier: DOBYear
 voter_status: voter_status
 voter_status_active: Active
@@ -18,12 +21,20 @@ missing_required_fields: true
 date_format: 
   - '%Y'
   - '%Y-%m-%d hh:mm:ss'
-numeric_county: true
+match_fields:
+  - FirstName
+  - MiddleName
+  - LastName
+  - DOBYear
 name_fields:
   - FirstName
   - MiddleName
   - LastName
   - NameSuffix
+standard_name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
 address_fields:
   - HouseNumber
   - StreetName
@@ -33,6 +44,10 @@ address_fields:
   - City
   - state
   - ZipCode
+  - MailAddress
+  - MailCity
+  - MailState
+  - MailZipCode
 primary_key:
   - pre_date
   - post_date
@@ -54,7 +69,7 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - county
+  - locale
 summary_types:
   - int
   - timestamp
@@ -64,7 +79,6 @@ summary_types:
   - int
   - int
   - int
-
 additional_snapshot_columns:
   all_history: text[]
 generated_columns:

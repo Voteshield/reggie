@@ -3,10 +3,13 @@
 # may have heterogeneous history codes within their history field.
 file_type: CSV
 state: new_york
+abbreviation: ny
 source: boe
 file_class: voter_file
 voter_id: sboeid
 county_identifier: countycode
+primary_locale_identifier: countycode
+numeric_primary_locale: true
 birthday_identifier: dob
 voter_status: status
 voter_status_active: ACTIVE
@@ -27,15 +30,23 @@ womens_equality_party: WEP
 working_families_party: WOR
 other_parties: OTH
 no_party_affiliation: BLK
-numeric_county: true
 date_format: '%Y%m%d'
 party_identifier: enrollment
 gender_identifier: gender
+match_fields:
+  - firstname
+  - middlename
+  - lastname
+  - dob
 name_fields:
   - firstname
   - middlename
   - lastname
   - namesuffix
+standard_name_fields:
+  - firstname
+  - middlename
+  - lastname
 address_fields:
   - raddnumber
   - rapartment
@@ -43,6 +54,10 @@ address_fields:
   - rcity
   - rzip5
   - rzip4
+  - mailadd1
+  - mailadd2
+  - mailadd3
+  - mailadd4
 format:
   separate_hist: false
   segmented_files: false
@@ -86,7 +101,7 @@ summary_columns:
   - WOR
   - OTH
   - BLK
-  - county
+  - locale
 summary_types:
   - int
   - timestamp
