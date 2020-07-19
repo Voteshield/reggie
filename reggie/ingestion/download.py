@@ -334,10 +334,11 @@ class Loader(object):
         logging.info("decompressing {} using {}".format(s3_file_obj["name"],
                                                         compression_type))
 
-        if (s3_file_obj["name"].split(".")[-1] == "xlsx") or \
-                (s3_file_obj["name"].split(".")[-1] == "txt") or \
-                (s3_file_obj["name"].split(".")[-1] == "pdf") or \
-                (s3_file_obj["name"].split(".")[-1] == "png") or \
+        if (s3_file_obj["name"].split(".")[-1].lower() == "xlsx") or \
+                (s3_file_obj["name"].split(".")[-1].lower() == "txt") or \
+                (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
+                # why was csv removed? 
+                (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
                 ("MACOS" in s3_file_obj["name"]):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
