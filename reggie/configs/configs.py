@@ -140,10 +140,12 @@ class Config(object):
             df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
-                    errors='coerce').dt.strftime(self.data['date_format']).fillna(pd.NaT)
+                                           format=self.data["date_format"],
+                                           errors='coerce').fillna(pd.NaT)
             else:
                 for format_str in self.data["date_format"]:
-                    formatted = pd.to_datetime(df[field], format=format_str,
+                    formatted = pd.to_datetime(df[field], 
+                                               format=format_str,
                                                errors='coerce').fillna(pd.NaT)
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
