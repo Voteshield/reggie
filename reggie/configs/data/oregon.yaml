@@ -12,7 +12,7 @@ county_identifier: COUNTY
 birthday_identifier: BIRTH_DATE
 voter_status: STATUS
 party_identifier: PARTY_CODE
-date_format: '%m-%d-%Y'
+date_format: ['%m-%d-%Y', '%Y']
 numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
@@ -108,7 +108,8 @@ column_classes:
   MIDDLE_NAME: character
   LAST_NAME: character
   NAME_SUFFIX: character
-  BIRTH_DATE: character       
+  # just year
+  BIRTH_DATE: date
   CONFIDENTIAL: character
   EFF_REGN_DATE: date
   STATUS: character

@@ -6,11 +6,11 @@ delimiter: ','
 state: wyoming
 source: boe
 file_class: voter_file
-voter_id: Voter.ID
+voter_id: Voter ID
 county_identifier: County
 birthday_identifier: null
 voter_status: null
-party_identifier: Political.Party
+party_identifier: Political Party
 date_format: '%m/%d/%Y'
 numeric_county: FALSE
 has_headers: TRUE
@@ -27,92 +27,92 @@ format:
   vote_history_type: 'Single'
 
 name_fields:
-  - Last.Name
-  - First.Name
-  - Middle.Name
-  - Name.Suffix
+  - Last Name
+  - First Name
+  - Middle Name
+  - Name Suffix
 
 address_fields:
-  - Details..RA.
-  - City..RA.
-  - Zip..RA.
+  - Details (RA)
+  - City (RA)
+  - Zip (RA)
   - Split
   - Precinct
   - County
-  - Details..MA.
-  - City..MA.
-  - State..MA.
-  - ZIP..MA.
-  - Country..MA.
+  - Details (MA)
+  - City (MA)
+  - State (MA)
+  - ZIP (MA)
+  - Country (MA)
 
 column_names:
-  - Voter.ID
-  - Last.Name
-  - First.Name
-  - Middle.Name
-  - Name.Suffix
-  - Details..RA.
-  - City..RA.
-  - Zip..RA.
+  - Voter ID
+  - Last Name
+  - First Name
+  - Middle Name
+  - Name Suffix
+  - Details (RA)
+  - City (RA)
+  - Zip (RA)
   - Split
   - Precinct
   - County
-  - Details..MA.
-  - City..MA.
-  - State..MA.
-  - ZIP..MA.
-  - Country..MA.
-  - Registration.Date
-  - Political.Party
+  - Details (MA)
+  - City (MA)
+  - State (MA)
+  - ZIP (MA)
+  - Country (MA)
+  - Registration Date
+  - Political Party
   - House
   - Senate
 
 column_classes:
-  Voter.ID: character
-  Last.Name: character
-  First.Name: character
-  Middle.Name: character
-  Name.Suffix: character
-  Details..RA.: character
-  City..RA.: character
-  Zip..RA.: character
+  Voter ID: character
+  Last Name: character
+  First Name: character
+  Middle Name: character
+  Name Suffix: character
+  Details (RA): character
+  City (RA): character
+  Zip (RA): int
   Split: character
   Precinct: character
   County: character
-  Details..MA.: character
-  City..MA.: character
-  State..MA.: character
-  ZIP..MA.: character
-  Country..MA.: character
-  Registration.Date: date
-  Political.Party: character
-  House: character
-  Senate: character
+  Details (MA): character
+  City (MA): character
+  State (MA): character
+  ZIP (MA): int
+  Country (MA): character
+  Registration Date: date
+  Political Party: character
+  House: int
+  Senate: int
 
 vote_history:
   columns:
-    - Voter.ID
-    - Political.Party
+    - Voter ID
+    - Political Party
     - election_date
     - vote_method
     - precinct
     - election_type
   elections:
-    2018 General: {VOTER_ID: Voter.ID, PARTY: Political.Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2018 Primary: {VOTER_ID: Voter.ID, PARTY: Political.Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2016 General: {VOTER_ID: Voter.ID, PARTY: Political.Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2016 Primary: {VOTER_ID: Voter.ID, PARTY: Political.Party, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2014 General: {VOTER_ID: Voter.ID, REGISTERED_PARTY: Political.Party, ELECTION DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
-    2014 Primary: {VOTER_ID: Voter.ID, REGISTERED_PARTY: Political.Party, PRIMARY_ELECTION_DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
-    2012 General: {Voter ID: Voter.ID, Party: Political.Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2012 Primary: {Voter_ID: Voter.ID, Party: Political.Party, Primary Election date: election_date, Voter Method: vote_method, Precinct: precinct}
-    2010 General: {Voter ID: Voter.ID, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2010 Primary: {Voter ID: Voter.ID, Party: Political.Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2008 General: {Voter ID: Voter.ID, Party: Political.Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2008 Primary: {VOTER ID: Voter.ID, PARTY: Political.Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
+    2018 General: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
+    2018 Primary: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
+    2016 General: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
+    2016 Primary: {VOTER_ID: Voter ID, PARTY: Political Party, VOTE METHOD: vote_method, PRECINCT: precinct}
+    2014 General: {VOTER_ID: Voter ID, REGISTERED_PARTY: Political Party, ELECTION DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
+    2014 Primary: {VOTER_ID: Voter ID, REGISTERED_PARTY: Political Party, PRIMARY_ELECTION_DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
+    2012 General: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
+    2012 Primary: {Voter_ID: Voter ID, Party: Political Party, Primary Election date: election_date, Voter Method: vote_method, Precinct: precinct}
+    2010 General: {Voter ID: Voter ID, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
+    2010 Primary: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
+    2008 General: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
+    2008 Primary: {VOTER ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
     # NP for any elections that have not been implemented above
     # assumes the most common column names for each of the above
-    NP: {voterid: Voter.ID, party: Political.Party, electiondate: election_date, votemethod: vote_method, precinct: precinct}
+    NP: {voterid: Voter ID, party: Political Party, electiondate: election_date, votemethod: vote_method, precinct: precinct}
 
 status_codes:
   Not_Provided: NP

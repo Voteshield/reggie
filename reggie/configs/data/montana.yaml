@@ -103,13 +103,13 @@ columns:
   RA_UNIT_NUM: character
   RA_CITY: character
   RA_STATE: character
-  RA_ZIP_CODE: character
+  RA_ZIP_CODE: int
   RESIDENCEADDRESS: character
   MA_ADDR_LINE_1: character
   MA_CITY: character
   MA_STATE: character
-  MA_ZIP_CODE: character
-  MA_ZIP_PLUS: character
+  MA_ZIP_CODE: int
+  MA_ZIP_PLUS: int
   MAILINGADDRESS: character
   PHONE_NO: character
   DOB: date

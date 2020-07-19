@@ -10,7 +10,8 @@ county_identifier: County
 birthday_identifier: DOB
 voter_status: Status
 party_identifier: Party
-date_format: '%m/%d/%Y'
+# for birthdate
+date_format: ['%m/%d/%Y', '%Y']
 numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
@@ -95,7 +96,7 @@ columns:
   First Name: character
   Middle Name: character
   Suffix: character
-  DOB: date # says date, but just year
+  DOB: date # just year
   Residential Address: character
   Residential City: character
   Residential State: character

@@ -10,7 +10,8 @@ county_identifier: null
 birthday_identifier: YEAR OF BIRTH
 voter_status: STATUS CODE
 party_identifier: PARTY CODE
-date_format: '%m/%d/%Y'
+# birth year
+date_format: ['%m/%d/%Y', '%Y']
 numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
@@ -121,8 +122,8 @@ columns:
   STREET NUMBER: character
   STREET NAME: character
   STREET NAME 2: character
-  ZIP CODE: character
-  ZIP4 CODE: character
+  ZIP CODE: int
+  ZIP4 CODE: int
   CITY: character
   UNIT: character
   SUFFIX A: character
@@ -148,7 +149,8 @@ columns:
   SEX: character
   DATE ACCEPTED: date
   DATE OF STATUS CHANGE: date
-  YEAR OF BIRTH: character
+  # year only
+  YEAR OF BIRTH: date
   OFF REASON CODE: character
   DATE LAST ACTIVE: date
   CONGRESSIONAL DISTRICT: character

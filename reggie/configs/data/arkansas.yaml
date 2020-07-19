@@ -120,7 +120,7 @@ column_classes:
   CDE_REGISTRANT_STATUS: character
   CDE_REGISTRANT_REASON: character
   date_of_birth: date
-  date_of_registration: character
+  date_of_registration: date
   CDE_NAME_TITLE: character
   TEXT_NAME_LAST: character
   TEXT_NAME_FIRST: character

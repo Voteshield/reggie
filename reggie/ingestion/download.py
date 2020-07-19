@@ -170,6 +170,7 @@ class Loader(object):
         self.state = config["state"]
         self.obj_will_download = False
         self.meta = None
+#        self.dataframe = None
         self.testing = testing
         self.s3_bucket = s3_bucket
         if force_date is not None:
@@ -399,6 +400,8 @@ class Loader(object):
         return name
 
     def output_dataframe(self, file_item):
+        # if self.dataframe is not None:
+        #     return self.dataframe
         return pd.read_csv(file_item.obj)
 
     def local_dump(self, file_item):
@@ -2460,10 +2463,6 @@ class Preprocessor(Loader):
             col_list='column_classes')
         df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
 
-        # adding county name column from YAML keys
-        df_voter.loc[:,'county_name'] = df_voter.loc[:,self.config['county_identifier']].map(
-            {v:c.lower() for c, v in self.config['county_codes'].items()})
-
         # add voter history
         df_voter = df_voter.join(df_hist)
 
@@ -2619,7 +2618,6 @@ class Preprocessor(Loader):
         # --- handling the vote history file --- #
         df_hist = pd.read_csv(hist_file['obj'], dtype=str)
 
-        counties = {d[1]: d[0] for d in self.config['county_codes'].items()}
         votetype = {d[1]: d[0] for d in self.config['votetype_codes'].items()}
         party = {d[1]: d[0] for d in self.config['party_codes'].items()}
 
@@ -2658,9 +2656,8 @@ class Preprocessor(Loader):
 
         df_hist = pd.concat(electiondfs, ignore_index=True)
 
-        df_hist.loc[:, ['party_history', 'county_history','votetype_history']] = pd.concat(
+        df_hist.loc[:, ['party_history', 'votetype_history']] = pd.concat(
             [df_hist.party_history.str.strip().map(party),
-             df_hist.county_history.str.strip().map(counties),
              df_hist.votetype_history.str.strip().map(votetype)],
             axis = 1)
         df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(
@@ -2709,9 +2706,9 @@ class Preprocessor(Loader):
             text = file['obj'].readline()
             file['obj'].seek(0)
 
-            if '\t' in text:
+            if b'\t' in text:
                 df = pd.read_csv(file['obj'], sep='\t', dtype=str)
-            elif ',' in text:
+            elif b',' in text:
                 df = pd.read_csv(file['obj'], sep=',', dtype=str)
 
             election_type = file['name'][:file['name'].find(' Vot')]
@@ -2775,12 +2772,11 @@ class Preprocessor(Loader):
         # --- handling voter file --- #
 
         df_voter = pd.read_csv(voter_file['obj'], dtype=str)
-        df_voter.columns = df_voter.columns.str.replace('[^\w]', '.')
 
         df_voter = self.config.coerce_strings(df_voter,
             exclude=[self.config['voter_id']], col_list='column_classes')
         df_voter = self.config.coerce_numeric(df_voter,
-            extra_cols=['Zip..RA.', 'Split', 'Precinct', 'ZIP..MA.', 'House', 'Senate'],
+            extra_cols=['Zip (RA)', 'Split', 'Precinct', 'ZIP (MA)', 'House', 'Senate'],
             col_list='column_classes')
         df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
 
@@ -2852,8 +2848,13 @@ class Preprocessor(Loader):
         df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
 
+        df_voter.loc[:, 'ZIP CODE'] = df_voter.loc[:, 'ZIP CODE'].astype(str).str.zfill(5).fillna('-')
+        df_voter.loc[:, 'ZIP4 CODE'] = df_voter.loc[:, 'ZIP4 CODE'].fillna('0').astype(int).astype(str)
+        print(df_voter.loc[:, ['ZIP4 CODE', 'ZIP CODE']].head())
+
         df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
 
+#         self.dataframe = df_voter
         self.meta = {
             'message': 'rhode_island_{}'.format(datetime.now().isoformat()),
             'array_encoding': json.dumps(sorted_elections_dict),
