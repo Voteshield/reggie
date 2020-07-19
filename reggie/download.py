@@ -2146,8 +2146,7 @@ class Preprocessor():
 
         df_hist = (pd.read_csv(hist_file['obj'], dtype=str)
                    .rename(self.config['election_column_map'], axis=1))
-        df_hist = df_hist.loc[(df_hist['SENT_DATE'].isna()
-                               | df_hist['BALLOTSTAGE/STATUS'].str.contains('Accepted')), :]
+        df_hist = df_hist.loc[(df_hist['SENT_DATE'].isna() | df_hist['BALLOTSTAGE/STATUS'].str.contains('Accepted')), :]
         df_hist.loc[:, 'election_code'] = (df_hist.election_code
                                            .astype(int)
                                            .map({i: k for k, i in self.config['election_codes'].items()}))

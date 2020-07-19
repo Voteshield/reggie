@@ -1,0 +1,258 @@
+#Alaska has one voter file (name: voter is epor .2  xt)
+
+file_type: .csv
+delimiter: ','
+state: alaska
+source: boe
+file_class: voter_file
+voter_id: 'ASCENSION #'
+county_identifier: null
+birthday_identifier: null
+voter_status: null
+party_identifier: PARTY
+date_format: '%m/%d/%Y'
+numeric_county: FALSE
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: FALSE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Sporadic'
+
+name_fields:
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - SUFFIX NAME
+
+address_fields:
+  - RESIDENCE ADDRESS
+  - RESIDENCE CITY
+  - RESIDENCE ZIP
+  - MAILING ADDRESS1
+  - MAILING ADDRESS2
+  - MAILING ADDRESS3
+  - MAILING CITY
+  - MAILING STATE
+  - MAILING ZIP
+  - MAILING COUNTRY
+
+column_names:
+  - UN
+  - PARTY
+  - D/P
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - SUFFIX NAME
+  - 'ASCENSION #'
+  - REG DATE
+  - ORG REG DATE
+  - DIST DATE
+  - RESIDENCE ADDRESS
+  - RESIDENCE CITY
+  - RESIDENCE ZIP
+  - MAILING ADDRESS1
+  - MAILING ADDRESS2
+  - MAILING ADDRESS3
+  - MAILING CITY
+  - MAILING STATE
+  - MAILING ZIP
+  - MAILING COUNTRY
+  - GENDER
+  - VH1
+  - VH2
+  - VH3
+  - VH4
+  - VH5
+  - VH6
+  - VH7
+  - VH8
+  - VH9
+  - VH10
+  - VH11
+  - VH12
+  - VH13
+  - VH14
+  - VH15
+  - VH16
+
+election_columns:
+  - VH1
+  - VH2
+  - VH3
+  - VH4
+  - VH5
+  - VH6
+  - VH7
+  - VH8
+  - VH9
+  - VH10
+  - VH11
+  - VH12
+  - VH13
+  - VH14
+  - VH15
+  - VH16
+
+column_classes:
+  UN: character
+  PARTY: character
+  D/P: character
+  LAST NAME: character
+  FIRST NAME: character
+  MIDDLE NAME: character
+  SUFFIX NAME: character
+  ASCENSION : character
+  REG DATE: character
+  ORG REG DATE: character
+  DIST DATE: character
+  RESIDENCE ADDRESS: character
+  RESIDENCE CITY: character
+  RESIDENCE ZIP: character
+  MAILING ADDRESS1: character
+  MAILING ADDRESS2: character
+  MAILING ADDRESS3: character
+  MAILING CITY: character
+  MAILING STATE: character
+  MAILING ZIP: character
+  MAILING COUNTRY: character
+  GENDER: character
+  VH1: character
+  VH2: character
+  VH3: character
+  VH4: character
+  VH5: character
+  VH6: character
+  VH7: character
+  VH8: character
+  VH9: character
+  VH10: character
+  VH11: character
+  VH12: character
+  VH13: character
+  VH14: character
+  VH15: character
+  VH16: character
+
+standard_colnames:
+  - Flagged
+  - Party_Affiliation
+  - House_District
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+  - Voter_ID
+  - Registration_Date
+  - Original_Registration_Date
+  - District_Reg_Date
+  - Residence_Address
+  - Residence_City
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Country
+  - Gender
+  - Vote_History_1
+  - Vote_History_2
+  - Vote_History_3
+  - Vote_History_4
+  - Vote_History_5
+  - Vote_History_6
+  - Vote_History_7
+  - Vote_History_8
+  - Vote_History_9
+  - Vote_History_10
+  - Vote_History_11
+  - Vote_History_12
+  - Vote_History_13
+  - Vote_History_14
+  - Vote_History_15
+  - Vote_History_16
+
+standard_colpairs:
+  UN: Flagged
+  PARTY: Party_Affiliation
+  D/P: House_District
+  LAST NAME: Name_Last
+  FIRST NAME: Name_First
+  MIDDLE NAME: Name_Middle
+  SUFFIX NAME: Name_Suffix
+  'ASCENSION #': Voter_ID
+  REG DATE: Registration_Date
+  ORG REG DATE: Original_Registration_Date
+  DIST DATE: District_Reg_Date
+  RESIDENCE ADDRESS: Residence_Address
+  RESIDENCE CITY: Residence_City
+  RESIDENCE ZIP: Residence_Zipcode
+  MAILING ADDRESS1: Mailing_Address_Line_1
+  MAILING ADDRESS2: Mailing_Address_Line_2
+  MAILING ADDRESS3: Mailing_Address_Line_3
+  MAILING CITY: Mailing_City
+  MAILING STATE: Mailing_State
+  MAILING ZIP: Mailing_Zipcode
+  MAILING COUNTRY: Mailing_Country
+  GENDER: Gender
+  VH1: Vote_History_1
+  VH2: Vote_History_2
+  VH3: Vote_History_3
+  VH4: Vote_History_4
+  VH5: Vote_History_5
+  VH6: Vote_History_6
+  VH7: Vote_History_7
+  VH8: Vote_History_8
+  VH9: Vote_History_9
+  VH10: Vote_History_10
+  VH11: Vote_History_11
+  VH12: Vote_History_12
+  VH13: Vote_History_13
+  VH14: Vote_History_14
+  VH15: Vote_History_15
+  VH16: Vote_History_16
+
+county_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Male: 'M'
+  Female: 'F'
+  Unidentified: 'U'
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  Not_Provided: NP
+
+party_codes:
+  #recognized political parties
+  democratic_party: D
+  independence_party: A
+  republican_party: R
+  #political groups
+  constitution_party: C
+  libertarian_party: L
+  alliance_party: K
+  green_party: G
+  moderate_party: E
+  OWL_party: H
+  patriots_party: P
+  progressive_party: O
+  UCES_clowns_party: W
+  veterans_party: V
+  #no affiliation/undeclared
+  no_affilitation: N
+  undeclared: U
+
+num_party_codes: 15
