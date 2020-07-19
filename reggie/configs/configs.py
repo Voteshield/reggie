@@ -21,9 +21,10 @@ class Config(object):
         self.data = self.load_data(config_file, self.infer_locale_file(
             config_file))
 
-        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
-        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
-        self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
+        if self.data[PRIMARY_LOCALE_NAMES] is not None:
+            self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
+            self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+            self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -139,11 +140,11 @@ class Config(object):
             df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
-                    errors='coerce').dt.strftime(self.data['date_format'])
+                    errors='coerce').dt.strftime(self.data['date_format']).fillna(pd.NaT)
             else:
                 for format_str in self.data["date_format"]:
                     formatted = pd.to_datetime(df[field], format=format_str,
-                                               errors='coerce')
+                                               errors='coerce').fillna(pd.NaT)
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
                         break
