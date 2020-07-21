@@ -1,6 +1,7 @@
 import boto3
 import json
 import re
+import logging
 
 from dateutil import parser
 from botocore.exceptions import ClientError
@@ -14,6 +15,7 @@ s3 = boto3.resource("s3")
 
 
 class MissingElectionCodesError(Exception):
+    pass
     pass
 
 
