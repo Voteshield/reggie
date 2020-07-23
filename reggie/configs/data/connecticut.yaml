@@ -1,0 +1,904 @@
+# Conneticut extract is broken into 4 zipped files.  
+# The towns are sequenced alphabetically with a corresponding id tax town code(001-169).  
+# The extract files both fixed length and comma delimited and are assembled as follows:
+#FILE1   Andover 001         thru  East Hampton 042
+#FILE2   East Hartford 043   thru  Monroe 085
+#FILE3   Montville 086       thru  Sherman 127
+#FILE4   Simsbury 128        thru  Woodstock 169 
+
+file_type: .csv
+delimiter: ','
+state: connecticut
+source: boe
+ile_class: voter_file
+voter_id: Voter_ID
+county_identifier: Town_ID
+birthday_identifier: Birth_Date
+voter_status: Voter_Status
+party_identifier: Party_Affiliation
+date_format: '%m/%d/%Y'
+numeric_county: TRUE
+has_headers: FALSE
+separate_hispanic_origin: FALSE
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: TRUE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: null
+
+name_fields:
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Prefix
+  - Name_Suffix
+
+address_fields:
+  - House_Number
+  - Unit_Number
+  - Street_Name
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Residence_Carrier
+  - Mailing_House_Num
+  - Mailing_Unit_Num
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Country
+  - Mailing_Zipcode
+  - Mailing_Carrier
+
+column_names:
+  - Town_ID
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Prefix
+  - Name_Suffix
+  - Voter_Status
+  - Special_Status
+  - Voter_Status_Reason
+  - District_ID
+  - Precinct_Code
+  - Congressional_District
+  - Senate_District
+  - Legislative_District
+  - Polling_Name
+  - Local_Voter_District
+  - Local_Voter_Precinct
+  - Special_Voter_District
+  - Special_Voter_Precinct
+  - House_Number
+  - Unit_Number
+  - Street_Name
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Residence_Carrier
+  - Mailing_House_Num
+  - Mailing_Unit_Num
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Country
+  - Mailing_Zipcode
+  - Mailing_Carrier
+  - Birth_Date
+  - Phone_Number
+  - Party_Affiliation
+  - Party_Affiliation_Unqual
+  - Gender
+  - Registration_Date
+  - Election_Date
+  - Ballot_Type
+  - Absentee
+  - Election_Date_2
+  - Ballot_Type_2
+  - Absentee_2
+  - Election_Date_3
+  - Ballot_Type_3
+  - Absentee_3
+  - Election_Date_4
+  - Ballot_Type_4
+  - Absentee_4
+  - Election_Date_5
+  - Ballot_Type_5
+  - Absentee_5
+  - Election_Date_6
+  - Ballot_Type_6
+  - Absentee_6
+  - Election_Date_7
+  - Ballot_Type_7
+  - Absentee_7
+  - Election_Date_8
+  - Ballot_Type_8
+  - Absentee_8
+  - Election_Date_9
+  - Ballot_Type_9
+  - Absentee_9
+  - Election_Date_10
+  - Ballot_Type_10
+  - Absentee_10
+  - Election_Date_11
+  - Ballot_Type_11
+  - Absentee_11
+  - Election_Date_12
+  - Ballot_Type_12
+  - Absentee_12
+  - Election_Date_13
+  - Ballot_Type_13
+  - Absentee_13
+  - Election_Date_14
+  - Ballot_Type_14
+  - Absentee_14
+  - Election_Date_15
+  - Ballot_Type_15
+  - Absentee_15
+  - Election_Date_16
+  - Ballot_Type_16
+  - Absentee_16
+  - Election_Date_17
+  - Ballot_Type_17
+  - Absentee_17
+  - Election_Date_18
+  - Ballot_Type_18
+  - Absentee_18
+  - Election_Date_19
+  - Ballot_Type_19
+  - Absentee_19
+  - Election_Date_20
+  - Ballot_Type_20
+  - Absentee_20
+
+column_classes:
+  Town_ID: character
+  Voter_ID: character
+  Name_Last: character
+  Name_First: character
+  Name_Middle: character
+  Name_Prefix: character
+  Name_Suffix: character
+  Voter_Status: character
+  Special_Status: character
+  Voter_Status_Reason: character
+  District_ID: character
+  Precinct_Code: character
+  Congressional_District: character
+  Senate_District: character
+  Legislative_District: character
+  Polling_Name: character
+  Local_Voter_District: character
+  Local_Voter_Precinct: character
+  Special_Voter_District: character
+  Special_Voter_Precinct: character
+  House_Number: character
+  Unit_Number: character
+  Street_Name: character
+  Residence_City: character
+  Residence_State: character
+  Residence_Zipcode: character
+  Residence_Zipcode_Plus: character
+  Residence_Carrier: character
+  Mailing_House_Num: character
+  Mailing_Unit_Num: character
+  Mailing_Address_Line_2: character
+  Mailing_Address_Line_3: character
+  Mailing_City: character
+  Mailing_State: character
+  Mailing_Country: character
+  Mailing_Zipcode: character
+  Mailing_Carrier: character
+  Birth_Date: date
+  Phone_Number: character
+  Party_Affiliation: character
+  Party_Affiliation_Unqual: character
+  Gender: character
+  Registration_Date: date
+  Election_Date: date
+  Ballot_Type: character
+  Absentee: character
+  Election_Date_2: date
+  Ballot_Type_2: character
+  Absentee_2: character
+  Election_Date_3: date
+  Ballot_Type_3: character
+  Absentee_3: character
+  Election_Date_4: date
+  Ballot_Type_4: character
+  Absentee_4: character
+  Election_Date_5: date
+  Ballot_Type_5: character
+  Absentee_5: character
+  Election_Date_6: date
+  Ballot_Type_6: character
+  Absentee_6: character
+  Election_Date_7: date
+  Ballot_Type_7: character
+  Absentee_7: character
+  Election_Date_8: date
+  Ballot_Type_8: character
+  Absentee_8: character
+  Election_Date_9: date
+  Ballot_Type_9: character
+  Absentee_9: character
+  Election_Date_10: date
+  Ballot_Type_10: character
+  Absentee_10: character
+  Election_Date_11: date
+  Ballot_Type_11: character
+  Absentee_11: character
+  Election_Date_12: date
+  Ballot_Type_12: character
+  Absentee_12: character
+  Election_Date_13: date
+  Ballot_Type_13: character
+  Absentee_13: character
+  Election_Date_14: date
+  Ballot_Type_14: character
+  Absentee_14: character
+  Election_Date_15: date
+  Ballot_Type_15: character
+  Absentee_15: character
+  Election_Date_16: date
+  Ballot_Type_16: character
+  Absentee_16: character
+  Election_Date_17: date
+  Ballot_Type_17: character
+  Absentee_17: character
+  Election_Date_18: date
+  Ballot_Type_18: character
+  Absentee_18: character
+  Election_Date_19: date
+  Ballot_Type_19: character
+  Absentee_19: character
+  Election_Date_20: date
+  Ballot_Type_20: character
+  Absentee_20: character
+
+standard_colnames:
+  - Town_ID
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Prefix
+  - Name_Suffix
+  - Voter_Status
+  - Special_Status
+  - Voter_Status_Reason
+  - District_ID
+  - Precinct_Code
+  - Congressional_District
+  - Senate_District
+  - Legislative_District
+  - Polling_Name
+  - Local_Voter_District
+  - Local_Voter_Precinct
+  - Special_Voter_District
+  - Special_Voter_Precinct
+  - House_Number
+  - Unit_Number
+  - Street_Name
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Residence_Carrier
+  - Mailing_House_Num
+  - Mailing_Unit_Num
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Country
+  - Mailing_Zipcode
+  - Mailing_Carrier
+  - Birth_Date
+  - Phone_Number
+  - Party_Affiliation
+  - Party_Affiliation_Unqual
+  - Gender
+  - Registration_Date
+  - Election_Date
+  - Ballot_Type
+  - Absentee
+  - Election_Date_2
+  - Ballot_Type_2
+  - Absentee_2
+  - Election_Date_3
+  - Ballot_Type_3
+  - Absentee_3
+  - Election_Date_4
+  - Ballot_Type_4
+  - Absentee_4
+  - Election_Date_5
+  - Ballot_Type_5
+  - Absentee_5
+  - Election_Date_6
+  - Ballot_Type_6
+  - Absentee_6
+  - Election_Date_7
+  - Ballot_Type_7
+  - Absentee_7
+  - Election_Date_8
+  - Ballot_Type_8
+  - Absentee_8
+  - Election_Date_9
+  - Ballot_Type_9
+  - Absentee_9
+  - Election_Date_10
+  - Ballot_Type_10
+  - Absentee_10
+  - Election_Date_11
+  - Ballot_Type_11
+  - Absentee_11
+  - Election_Date_12
+  - Ballot_Type_12
+  - Absentee_12
+  - Election_Date_13
+  - Ballot_Type_13
+  - Absentee_13
+  - Election_Date_14
+  - Ballot_Type_14
+  - Absentee_14
+  - Election_Date_15
+  - Ballot_Type_15
+  - Absentee_15
+  - Election_Date_16
+  - Ballot_Type_16
+  - Absentee_16
+  - Election_Date_17
+  - Ballot_Type_17
+  - Absentee_17
+  - Election_Date_18
+  - Ballot_Type_18
+  - Absentee_18
+  - Election_Date_19
+  - Ballot_Type_19
+  - Absentee_19
+  - Election_Date_20
+  - Ballot_Type_20
+  - Absentee_20
+
+standard_colpairs:
+  Town_ID: Town_ID
+  Voter_ID: Voter_ID
+  Name_Last: Name_Last
+  Name_First: Name_First
+  Name_Middle: Name_Middle
+  Name_Prefix: Name_Prefix
+  Name_Suffix: Name_Suffix
+  Voter_Status: Voter_Status
+  Special_Status: Special_Status
+  Voter_Status_Reason: Voter_Status_Reason
+  District_ID: District_ID
+  Precinct_Code: Precinct_Code
+  Congressional_District: Congressional_District
+  Senate_District: Senate_District
+  Legislative_District: Legislative_District
+  Polling_Name: Polling_Name
+  Local_Voter_District: Local_Voter_District
+  Local_Voter_Precinct: Local_Voter_Precinct
+  Special_Voter_District: Special_Voter_District
+  Special_Voter_Precinct: Special_Voter_Precinct
+  House_Number: House_Number
+  Unit_Number: Unit_Number
+  Street_Name: Street_Name
+  Residence_City: Residence_City
+  Residence_State: Residence_State
+  Residence_Zipcode: Residence_Zipcode
+  Residence_Zipcode_Plus: Residence_Zipcode_Plus
+  Residence_Carrier: Residence_Carrier
+  Mailing_House_Num: Mailing_House_Num
+  Mailing_Unit_Num: Mailing_Unit_Num
+  Mailing_Address_Line_2: Mailing_Address_Line_2
+  Mailing_Address_Line_3: Mailing_Address_Line_3
+  Mailing_City: Mailing_City
+  Mailing_State: Mailing_State
+  Mailing_Country: Mailing_Country
+  Mailing_Zipcode: Mailing_Zipcode
+  Mailing_Carrier: Mailing_Carrier
+  Birth_Date: Birth_Date
+  Phone_Number: Phone_Number
+  Party_Affiliation: Party_Affiliation
+  Party_Affiliation_Unqual: Party_Affiliation_Unqual
+  Gender: Gender
+  Registration_Date: Registration_Date
+  Election_Date: Election_Date
+  Ballot_Type: Ballot_Type
+  Absentee: Absentee
+  Election_Date_2: Election_Date_2
+  Ballot_Type_2: Ballot_Type_2
+  Absentee_2: Absentee_2
+  Election_Date_3: Election_Date_3
+  Ballot_Type_3: Ballot_Type_3
+  Absentee_3: Absentee_3
+  Election_Date_4: Election_Date_4
+  Ballot_Type_4: Ballot_Type_4
+  Absentee_4: Absentee_4
+  Election_Date_5: Election_Date_5
+  Ballot_Type_5: Ballot_Type_5
+  Absentee_5: Absentee_5
+  Election_Date_6: Election_Date_6
+  Ballot_Type_6: Ballot_Type_6
+  Absentee_6: Absentee_6
+  Election_Date_7: Election_Date_7
+  Ballot_Type_7: Ballot_Type_7
+  Absentee_7: Absentee_7
+  Election_Date_8: Election_Date_8
+  Ballot_Type_8: Ballot_Type_8
+  Absentee_8: Absentee_8
+  Election_Date_9: Election_Date_9
+  Ballot_Type_9: Ballot_Type_9
+  Absentee_9: Absentee_9
+  Election_Date_10: Election_Date_10
+  Ballot_Type_10: Ballot_Type_10
+  Absentee_10: Absentee_10
+  Election_Date_11: Election_Date_11
+  Ballot_Type_11: Ballot_Type_11
+  Absentee_11: Absentee_11
+  Election_Date_12: Election_Date_12
+  Ballot_Type_12: Ballot_Type_12
+  Absentee_12: Absentee_12
+  Election_Date_13: Election_Date_13
+  Ballot_Type_13: Ballot_Type_13
+  Absentee_13: Absentee_13
+  Election_Date_14: Election_Date_14
+  Ballot_Type_14: Ballot_Type_14
+  Absentee_14: Absentee_14
+  Election_Date_15: Election_Date_15
+  Ballot_Type_15: Ballot_Type_15
+  Absentee_15: Absentee_15
+  Election_Date_16: Election_Date_16
+  Ballot_Type_16: Ballot_Type_16
+  Absentee_16: Absentee_16
+  Election_Date_17: Election_Date_17
+  Ballot_Type_17: Ballot_Type_17
+  Absentee_17: Absentee_17
+  Election_Date_18: Election_Date_18
+  Ballot_Type_18: Ballot_Type_18
+  Absentee_18: Absentee_18
+  Election_Date_19: Election_Date_19
+  Ballot_Type_19: Ballot_Type_19
+  Absentee_19: Absentee_19
+  Election_Date_20: Election_Date_20
+  Ballot_Type_20: Ballot_Type_20
+  Absentee_20: Absentee_20  
+
+Election_Type_Code:
+  SPECIAL: S
+  PRIMARY: P
+  REFERENDUM: R
+  GENERAL_ELECTION: E
+  DELEGATE_CAUCAS: D
+  TOWN_COMMITTEE_PRIMARY: T
+
+Absentee_Ballot_Flag:
+  VOTING_USING_ABSENTEE_BALLOT: Y
+  VOTING_IN_PERSON: N
+
+Off_Reason_Code:
+  Felon: F            
+  Death: D            
+  Move_Out_Of_State: C            
+  Voter_Cancel: V            
+  DMV: M            
+  Notice-No_Reply: R            
+  Duplicate: U            
+  Canvass-Moved_Out: O            
+  CVR_Returned_by_Voter: T            
+  ED-683_Return_by_Voter: E            
+  Inactive_4_Yrs: B            
+  Canvass-Inactive_to_Off: I
+  None-used_for_non_displayable_addresses: A
+
+
+party_codes:
+  A_Connecticut_Party: A         
+  A_Better_Future: A Bet     
+  All_American_Dreamers: AAD     
+  A_Better_Choice: ABC       
+  A_Brookfield_Party: ABP       
+  A_Ct._Tea_Party: ACTP      
+  Socialist_Alternative: AL        
+  American: AM      
+  Anarchist: AN        
+  Anarcho-Syndacist: ANA       
+  American_Patriot: AP        
+  American_Socialist_Party: ASP       
+  A_Wethersfield_Party: AWP       
+  Beeblebroxian: B        
+  B.A.C.: BA        
+  Being_Chill: BC      
+  Better_Government: BG        
+  B-Independent: BI        
+  Bottom_Line: BL        
+  Bull_Moose: BM        
+  Blue_Wolf: BW       
+  Concerned_Citizens: C         
+  Christian_Center_Party: CCP       
+  Centralist: CE        
+  Centrist: CEN       
+  Canterbury_First: CF        
+  Connecticut_For_Lieberman: CFL      
+  Common_Ground: CG        
+  Chatham_Party: CHA       
+  Communist_%_Korean_Workers_Party: CKWP      
+  Constitutionalist: CO        
+  Communist: COM       
+  Community: COMM      
+  Conservative: CON      
+  Connecticut_Patriot_Party: CONN      
+  Constitution: CONS      
+  Conservarve: CONSE     
+  Constitution_Party: CONST     
+  Church_Of_Rock_And_Roll: CORAR     
+  Communist_Party: CP        
+  Conservative_Party_Connecticut: CPC       
+  Connecticut_Pirate_Party: CPP       
+  Communist_Party_Usa: CPU       
+  Ct: CT       
+  Citiozens_United: CU        
+  Democratic: D         
+  Democrat_socialist: DE        
+  Democratic_Socialists_Of_America: DSOA      
+  Evangelical: E         
+  Enfield_Taxpayers_Party: ETP       
+  Friends_Of_Saybrook: F         
+  Fascist: FA        
+  Free_Choice: FC        
+  Federalist: FE        
+  First_Middlefield: FM        
+  Free_Party: FP        
+  Green: G         
+  Griswold_Independent_Party: Grisw     
+  Guilty: Guilt     
+  Guilford_Libertarian: GL        
+  Green_Party: GP        
+  Grassroots: GR        
+  Grass_Roots_For_Reform: GRFR      
+  Gods_Will: GW        
+  Hartford_Together: HT       
+  Independence: I         
+  Independent_Choice: IC        
+  Independence_For_Montville: IFM       
+  Independents_For_Orange: IFO       
+  Independent386: IN        
+  Independant: IND       
+  Indepent: INDE      
+  Indipendent: INDI      
+  Indy: INDY      
+  Independent_Party: IP        
+  Independent_Party_of_Norwalk: IPN       
+  Independent_Party_Of_Connecticut: IPOC      
+  Independent_Party_Of_East Haven: IPOEH     
+  Independent_Party_Of_Newtown: IPON     
+  Independent: IT        
+  Jedi: J         
+  Justice_Party: JP 
+  Justice_Party_Of_Ct: JPOC      
+  Libertarian: L        
+  Liberal_Democratric: LD        
+  Live_Free_Or_Die: LFOD      
+  Libraterian: LI        
+  Liberatarian: LIB       
+  Liberal: LIBE      
+  Liberel: LIBER     
+  Libritarian: LIBR      
+  Libertarian_Party: LP        
+  Moderate: M         
+  Marxist: MA        
+  Marijuana: MAR       
+  Moderate_Conservative: MC        
+  Milford_Independent_Party: MIP       
+  Modern_Whig: MW        
+  Modern_Wig_Party: MWP      
+  Nice: N        
+  Norwich_for_Change: Norwi     
+  Nader: NA       
+  Not_At_This_Time: NATT      
+  Neo-Socialist: NE        
+  Neutral: NEU       
+  Natural_Law: NL        
+  Natural_Law_Party: NLP       
+  None: NO        
+  No: NO2      
+  Not_Sure: NS        
+  Orange_Taxpayers: O         
+  One_New_London: ONL       
+  Open: OP        
+  Other: OT        
+  Other_Party: OTH      
+  Otherparty: OTHE      
+  Popular: P         
+  American_Patriot_Party: PA        
+  Peace_And_Freedom: PAF       
+  Patriot: PAT       
+  Progressive_Bull_Moose_Party: PBMP      
+  Peace-Freedom: PE        
+  Peoples_Inclusionary: PEO       
+  Permaculture: PER       
+  Pacific_Green: PG        
+  Pomfret_Independent: PI        
+  Pirate_Party: PIR       
+  Pro_Life: PL        
+  A_Portland_Party: PO        
+  Peoples_Party: PP        
+  Progressive: PR        
+  Pro-Bethel: PRO       
+  Republican: R         
+  Radical: RA        
+  Realistic_Balance: RB        
+  Repulican: REPU      
+  Reform: RF        
+  Rocky_Hill_First: RHF      
+  Reform_Party: RP        
+  Realist_Peoples_Party: RPP       
+  Rr: RR9       
+  Right_To_Life: RTL       
+  Swing: S        
+  Socialist_Action: SA        
+  Satanist: SAT       
+  Suffield_Community: SC        
+  Simsbury_Citizens_First: SCF       
+  A_Sentinel_Party: SEN       
+  Spring_Glen_Party: SGP       
+  Southington_Independent: SI        
+  Southington_Independent_Party: SIP       
+  Socialist: SOC      
+  Sons_Of_Liberty: SOL       
+  Socialist_Party: SP        
+  Socialist_Party_Of_Connecticut: SPOC      
+  Socialist_Party_Usa: SPU       
+  Surprise_Party: SUR       
+  South_Windsor_Citizens: SWC       
+  Save_Westport_Now: SWN       
+  Taxpayers: T         
+  The_Church_Of_Rock_And_Roll: TCORA     
+  Tea: TE        
+  Tea_Party: TEA       
+  Together_For_Brookfield: TFB       
+  Independent_Thinkers: TH        
+  The_Hampton_Party: THP       
+  Unaffiliated: U         
+  U/i: UI       
+  U-It: UIT       
+  Undecided: UN        
+  Unaffiliated(Independent): UNA       
+  Unaffiliated/socialist: UNAF      
+  Unaffiliated(Conservative): UNAFF     
+  Uniffilated: UNIF      
+  Unknown: UNK      
+  Usa: US        
+  U: U1        
+  Veterans: V         
+  Veterans_Party_Of_America: VPOA      
+  Whig: W         
+  Waterford_Independent: Water     
+  Winsted_Independent: Winst     
+  Working_Families: Worki     
+  Woodbury_First: WF        
+  Modern_Whig_Party: WH        
+  Wigs: WI        
+  Whig_Party: WP        
+  We_The_People: WTP       
+  X: X         
+  1st_Independent_Party: 1IP       
+
+county_codes: 
+  FILE_1: 001- 042
+  FILE_2: 043- 085
+  FILE_3: 086- 127
+  FILE_4: 128- 169
+
+county_codes: 
+  Andover: 001
+  Ansonia: 002
+  Ashford: 003
+  Avon: 004
+  Barkhamsted: 005
+  Beacon Falls: 006
+  Berlin: 007
+  Bethany: 008
+  Bethel: 009
+  Bethlehem: 010
+  Bloomfield: 011
+  Bolton: 012
+  Bozrah: 013
+  Branford: 014
+  Bridgeport: 015
+  Bridgewater: 016
+  Bristol: 017
+  Brookfield: 018
+  Brooklyn: 019
+  Burlington: 020
+  Canaan: 021
+  Canterbury: 022
+  Canton: 023
+  Chaplin: 024
+  Cheshire: 025
+  Chester: 026
+  Clinton: 027
+  Colchester: 028
+  Colebrook: 029
+  Columbia: 030
+  Cornwall: 031
+  Coventry: 032
+  Cromwell: 033
+  Danbury: 034
+  Darien: 035
+  Deep River: 036
+  Derby: 037
+  Durham: 038
+  Eastford: 039
+  East Granby: 040
+  East Haddam: 041
+  East Hampton: 042
+  East Hartford: 043
+  East Haven: 044
+  East Lyme: 045
+  Easton: 046
+  East Windsor: 047
+  Ellington: 048
+  Enfield: 049
+  Essex: 050
+  Fairfield: 051
+  Farmington: 052
+  Franklin: 053
+  Glastonbury: 054
+  Goshen: 055
+  Granby: 056
+  Greenwich: 057
+  Griswold: 058
+  Groton: 059
+  Guilford: 060
+  Haddam: 061
+  Hamden: 062
+  Hampton: 063
+  Hartford: 064
+  Hartland: 065
+  Harwinton: 066
+  Hebron: 067
+  Kent: 068
+  Killingly: 069
+  Killingworth: 070
+  Lebanon: 071
+  Ledyard: 072
+  Lisbon: 073
+  Litchfield: 074
+  Lyme: 075
+  Madison: 076
+  Manchester: 077
+  Mansfield: 078
+  Marlborough: 079
+  Meriden: 080
+  Middlebury: 081
+  Middlefield: 082
+  Middletown: 083
+  Milford: 084
+  Monroe: 085
+  Montville: 086
+  Morris: 087
+  Naugatuck: 088
+  New Britain: 089
+  New Canaan: 090
+  New Fairfield: 091
+  New Hartford: 092
+  New Haven: 093
+  Newington: 094
+  New London: 095
+  New Milford: 096
+  Newtown: 097
+  Norfolk: 098
+  North Branford: 099
+  North Canaan: 100
+  North Haven: 101
+  North Stonington: 102
+  Norwalk: 103
+  Norwich: 104
+  Old Lyme: 105
+  Old Saybrook: 106
+  Orange: 107
+  Oxford: 108
+  Plainfield: 109
+  Plainville: 110
+  Plymouth: 111
+  Pomfret: 112
+  Portland: 113
+  Preston: 114
+  Prospect: 115
+  Putnam: 116
+  Redding: 117
+  Ridgefield: 118
+  Rocky Hill: 119
+  Roxbury: 120
+  Salem: 121
+  Salisbury: 122
+  Scotland: 123
+  Seymour: 124
+  Sharon: 125
+  Shelton: 126
+  Sherman: 127
+  Simsbury: 128
+  Somers: 129
+  Southbury: 130
+  Southington: 131
+  South Windsor: 132
+  Sprague: 133
+  Stafford: 134
+  Stamford: 135
+  Sterling: 136
+  Stonington: 137
+  Stratford: 138
+  Suffield: 139
+  Thomaston: 140
+  Thompson: 141
+  Tolland: 142
+  Torrington: 143
+  Trumbull: 144
+  Union: 145
+  Vernon: 146
+  Voluntown: 147
+  Wallingford: 148
+  Warren: 149
+  Washington: 150
+  Waterbury: 151
+  Waterford: 152
+  Watertown: 153
+  Westbrook: 154
+  West Hartford: 155
+  West Haven: 156
+  Weston: 157
+  Westport: 158
+  Wethersfield: 159
+  Willington: 160
+  Wilton: 161
+  Winchester: 162
+  Windham: 163
+  Windsor: 164
+  Windsor Locks: 165
+  Wolcott: 166
+  Woodbridge: 167
+  Woodbury: 168
+  Woodstock: 169
+
+status_codes:
+  ACTIVE: A
+  INACTIVE: I
+  OFF: O
+
+race_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Male: M
+  Female: F
+  Unknown: U
+
+num_party_codes: 190
+
+Special_Status:
+  None-used for non displayable addresses: A
+  MILITARY: M
+  INSTITUTION: I
+  OVERSEAS: O
+  OTHER: X
+
+file_names:
+  - VOTELCT1.ZIP 
+  - VOTELCT2.ZIP
+  - VOTELCT3.ZIP
+  - VOTELCT4.ZIP
+
+num_files: 4

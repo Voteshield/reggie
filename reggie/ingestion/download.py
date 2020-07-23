@@ -2975,6 +2975,7 @@ class Preprocessor(Loader):
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
+
     def preprocess_alaska(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
         voter_file = [n for n in new_files if 'voter' in n['name'].lower()][0]
@@ -3032,6 +3033,9 @@ class Preprocessor(Loader):
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_connecticut(self):
+        return
+
     def execute(self):
         return self.state_router()
 
@@ -3067,7 +3071,8 @@ class Preprocessor(Loader):
             'rhode_island': self.preprocess_rhode_island,
             'south_dakota': self.preprocess_south_dakota,
             'montana': self.preprocess_montana,
-            'alaska': self.preprocess_alaska
+            'alaska': self.preprocess_alaska,
+            'connecticut': self.preprocess_connecticut
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
