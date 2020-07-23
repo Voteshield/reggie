@@ -339,7 +339,7 @@ class Loader(object):
                 (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
                 (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
                 ("MACOS" in s3_file_obj["name"]):
-                # why was csv removed? 
+                # why was csv removed?
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -2975,7 +2975,62 @@ class Preprocessor(Loader):
 
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
+    def preprocess_alaska(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+        voter_file = [n for n in new_files if 'voter' in n['name'].lower()][0]
 
+        df_voter = pd.read_csv(voter_file['obj'], dtype=str).drop('UN', axis=1)
+        df_hist = df_voter.loc[:, [self.config['voter_id']] + self.config['election_columns']]
+
+        # --- handling the vote history file --- #
+
+        df_hist = df_hist.set_index(self.config['voter_id']).stack().reset_index().iloc[:, [0, 2]]
+        df_hist.columns = [self.config['voter_id'], 'election']
+
+        df_hist = df_hist.join(df_hist.election.str.split(' ', expand=True))
+        df_hist = df_hist.rename({0: 'all_history', 1: 'votetype_history'}, axis=1)
+
+        df_hist = df_hist.join(df_hist.all_history.str.split('(?<=^\d{2})', expand=True))
+        df_hist = df_hist.rename({0: 'election_year', 1: 'election_type'}, axis=1)
+
+        df_hist.election_year = '20' + df_hist.election_year
+
+        elections, counts = np.unique(df_hist.loc[:, ['all_history', 'election_year']]
+                                      .apply(tuple, axis=1), return_counts=True)
+
+        sorted_elections_dict = {k[0]: {'index': i,
+                                        'count': int(counts[i]),
+                                        'date': int(k[1])}
+                                 for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict)
+
+        df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(lambda x: sorted_elections_dict[x]['index'])
+
+        df_hist = pd.concat([df_hist.groupby(self.config['voter_id'])[c].apply(list)
+                             for c in ['all_history',
+                                       'votetype_history',
+                                       'sparse_history']], axis=1)
+
+        # --- handling the voter file --- #
+
+        df_voter = df_voter.loc[:, ~df_voter.columns.isin(self.config['election_columns'])]
+        df_voter = df_voter.set_index(self.config['voter_id'])
+
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+
+        df_voter = df_voter.join(df_hist)
+
+        self.meta = {
+            'message': 'alaska_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def execute(self):
         return self.state_router()
@@ -3011,7 +3066,8 @@ class Preprocessor(Loader):
             'wyoming': self.preprocess_wyoming,
             'rhode_island': self.preprocess_rhode_island,
             'south_dakota': self.preprocess_south_dakota,
-            'montana': self.preprocess_montana
+            'montana': self.preprocess_montana,
+            'alaska': self.preprocess_alaska
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
