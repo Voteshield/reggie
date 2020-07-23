@@ -1,10 +1,10 @@
-# Conneticut extract is broken into 4 zipped files.  
-# The towns are sequenced alphabetically with a corresponding id tax town code(001-169).  
+# Conneticut extract is broken into 4 zipped files.
+# The towns are sequenced alphabetically with a corresponding id tax town code(001-169).
 # The extract files both fixed length and comma delimited and are assembled as follows:
 #FILE1   Andover 001         thru  East Hampton 042
 #FILE2   East Hartford 043   thru  Monroe 085
 #FILE3   Montville 086       thru  Sherman 127
-#FILE4   Simsbury 128        thru  Woodstock 169 
+#FILE4   Simsbury 128        thru  Woodstock 169
 
 file_type: .csv
 delimiter: ','
@@ -474,7 +474,7 @@ standard_colpairs:
   Absentee_19: Absentee_19
   Election_Date_20: Election_Date_20
   Ballot_Type_20: Ballot_Type_20
-  Absentee_20: Absentee_20  
+  Absentee_20: Absentee_20
 
 Election_Type_Code:
   SPECIAL: S
@@ -489,220 +489,220 @@ Absentee_Ballot_Flag:
   VOTING_IN_PERSON: N
 
 Off_Reason_Code:
-  Felon: F            
-  Death: D            
-  Move_Out_Of_State: C            
-  Voter_Cancel: V            
-  DMV: M            
-  Notice-No_Reply: R            
-  Duplicate: U            
-  Canvass-Moved_Out: O            
-  CVR_Returned_by_Voter: T            
-  ED-683_Return_by_Voter: E            
-  Inactive_4_Yrs: B            
+  Felon: F
+  Death: D
+  Move_Out_Of_State: C
+  Voter_Cancel: V
+  DMV: M
+  Notice-No_Reply: R
+  Duplicate: U
+  Canvass-Moved_Out: O
+  CVR_Returned_by_Voter: T
+  ED-683_Return_by_Voter: E
+  Inactive_4_Yrs: B
   Canvass-Inactive_to_Off: I
   None-used_for_non_displayable_addresses: A
 
 
 party_codes:
-  A_Connecticut_Party: A         
-  A_Better_Future: A Bet     
-  All_American_Dreamers: AAD     
-  A_Better_Choice: ABC       
-  A_Brookfield_Party: ABP       
-  A_Ct._Tea_Party: ACTP      
-  Socialist_Alternative: AL        
-  American: AM      
-  Anarchist: AN        
-  Anarcho-Syndacist: ANA       
-  American_Patriot: AP        
-  American_Socialist_Party: ASP       
-  A_Wethersfield_Party: AWP       
-  Beeblebroxian: B        
-  B.A.C.: BA        
-  Being_Chill: BC      
-  Better_Government: BG        
-  B-Independent: BI        
-  Bottom_Line: BL        
-  Bull_Moose: BM        
-  Blue_Wolf: BW       
-  Concerned_Citizens: C         
-  Christian_Center_Party: CCP       
-  Centralist: CE        
-  Centrist: CEN       
-  Canterbury_First: CF        
-  Connecticut_For_Lieberman: CFL      
-  Common_Ground: CG        
-  Chatham_Party: CHA       
-  Communist_%_Korean_Workers_Party: CKWP      
-  Constitutionalist: CO        
-  Communist: COM       
-  Community: COMM      
-  Conservative: CON      
-  Connecticut_Patriot_Party: CONN      
-  Constitution: CONS      
-  Conservarve: CONSE     
-  Constitution_Party: CONST     
-  Church_Of_Rock_And_Roll: CORAR     
-  Communist_Party: CP        
-  Conservative_Party_Connecticut: CPC       
-  Connecticut_Pirate_Party: CPP       
-  Communist_Party_Usa: CPU       
-  Ct: CT       
-  Citiozens_United: CU        
-  Democratic: D         
-  Democrat_socialist: DE        
-  Democratic_Socialists_Of_America: DSOA      
-  Evangelical: E         
-  Enfield_Taxpayers_Party: ETP       
-  Friends_Of_Saybrook: F         
-  Fascist: FA        
-  Free_Choice: FC        
-  Federalist: FE        
-  First_Middlefield: FM        
-  Free_Party: FP        
-  Green: G         
-  Griswold_Independent_Party: Grisw     
-  Guilty: Guilt     
-  Guilford_Libertarian: GL        
-  Green_Party: GP        
-  Grassroots: GR        
-  Grass_Roots_For_Reform: GRFR      
-  Gods_Will: GW        
-  Hartford_Together: HT       
-  Independence: I         
-  Independent_Choice: IC        
-  Independence_For_Montville: IFM       
-  Independents_For_Orange: IFO       
-  Independent386: IN        
-  Independant: IND       
-  Indepent: INDE      
-  Indipendent: INDI      
-  Indy: INDY      
-  Independent_Party: IP        
-  Independent_Party_of_Norwalk: IPN       
-  Independent_Party_Of_Connecticut: IPOC      
-  Independent_Party_Of_East Haven: IPOEH     
-  Independent_Party_Of_Newtown: IPON     
-  Independent: IT        
-  Jedi: J         
-  Justice_Party: JP 
-  Justice_Party_Of_Ct: JPOC      
-  Libertarian: L        
-  Liberal_Democratric: LD        
-  Live_Free_Or_Die: LFOD      
-  Libraterian: LI        
-  Liberatarian: LIB       
-  Liberal: LIBE      
-  Liberel: LIBER     
-  Libritarian: LIBR      
-  Libertarian_Party: LP        
-  Moderate: M         
-  Marxist: MA        
-  Marijuana: MAR       
-  Moderate_Conservative: MC        
-  Milford_Independent_Party: MIP       
-  Modern_Whig: MW        
-  Modern_Wig_Party: MWP      
-  Nice: N        
-  Norwich_for_Change: Norwi     
-  Nader: NA       
-  Not_At_This_Time: NATT      
-  Neo-Socialist: NE        
-  Neutral: NEU       
-  Natural_Law: NL        
-  Natural_Law_Party: NLP       
-  None: NO        
-  No: NO2      
-  Not_Sure: NS        
-  Orange_Taxpayers: O         
-  One_New_London: ONL       
-  Open: OP        
-  Other: OT        
-  Other_Party: OTH      
-  Otherparty: OTHE      
-  Popular: P         
-  American_Patriot_Party: PA        
-  Peace_And_Freedom: PAF       
-  Patriot: PAT       
-  Progressive_Bull_Moose_Party: PBMP      
-  Peace-Freedom: PE        
-  Peoples_Inclusionary: PEO       
-  Permaculture: PER       
-  Pacific_Green: PG        
-  Pomfret_Independent: PI        
-  Pirate_Party: PIR       
-  Pro_Life: PL        
-  A_Portland_Party: PO        
-  Peoples_Party: PP        
-  Progressive: PR        
-  Pro-Bethel: PRO       
-  Republican: R         
-  Radical: RA        
-  Realistic_Balance: RB        
-  Repulican: REPU      
-  Reform: RF        
-  Rocky_Hill_First: RHF      
-  Reform_Party: RP        
-  Realist_Peoples_Party: RPP       
-  Rr: RR9       
-  Right_To_Life: RTL       
-  Swing: S        
-  Socialist_Action: SA        
-  Satanist: SAT       
-  Suffield_Community: SC        
-  Simsbury_Citizens_First: SCF       
-  A_Sentinel_Party: SEN       
-  Spring_Glen_Party: SGP       
-  Southington_Independent: SI        
-  Southington_Independent_Party: SIP       
-  Socialist: SOC      
-  Sons_Of_Liberty: SOL       
-  Socialist_Party: SP        
-  Socialist_Party_Of_Connecticut: SPOC      
-  Socialist_Party_Usa: SPU       
-  Surprise_Party: SUR       
-  South_Windsor_Citizens: SWC       
-  Save_Westport_Now: SWN       
-  Taxpayers: T         
-  The_Church_Of_Rock_And_Roll: TCORA     
-  Tea: TE        
-  Tea_Party: TEA       
-  Together_For_Brookfield: TFB       
-  Independent_Thinkers: TH        
-  The_Hampton_Party: THP       
-  Unaffiliated: U         
-  U/i: UI       
-  U-It: UIT       
-  Undecided: UN        
-  Unaffiliated(Independent): UNA       
-  Unaffiliated/socialist: UNAF      
-  Unaffiliated(Conservative): UNAFF     
-  Uniffilated: UNIF      
-  Unknown: UNK      
-  Usa: US        
-  U: U1        
-  Veterans: V         
-  Veterans_Party_Of_America: VPOA      
-  Whig: W         
-  Waterford_Independent: Water     
-  Winsted_Independent: Winst     
-  Working_Families: Worki     
-  Woodbury_First: WF        
-  Modern_Whig_Party: WH        
-  Wigs: WI        
-  Whig_Party: WP        
-  We_The_People: WTP       
-  X: X         
-  1st_Independent_Party: 1IP       
+  A_Connecticut_Party: A
+  A_Better_Future: A Bet
+  All_American_Dreamers: AAD
+  A_Better_Choice: ABC
+  A_Brookfield_Party: ABP
+  A_Ct._Tea_Party: ACTP
+  Socialist_Alternative: AL
+  American: AM
+  Anarchist: AN
+  Anarcho-Syndacist: ANA
+  American_Patriot: AP
+  American_Socialist_Party: ASP
+  A_Wethersfield_Party: AWP
+  Beeblebroxian: B
+  B.A.C.: BA
+  Being_Chill: BC
+  Better_Government: BG
+  B-Independent: BI
+  Bottom_Line: BL
+  Bull_Moose: BM
+  Blue_Wolf: BW
+  Concerned_Citizens: C
+  Christian_Center_Party: CCP
+  Centralist: CE
+  Centrist: CEN
+  Canterbury_First: CF
+  Connecticut_For_Lieberman: CFL
+  Common_Ground: CG
+  Chatham_Party: CHA
+  Communist_%_Korean_Workers_Party: CKWP
+  Constitutionalist: CO
+  Communist: COM
+  Community: COMM
+  Conservative: CON
+  Connecticut_Patriot_Party: CONN
+  Constitution: CONS
+  Conservarve: CONSE
+  Constitution_Party: CONST
+  Church_Of_Rock_And_Roll: CORAR
+  Communist_Party: CP
+  Conservative_Party_Connecticut: CPC
+  Connecticut_Pirate_Party: CPP
+  Communist_Party_Usa: CPU
+  Ct: CT
+  Citiozens_United: CU
+  Democratic: D
+  Democrat_socialist: DE
+  Democratic_Socialists_Of_America: DSOA
+  Evangelical: E
+  Enfield_Taxpayers_Party: ETP
+  Friends_Of_Saybrook: F
+  Fascist: FA
+  Free_Choice: FC
+  Federalist: FE
+  First_Middlefield: FM
+  Free_Party: FP
+  Green: G
+  Griswold_Independent_Party: Grisw
+  Guilty: Guilt
+  Guilford_Libertarian: GL
+  Green_Party: GP
+  Grassroots: GR
+  Grass_Roots_For_Reform: GRFR
+  Gods_Will: GW
+  Hartford_Together: HT
+  Independence: I
+  Independent_Choice: IC
+  Independence_For_Montville: IFM
+  Independents_For_Orange: IFO
+  Independent386: IN
+  Independant: IND
+  Indepent: INDE
+  Indipendent: INDI
+  Indy: INDY
+  Independent_Party: IP
+  Independent_Party_of_Norwalk: IPN
+  Independent_Party_Of_Connecticut: IPOC
+  Independent_Party_Of_East Haven: IPOEH
+  Independent_Party_Of_Newtown: IPON
+  Independent: IT
+  Jedi: J
+  Justice_Party: JP
+  Justice_Party_Of_Ct: JPOC
+  Libertarian: L
+  Liberal_Democratric: LD
+  Live_Free_Or_Die: LFOD
+  Libraterian: LI
+  Liberatarian: LIB
+  Liberal: LIBE
+  Liberel: LIBER
+  Libritarian: LIBR
+  Libertarian_Party: LP
+  Moderate: M
+  Marxist: MA
+  Marijuana: MAR
+  Moderate_Conservative: MC
+  Milford_Independent_Party: MIP
+  Modern_Whig: MW
+  Modern_Wig_Party: MWP
+  Nice: N
+  Norwich_for_Change: Norwi
+  Nader: NA
+  Not_At_This_Time: NATT
+  Neo-Socialist: NE
+  Neutral: NEU
+  Natural_Law: NL
+  Natural_Law_Party: NLP
+  None: NO
+  No: NO2
+  Not_Sure: NS
+  Orange_Taxpayers: O
+  One_New_London: ONL
+  Open: OP
+  Other: OT
+  Other_Party: OTH
+  Otherparty: OTHE
+  Popular: P
+  American_Patriot_Party: PA
+  Peace_And_Freedom: PAF
+  Patriot: PAT
+  Progressive_Bull_Moose_Party: PBMP
+  Peace-Freedom: PE
+  Peoples_Inclusionary: PEO
+  Permaculture: PER
+  Pacific_Green: PG
+  Pomfret_Independent: PI
+  Pirate_Party: PIR
+  Pro_Life: PL
+  A_Portland_Party: PO
+  Peoples_Party: PP
+  Progressive: PR
+  Pro-Bethel: PRO
+  Republican: R
+  Radical: RA
+  Realistic_Balance: RB
+  Repulican: REPU
+  Reform: RF
+  Rocky_Hill_First: RHF
+  Reform_Party: RP
+  Realist_Peoples_Party: RPP
+  Rr: RR9
+  Right_To_Life: RTL
+  Swing: S
+  Socialist_Action: SA
+  Satanist: SAT
+  Suffield_Community: SC
+  Simsbury_Citizens_First: SCF
+  A_Sentinel_Party: SEN
+  Spring_Glen_Party: SGP
+  Southington_Independent: SI
+  Southington_Independent_Party: SIP
+  Socialist: SOC
+  Sons_Of_Liberty: SOL
+  Socialist_Party: SP
+  Socialist_Party_Of_Connecticut: SPOC
+  Socialist_Party_Usa: SPU
+  Surprise_Party: SUR
+  South_Windsor_Citizens: SWC
+  Save_Westport_Now: SWN
+  Taxpayers: T
+  The_Church_Of_Rock_And_Roll: TCORA
+  Tea: TE
+  Tea_Party: TEA
+  Together_For_Brookfield: TFB
+  Independent_Thinkers: TH
+  The_Hampton_Party: THP
+  Unaffiliated: U
+  U/i: UI
+  U-It: UIT
+  Undecided: UN
+  Unaffiliated(Independent): UNA
+  Unaffiliated/socialist: UNAF
+  Unaffiliated(Conservative): UNAFF
+  Uniffilated: UNIF
+  Unknown: UNK
+  Usa: US
+  U: U1
+  Veterans: V
+  Veterans_Party_Of_America: VPOA
+  Whig: W
+  Waterford_Independent: Water
+  Winsted_Independent: Winst
+  Working_Families: Worki
+  Woodbury_First: WF
+  Modern_Whig_Party: WH
+  Wigs: WI
+  Whig_Party: WP
+  We_The_People: WTP
+  X: X
+  1st_Independent_Party: 1IP
 
-county_codes: 
+county_codes:
   FILE_1: 001- 042
   FILE_2: 043- 085
   FILE_3: 086- 127
   FILE_4: 128- 169
 
-county_codes: 
+county_codes:
   Andover: 001
   Ansonia: 002
   Ashford: 003
@@ -896,7 +896,7 @@ Special_Status:
   OTHER: X
 
 file_names:
-  - VOTELCT1.ZIP 
+  - VOTELCT1.ZIP
   - VOTELCT2.ZIP
   - VOTELCT3.ZIP
   - VOTELCT4.ZIP

@@ -3036,6 +3036,15 @@ class Preprocessor(Loader):
     def preprocess_connecticut(self):
         return
 
+    def preprocess_vermont(self):
+        return
+
+    def preprocess_delaware(self):
+        return
+
+    def preprocess_maryland(self):
+        return
+
     def execute(self):
         return self.state_router()
 
@@ -3072,7 +3081,10 @@ class Preprocessor(Loader):
             'south_dakota': self.preprocess_south_dakota,
             'montana': self.preprocess_montana,
             'alaska': self.preprocess_alaska,
-            'connecticut': self.preprocess_connecticut
+            'connecticut': self.preprocess_connecticut,
+            'vermont': self.preprocess_vermont,
+            'delaware': self.preprocess_delaware,
+            'maryland': self.preprocess_maryland
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
