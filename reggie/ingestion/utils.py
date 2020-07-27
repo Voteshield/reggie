@@ -16,7 +16,6 @@ s3 = boto3.resource("s3")
 
 class MissingElectionCodesError(Exception):
     pass
-    pass
 
 
 class TooManyMalformedLines(Exception):
