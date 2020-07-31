@@ -3034,6 +3034,12 @@ class Preprocessor(Loader):
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def preprocess_connecticut(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+        print(pd.read_csv([n for n in new_files if 'EXT' in n['name']][0]['obj'],
+                    header=None,
+                    sep=',',
+                    nrows=10))
+
         return
 
     def preprocess_vermont(self):

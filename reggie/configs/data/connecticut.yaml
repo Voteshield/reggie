@@ -371,6 +371,135 @@ standard_colnames:
   - Ballot_Type_20
   - Absentee_20
 
+election_columns:
+  - Election_Date
+  - Ballot_Type
+  - Absentee
+  - Election_Date_2
+  - Ballot_Type_2
+  - Absentee_2
+  - Election_Date_3
+  - Ballot_Type_3
+  - Absentee_3
+  - Election_Date_4
+  - Ballot_Type_4
+  - Absentee_4
+  - Election_Date_5
+  - Ballot_Type_5
+  - Absentee_5
+  - Election_Date_6
+  - Ballot_Type_6
+  - Absentee_6
+  - Election_Date_7
+  - Ballot_Type_7
+  - Absentee_7
+  - Election_Date_8
+  - Ballot_Type_8
+  - Absentee_8
+  - Election_Date_9
+  - Ballot_Type_9
+  - Absentee_9
+  - Election_Date_10
+  - Ballot_Type_10
+  - Absentee_10
+  - Election_Date_11
+  - Ballot_Type_11
+  - Absentee_11
+  - Election_Date_12
+  - Ballot_Type_12
+  - Absentee_12
+  - Election_Date_13
+  - Ballot_Type_13
+  - Absentee_13
+  - Election_Date_14
+  - Ballot_Type_14
+  - Absentee_14
+  - Election_Date_15
+  - Ballot_Type_15
+  - Absentee_15
+  - Election_Date_16
+  - Ballot_Type_16
+  - Absentee_16
+  - Election_Date_17
+  - Ballot_Type_17
+  - Absentee_17
+  - Election_Date_18
+  - Ballot_Type_18
+  - Absentee_18
+  - Election_Date_19
+  - Ballot_Type_19
+  - Absentee_19
+  - Election_Date_20
+  - Ballot_Type_20
+  - Absentee_20
+
+election_date_columns:
+  - Election_Date
+  - Election_Date_2
+  - Election_Date_3
+  - Election_Date_4
+  - Election_Date_5
+  - Election_Date_6
+  - Election_Date_7
+  - Election_Date_8
+  - Election_Date_9
+  - Election_Date_10
+  - Election_Date_11
+  - Election_Date_12
+  - Election_Date_13
+  - Election_Date_14
+  - Election_Date_15
+  - Election_Date_16
+  - Election_Date_17
+  - Election_Date_18
+  - Election_Date_19
+  - Election_Date_20
+
+electiontype_columns:
+  - Ballot_Type
+  - Ballot_Type_2
+  - Ballot_Type_3
+  - Ballot_Type_4
+  - Ballot_Type_5
+  - Ballot_Type_6
+  - Ballot_Type_7
+  - Ballot_Type_8
+  - Ballot_Type_9
+  - Ballot_Type_10
+  - Ballot_Type_11
+  - Ballot_Type_12
+  - Ballot_Type_13
+  - Ballot_Type_14
+  - Ballot_Type_15
+  - Ballot_Type_16
+  - Ballot_Type_17
+  - Ballot_Type_18
+  - Ballot_Type_19
+  - Ballot_Type_20
+
+votetype_columns:
+  - Absentee
+  - Absentee_2
+  - Absentee_3
+  - Absentee_4
+  - Absentee_5
+  - Absentee_6
+  - Absentee_7
+  - Absentee_8
+  - Absentee_9
+  - Absentee_10
+  - Absentee_11
+  - Absentee_12
+  - Absentee_13
+  - Absentee_14
+  - Absentee_15
+  - Absentee_16
+  - Absentee_17
+  - Absentee_18
+  - Absentee_19
+  - Absentee_20
+
+
 standard_colpairs:
   Town_ID: Town_ID
   Voter_ID: Voter_ID
@@ -476,7 +605,7 @@ standard_colpairs:
   Ballot_Type_20: Ballot_Type_20
   Absentee_20: Absentee_20
 
-Election_Type_Code:
+election_type_code:
   SPECIAL: S
   PRIMARY: P
   REFERENDUM: R
@@ -484,11 +613,11 @@ Election_Type_Code:
   DELEGATE_CAUCAS: D
   TOWN_COMMITTEE_PRIMARY: T
 
-Absentee_Ballot_Flag:
-  VOTING_USING_ABSENTEE_BALLOT: Y
-  VOTING_IN_PERSON: N
+absentee_ballot_code:
+  ABSENTEE: Y
+  IN_PERSON: N
 
-Off_Reason_Code:
+off_reason_Code:
   Felon: F
   Death: D
   Move_Out_Of_State: C
@@ -502,7 +631,6 @@ Off_Reason_Code:
   Inactive_4_Yrs: B
   Canvass-Inactive_to_Off: I
   None-used_for_non_displayable_addresses: A
-
 
 party_codes:
   A_Connecticut_Party: A
