@@ -170,7 +170,6 @@ class Loader(object):
         self.state = config["state"]
         self.obj_will_download = False
         self.meta = None
-#        self.dataframe = None
         self.testing = testing
         self.s3_bucket = s3_bucket
         if force_date is not None:
@@ -339,7 +338,7 @@ class Loader(object):
                 (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
                 (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
                 ("MACOS" in s3_file_obj["name"]):
-                # why was csv removed? 
+                # why was csv removed?
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -401,8 +400,6 @@ class Loader(object):
         return name
 
     def output_dataframe(self, file_item):
-        # if self.dataframe is not None:
-        #     return self.dataframe
         return pd.read_csv(file_item.obj)
 
     def local_dump(self, file_item):
