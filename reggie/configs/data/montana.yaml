@@ -6,13 +6,12 @@ state: montana
 source: boe
 file_class: voter_extract.txt
 voter_id: VTRID
-county_identifier: CURRENT_COUNTY
 primary_locale_identifier: CURRENT_COUNTY
+numeric_primary_locale: false
 birthday_identifier: DOB
 voter_status: VOTER_STATUS
 party_identifier: null
 date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 separate_hispanic_origin: FALSE
 

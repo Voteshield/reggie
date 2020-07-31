@@ -21,10 +21,11 @@ class Config(object):
         self.data = self.load_data(config_file, self.infer_locale_file(
             config_file))
 
+        self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
+        self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
+
         if self.data[PRIMARY_LOCALE_NAMES] is not None:
             self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
-            self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
-            self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -144,7 +145,7 @@ class Config(object):
                                            errors='coerce').fillna(pd.NaT)
             else:
                 for format_str in self.data["date_format"]:
-                    formatted = pd.to_datetime(df[field], 
+                    formatted = pd.to_datetime(df[field],
                                                format=format_str,
                                                errors='coerce').fillna(pd.NaT)
                     if len(formatted.unique()) > 1:

@@ -7,13 +7,12 @@ state: oklahoma
 source: boe
 file_class: voter_file
 voter_id: VoterID
-county_identifier: null
 primary_locale_identifier: null
+numeric_primary_locale: true
 birthday_identifier: DateOfBirth
 voter_status: Status
 party_identifier: PolitalAff
 date_format: '%m/%d/%Y'
-numeric_county: TRUE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

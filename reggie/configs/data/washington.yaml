@@ -4,15 +4,14 @@ state: washington
 source: boe
 file_class: voter_file
 voter_id: StateVoterID
-county_identifier: CountyCode
 primary_locale_identifier: CountyCode
+numeric_primary_locale: false
 birthday_identifier: Birthdate
 voter_status: StatusCode
 voter_status_active: A
 voter_status_inactive: I
 party_identifier: NA
 date_format: '%m/%d/%Y'
-numeric_county: false
 has_headers: true
 fixed_width: false
 

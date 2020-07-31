@@ -6,14 +6,13 @@ state: rhode_island
 source: boe
 file_class: voter_file
 voter_id: VOTER ID
-county_identifier: null
 primary_locale_identifier: PRECINCT
+numeric_primary_locale: true
 birthday_identifier: YEAR OF BIRTH
 voter_status: STATUS CODE
 party_identifier: PARTY CODE
 # birth year
 date_format: ['%m/%d/%Y', '%Y']
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

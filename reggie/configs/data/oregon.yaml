@@ -8,13 +8,12 @@ state: oregon
 source: boe
 file_class: voter_file
 voter_id: VOTER_ID
-county_identifier: COUNTY
 primary_locale_identifier: COUNTY
+numeric_primary_locale: false
 birthday_identifier: BIRTH_DATE
 voter_status: STATUS
 party_identifier: PARTY_CODE
 date_format: ['%m-%d-%Y', '%Y']
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

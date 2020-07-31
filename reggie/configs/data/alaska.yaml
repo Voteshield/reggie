@@ -6,13 +6,12 @@ state: alaska
 source: boe
 file_class: voter_file
 voter_id: 'ASCENSION #'
-county_identifier: null
 primary_locale_identifier: null
+numeric_primary_locale: false
 birthday_identifier: null
 voter_status: null
 party_identifier: PARTY
 date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

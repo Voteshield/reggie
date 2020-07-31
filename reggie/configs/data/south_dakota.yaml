@@ -6,14 +6,13 @@ state: south_dakota
 source: boe
 file_class: voter_history
 voter_id: Id
-county_identifier: County
 primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: DOB
 voter_status: Status
 party_identifier: Party
 # for birthdate
 date_format: ['%m/%d/%Y', '%Y']
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

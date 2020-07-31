@@ -7,13 +7,12 @@ state: wyoming
 source: boe
 file_class: voter_file
 voter_id: Voter ID
-county_identifier: County
 primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: null
 voter_status: null
 party_identifier: Political Party
 date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE

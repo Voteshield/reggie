@@ -5,13 +5,12 @@ state: arkansas
 source: boe
 ile_class: voter_file
 voter_id: VoterID
-county_identifier: County
 primary_locale_identifier: County
+numeric_primary_locale: false
 birthday_identifier: date_of_birth
 voter_status: CDE_REGISTRANT_STATUS
 party_identifier: CDE_PARTY
 date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: FALSE
 separate_hispanic_origin: FALSE
 
