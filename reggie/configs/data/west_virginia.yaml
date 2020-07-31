@@ -7,6 +7,7 @@ source: boe
 file_class: voter_file
 voter_id: ID_VOTER
 county_identifier: County_Name
+primary_locale_identifier: County_Name
 birthday_identifier: DATE.OF.BIRTH
 voter_status: Status
 party_identifier: PartyAffiliation

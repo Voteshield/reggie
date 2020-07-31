@@ -7,6 +7,7 @@ source: boe
 file_class: voter_extract.txt
 voter_id: VTRID
 county_identifier: CURRENT_COUNTY
+primary_locale_identifier: CURRENT_COUNTY
 birthday_identifier: DOB
 voter_status: VOTER_STATUS
 party_identifier: null

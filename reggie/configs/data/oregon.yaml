@@ -9,6 +9,7 @@ source: boe
 file_class: voter_file
 voter_id: VOTER_ID
 county_identifier: COUNTY
+primary_locale_identifier: COUNTY
 birthday_identifier: BIRTH_DATE
 voter_status: STATUS
 party_identifier: PARTY_CODE

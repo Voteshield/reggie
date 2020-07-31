@@ -1,4 +1,4 @@
-# Oklahoma has one zip file for voter files (name: CTYSW_VR_20190301085525.zip). 
+# Oklahoma has one zip file for voter files (name: CTYSW_VR_20190301085525.zip).
 # There are 77 separate (per county) voter filee (ex name: CTY01_vr.csv)
 
 file_type: .csv
@@ -8,6 +8,7 @@ source: boe
 file_class: voter_file
 voter_id: VoterID
 county_identifier: null
+primary_locale_identifier: null
 birthday_identifier: DateOfBirth
 voter_status: Status
 party_identifier: PolitalAff
@@ -255,8 +256,3 @@ party_codes:
   no_party_affiliated: IND
 
 num_party_codes: 4
-
-
-
-
-

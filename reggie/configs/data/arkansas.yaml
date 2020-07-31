@@ -6,6 +6,7 @@ source: boe
 ile_class: voter_file
 voter_id: VoterID
 county_identifier: County
+primary_locale_identifier: County
 birthday_identifier: date_of_birth
 voter_status: CDE_REGISTRANT_STATUS
 party_identifier: CDE_PARTY

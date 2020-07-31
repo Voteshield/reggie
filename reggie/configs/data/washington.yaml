@@ -5,6 +5,7 @@ source: boe
 file_class: voter_file
 voter_id: StateVoterID
 county_identifier: CountyCode
+primary_locale_identifier: CountyCode
 birthday_identifier: Birthdate
 voter_status: StatusCode
 voter_status_active: A

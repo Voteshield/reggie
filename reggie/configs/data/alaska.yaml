@@ -7,6 +7,7 @@ source: boe
 file_class: voter_file
 voter_id: 'ASCENSION #'
 county_identifier: null
+primary_locale_identifier: null
 birthday_identifier: null
 voter_status: null
 party_identifier: PARTY
