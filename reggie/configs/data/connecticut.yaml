@@ -10,16 +10,24 @@ file_type: .csv
 delimiter: ','
 state: connecticut
 source: boe
-ile_class: voter_file
-voter_id: Voter_ID
-county_identifier: Town_ID
-birthday_identifier: Birth_Date
-voter_status: Voter_Status
-party_identifier: Party_Affiliation
-date_format: '%m/%d/%Y'
-numeric_county: TRUE
+file_class: voter_file
 has_headers: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: Town_ID
+numeric_primary_locale: TRUE
+party_identifier: Party_Affiliation
+birthday_identifier: Birth_Date
+voter_id: Voter_ID
+voter_status: Voter_Status
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: D
+republican_party: R
+no_party_affiliation: U
 
 format:
   separate_hist: TRUE
@@ -161,7 +169,7 @@ column_names:
   - Ballot_Type_20
   - Absentee_20
 
-column_classes:
+columns:
   Town_ID: character
   Voter_ID: character
   Name_Last: character
@@ -498,7 +506,6 @@ votetype_columns:
   - Absentee_18
   - Absentee_19
   - Absentee_20
-
 
 standard_colpairs:
   Town_ID: Town_ID
