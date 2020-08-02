@@ -2,19 +2,27 @@
 
 file_type: .txt
 delimiter: '|'
-state: Vermont
+state: vermont
 source: boe
 file_class: voter_file
-voter_id: VoterID
-county_identifier: County
-birthday_identifier: Year of Birth
-voter_status: Status
-party_identifier: null
-date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: ['%m/%d/%Y', '%Y']
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: null
+birthday_identifier: Year of Birth
+voter_id: VoterID
+voter_status: Status
+voter_status_active: Active
+voter_status_inactive: Challenged
+democratic_party: null
+republican_party: null
+no_party_affiliation: null
 
 format:
   separate_hist: FALSE
@@ -84,8 +92,8 @@ column_names:
   - Village
   - Ward
 
-column_classes:
-    VoterID: character
+columns:
+  VoterID: character
   Last Name: character
   First Name: character
   Middle Name: character
@@ -100,7 +108,7 @@ column_classes:
   Mailing Address City: character
   Mailing Address State: character
   Mailing Address Zip: character
-  Year of Birth: character
+  Year of Birth: date
   Date of Registration: date
   Date last Voted: date
   2008 Gen Election Participation: character
@@ -126,7 +134,7 @@ column_classes:
   Ward: character
 
 
-standard_colnames: 
+standard_colnames:
   - Voter_ID
   - Name_Last
   - Name_First
@@ -208,6 +216,13 @@ standard_colpairs:
   Village: Village_Name
   Ward: Ward_Code
 
+election_columns:
+  - 2008 Gen Election Participation
+  - 2010 Gen Election Participation
+  - 2012 Gen Election Participation
+  - 2014 Gen Election Participation
+  - 2016 Gen Election Participation
+  - 2018 Gen Election Participation
 
 county_codes:
   Addison: 001
@@ -486,12 +501,9 @@ status_codes:
   Challenged: Challenged
   Pre-Registered: N-18
 
-party_codes:  
+party_codes:
   #not provided (Party_Affiliation or Party_Last_Voted)
   Not_Provided: NP
 
 num_party_codes:
   Not_Provided: NP
-
-
-
