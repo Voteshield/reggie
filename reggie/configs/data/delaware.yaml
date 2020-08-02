@@ -1,4 +1,4 @@
-# Delaware has one .txt file entitled de_voter_reg.txt which has both registration and history records 
+# Delaware has one .txt file entitled de_voter_reg.txt which has both registration and history records
 # Data Documentation does not match data (phone number columns missing)
 
 file_type: txt
@@ -6,16 +6,24 @@ delimiter: '\t'
 state: delaware
 source: boe
 file_class: voter_file
-voter_id: Voter-ID
-county_identifier: County
-birthday_identifier: Year of Birth
-voter_status: Status
-party_identifier: Political Party
-date_format: '%f/%e/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_orign: FALSE
+
+# --- VoteShield --- #
+
+date_format: ['%m/%d/%Y', '%Y']
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: Political Party
+birthday_identifier: Year of Birth
+voter_id: Voter ID
+voter_status: Status
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: DEMOCRATIC
+republican_party: REPUBLICAN
+no_party_affiliation: NO PARTY
 
 format:
   separate_hist: FALSE
@@ -27,11 +35,11 @@ format:
   vote_history_type: 'Sporadic'
 
 name_fields:
-  - Title                                               
-  - Name-First                                          
-  - Name-Middle                                         
-  - Name-Last                                           
-  - Name-Suffix      
+  - Title
+  - Name-First
+  - Name-Middle
+  - Name-Last
+  - Name-Suffix
 
 address_fields:
   - Res-Addr-Development Name
@@ -102,16 +110,6 @@ column_names:
   - Year of Birth
   - Registration Date
   - Party Affiliation Date
-  - Voting History 1
-  - Voting History 2
-  - Voting History 3
-  - Voting History 4
-  - Voting History 5
-  - Voting History 6
-  - Voting History 7
-  - Voting History 8
-  - Voting History 9
-  - Voting History 10
   - Res Addr-Non-Standard
   - Last Registration Update Date
   - District-Congressional
@@ -122,10 +120,10 @@ column_names:
   - District-Municipality
   - District-Representative
   - District-School
-  - District-Senate 
+  - District-Senate
 
 
-column_classes:
+columns:
   County: character
   Status: character
   Title: character
@@ -163,7 +161,7 @@ column_classes:
   Mail-Addr-Foreign Ind: character
   Political Party: character
   Precinct (RDED): character
-  Year of Birth: character
+  Year of Birth: date
   Registration Date: date
   Party Affiliation Date: date
   Voting History 1: character
@@ -188,7 +186,19 @@ column_classes:
   District-School: character
   District-Senate : character
 
-standard_colnames: 
+election_columns:
+  - Voting History 1
+  - Voting History 2
+  - Voting History 3
+  - Voting History 4
+  - Voting History 5
+  - Voting History 6
+  - Voting History 7
+  - Voting History 8
+  - Voting History 9
+  - Voting History 10
+
+standard_colnames:
   - County_Name
   - Voter_Status
   - Name_Title
@@ -240,7 +250,7 @@ standard_colnames:
   - Vote_History_9
   - Vote_History_10
   - Address_Non_Standard
-  - Last_Updated_Date 
+  - Last_Updated_Date
   - Congressional_District
   - City_Council_District
   - County_Council_District
@@ -303,7 +313,7 @@ standard_colpairs:
   Voting History 9: Vote_History_9
   Voting History 10: Vote_History_10
   Res Addr-Non-Standard: Address_Non_Standard
-  Last Registration Update Date: Last_Updated_Date 
+  Last Registration Update Date: Last_Updated_Date
   District-Congressional: Congressional_District
   District-City Council (Wilmington Only): City_Council_District
   District-County Council (New Castle and Sussex Only): County_Council_District
@@ -314,13 +324,13 @@ standard_colpairs:
   District-School: School_District
   District-Senate : Senate_District
 
-    
+
 county_codes:
   Not_Provided: NP
 
 status_codes:
-  active: A 
-  inactive: I 
+  active: A
+  inactive: I
 
 gender_codes:
   Not_Provided: NP
@@ -329,23 +339,23 @@ race_codes:
   Not_Provided: NP
 
 party_codes:
-  - REPUBLICAN    
-  - DEMOCRATIC 
-  - NO PARTY     
+  - REPUBLICAN
+  - DEMOCRATIC
+  - NO PARTY
   - GREEN
-  - IND PTY OF DE 
-  - LIBERTARIAN  
-  - CONSTITUTION  
-  - NONPARTISAN   
-  - OTHER        
-  - CONSERVATIVE  
-  - LIBERAL       
-  - AMERICAN     
-  - BLUE ENIGMA   
-  - REFORM        
-  - WORKING FAM  
-  - AMER DELTA    
-  - NATURAL LAW   
-  - SOCIALST WR  
+  - IND PTY OF DE
+  - LIBERTARIAN
+  - CONSTITUTION
+  - NONPARTISAN
+  - OTHER
+  - CONSERVATIVE
+  - LIBERAL
+  - AMERICAN
+  - BLUE ENIGMA
+  - REFORM
+  - WORKING FAM
+  - AMER DELTA
+  - NATURAL LAW
+  - SOCIALST WR
 
 num_party_codes: 18
