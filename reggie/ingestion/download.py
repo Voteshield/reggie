@@ -2426,40 +2426,37 @@ class Preprocessor(Loader):
         elections, counts = np.unique(election_dates.date, return_counts=True)
         sorted_elections_dict = {str(k): {'index': i,
                                           'count': int(counts[i]),
-                                          'date': k.strftime('%m/%d/%Y')}
+                                          'date': k.strftime('%Y-%m-%d')}
              for i, k in enumerate(elections)}
         sorted_elections = list(sorted_elections_dict.keys())
 
         df_hist.loc[:, 'all_history'] = election_dates.date.apply(str)
         df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(
             lambda x: int(sorted_elections_dict[x]['index']))
+        df_hist.loc[:, 'county_history'] = df_hist.loc[:, self.config['primary_locale_identifier']]
 
         voter_groups = df_hist.groupby(self.config['voter_id'])
-        all_history = (voter_groups['all_history']
-            .apply(list)
-            .rename_axis(self.config['voter_id']))
-        sparse_history = (voter_groups['sparse_history']
-            .apply(list)
-            .rename_axis(self.config['voter_id']))
-        df_hist = pd.concat([all_history, sparse_history], axis=1)
+        all_history = voter_groups['all_history'].apply(list)
+        sparse_history = voter_groups['sparse_history'].apply(list)
+        county_history = voter_groups['county_history'].apply(list)
+        df_hist = pd.concat([all_history, sparse_history, county_history], axis=1)
 
         # --- handling the voter file --- #
 
         # some columns have become obsolete
-        df_voter = df_voter.loc[:,[n for n in self.config['column_names']]]
+        df_voter = df_voter.loc[:, df_voter.columns.isin(self.config['column_names'])]
         df_voter = df_voter.set_index(self.config['voter_id'])
 
         # pandas loads any numeric column with NaN values as floats
         # causing formatting trouble during execute() with a few columns
-        # all columns in this df should be text but int is ok for a few
         # saw this solution in other states (arizona & texas)
         to_numeric = [df_voter.loc[:,col].str.isnumeric().all() for col in df_voter.columns]
         df_voter.loc[:,to_numeric] = df_voter.loc[:,to_numeric].fillna(-1).astype(int)
 
+        df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_strings(df_voter,
-            exclude=[self.config['county_identifier'], self.config['voter_id']],
-            col_list='column_classes')
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+            exclude=[self.config['primary_locale_identifier'], self.config['voter_id']])
+        df_voter = self.config.coerce_dates(df_voter)
 
         # add voter history
         df_voter = df_voter.join(df_hist)
@@ -2484,7 +2481,7 @@ class Preprocessor(Loader):
         df_voter = pd.read_csv(voter_file['obj'], sep='|',
             encoding='latin-1',
             dtype=str,
-            header=0, names=self.config['column_names'])
+            header=0)
 
         # --- handling voter file --- #
 
@@ -2497,14 +2494,13 @@ class Preprocessor(Loader):
 
         df_voter.loc[:, 'SEX'] = df_voter.loc[:, 'SEX'].map(gender_conversion_dict)
 
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
-        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']],
-            col_list='column_classes')
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']])
 
         # coerce_strings does not convert party_identifier but conversion is needed in this instance
         df_voter.loc[:,self.config['party_identifier']] = (df_voter
             .loc[:,self.config['party_identifier']]
-            .str.lower().str.replace('\W', ' ').str.strip())
+            .str.replace('\W', ' ').str.strip())
 
         df_voter = df_voter.set_index(self.config['voter_id'])
 
@@ -2523,7 +2519,7 @@ class Preprocessor(Loader):
                      self.unpack_files(self.main_file, compression='unzip')
                      if 'readme' not in f['name'].lower()]
 
-        voter_file = [n for n in new_files if 'registeredvoters' in n['name'].lower()][0]
+        voter_file = [n for n in new_files if not 'readme' in n['name'].lower()][0]
         # don't have access to them yet
         # hist_files = ...
 
@@ -2532,17 +2528,14 @@ class Preprocessor(Loader):
         df_voter = (pd.read_csv(voter_file['obj'], sep='\t', dtype=str)
                     .dropna(how='all', axis=1))
 
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_dates(df_voter)
         df_voter = self.config.coerce_strings(df_voter,
-                                              exclude=['STATE'],
-                                              col_list='column_classes')
-        df_voter = self.config.coerce_numeric(df_voter,
-                                              col_list='column_classes')
+                                              exclude=['STATE'])
+        df_voter = self.config.coerce_numeric(df_voter)
 
         df_voter.loc[:,self.config['voter_id']] = df_voter.loc[:,self.config['voter_id']].str.zfill(9).astype('str')
         df_voter.loc[:,'UNLISTED'] = df_voter.loc[:,'UNLISTED'].map({'yes':True, 'no':False})
         # when vote history is received
-        # df_voter = df_voter.set_index(self.config['voter_id'])
 
         self.meta = {
             'message': 'oregon_{}'.format(datetime.now().isoformat()),
@@ -2586,13 +2579,18 @@ class Preprocessor(Loader):
 
         # --- handling the voter file --- #
 
-        df_voter = pd.concat([pd.read_csv(n['obj'], dtype=str) for n in voter_files],
-                             ignore_index=True)
+        # no primary locale column, county code is in file name only
+        dfs = []
+        for n in voter_files:
+            df = pd.read_csv(n['obj'], dtype=str)
+            df.loc[:, 'county_code'] = str(n['name'][-9:-7])
+            dfs.append(df)
 
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
-        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']],
-                                              col_list='column_classes')
-        df_voter = self.config.coerce_numeric(df_voter, col_list='column_classes')
+        df_voter = pd.concat(dfs, ignore_index=True)
+
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_strings(df_voter, exclude=[self.config['voter_id']])
+        df_voter = self.config.coerce_numeric(df_voter)
         df_voter = df_voter.loc[:, ~df_voter.columns.str.contains('Hist\w+\d')]
         df_voter = df_voter.set_index(self.config['voter_id'])
 
@@ -2616,65 +2614,50 @@ class Preprocessor(Loader):
         # --- handling the vote history file --- #
         df_hist = pd.read_csv(hist_file['obj'], dtype=str)
 
-        votetype = {d[1]: d[0] for d in self.config['votetype_codes'].items()}
-        party = {d[1]: d[0] for d in self.config['party_codes'].items()}
+        elections = pd.Series(self.config['elections'])
+        election_votetype = elections + 'HowVoted'
+        election_party = elections + 'PartyVoted'
+        election_county = elections + 'CountyVotedIn'
 
-        elections = (df_hist.columns.str
-                     .extract('(\w*\d{2,4}\w*)(?=County|Party|How)', expand=False)
-                     .drop_duplicates()
-                     .dropna())
-        elections = pd.Series(df_hist.loc[:, elections].dropna(how='all', axis=1).columns)
-        election_counts = (df_hist.sort_values(self.config['voter_id'])
-                           .loc[:, elections]
-                           .count()
-                           .values)
-        election_years = pd.to_datetime(('20' + elections.str.extract('(\d{2}(?!\d))', expand=False))).dt.year
+        election_cols = zip(*[elections, election_votetype, election_party, election_county])
 
-        elections_zip = zip(elections, election_counts, election_years)
-        sorted_elections_dict = {k[0]: {'index': i,
-                                        'count': int(k[1]),
-                                        'date': k[2]}
-                                 for i, k in enumerate(elections_zip)}
+        election_dfs = []
+        for e in election_cols:
+            election_df = df_hist.set_index(self.config['voter_id'])
+            election_df = election_df.loc[:, election_df.columns.isin(e)]
+            election_df = election_df.dropna(how='all')
+            election_df.columns = ['all_history', 'county_history', 'party_history', 'votetype_history']
+            election_df.loc[:, 'all_history'] = e[0]
+            election_dfs.append(election_df.reset_index())
+
+        df_hist = pd.concat(election_dfs, ignore_index=True)
+        df_hist = df_hist.fillna('NP').applymap(lambda x: x.strip(' '))
+
+        elections, counts = np.unique(df_hist.all_history, return_counts=True)
+        order = np.argsort(counts)[::-1]
+        counts = counts[order]
+        elections = elections[order]
+        election_years = list(pd.to_datetime(('20' + pd.Series(elections).str.extract('(\d{2}(?!\d))', expand=False))).dt.year)
+
+        sorted_elections_dict = {k: {'index': i,
+                                     'count': int(counts[i]),
+                                     'date': str(election_years[i])}
+                                 for i, k in enumerate(elections)}
         sorted_elections = list(sorted_elections_dict.keys())
 
-        electiondfs = []
-        for e in elections:
-            eparty, ecounty, evotetype = e + 'PartyVoted', e + 'CountyVotedIn', e + 'HowVoted'
-            electiondf = df_hist.loc[:, [self.config['voter_id']]].join(
-                df_hist.loc[:, [e, eparty, ecounty, evotetype]])
-            electiondf = electiondf.loc[~electiondf[e].isna(),:]
-            electiondf.loc[:, e] = e
-            electiondf = electiondf.rename(
-                {e:'all_history',
-                 eparty: 'party_history',
-                 ecounty: 'county_history',
-                 evotetype: 'votetype_history'}, axis=1)
+        df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(lambda x:
+            int(sorted_elections_dict[x]['index']))
 
-            electiondfs.append(electiondf)
-
-        df_hist = pd.concat(electiondfs, ignore_index=True)
-
-        df_hist.loc[:, ['party_history', 'votetype_history']] = pd.concat(
-            [df_hist.party_history.str.strip().map(party),
-             df_hist.votetype_history.str.strip().map(votetype)],
-            axis = 1)
-        df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(
-            lambda x: int(sorted_elections_dict[x]['index']))
-
-        df_hist = df_hist.fillna('NP')
-
-        voter_groups = df_hist.groupby(self.config['voter_id'])
-
-        df_hist = pd.concat([voter_groups[c].apply(list) for c in df_hist.columns[1:]], axis=1)
+        group = df_hist.groupby(self.config['voter_id'])
+        df_hist = pd.concat([group[col].apply(list) for col in df_hist.columns[1:]], axis=1)
 
         # --- handling the voter file --- #
         df_voter = pd.read_csv(voter_file['obj'], dtype=str)
 
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
-        df_voter = self.config.coerce_numeric(df_voter, col_list='column_classes')
+        df_voter = self.config.coerce_dates(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_strings(df_voter,
-                                              exclude=[self.config['voter_id']],
-                                              col_list='column_classes')
+                                              exclude=[self.config['voter_id']])
 
         df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
 
@@ -2695,8 +2678,8 @@ class Preprocessor(Loader):
 
         # --- handling voter history --- #
 
-        hist_config = self.config['vote_history']
-        election_config = hist_config['elections']
+        election_col = self.config['election_columns']
+        elections = self.config['elections']
 
         df_hist = []
 
@@ -2711,22 +2694,19 @@ class Preprocessor(Loader):
 
             election_type = file['name'][:file['name'].find(' Vot')]
 
-            try:
-                col_dict = election_config[election_type]
-                df = df.loc[:,df.columns.isin(col_dict.keys())].rename(col_dict, axis=1)
+            if not election_type in elections:
+                print('Warning:', election_type, 'not in documentation. Some fields may be excluded.')
 
-            except:
-                col_dict = election_config['NP']
-                df = df.loc[:,~df.columns.str.contains('\d')]
-                df.columns = df.columns.str.lower().str.replace('[^A-Za-z]', '')
-                df = df.loc[:,df.columns.isin(col_dict.keys())].rename(col_dict, axis=1)
+            for var, names in election_col.items():
+                for col in df.columns:
+                    if col in names:
+                        df = df.rename({col: var}, axis=1)
+                if var not in df.columns:
+                    df.loc[:, var] = 'NP'
 
-            df.loc[:,'election_type'] = election_type
-            df.loc[:,self.config['voter_id']] = df.loc[:,self.config['voter_id']].str.zfill(9)
+            df = df.loc[:, election_col.keys()]
 
-            for col in hist_config['columns']:
-                if col not in df.columns:
-                    df.loc[:,col] = 'NP'
+            df.loc[:, 'election_type'] = election_type
 
             df_hist.append(df)
 
@@ -2772,11 +2752,10 @@ class Preprocessor(Loader):
         df_voter = pd.read_csv(voter_file['obj'], dtype=str)
 
         df_voter = self.config.coerce_strings(df_voter,
-            exclude=[self.config['voter_id']], col_list='column_classes')
+            exclude=[self.config['voter_id']])
         df_voter = self.config.coerce_numeric(df_voter,
-            extra_cols=['Zip (RA)', 'Split', 'Precinct', 'ZIP (MA)', 'House', 'Senate'],
-            col_list='column_classes')
-        df_voter = self.config.coerce_dates(df_voter, col_list='column_classes')
+            extra_cols=['Zip (RA)', 'Split', 'Precinct', 'ZIP (MA)', 'House', 'Senate'])
+        df_voter = self.config.coerce_dates(df_voter)
 
         df_voter.loc[:,self.config['voter_id']] = df_voter.loc[:,self.config['voter_id']].str.zfill(9).astype(str)
         df_voter = df_voter.set_index(self.config['voter_id'])
@@ -2814,29 +2793,35 @@ class Preprocessor(Loader):
         for election in zip(*[self.config[k] for k in election_keys]):
             cols = [self.config['voter_id']] + list(election)
             election_df = df_hist.loc[:, cols].dropna()
-            election_df.columns = [self.config['voter_id'], 'all_history', 'date', 'precinct_history', 'party_history', 'votetype_history']
+            election_df.columns = [self.config['voter_id'],
+                                   'all_history',
+                                   'date',
+                                   'precinct_history',
+                                   'party_history',
+                                   'votetype_history']
             election_dfs.append(election_df)
 
         election_df = pd.concat(election_dfs, ignore_index=True)
 
-        year = pd.to_datetime(election_df.date).dt.year.astype(str)
-        names = election_df.all_history.str.lower().str.replace(' ', '_')
+        election_dates = pd.to_datetime(election_df.date)
+        election_df.loc[:, 'date'] = election_dates.astype(str)
+        election_df.loc[:, 'all_history'] = (election_dates.dt.strftime('%Y_%m_%d_')
+                                             + election_df.all_history.str.split(' ').str.join('_'))
 
-        election_df.loc[:, 'all_history'] = names + '_' + year
-        election_df.loc[:, 'date'] = pd.to_datetime(election_df.date)
+        elections = (election_df.groupby(['all_history', 'date'])[self.config['voter_id']]
+                     .count().reset_index().values)
 
-        elections, counts = np.unique(election_df.sort_values('date').apply(lambda x:(x.date, x.all_history), axis=1),
-                                      return_counts=True)
-        sorted_elections_dict = {k[1]: {'index': i,
-                                        'count': int(counts[i]),
-                                        'date': k[0].strftime('%m/%d/%Y')}
+        sorted_elections_dict = {k[0]: {'index': i,
+                                        'count': int(k[2]),
+                                        'date': k[1]}
                                          for i, k in enumerate(elections)}
         sorted_elections = list(sorted_elections_dict.keys())
+
         election_df.loc[:, 'sparse_history'] = election_df.loc[:, 'all_history'].map(
             lambda x: int(sorted_elections_dict[x]['index']))
 
-        voter_groups = election_df.sort_values('date', ascending=True).groupby(self.config['voter_id'])
-        df_hist = pd.concat([voter_groups[c].apply(list) for c in election_df.columns if 'history' in c], axis=1)
+        df_group = election_df.sort_values('date', ascending=True).groupby(self.config['voter_id'])
+        df_hist = pd.concat([df_group[c].apply(list) for c in election_df.columns if 'history' in c], axis=1)
 
         # --- handling vote file --- #
 
@@ -2848,11 +2833,9 @@ class Preprocessor(Loader):
 
         df_voter.loc[:, 'ZIP CODE'] = df_voter.loc[:, 'ZIP CODE'].astype(str).str.zfill(5).fillna('-')
         df_voter.loc[:, 'ZIP4 CODE'] = df_voter.loc[:, 'ZIP4 CODE'].fillna('0').astype(int).astype(str)
-        print(df_voter.loc[:, ['ZIP4 CODE', 'ZIP CODE']].head())
 
         df_voter = df_voter.set_index(self.config['voter_id']).join(df_hist)
 
-#         self.dataframe = df_voter
         self.meta = {
             'message': 'rhode_island_{}'.format(datetime.now().isoformat()),
             'array_encoding': json.dumps(sorted_elections_dict),
@@ -2919,41 +2902,62 @@ class Preprocessor(Loader):
         # --- handling voter history --- #
 
         df_hist = (pd.read_csv(hist_file['obj'], dtype=str)
-                   .rename(self.config['election_column_map'], axis=1))
-        df_hist = df_hist.loc[(df_hist['SENT_DATE'].isna() | df_hist['BALLOTSTAGE/STATUS'].str.contains('Accepted')), :]
-        df_hist.loc[:, 'election_code'] = (df_hist.election_code
-                                           .astype(int)
-                                           .map({i: k for k, i in self.config['election_codes'].items()}))
-        df_hist.loc[:, 'votetype_history'] = (df_hist['BALLOTSTAGE/STATUS']
-                                              .map({'Processed/Accepted': 'absentee'})
-                                              .fillna('non-absentee'))
-        df_hist.loc[df_hist.election_code.isna(), 'election_code'] = (df_hist
-                                                                      .loc[df_hist.election_code.isna(), 'election_desc']
-                                                                      .str.replace('\d', '').str.strip().str.lower().str.split(' ').str.join('_'))
+                   .rename({'Voter ID': self.config['voter_id']}, axis=1))
 
-        df_hist = (df_hist.groupby(['VTRID', 'election_date', 'election_code', 'votetype_history'])
-                   .count().sort_values('election_desc', ascending=False)
-                   .reset_index().loc[:, ['VTRID', 'election_date', 'election_code', 'votetype_history']])
+        election_codes = {str(v):k for k, v in self.config['election_codes'].items()}
+        votetype_codes = {str(v):k for k, v in self.config['votetype_codes'].items()}
 
-        df_hist.loc[:, 'all_history'] = (pd.to_datetime(df_hist.election_date).dt.strftime('%Y/%m/%d') +
-                                         '_' +
-                                         df_hist.election_code)
+        df_hist.loc[:, 'BALLOTSTAGE/STATUS'] = (df_hist.loc[:, 'BALLOTSTAGE/STATUS']
+                                                .map({
+                                                    'Processed/Accepted': 'absentee-ACCEPTED',
+                                                    'Sent': 'absentee-SENT',
+                                                    'Processed/Rejected': 'absentee-REJECTED',
+                                                    'Undeliverable': 'absentee-UNDELIVERABLE'
+                                                      }).fillna('non-absentee'))
 
-        elections = (df_hist.groupby(['all_history', 'election_date'])[self.config['voter_id']]
-                     .count().reset_index()
-                     .values)
+        df_hist = df_hist.loc[df_hist['BALLOTSTAGE/STATUS'].isin(['non-absentee', 'absentee-ACCEPTED']), :]
+
+        df_hist.loc[:, 'ELECTION_TYPE'] = df_hist.loc[:, 'ELECTION_TYPE'].map(election_codes)
+
+        # if the election code does not exist, take a clean version of the election description
+        df_hist.loc[df_hist['ELECTION_TYPE'].isna(), 'ELECTION_DESCRIPTION'] = (df_hist
+                                                                                .loc[df_hist['ELECTION_TYPE'].isna(),
+                                                                                     'ELECTION_DESCRIPTION']
+                                                                                .str.lower()
+                                                                                .str.split(' ')
+                                                                                .str.join('_'))
+        # will use later
+        election_dates = pd.to_datetime(df_hist.loc[:, 'ELECTION_DATE'])
+        df_hist.loc[:, 'ELECTION_DATE'] = election_dates.dt.strftime('%Y-%m-%d')
+
+        # creating election ids
+        df_hist.loc[:, 'all_history'] = (election_dates.dt.strftime('%Y_%m_%d_') + df_hist.loc[:, 'ELECTION_TYPE'])
+        df_hist.loc[:, 'votetype_history'] = df_hist.loc[:, 'VVM_ID'].map(votetype_codes)
+        df_hist.loc[:, 'county_history'] = df_hist.loc[:, 'JS_CODE'].fillna(0)
+
+        elections = (df_hist.groupby(['all_history', 'ELECTION_DATE'])[self.config['voter_id']]
+                     .count().reset_index().values)
+
         sorted_elections_dict = {k[0]: {'index': i,
                                         'count': int(k[2]),
-                                        'date': k[1]}
-                                 for i, k in  enumerate(elections)}
+                                        'date': str(k[1])} for i, k in  enumerate(elections)}
         sorted_elections = list(sorted_elections_dict.keys())
 
-        df_hist.loc[:, 'sparse_history'] = (df_hist.loc[:, 'all_history']
-                                            .map(lambda x: sorted_elections_dict[x]['index']))
+        df_hist.loc[:, 'sparse_history'] = df_hist.loc[:, 'all_history'].map(lambda x: sorted_elections_dict[x]['index'])
 
-        voter_groups = df_hist.sort_values('all_history').groupby(self.config['voter_id'])
-        df_hist = pd.concat([voter_groups[c].apply(list) for c in
-                             ['all_history', 'sparse_history', 'votetype_history']], axis=1)
+        df_hist = df_hist.loc[:, [self.config['voter_id'],
+                                  'all_history',
+                                  'votetype_history',
+                                  'county_history',
+                                  'sparse_history']]
+
+        df_group = df_hist.groupby(self.config['voter_id'])
+        groups = []
+        for col in df_hist.columns[1:]:
+            group = df_group[col].apply(list)
+            groups.append(group)
+
+        df_hist = pd.concat(groups, axis=1)
 
         # --- handling voter file --- #
 
@@ -2973,6 +2977,62 @@ class Preprocessor(Loader):
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_alaska(self):
+        new_files = self.unpack_files(self.main_file, compression='unzip')
+        voter_file = [n for n in new_files if 'voter' in n['name'].lower()][0]
+
+        df_voter = pd.read_csv(voter_file['obj'], dtype=str).drop('UN', axis=1)
+        df_hist = df_voter.loc[:, [self.config['voter_id']] + self.config['election_columns']]
+
+        # --- handling the vote history file --- #
+
+        df_hist = df_hist.set_index(self.config['voter_id']).stack().reset_index().iloc[:, [0, 2]]
+        df_hist.columns = [self.config['voter_id'], 'election']
+
+        df_hist = df_hist.join(df_hist.election.str.split(' ', expand=True))
+        df_hist = df_hist.rename({0: 'all_history', 1: 'votetype_history'}, axis=1)
+
+        df_hist = df_hist.join(df_hist.all_history.str.split('(?<=^\d{2})', expand=True))
+        df_hist = df_hist.rename({0: 'election_year', 1: 'election_type'}, axis=1)
+
+        df_hist.election_year = '20' + df_hist.election_year
+
+        elections, counts = np.unique(df_hist.loc[:, ['all_history', 'election_year']]
+                                      .apply(tuple, axis=1), return_counts=True)
+
+        sorted_elections_dict = {k[0]: {'index': i,
+                                        'count': int(counts[i]),
+                                        'date': int(k[1])}
+                                 for i, k in enumerate(elections)}
+        sorted_elections = list(sorted_elections_dict)
+
+        df_hist.loc[:, 'sparse_history'] = df_hist.all_history.map(lambda x: sorted_elections_dict[x]['index'])
+
+        df_hist = pd.concat([df_hist.groupby(self.config['voter_id'])[c].apply(list)
+                             for c in ['all_history',
+                                       'votetype_history',
+                                       'sparse_history']], axis=1)
+
+        # --- handling the voter file --- #
+
+        df_voter = df_voter.loc[:, ~df_voter.columns.isin(self.config['election_columns'])]
+        df_voter = df_voter.set_index(self.config['voter_id'])
+
+        df_voter = self.config.coerce_strings(df_voter)
+        df_voter = self.config.coerce_numeric(df_voter)
+        df_voter = self.config.coerce_dates(df_voter)
+
+        df_voter = df_voter.join(df_hist)
+
+        self.meta = {
+            'message': 'alaska_{}'.format(datetime.now().isoformat()),
+            'array_encoding': json.dumps(sorted_elections_dict),
+            'array_decoding': json.dumps(sorted_elections)
+        }
+
+
+        return FileItem(name='{}.processed'.format(self.config['state']),
+                        io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
     def execute(self):
         return self.state_router()
@@ -3008,7 +3068,8 @@ class Preprocessor(Loader):
             'wyoming': self.preprocess_wyoming,
             'rhode_island': self.preprocess_rhode_island,
             'south_dakota': self.preprocess_south_dakota,
-            'montana': self.preprocess_montana
+            'montana': self.preprocess_montana,
+            'alaska': self.preprocess_alaska
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]

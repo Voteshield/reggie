@@ -23,8 +23,7 @@ class Config(object):
 
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
         self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
-        if self.data[PRIMARY_LOCALE_NAMES] is not None:
-            self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
+        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
 
     @classmethod
     def config_file_from_state(cls, state):
