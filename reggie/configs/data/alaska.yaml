@@ -5,16 +5,24 @@ delimiter: ','
 state: alaska
 source: boe
 file_class: voter_file
-voter_id: 'ASCENSION #'
-primary_locale_identifier: null
-numeric_primary_locale: false
-birthday_identifier: null
-voter_status: null
-party_identifier: PARTY
-date_format: '%m/%d/%Y'
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: RESIDENCE CITY
+numeric_primary_locale: FALSE
+party_identifier: PARTY
+birthday_identifier: null
+voter_id: 'ASCENSION #'
+voter_status: null
+voter_status_active: null
+voter_status_inactive: null
+democratic_party: D
+republican_party: R
+no_party_affiliation: N
 
 format:
   separate_hist: FALSE
@@ -101,7 +109,7 @@ election_columns:
   - VH15
   - VH16
 
-column_classes:
+columns:
   UN: character
   PARTY: character
   D/P: character

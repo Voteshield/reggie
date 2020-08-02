@@ -3,16 +3,25 @@ file_type: .csv
 delimiter: ','
 state: arkansas
 source: boe
-ile_class: voter_file
-voter_id: VoterID
-primary_locale_identifier: County
-numeric_primary_locale: false
-birthday_identifier: date_of_birth
-voter_status: CDE_REGISTRANT_STATUS
-party_identifier: CDE_PARTY
-date_format: '%m/%d/%Y'
+file_class: voter_file
 has_headers: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: County
+# Vote history counties are numeric
+numeric_primary_locale: FALSE
+party_identifier: CDE_PARTY
+birthday_identifier: date_of_birth
+voter_id: VoterID
+voter_status: CDE_REGISTRANT_STATUS
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: D
+republican_party: R
+no_party_affiliation: I 
 
 format:
   separate_hist: FALSE
@@ -113,7 +122,7 @@ column_names:
   - VolunteerFireDistrict
   - DateLastVoted
 
-column_classes:
+columns:
   County: character
   Voter_ID: character
   KEY_REGISTRANT: character
@@ -305,6 +314,39 @@ votetype_codes:
   provisial_absentee: B
   provisional_early: Y
   new_former_resident: F
+
+elections:
+  - PresPrimary2008
+  - Primary2008
+  - General2008
+  - Primary2010
+  - PrimaryRunoff2010
+  - General2010
+  - GeneralLG242011
+  - PrimaryLG542011
+  - PrimaryRunOffLG542011
+  - GeneralLG542011
+  - HwyBonds2011
+  - Primary2012
+  - PrimaryRunoff2012
+  - General2012
+  - PrimarySD212014
+  - PrimaryRunoffSD212014
+  - GeneralSD212014
+  - Primary2014
+  - PrimaryRunoff2014
+  - General2014
+  - PrimarySPSN16
+  - PrimaryRunoffSPSN16
+  - GeneralSPSN16
+  - Primary2016
+  - PrimaryRunoff2016
+  - General2016
+  - 2018SpecialPrimaryElection
+  - 2018PreferentialPrimary
+  - 2018PrimaryRunoff
+  - 2018General
+  - 2018GeneralRunoff
 
 county_codes:
   Arkansas: '01'

@@ -5,16 +5,28 @@ delimiter: '|'
 state: west_virginia
 source: boe
 file_class: voter_file
-voter_id: ID_VOTER
-primary_locale_identifier: County_Name
-numeric_primary_locale: false
-birthday_identifier: DATE.OF.BIRTH
-voter_status: Status
-party_identifier: PartyAffiliation
-date_format: '%m/%d/%Y'
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_orign: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: County_Name
+numeric_primary_locale: FALSE
+party_identifier: PartyAffiliation
+birthday_identifier: DATE OF BIRTH
+voter_id: ID_VOTER
+voter_status: Status
+voter_status_active: Active
+voter_status_inactive: Inactive
+# lots of whitespace in PartyAffiliation column before cleaning
+# also looks like write-in parties are allowed (lots of mispellings)
+democratic_party: Democrat
+republican_party: Republican
+no_party_affiliation:
+  - No Party Affiliation
+  - Unaffiliated
 
 format:
   separate_hist: FALSE
@@ -26,90 +38,90 @@ format:
   vote_history_type: null
 
 name_fields:
-  - FIRST.NAME
+  - FIRST NAME
   - Mid
-  - LAST.NAME
+  - LAST NAME
   - Suffix
 
 address_fields:
-  - HOUSE.NO
+  - HOUSE NO
   - STREET
   - STREET2
   - UNIT
   - CITY
   - STATE
   - ZIP
-  - MAIL.HOUSE.NO
-  - MAIL.STREET
-  - MAIL.STREET2
-  - MAIL.UNIT
-  - MAIL.CITY
-  - MAIL.STATE
-  - MAIL.ZIP
+  - MAIL HOUSE NO
+  - MAIL STREET
+  - MAIL STREET2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
 
 column_names:
   - ID_VOTER
   - County_Name
-  - FIRST.NAME
+  - FIRST NAME
   - Mid
-  - LAST.NAME
+  - LAST NAME
   - Suffix
-  - DATE.OF.BIRTH
+  - DATE OF BIRTH
   - SEX
-  - HOUSE.NO
+  - HOUSE NO
   - STREET
   - STREET2
   - UNIT
   - CITY
   - STATE
   - ZIP
-  - MAIL.HOUSE.NO
-  - MAIL.STREET
-  - MAIL.STREET2
-  - MAIL.UNIT
-  - MAIL.CITY
-  - MAIL.STATE
-  - MAIL.ZIP
-  - REGISTRATION.DATE
+  - MAIL HOUSE NO
+  - MAIL STREET
+  - MAIL STREET2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+  - REGISTRATION DATE
   - PartyAffiliation
   - Status
-  - Congressional.District
-  - Senatorial.District
-  - Delegate.District
-  - Magisterial.District
+  - Congressional District
+  - Senatorial District
+  - Delegate District
+  - Magisterial District
   - Precinct_Number
   - POLL_NAME
 
-column_classes:
+columns:
   ID_VOTER: character
   County_Name: character
-  FIRST.NAME: character
+  FIRST NAME: character
   Mid: character
-  LAST.NAME: character
+  LAST NAME: character
   Suffix: character
-  DATE.OF.BIRTH: date
+  DATE OF BIRTH: date
   SEX: character
-  HOUSE.NO: character
+  HOUSE NO: character
   STREET: character
   STREET2: character
   UNIT: character
   CITY: character
   STATE: character
   ZIP: character
-  MAIL.HOUSE.NO: character
-  MAIL.STREET: character
-  MAIL.STREET2: character
-  MAIL.UNIT: character
-  MAIL.CITY: character
-  MAIL.STATE: character
-  MAIL.ZIP: character
-  REGISTRATION.DATE: date
+  MAIL HOUSE NO: character
+  MAIL STREET: character
+  MAIL STREET2: character
+  MAIL UNIT: character
+  MAIL CITY: character
+  MAIL STATE: character
+  MAIL ZIP: character
+  REGISTRATION DATE: date
   PartyAffiliation: character
   Status: character
-  Congressional.District: character
-  Senatorial.District: character
-  Delegate.District: character
-  Magisterial.District: character
+  Congressional District: character
+  Senatorial District: character
+  Delegate District: character
+  Magisterial District: character
   Precinct_Number: character
   POLL_NAME: character
 
@@ -137,16 +149,16 @@ race_codes:
 
 party_codes:
   no_party_affiliation:
-    - no party affiliation
-    - unaffiliated
-  democratic_party: democrat
-  republican_party: republican
-  green_party: green
-  libertarian_party: libertarian
-  mountain_party: mountain
+    - No Party Affiliation
+    - Unaffiliated
+  democratic_party: Democrat
+  republican_party: Republican
+  green_party: Green
+  libertarian_party: Libertarian
+  mountain_party: Mountain
   independent:
-    - independent
-    - independent party
-  other: other
+    - Independent
+    - Independent Party
+  other: Other
 
 num_party_codes: 230

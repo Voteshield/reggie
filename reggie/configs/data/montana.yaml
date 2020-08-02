@@ -1,19 +1,29 @@
 # Voter Registration records are in one file entitled voter_extract.txt
 # There seems to be an issue with the DOB column where some entries have birthdays in recent years like 2016 and 2017
+# https://app.mt.gov/voterfile/about.html
+
 
 file_type: txt
 state: montana
 source: boe
 file_class: voter_extract.txt
-voter_id: VTRID
-primary_locale_identifier: CURRENT_COUNTY
-numeric_primary_locale: false
-birthday_identifier: DOB
-voter_status: VOTER_STATUS
-party_identifier: null
-date_format: '%m/%d/%Y'
 has_headers: TRUE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: CURRENT_COUNTY
+numeric_primary_locale: false
+party_identifier: null
+birthday_identifier: DOB
+voter_id: VTRID
+voter_status: VOTER_STATUS
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: null
+republican_party: null
+no_party_affiliation: null
 
 format:
   separate_hist: TRUE
@@ -172,24 +182,82 @@ election_columns:
   - BALLOTSTAGE STATUS
   - BALLOT_STATUS_REASON
 
-election_column_map:
-  Voter ID: VTRID
-  ELECTION_DATE: election_date
-  ELECTION_DESCRIPTION: election_desc
-  ELECTION_TYPE: election_code
-
 election_codes:
   federal_genderal: 1
   federal_primary: 2
-  primary: 8
-  federal_special: 450000001
   municipal_primary: 3
   municipal_general: 4
   special: 6
-  school_special_district: 7
+  school: 7
+  presidential_primary: 8
   fire_district: 100000029
-  special_misc: 100000030
+  water_sewer_district: 100000030
+  federal_special: 450000001
 
+votetype_codes:
+    absentee: 1
+    polling_place: 2
+    mail: 4
+
+# Election jurisdiction codes, only in vote history file
+js_codes:
+  Not Provided: 0
+  Beaverhead: 1
+  Big Horn: 2
+  Blaine: 3
+  Broadwater: 4
+  Carbon: 5
+  Carter: 6
+  Cascade: 7
+  Chouteau: 8
+  Custer: 9
+  Daniels: 10
+  Dawson: 11
+  Deer Lodge: 12
+  Fallon: 13
+  Fergus: 14
+  Flathead: 15
+  Gallatin: 16
+  Garfield: 17
+  Glacier: 18
+  Golden Valley: 19
+  Granite: 20
+  Hill: 21
+  Jefferson: 22
+  Judith Basin: 23
+  Lake: 24
+  Lewis and Clark: 25
+  Liberty: 26
+  Lincoln: 27
+  Madison: 28
+  McCone: 29
+  Meagher: 30
+  Mineral: 31
+  Missoula: 32
+  Musselshell: 33
+  Park: 34
+  Petroleum: 35
+  Phillips: 36
+  Pondera: 37
+  Powder River: 38
+  Powell: 39
+  Prairie: 40
+  Ravalli: 41
+  Richland: 42
+  Roosevelt: 43
+  Rosebud: 44
+  Sanders: 45
+  Sheridan: 46
+  Silver Bow: 47
+  Stillwater: 48
+  Sweet Grass: 49
+  Teton: 50
+  Toole: 51
+  Treasure: 52
+  Valley: 53
+  Wheatland: 54
+  Wibaux: 55
+  Yellowstone: 56
 
 standard_colpairs:
   VTRID: Voter_ID

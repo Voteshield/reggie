@@ -1,22 +1,32 @@
-#Oregon has one voting export file or voter file
-#(name: Ex-RegisteredVoters-nkramer-2019-02-07-131641.txt) updated last 02/15/2019
-#1726 voters not listed on report
+# Oregon has one voting export file or voter file
+# (name: Ex-RegisteredVoters-nkramer-2019-02-07-131641.txt) updated last 02/15/2019
+# 1726 voters not listed on report
+# No history file
 
 file_type: .txt
 delimiter: '\t'
 state: oregon
 source: boe
 file_class: voter_file
-voter_id: VOTER_ID
-primary_locale_identifier: COUNTY
-numeric_primary_locale: false
-birthday_identifier: BIRTH_DATE
-voter_status: STATUS
-party_identifier: PARTY_CODE
-date_format: ['%m-%d-%Y', '%Y']
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: ['%m-%d-%Y', '%Y']
+primary_locale_identifier: COUNTY
+numeric_primary_locale: FALSE
+party_identifier: PARTY_CODE
+birthday_identifier: BIRTH_DATE
+voter_id: VOTER_ID
+voter_status: STATUS
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: DEM
+republican_party: REP
+# also some records with literal whitespace under party code
+no_party_affiliation: NAV
 
 format:
   separate_hist: TRUE
@@ -26,7 +36,6 @@ format:
   columnar_elections: TRUE
   separate_district_lookup_file: FALSE
   vote_history_type: 'Serial'
-
 
 name_fields:
   - FIRST_NAME
@@ -102,7 +111,7 @@ column_names:
   - SPLIT
   - X
 
-column_classes:
+columns:
   VOTER_ID: character
   FIRST_NAME: character
   MIDDLE_NAME: character
