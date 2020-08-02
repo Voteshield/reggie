@@ -3,17 +3,23 @@ file_type: .txt
 state: washington
 source: boe
 file_class: voter_file
-voter_id: StateVoterID
-county_identifier: CountyCode
+has_headers: true
+fixed_width: false
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: CountyCode
+numeric_primary_locale: FALSE
+party_identifier: null
 birthday_identifier: Birthdate
+voter_id: StateVoterID
 voter_status: StatusCode
 voter_status_active: A
 voter_status_inactive: I
-party_identifier: NA
-date_format: '%m/%d/%Y'
-numeric_county: false
-has_headers: true
-fixed_width: false
+democratic_party: null
+republican_party: null
+no_party_affiliation: null
 
 format:
   separate_hist: true
@@ -93,7 +99,7 @@ column_names:
   # As of 2012, Statuscode
   - StatusCode
 
-column_classes:
+columns:
   StateVoterID: character
 # Obsolete as of 2012
 #  CountyVoterID: character

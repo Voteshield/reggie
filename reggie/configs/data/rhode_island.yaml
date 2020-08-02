@@ -5,17 +5,26 @@ delimiter: '|'
 state: rhode_island
 source: boe
 file_class: voter_file
-voter_id: VOTER ID
-county_identifier: null
-birthday_identifier: YEAR OF BIRTH
-voter_status: STATUS CODE
-party_identifier: PARTY CODE
-# birth year
-date_format: ['%m/%d/%Y', '%Y']
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+# birth year
+date_format: ['%m/%d/%Y', '%Y']
+# no county
+primary_locale_identifier: CONGRESSIONAL DISTRICT
+numeric_primary_locale: TRUE
+party_identifier: PARTY CODE
+birthday_identifier: YEAR OF BIRTH
+voter_id: VOTER ID
+voter_status: STATUS CODE
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: D
+republican_party: R
+no_party_affiliation: U
 
 format:
   separate_hist: TRUE
@@ -56,7 +65,6 @@ address_fields:
   - MAILING SUFFIX B
   - MAILING STATE
   - MAILING COUNTRY
-
 
 column_names:
   - VOTER ID

@@ -6,16 +6,24 @@ delimiter: ','
 state: wyoming
 source: boe
 file_class: voter_file
-voter_id: Voter ID
-county_identifier: County
-birthday_identifier: null
-voter_status: null
-party_identifier: Political Party
-date_format: '%m/%d/%Y'
-numeric_county: FALSE
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: Political Party
+birthday_identifier: null
+voter_id: Voter ID
+voter_status: null
+voter_status_active: null
+voter_status_inactive: null
+democratic_party: Democratic
+republican_party: Republican
+no_party_affiliation: Unaffiliated
 
 format:
   separate_hist: TRUE
@@ -67,7 +75,7 @@ column_names:
   - House
   - Senate
 
-column_classes:
+columns:
   Voter ID: character
   Last Name: character
   First Name: character
@@ -89,30 +97,43 @@ column_classes:
   House: int
   Senate: int
 
-vote_history:
-  columns:
+election_columns:
+  Voter ID:
+    - VOTER_ID
+    - VOTER ID
     - Voter ID
-    - Political Party
-    - election_date
-    - vote_method
-    - precinct
-    - election_type
-  elections:
-    2018 General: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2018 Primary: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2016 General: {VOTER_ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2016 Primary: {VOTER_ID: Voter ID, PARTY: Political Party, VOTE METHOD: vote_method, PRECINCT: precinct}
-    2014 General: {VOTER_ID: Voter ID, REGISTERED_PARTY: Political Party, ELECTION DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
-    2014 Primary: {VOTER_ID: Voter ID, REGISTERED_PARTY: Political Party, PRIMARY_ELECTION_DATE: election_date, VOTE_METHOD: vote_method, PRECINCT: precinct}
-    2012 General: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2012 Primary: {Voter_ID: Voter ID, Party: Political Party, Primary Election date: election_date, Voter Method: vote_method, Precinct: precinct}
-    2010 General: {Voter ID: Voter ID, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2010 Primary: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2008 General: {Voter ID: Voter ID, Party: Political Party, Election Date: election_date, Vote Method: vote_method, Precinct: precinct}
-    2008 Primary: {VOTER ID: Voter ID, PARTY: Political Party, ELECTION DATE: election_date, VOTE METHOD: vote_method, PRECINCT: precinct}
-    # NP for any elections that have not been implemented above
-    # assumes the most common column names for each of the above
-    NP: {voterid: Voter ID, party: Political Party, electiondate: election_date, votemethod: vote_method, precinct: precinct}
+    - Voter_ID
+  Political Party:
+    - PARTY
+    - REGISTERED_PARTY
+    - Party
+  election_date:
+    - ELECTION DATE
+    - PRIMARY_ELECTION_DATE
+    - Election Date
+    - Primary Election Date
+  vote_method:
+    - VOTE METHOD
+    - Vote Method
+    - VOTE_METHOD
+    - Voter Method
+  precinct:
+    - PRECINCT
+    - Precinct
+
+elections:
+  - 2018 General
+  - 2018 Primary
+  - 2016 General
+  - 2016 Primary
+  - 2014 General
+  - 2014 Primary
+  - 2012 General
+  - 2012 Primary
+  - 2010 General
+  - 2010 Primary
+  - 2008 General
+  - 2008 Primary
 
 status_codes:
   Not_Provided: NP
@@ -123,7 +144,10 @@ gender_codes:
 race_codes:
   Not_Provided: NP
 
+# Party codes only used in vote history files
 party_codes:
-  Not_Provided: NP
+  democratic_party: DEM
+  republican_party: REP
+  no_party_affiliation: UAF
 
 num_party_codes: 9
