@@ -290,28 +290,28 @@ status_codes: # only list active voters in this dataset, I is assumed
 race_codes:
   Not_Provided: NP
 
-county_codes:
-  Allegany: 1
-  Anne Arundel: 2
-  Baltimore City: 3
-  Baltimore County: 4
-  Calvert: 5
-  Caroline: 6
-  Carroll: 7
-  Cecil: 8
-  Charles: 9
-  Dorchester: 10
-  Frederick: 11
-  Garrett: 12
-  Harford: 13
-  Howard: 14
-  Kent: 15
-  Montgomery: 16
-  Prince Georges: 17
-  Queen Annes: 18
-  Saint Marys: 19
-  Somerset: 20
-  Talbot: 21
-  Washington: 22
-  Wicomico: 23
-  Worcester: 24
+jurisdiction_codes:
+  Allegany: '01'
+  Anne Arundel: '02'
+  Baltimore City: '03'
+  Baltimore County: '04'
+  Calvert: '05'
+  Caroline: '06'
+  Carroll: '07'
+  Cecil: '08'
+  Charles: '09'
+  Dorchester: '10'
+  Frederick: '11'
+  Garrett: '12'
+  Harford: '13'
+  Howard: '14'
+  Kent: '15'
+  Montgomery: '16'
+  Prince George: '17'
+  Queen Annes: '18'
+  Saint Mary: '19'
+  Somerset: '20'
+  Talbot: '21'
+  Washington: '22'
+  Wicomico: '23'
+  Worcester: '24'
