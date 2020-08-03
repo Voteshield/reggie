@@ -3317,6 +3317,9 @@ class Preprocessor(Loader):
         return FileItem(name='{}.processed'.format(self.config['state']),
                         io_obj=StringIO(df_voter.to_csv(index=True, encoding='latin-1')))
 
+    def preprocess_dc(self):
+        return
+
     def execute(self):
         return self.state_router()
 
@@ -3356,7 +3359,8 @@ class Preprocessor(Loader):
             'connecticut': self.preprocess_connecticut,
             'vermont': self.preprocess_vermont,
             'delaware': self.preprocess_delaware,
-            'maryland': self.preprocess_maryland
+            'maryland': self.preprocess_maryland,
+            'dc': self.preprocess_dc
         }
         if self.config["state"] in routes:
             f = routes[self.config["state"]]
