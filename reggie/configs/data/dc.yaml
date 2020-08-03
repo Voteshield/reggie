@@ -6,6 +6,7 @@
 file_type: .xlsx
 delimiter: ','
 state: dc
+source: boe
 file_class: voter_file
 has_headers: TRUE
 fixed_width: FALSE
