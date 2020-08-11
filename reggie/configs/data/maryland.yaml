@@ -1,0 +1,317 @@
+# Maryland comes with six files: Absentee vote history, vote history, voter list as well as readme.txt files for each
+
+file_type: txt
+delimiter: '\t'
+state: maryland
+source: boe
+file_class: voter_file
+has_headers: TRUE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m-%d-%Y'
+primary_locale_identifier: COUNTY
+numeric_primary_locale: FALSE
+party_identifier: PARTY
+birthday_identifier: null
+voter_id: VTRID
+voter_status: STATUS_CODE
+voter_status_active: A
+voter_status_inactive: null
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: UNA
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: TRUE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Serial'
+
+name_fields:
+  - LASTNAME
+  - FIRSTNAME
+  - MIDDLENAME
+  - SUFFIX
+
+address_fields:
+  - HOUSE_NUMBER
+  - HOUSE_SUFFIX
+  - STREET_PREDIRECTION
+  - STREETNAME
+  - STREETTYPE
+  - STREET_POSTDIRECTION
+  - UNITTYPE
+  - UNITNUMBER
+  - ADDRESS
+  - NON_STD_ADDRESS
+  - RESIDENTIALCITY
+  - RESIDENTIALSTATE
+  - RESIDENTIALZIP5
+  - RESIDENTIALZIP4
+  - MAILINGADDRESS
+  - MAILINGCITY
+  - MAILINGSTATE
+  - MAILINGZIP5
+  - MAILINGZIP4
+  - COUNTRY
+
+column_names:
+  - VTRID
+  - LASTNAME
+  - FIRSTNAME
+  - MIDDLENAME
+  - SUFFIX
+  - GENDER
+  - PARTY
+  - HOUSE_NUMBER
+  - HOUSE_SUFFIX
+  - STREET_PREDIRECTION
+  - STREETNAME
+  - STREETTYPE
+  - STREET_POSTDIRECTION
+  - UNITTYPE
+  - UNITNUMBER
+  - ADDRESS
+  - NON_STD_ADDRESS
+  - RESIDENTIALCITY
+  - RESIDENTIALSTATE
+  - RESIDENTIALZIP5
+  - RESIDENTIALZIP4
+  - MAILINGADDRESS
+  - MAILINGCITY
+  - MAILINGSTATE
+  - MAILINGZIP5
+  - MAILINGZIP4
+  - COUNTRY
+  - STATUS_CODE
+  - STATE_REGISTRATION_DATE
+  - COUNTY_REGISTRATION_DATE
+  - PRECINCT
+  - SPLIT
+  - COUNTY
+  - CONGRESSIONAL_DISTRICTS
+  - LEGISLATIVE_DISTRICTS
+  - COUNCILMANIC_DISTRICTS
+  - WARD_DISTRICTS
+  - MUNICIPAL_DISTRICTS
+  - COMMISSIONER_DISTRICTS
+  - SCHOOL_DISTRICTS
+
+columns:
+  VTRID: character
+  LASTNAME: character
+  FIRSTNAME: character
+  MIDDLENAME: character
+  SUFFIX: character
+  GENDER: character
+  PARTY: character
+  HOUSE_NUMBER: character
+  HOUSE_SUFFIX: character
+  STREET_PREDIRECTION: character
+  STREETNAME: character
+  STREETTYPE: character
+  STREET_POSTDIRECTION: character
+  UNITTYPE: character
+  UNITNUMBER: character
+  ADDRESS: character
+  NON_STD_ADDRESS: character
+  RESIDENTIALCITY: character
+  RESIDENTIALSTATE: character
+  RESIDENTIALZIP5: character
+  RESIDENTIALZIP4: character
+  MAILINGADDRESS: character
+  MAILINGCITY: character
+  MAILINGSTATE: character
+  MAILINGZIP5: character
+  MAILINGZIP4: character
+  COUNTRY: character
+  STATUS_CODE: character
+  STATE_REGISTRATION_DATE: date
+  COUNTY_REGISTRATION_DATE: date
+  PRECINCT: character
+  SPLIT: character
+  COUNTY: character
+  CONGRESSIONAL_DISTRICTS: character
+  LEGISLATIVE_DISTRICTS: character
+  COUNCILMANIC_DISTRICTS: character
+  WARD_DISTRICTS: character
+  MUNICIPAL_DISTRICTS: character
+  COMMISSIONER_DISTRICTS: character
+  SCHOOL_DISTRICTS: character
+
+standard_colnames:
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+  - Gender
+  - Party_Affiliation
+  - House_Number
+  - House_Suffix
+  - Pre_Direction
+  - Street_Name
+  - Street_Type
+  - Post_Direction
+  - Unit_Type
+  - Unit_Number
+  - Residence_Line1
+  - Address_Non_Standard
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Mailing_Address
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Zipcode_Plus
+  - Mailing_Country
+  - Voter_Status
+  - State_Registration_Date
+  - County_Registration_Date
+  - Precinct_Code
+  - Precinct_Split
+  - County_Name
+  - Congressional_District
+  - Legislative_District
+  - Councilmanic_Districts
+  - Ward_Code
+  - Municipality_Code
+  - County_Commission_District_Code
+  - School_District_Code
+
+standard_colpairs:
+  VTRID: Voter_ID
+  LASTNAME: Name_Last
+  FIRSTNAME: Name_First
+  MIDDLENAME: Name_Middle
+  SUFFIX: Name_Suffix
+  GENDER: Gender
+  PARTY: Party_Affiliation
+  HOUSE_NUMBER: House_Number
+  HOUSE_SUFFIX: House_Suffix
+  STREET_PREDIRECTION: Pre_Direction
+  STREETNAME: Street_Name
+  STREETTYPE: Street_Type
+  STREET_POSTDIRECTION: Post_Direction
+  UNITTYPE: Unit_Type
+  UNITNUMBER: Unit_Number
+  ADDRESS: Residence_Line1
+  NON_STD_ADDRESS: Address_Non_Standard
+  RESIDENTIALCITY: Residence_City
+  RESIDENTIALSTATE: Residence_State
+  RESIDENTIALZIP5: Residence_Zipcode
+  RESIDENTIALZIP4: Residence_Zipcode_Plus
+  MAILINGADDRESS: Mailing_Address
+  MAILINGCITY: Mailing_City
+  MAILINGSTATE: Mailing_State
+  MAILINGZIP5: Mailing_Zipcode
+  MAILINGZIP4: Mailing_Zipcode_Plus
+  COUNTRY: Mailing_Country
+  STATUS_CODE: Voter_Status
+  STATE_REGISTRATION_DATE: State_Registration_Date
+  COUNTY_REGISTRATION_DATE: County_Registration_Date
+  PRECINCT: Precinct_Code
+  SPLIT: Precinct_Split
+  COUNTY: County_Name
+  CONGRESSIONAL_DISTRICTS: Congressional_District
+  LEGISLATIVE_DISTRICTS: Legislative_District
+  COUNCILMANIC_DISTRICTS: Councilmanic_Districts
+  WARD_DISTRICTS: Ward_Code
+  MUNICIPAL_DISTRICTS: Municipality_Code
+  COMMISSIONER_DISTRICTS: County_Commission_District_Code
+  SCHOOL_DISTRICTS: School_District_Code
+
+election_codes:
+  presidential_primary: PP
+  presidential_general: PG
+  gubernatorial_primary: GP
+  gubernatorial_general: GG
+  municipal_election1: CEMUN
+  municipal_election2: CTMUN
+
+gender_codes:
+  Male: M
+  Female: F
+  Unknown: U
+
+party_codes:
+  DEMOCRAT: DEM
+  REPUBLICAN: REP
+  WORKING CLASS PARTY: WCP
+  BREAD AND ROSES: BAR
+  UNAFFILIATED: UNA
+  OTHER PARTIES: OTH
+  OTHERS - ALLIANCE: OAL
+  OTHERS - AMERICAN: OAM
+  OTHERS - AMERICAN INDEPENDENT: OAI
+  OTHERS - AMERICAN SOCIALIST: OAS
+  OTHERS - ANARCHIST: OAN
+  OTHERS - BULL MOOSE: OBM
+  OTHERS - CHRISTIAN: OCH
+  OTHERS - COMMUNIST: OCO
+  OTHERS - CONSERVATIVE: OCN
+  OTHERS - CONSTITUTION: OCON
+  OTHERS - CONSTITUTIONAL: OCS
+  OTHERS - FREE CHOICE: OFCH
+  OTHERS - FREEDOM: OFR
+  OTHERS - GRASS ROOTS: OGRT
+  OTHERS - GREEN: OGRN
+  OTHERS - INDEPENDENT: OIN
+  OTHERS - INDIVIDUALIST: OID
+  OTHERS - LEAGUE OF THE SOUTH: OLS
+  OTHERS - LIBERALS: OLIR
+  OTHERS - LIBERTARIAN: OLB
+  OTHERS - NATIONAL SOCIALIST: ONAS
+  OTHERS - NATURAL LAW: ONL
+  OTHERS - NATURAL PARTY: ONP
+  OTHERS - PATRIOT: OPAT
+  OTHERS - PEOPLES: OPE
+  OTHERS - POPULIST: OPOP
+  OTHERS - REFORM: ORE
+  OTHERS - RIGHT-TO-LIFE: ORL
+  OTHERS - SOCIAL DEMOCRAT: OSD
+  OTHERS - SOCIALIST: OSC
+  OTHERS - TAX: OTX
+  OTHERS - TAXPAYERS: OTP
+  OTHERS - WHIG: OWH
+  OTHERS - WORKERS: OWO
+
+status_codes: # only list active voters in this dataset, I is assumed
+  ACTIVE: A
+  INACTIVE: I
+
+race_codes:
+  Not_Provided: NP
+
+jurisdiction_codes:
+  Allegany: '01'
+  Anne Arundel: '02'
+  Baltimore City: '03'
+  Baltimore County: '04'
+  Calvert: '05'
+  Caroline: '06'
+  Carroll: '07'
+  Cecil: '08'
+  Charles: '09'
+  Dorchester: '10'
+  Frederick: '11'
+  Garrett: '12'
+  Harford: '13'
+  Howard: '14'
+  Kent: '15'
+  Montgomery: '16'
+  Prince George: '17'
+  Queen Annes: '18'
+  Saint Mary: '19'
+  Somerset: '20'
+  Talbot: '21'
+  Washington: '22'
+  Wicomico: '23'
+  Worcester: '24'

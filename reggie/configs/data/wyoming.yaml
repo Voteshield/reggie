@@ -1,0 +1,153 @@
+# Wyoming has the Voter File all in one file called "Statewide" with the date is was extracted
+# all histories are separated by election
+
+file_type: .txt
+delimiter: ','
+state: wyoming
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: Political Party
+birthday_identifier: null
+voter_id: Voter ID
+voter_status: null
+voter_status_active: null
+voter_status_inactive: null
+democratic_party: Democratic
+republican_party: Republican
+no_party_affiliation: Unaffiliated
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Single'
+
+name_fields:
+  - Last Name
+  - First Name
+  - Middle Name
+  - Name Suffix
+
+address_fields:
+  - Details (RA)
+  - City (RA)
+  - Zip (RA)
+  - Split
+  - Precinct
+  - County
+  - Details (MA)
+  - City (MA)
+  - State (MA)
+  - ZIP (MA)
+  - Country (MA)
+
+column_names:
+  - Voter ID
+  - Last Name
+  - First Name
+  - Middle Name
+  - Name Suffix
+  - Details (RA)
+  - City (RA)
+  - Zip (RA)
+  - Split
+  - Precinct
+  - County
+  - Details (MA)
+  - City (MA)
+  - State (MA)
+  - ZIP (MA)
+  - Country (MA)
+  - Registration Date
+  - Political Party
+  - House
+  - Senate
+
+columns:
+  Voter ID: character
+  Last Name: character
+  First Name: character
+  Middle Name: character
+  Name Suffix: character
+  Details (RA): character
+  City (RA): character
+  Zip (RA): int
+  Split: character
+  Precinct: character
+  County: character
+  Details (MA): character
+  City (MA): character
+  State (MA): character
+  ZIP (MA): int
+  Country (MA): character
+  Registration Date: date
+  Political Party: character
+  House: int
+  Senate: int
+
+election_columns:
+  Voter ID:
+    - VOTER_ID
+    - VOTER ID
+    - Voter ID
+    - Voter_ID
+  Political Party:
+    - PARTY
+    - REGISTERED_PARTY
+    - Party
+  election_date:
+    - ELECTION DATE
+    - PRIMARY_ELECTION_DATE
+    - Election Date
+    - Primary Election Date
+  vote_method:
+    - VOTE METHOD
+    - Vote Method
+    - VOTE_METHOD
+    - Voter Method
+  precinct:
+    - PRECINCT
+    - Precinct
+
+elections:
+  - 2018 General
+  - 2018 Primary
+  - 2016 General
+  - 2016 Primary
+  - 2014 General
+  - 2014 Primary
+  - 2012 General
+  - 2012 Primary
+  - 2010 General
+  - 2010 Primary
+  - 2008 General
+  - 2008 Primary
+
+status_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+# Party codes only used in vote history files
+party_codes:
+  democratic_party: DEM
+  republican_party: REP
+  no_party_affiliation: UAF
+
+num_party_codes: 9

@@ -1,0 +1,279 @@
+# DC has one voter file in EXCEL format
+# DC has a README called Read Me.txt
+# Despite VOTER ID being in the README, it is NOT included in the excel export
+# the sheet name for the voter file is DC VH EXPORT (ALL)
+
+file_type: .xlsx
+delimiter: ','
+state: dc
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: PRECINCT
+numeric_primary_locale: TRUE
+party_identifier: PARTY
+birthday_identifier: null
+voter_id: VOTER ID
+voter_status: STATUS
+voter_status_active:
+  - A
+  # ID required
+  - X
+  # federal only
+  - F
+voter_status_inactive: null
+democratic_party: DEMOCRATIC
+republican_party: REPUBLICAN
+no_party_affiliation: NO PARTY
+
+format:
+  separate_hist: FALSE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  # columnar_elections:
+  # separate_district_lookup_file:
+  # vote_history_type:
+
+name_fields:
+  - LASTNAME
+  - FIRSTNAME
+  - MIDDLE
+  - SUFFIX
+
+address_fields:
+  - RES_HOUSE
+  - RES_FRAC
+  - RES_APT
+  - RES STREET
+  - RES_CITY
+  - RES_STATE
+  - RES_ZIP
+  - RES_ZIP4
+
+column_names:
+  - REGISTERED
+  - LASTNAME
+  - FIRSTNAME
+  - MIDDLE
+  - SUFFIX
+  - STATUS
+  - PARTY
+  - RES_HOUSE
+  - RES_FRAC
+  - RES_APT
+  - RES STREET
+  - RES_CITY
+  - RES_STATE
+  - RES_ZIP
+  - RES_ZIP4
+  - PRECINCT
+  - WARD
+  - ANC
+  - SMD
+  # Only listed on README, not in actual file
+  # - VOTER ID
+  - 060220-P
+  - 120418-S
+  - 110618-G
+  - 061918-P
+  - 110816-G
+  - 061416-P
+  - 042815-S
+  - 110414-G
+  - 071514-S
+  - 040114-P
+  - 042313-S
+  - 112012-G
+  - 052012-S
+  - 042012-P
+  - 022012-S
+  - 042011-S
+  - 112010-G
+  - 092010-P
+  - 112008-G
+  - 092008-P
+  - 022008-P
+  - 082007-S
+  - 052007-S
+  - 112006-G
+  - 092006-P
+  - 112004-G
+  - 092004-P
+  - 042004-S
+  - 012004-P
+  - 112002-G
+  - 092002-P
+  - 112000-G
+  - 092000-P
+  - 082000-P
+  - 012000-S
+  - 111999-G
+  - 111998-G
+  - 091998-P
+  - 081998-P
+  - 111997-G
+  - 091997-P
+  - 011997-S
+  - 111996-G
+  - 091996-P
+  - 081996-P
+  - 111995-G
+  - 091995-P
+  - 011995-S
+  - 111994-G
+
+election_columns:
+  - 060220-P
+  - 120418-S
+  - 110618-G
+  - 061918-P
+  - 110816-G
+  - 061416-P
+  - 042815-S
+  - 110414-G
+  - 071514-S
+  - 040114-P
+  - 042313-S
+  - 112012-G
+  - 052012-S
+  - 042012-P
+  - 022012-S
+  - 042011-S
+  - 112010-G
+  - 092010-P
+  - 112008-G
+  - 092008-P
+  - 022008-P
+  - 082007-S
+  - 052007-S
+  - 112006-G
+  - 092006-P
+  - 112004-G
+  - 092004-P
+  - 042004-S
+  - 012004-P
+  - 112002-G
+  - 092002-P
+  - 112000-G
+  - 092000-P
+  - 082000-P
+  - 012000-S
+  - 111999-G
+  - 111998-G
+  - 091998-P
+  - 081998-P
+  - 111997-G
+  - 091997-P
+  - 011997-S
+  - 111996-G
+  - 091996-P
+  - 081996-P
+  - 111995-G
+  - 091995-P
+  - 011995-S
+  - 111994-G
+
+votetype_codes:
+  V: poll
+  A: absentee
+  N: not_eligible_to_vote
+  E: eligible_no_vote
+  Y: early_vote
+  # blank indicates no voting history for that election
+
+columns:
+  REGISTERED: date
+  LASTNAME: varchar
+  FIRSTNAME: varchar
+  MIDDLE: varchar
+  SUFFIX: varchar
+  STATUS: varchar
+  PARTY: varchar
+  RES_HOUSE: varchar
+  RES_FRAC: varchar
+  RES_APT: varchar
+  RES STREET: varchar
+  RES_CITY: varchar
+  RES_STATE: varchar
+  RES_ZIP: varchar
+  RES_ZIP4: varchar
+  PRECINCT: float
+  WARD: varchar
+  ANC: varchar
+  SMD: varchar
+  060220-P: varchar
+  120418-S: varchar
+  110618-G: varchar
+  061918-P: varchar
+  110816-G: varchar
+  061416-P: varchar
+  042815-S: varchar
+  110414-G: varchar
+  071514-S: varchar
+  040114-P: varchar
+  042313-S: varchar
+  112012-G: varchar
+  052012-S: varchar
+  042012-P: varchar
+  022012-S: varchar
+  042011-S: varchar
+  112010-G: varchar
+  092010-P: varchar
+  112008-G: varchar
+  092008-P: varchar
+  022008-P: varchar
+  082007-S: varchar
+  052007-S: varchar
+  112006-G: varchar
+  092006-P: varchar
+  112004-G: varchar
+  092004-P: varchar
+  042004-S: varchar
+  012004-P: varchar
+  112002-G: varchar
+  092002-P: varchar
+  112000-G: varchar
+  092000-P: varchar
+  082000-P: varchar
+  012000-S: varchar
+  111999-G: varchar
+  111998-G: varchar
+  091998-P: varchar
+  081998-P: varchar
+  111997-G: varchar
+  091997-P: varchar
+  011997-S: varchar
+  111996-G: varchar
+  091996-P: varchar
+  081996-P: varchar
+  111995-G: varchar
+  091995-P: varchar
+  011995-S: varchar
+  111994-G: varchar
+
+county_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  Not_Provided: NP
+
+party_codes:
+  democratic_party: DEMOCRATIC
+  republican_party: REPUBLICAN
+  libertarian_party: LIBERTARIAN
+  #no affiliation/undeclared
+  no_affilitation: NO PARTY
+  other: OTHER

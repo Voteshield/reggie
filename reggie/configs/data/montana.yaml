@@ -1,0 +1,314 @@
+# Voter Registration records are in one file entitled voter_extract.txt
+# There seems to be an issue with the DOB column where some entries have birthdays in recent years like 2016 and 2017
+# https://app.mt.gov/voterfile/about.html
+
+
+file_type: txt
+state: montana
+source: boe
+file_class: voter_extract.txt
+has_headers: TRUE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: '%m/%d/%Y'
+primary_locale_identifier: CURRENT_COUNTY
+numeric_primary_locale: false
+party_identifier: null
+birthday_identifier: DOB
+voter_id: VTRID
+voter_status: VOTER_STATUS
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: null
+republican_party: null
+no_party_affiliation: null
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: null
+
+name_fields:
+  - FIRSTNAME
+  - MIDDLENAME
+  - LASTNAME
+  - NAMESUFFIX
+
+address_fields:
+  - RA_HS_NUM
+  - RA_STREET_NAME
+  - RA_STTYPE
+  - RA_STDIR_CODE
+  - RA_STDIR_CODE_POST
+  - RA_UTYP_CODE
+  - RA_UNIT_NUM
+  - RA_CITY
+  - RA_STATE
+  - RA_ZIP_CODE
+  - RESIDENCEADDRESS
+  - MA_ADDR_LINE_1
+  - MA_CITY
+  - MA_STATE
+  - MA_ZIP_CODE
+  - MA_ZIP_PLUS
+  - MAILINGADDRESS
+
+column_names:
+  - VTRID
+  - FIRSTNAME
+  - MIDDLENAME
+  - LASTNAME
+  - NAMESUFFIX
+  - VOTER_STATUS
+  - VOTER_STATUS_REASON
+  - RA_HS_NUM
+  - RA_STREET_NAME
+  - RA_STTYPE
+  - RA_STDIR_CODE
+  - RA_STDIR_CODE_POST
+  - RA_UTYP_CODE
+  - RA_UNIT_NUM
+  - RA_CITY
+  - RA_STATE
+  - RA_ZIP_CODE
+  - RESIDENCEADDRESS
+  - MA_ADDR_LINE_1
+  - MA_CITY
+  - MA_STATE
+  - MA_ZIP_CODE
+  - MA_ZIP_PLUS
+  - MAILINGADDRESS
+  - PHONE_NO
+  - DOB
+  - VOTE_ELIGIBLE_DATE
+  - CURRENT_COUNTY
+  - PRECINCT
+  - HOUSE_DISTRICT
+  - SENATE_DISTRICT
+  - PREC_CODE
+  - ABSENTEE
+  - WARD
+  - CITY_LIMITS
+
+columns:
+  VTRID: character
+  FIRSTNAME: character
+  MIDDLENAME: character
+  LASTNAME: character
+  NAMESUFFIX: character
+  VOTER_STATUS: character
+  VOTER_STATUS_REASON: character
+  RA_HS_NUM: character
+  RA_STREET_NAME: character
+  RA_STTYPE: character
+  RA_STDIR_CODE: character
+  RA_STDIR_CODE_POST: character
+  RA_UTYP_CODE: character
+  RA_UNIT_NUM: character
+  RA_CITY: character
+  RA_STATE: character
+  RA_ZIP_CODE: int
+  RESIDENCEADDRESS: character
+  MA_ADDR_LINE_1: character
+  MA_CITY: character
+  MA_STATE: character
+  MA_ZIP_CODE: int
+  MA_ZIP_PLUS: int
+  MAILINGADDRESS: character
+  PHONE_NO: character
+  DOB: date
+  VOTE_ELIGIBLE_DATE: date
+  CURRENT_COUNTY: character
+  PRECINCT: character
+  HOUSE_DISTRICT: character
+  SENATE_DISTRICT: character
+  PREC_CODE: character
+  ABSENTEE: character
+  WARD: character
+  CITY_LIMITS: character
+
+standard_colnames:
+  - Voter_ID
+  - Name_Last
+  - Name_Suffix
+  - Name_First
+  - Name_Middle
+  - voter_status
+  - Voter_Status_Reason
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Street_Type
+  - Pre_Direction
+  - Post_Direction
+  - Unit_Code
+  - Unit_Number
+  - Residence_City
+  - Residence_State
+  - Residnece_Zipcode
+  - Residence_Address
+  - Mailing_Address_Line_1
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Zip_Plus
+  - Mailing_Address
+  - Phone_Number
+  - Birth_Date
+  - Voter_Eligibility_Date
+  - County_Code
+  - Precinct
+  - House_District
+  - Senate_District
+  - Precinct_Code
+  - Absentee
+  - Ward_Name
+  - City_Limits
+
+election_columns:
+  - Voter ID
+  - ELECTION_TYPE
+  - ELECTION_DATE
+  - ELECTION_DESCRIPTION
+  - JS_CODE
+  - VVM_ID
+  - SENT_DATE
+  - RECEIVE_DATE
+  - BALLOTSTAGE STATUS
+  - BALLOT_STATUS_REASON
+
+election_codes:
+  federal_genderal: 1
+  federal_primary: 2
+  municipal_primary: 3
+  municipal_general: 4
+  special: 6
+  school: 7
+  presidential_primary: 8
+  fire_district: 100000029
+  water_sewer_district: 100000030
+  federal_special: 450000001
+
+votetype_codes:
+    absentee: 1
+    polling_place: 2
+    mail: 4
+
+# Election jurisdiction codes, only in vote history file
+js_codes:
+  Not Provided: 0
+  Beaverhead: 1
+  Big Horn: 2
+  Blaine: 3
+  Broadwater: 4
+  Carbon: 5
+  Carter: 6
+  Cascade: 7
+  Chouteau: 8
+  Custer: 9
+  Daniels: 10
+  Dawson: 11
+  Deer Lodge: 12
+  Fallon: 13
+  Fergus: 14
+  Flathead: 15
+  Gallatin: 16
+  Garfield: 17
+  Glacier: 18
+  Golden Valley: 19
+  Granite: 20
+  Hill: 21
+  Jefferson: 22
+  Judith Basin: 23
+  Lake: 24
+  Lewis and Clark: 25
+  Liberty: 26
+  Lincoln: 27
+  Madison: 28
+  McCone: 29
+  Meagher: 30
+  Mineral: 31
+  Missoula: 32
+  Musselshell: 33
+  Park: 34
+  Petroleum: 35
+  Phillips: 36
+  Pondera: 37
+  Powder River: 38
+  Powell: 39
+  Prairie: 40
+  Ravalli: 41
+  Richland: 42
+  Roosevelt: 43
+  Rosebud: 44
+  Sanders: 45
+  Sheridan: 46
+  Silver Bow: 47
+  Stillwater: 48
+  Sweet Grass: 49
+  Teton: 50
+  Toole: 51
+  Treasure: 52
+  Valley: 53
+  Wheatland: 54
+  Wibaux: 55
+  Yellowstone: 56
+
+standard_colpairs:
+  VTRID: Voter_ID
+  FIRSTNAME: Name_Last
+  MIDDLENAME: Name_Suffix
+  LASTNAME: Name_First
+  NAMESUFFIX: Name_Middle
+  VOTER_STATUS: voter_status
+  VOTER_STATUS_REASON: Voter_Status_Reason
+  RA_HS_NUM: Residence_Address_Line_1
+  RA_STREET_NAME: Residence_Address_Line_2
+  RA_STTYPE: Street_Type
+  RA_STDIR_CODE: Pre_Direction
+  RA_STDIR_CODE_POST: Post_Direction
+  RA_UTYP_CODE: Unit_Code
+  RA_UNIT_NUM: Unit_Number
+  RA_CITY: Residence_City
+  RA_STATE: Residence_State
+  RA_ZIP_CODE: Residnece_Zipcode
+  RESIDENCEADDRESS: Residence_Address
+  MA_ADDR_LINE_1: Mailing_Address_Line_1
+  MA_CITY: Mailing_City
+  MA_STATE: Mailing_State
+  MA_ZIP_CODE: Mailing_Zipcode
+  MA_ZIP_PLUS: Mailing_Zip_Plus
+  MAILINGADDRESS: Mailing_Address
+  PHONE_NO: Phone_Number
+  DOB: Birth_Date
+  VOTE_ELIGIBLE_DATE: Voter_Eligibility_Date
+  CURRENT_COUNTY: County_Code
+  PRECINCT: Precinct
+  HOUSE_DISTRICT: House_District
+  SENATE_DISTRICT: Senate_District
+  PREC_CODE: Precinct_Code
+  ABSENTEE: Absentee
+  WARD: Ward_Name
+  CITY_LIMITS: City_Limits
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  active: Active
+  inactive: Inactive
+  provisional: Provisional
+  late_registration: Late Registration
+
+gender_codes:
+  Not_Provided: NP
+
+num_party_codes:
+  Not_Provided: NP
+
+party_codes: null

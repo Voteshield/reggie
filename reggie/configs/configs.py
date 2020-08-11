@@ -21,9 +21,9 @@ class Config(object):
         self.data = self.load_data(config_file, self.infer_locale_file(
             config_file))
 
-        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
         self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
+        self.primary_locale_column = self.data[PRIMARY_LOCALE_ALIAS]
 
     @classmethod
     def config_file_from_state(cls, state):
@@ -140,11 +140,12 @@ class Config(object):
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
                                            format=self.data["date_format"],
-                                           errors='coerce')
+                                           errors='coerce').fillna(pd.NaT)
             else:
                 for format_str in self.data["date_format"]:
-                    formatted = pd.to_datetime(df[field], format=format_str,
-                                               errors='coerce')
+                    formatted = pd.to_datetime(df[field],
+                                               format=format_str,
+                                               errors='coerce').fillna(pd.NaT)
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
                         break
@@ -187,20 +188,28 @@ class Config(object):
                                       errors='coerce').fillna(df[field])
         return df
 
-    def coerce_strings(self, df):
+    def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
         """
         takes all columns with text or varchar labels in the config,
         strips out whitespace and converts text to all lowercase
         NOTE: does not convert voter_status or party_identifier,
               since those are typically defined as capitalized
         :param df: dataframe to modify
+        :param extra_cols: extra columns to add
+        :param exclude: columns to exclude
+        :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-        text_fields = [c for c, v in self.data["columns"].items()
+        text_fields = [c for c, v in self.data[col_list].items()
                        if v == "text" or "char" in v]
+        if extra_cols is not None:
+            text_fields = text_fields + extra_cols
+
         for field in text_fields:
-            if (field in df) and (field != self.data["voter_status"]) \
-               and (field != self.data["party_identifier"]):
+            if (field in df) \
+            and (field != self.data["voter_status"]) \
+            and (field != self.data["party_identifier"]) \
+            and (field not in exclude):
                 string_copy = df[field].astype(str)
                 stripped_copy = string_copy.str.strip()
                 lower_copy = stripped_copy.str.lower()

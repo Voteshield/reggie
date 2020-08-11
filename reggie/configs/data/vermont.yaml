@@ -1,0 +1,509 @@
+#Vermont has one voter file (name: September 2019 VT Statewide Voter File 9.3.2019.txt)
+
+file_type: .txt
+delimiter: '|'
+state: vermont
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: ['%m/%d/%Y', '%Y']
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: null
+birthday_identifier: Year of Birth
+voter_id: VoterID
+voter_status: Status
+voter_status_active: Active
+voter_status_inactive: Challenged
+democratic_party: null
+republican_party: null
+no_party_affiliation: null
+
+format:
+  separate_hist: FALSE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: TRUE
+  vote_history_type: 'Serial'
+
+name_fields:
+  - Last Name
+  - First Name
+  - Middle Name
+  - Suffix
+
+address_fields:
+  - Legal Address Line 1
+  - Legal Address Line 2
+  - Legal Address City
+  - Legal Address State
+  - Legal Address Zip
+  - Mailing Address Line 1
+  - Mailing Address Line 2
+  - Mailing Address City
+  - Mailing Address State
+  - Mailing Address Zip
+
+column_names:
+  - VoterID
+  - Last Name
+  - First Name
+  - Middle Name
+  - Suffix
+  - Legal Address Line 1
+  - Legal Address Line 2
+  - Legal Address City
+  - Legal Address State
+  - Legal Address Zip
+  - Mailing Address Line 1
+  - Mailing Address Line 2
+  - Mailing Address City
+  - Mailing Address State
+  - Mailing Address Zip
+  - Year of Birth
+  - Date of Registration
+  - Date last Voted
+  - 2008 Gen Election Participation
+  - 2010 Gen Election Participation
+  - 2012 Gen Election Participation
+  - 2014 Gen Election Participation
+  - 2016 Gen Election Participation
+  - 2018 Gen Election Participation
+  - Status
+  - Town of Registration
+  - County
+  - Senate District
+  - Town-Nemrc Number
+  - Voting District
+  - Polling Location
+  - Police District
+  - Sewer District
+  - Garbage District
+  - School District
+  - Fire District
+  - Water District
+  - Village
+  - Ward
+
+columns:
+  VoterID: character
+  Last Name: character
+  First Name: character
+  Middle Name: character
+  Suffix: character
+  Legal Address Line 1: character
+  Legal Address Line 2: character
+  Legal Address City: character
+  Legal Address State: character
+  Legal Address Zip: character
+  Mailing Address Line 1: character
+  Mailing Address Line 2: character
+  Mailing Address City: character
+  Mailing Address State: character
+  Mailing Address Zip: character
+  Year of Birth: date
+  Date of Registration: date
+  Date last Voted: date
+  2008 Gen Election Participation: character
+  2010 Gen Election Participation: character
+  2012 Gen Election Participation: character
+  2014 Gen Election Participation: character
+  2016 Gen Election Participation: character
+  2018 Gen Election Participation: character
+  Status: character
+  Town of Registration: character
+  County: character
+  Senate District: character
+  Town-Nemrc Number: character
+  Voting District: character
+  Polling Location: character
+  Police District: character
+  Sewer District: character
+  Garbage District: character
+  School District: character
+  Fire District: character
+  Water District: character
+  Village: character
+  Ward: character
+
+
+standard_colnames:
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+  - Residence_Address_Line_1
+  - Residence_Address_Line_2
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Mailing_Address_Line_1
+  - Mailing_Address_Line_2
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Birth_Year
+  - Registration_Date
+  - Last_Vote_Date
+  - Election_Date
+  - Election_Date_2
+  - Election_Date_3
+  - Election_Date_4
+  - Election_Date_5
+  - Election_Date_6
+  - Voter_Status
+  - Registration_Town
+  - County_Name
+  - Senate_District_Name
+  - Town_Code
+  - District_Code
+  - Polling_Location
+  - Police_District_Code
+  - Sewer_District_Code
+  - Garbage_District_Code
+  - School_District_Code
+  - Fire_District_Code
+  - Water_District_Code
+  - Village_Name
+  - Ward_Code
+
+standard_colpairs:
+  VoterID: Voter_ID
+  Last Name: Name_Last
+  First Name: Name_First
+  Middle Name: Name_Middle
+  Suffix: Name_Suffix
+  Legal Address Line 1: Residence_Address_Line_1
+  Legal Address Line 2: Residence_Address_Line_2
+  Legal Address City: Residence_City
+  Legal Address State: Residence_State
+  Legal Address Zip: Residence_Zipcode
+  Mailing Address Line 1: Mailing_Address_Line_1
+  Mailing Address Line 2: Mailing_Address_Line_2
+  Mailing Address City: Mailing_City
+  Mailing Address State: Mailing_State
+  Mailing Address Zip: Mailing_Zipcode
+  Year of Birth: Birth_Year
+  Date of Registration: Registration_Date
+  Date last Voted: Last_Vote_Date
+  2008 Gen Election Participation: Election_Date
+  2010 Gen Election Participation: Election_Date_2
+  2012 Gen Election Participation: Election_Date_3
+  2014 Gen Election Participation: Election_Date_4
+  2016 Gen Election Participation: Election_Date_5
+  2018 Gen Election Participation: Election_Date_6
+  Status: Voter_Status
+  Town of Registration: Registration_Town
+  County: County_Name
+  Senate District: Senate_District_Name
+  Town-Nemrc Number: Town_Code
+  Voting District: District_Code
+  Polling Location: Polling_Location
+  Police District: Police_District_Code
+  Sewer District: Sewer_District_Code
+  Garbage District: Garbage_District_Code
+  School District: School_District_Code
+  Fire District: Fire_District_Code
+  Water District: Water_District_Code
+  Village: Village_Name
+  Ward: Ward_Code
+
+election_columns:
+  - 2008 Gen Election Participation
+  - 2010 Gen Election Participation
+  - 2012 Gen Election Participation
+  - 2014 Gen Election Participation
+  - 2016 Gen Election Participation
+  - 2018 Gen Election Participation
+
+county_codes:
+  Addison: 001
+  Bennington: 002
+  Caledonia: 003
+  Chittenden: 004
+  Essex: 005
+  Franklin: 006
+  Grand Isle: 007
+  Lamoille: 008
+  Orange: 009
+  Orleans: 010
+  Rutland: 011
+  Washington: 012
+  Windham: 013
+  Windsor: 014
+
+town_codes:
+  Addison: 16
+  Albany: 17
+  Alburgh: 18
+  Andover: 19
+  Arlington: 20
+  Athens: 21
+  Bakersfield: 22
+  Baltimore: 23
+  Barnard: 24
+  Barnet: 25
+  Barre City: 26
+  Barre Town: 27
+  Barton: 28
+  Belvidere: 29
+  Bennington: 30
+  Benson: 31
+  Berkshire: 32
+  Berlin: 33
+  Bethel: 34
+  Bloomfield: 35
+  Bolton: 36
+  Bradford: 37
+  Braintree: 38
+  Brandon: 39
+  Brattleboro: 40
+  Bridgewater: 41
+  Bridport: 42
+  Brighton: 43
+  Bristol: 44
+  Brookfield: 45
+  Brookline: 46
+  Brownington: 47
+  Brunswick: 48
+  Burke: 49
+  Cabot: 50
+  Cambridge: 51
+  Canaan: 52
+  Castleton: 53
+  Cavendish: 54
+  Charleston: 55
+  Charlotte: 56
+  Chelsea: 57
+  Chester: 58
+  Chittenden: 59
+  Clarendon: 60
+  Colchester: 61
+  Concord: 62
+  Corinth: 63
+  Cornwall: 64
+  Coventry: 65
+  Crafsbury: 66
+  Danby: 67
+  Danville: 68
+  Derby: 69
+  Dorset: 70
+  Dover: 71
+  Dummerston: 72
+  Duxbury: 73
+  East Haven: 74
+  East Montpelier: 75
+  Eden: 76
+  Elmore: 77
+  Enosburgh: 78
+  Essex: 79
+  Fair Haven: 80
+  Fairfax: 81
+  Fairfield: 82
+  Fairlee: 83
+  Fayston: 84
+  Ferdinand: 85
+  Ferrisburgh: 86
+  Fletcher: 87
+  Franklin: 88
+  Georgia: 89
+  Glastenbury: 90
+  Glover: 91
+  Goshen: 92
+  Grafton: 93
+  Granby: 94
+  Grand Isle: 95
+  Granville: 96
+  Greensboro: 97
+  Groton: 98
+  Guildhall: 99
+  Guilford: 100
+  Halifax: 101
+  Hancock: 102
+  Hardwick: 103
+  Hartford: 104
+  Hartland: 105
+  Highgate: 106
+  Hinesburg: 107
+  Holland: 108
+  Hubbardton: 109
+  Huntington: 110
+  Hyde Park: 111
+  Ira: 112
+  Irasburg: 113
+  Isle La Motte: 114
+  Jamaica: 115
+  Jay: 116
+  Jericho: 117
+  Johnson: 118
+  Killington: 119
+  Kirby: 120
+  Landgrove: 121
+  Leicester: 122
+  Lemington: 123
+  Lincoln: 124
+  Londonderry: 125
+  Lowell: 126
+  Ludlow: 127
+  Lunenburg: 128
+  Lyndon: 129
+  Maidstone: 130
+  Manchester: 131
+  Marlboro: 132
+  Marshfield: 133
+  Mendon: 134
+  Middlebury: 135
+  Middlesex: 136
+  Middletown Springs: 137
+  Milton: 138
+  Monkton: 139
+  Montgomery: 140
+  Montpelier: 141
+  Moretown: 142
+  Morgan: 143
+  Morristown: 144
+  Mount Holly: 145
+  Mount Tabor: 146
+  New Haven: 147
+  Newark: 148
+  Newbury: 149
+  Newfane: 150
+  Newport City: 151
+  Newport Town: 152
+  North Hero: 153
+  Northfield: 154
+  Norton: 155
+  Norwich: 156
+  Orange: 157
+  Orwell: 158
+  Panton: 159
+  Pawlet: 160
+  Peachmam: 161
+  Peru: 162
+  Pittsfield: 163
+  Pittsford: 164
+  Plainfield: 165
+  Plymouth: 166
+  Pomfret: 167
+  Poultney: 168
+  Pownal: 169
+  Proctor: 170
+  Putney: 171
+  Randolph: 172
+  Reading: 173
+  Readsboro: 174
+  Richford: 175
+  Richmond: 176
+  Ripton: 177
+  Rochester: 178
+  Rockingham: 179
+  Roxbury: 180
+  Royalton: 181
+  Rupert: 182
+  Rutland City: 183
+  Rutland Town: 184
+  Ryegate: 185
+  Saint Albans City: 186
+  Saint Albans Town: 187
+  Saint George: 188
+  Saint Johnsbury: 189
+  Salisbury: 190
+  Sandgate: 191
+  Searsburg: 192
+  Shaftsbury: 193
+  Sharon: 194
+  Sheffield: 195
+  Shelburne: 196
+  Sheldon: 197
+  Shoreham: 198
+  Shrewsbury: 199
+  Somerset: 200
+  South Hero: 201
+  Springfield: 202
+  Stamford: 203
+  Stannard: 204
+  Stakrsboro: 205
+  Stockbridge: 206
+  Stowe: 207
+  Strafford: 208
+  Stratton: 209
+  Sudbury: 210
+  Sunderland: 211
+  Sutton: 212
+  Swanton: 213
+  #missing 214
+  Thetford: 215
+  Tinmouth: 216
+  Topsham: 217
+  Townshend: 218
+  Troy: 219
+  Tunbridge: 220
+  Underhill: 221
+  Vergennes: 222
+  Vernon: 223
+  Vershire: 224
+  Victory: 225
+  Waitsfield: 226
+  Walden: 227
+  Wallingford: 228
+  Waltham: 229
+  Wardsboro: 230
+  Warren: 231
+  Washington: 232
+  Waterbury: 233
+  Waterford: 234
+  Waterville: 235
+  Weathersfield: 236
+  Wells: 237
+  West Fairlee: 238
+  West Haven: 239
+  West Rutland: 240
+  West Windsor: 241
+  Westfield: 242
+  Westford: 243
+  Westminister: 244
+  Westmore: 245
+  WEston: 246
+  Weybridge: 247
+  Wheelock: 248
+  Whiting: 249
+  Whittingham: 250
+  Williamstown: 251
+  Williston: 252
+  Wilmington: 253
+  Windham: 254
+  Windsor: 255
+  Winhall: 256
+  Winooski: 257
+  Wolcott: 258
+  Woodbury: 259
+  Woodford: 260
+  Woodstock: 261
+  Worcester: 262
+
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+status_codes:
+  Active: Active
+  Challenged: Challenged
+  Pre-Registered: N-18
+
+party_codes:
+  #not provided (Party_Affiliation or Party_Last_Voted)
+  Not_Provided: NP
+
+num_party_codes:
+  Not_Provided: NP

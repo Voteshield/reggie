@@ -1,0 +1,361 @@
+# Delaware has one .txt file entitled de_voter_reg.txt which has both registration and history records
+# Data Documentation does not match data (phone number columns missing)
+
+file_type: txt
+delimiter: '\t'
+state: delaware
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_orign: FALSE
+
+# --- VoteShield --- #
+
+date_format: ['%m/%d/%Y', '%Y']
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: Political Party
+birthday_identifier: Year of Birth
+voter_id: Voter ID
+voter_status: Status
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: DEMOCRATIC
+republican_party: REPUBLICAN
+no_party_affiliation: NO PARTY
+
+format:
+  separate_hist: FALSE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Sporadic'
+
+name_fields:
+  - Title
+  - Name-First
+  - Name-Middle
+  - Name-Last
+  - Name-Suffix
+
+address_fields:
+  - Res-Addr-Development Name
+  - Res-Addr-House No
+  - Res-Addr-House No Suffix
+  - Res-Addr-Street Direction Prefix
+  - Res-Addr-Street Name
+  - Res-Addr-Street Type
+  - Res-Addr-Street Direction Suffix
+  - Res-Addr-Unit Type
+  - Res-Addr-Unit Number
+  - Res-Addr-City
+  - Res-Addr-State
+  - Res-Addr-Zip Code
+  - Res-Addr-Zip 4
+  - Res-Addr-Carrier Route
+  - Res-Addr-Military Ind
+  - Mail-Addr-Line1
+  - Mail-Addr-Line2
+  - Mail-Addr-Line3
+  - Mail-Addr-Line4
+  - Mail-Addr-City
+  - Mail-Addr-State
+  - Mail-Addr-Zip Code
+  - Mail-Addr-Zip 4
+  - Mail-Addr-Carrier Route
+  - Mail-Addr-Military Ind
+  - Mail-Addr-Foreign Ind
+
+column_names:
+  - County
+  - Status
+  - Title
+  - Name-First
+  - Name-Middle
+  - Name-Last
+  - Name-Suffix
+  - Voter-ID
+  - District-Municipality
+  - Res-Addr-Development Name
+  - Res-Addr-House No
+  - Res-Addr-House No Suffix
+  - Res-Addr-Street Direction Prefix
+  - Res-Addr-Street Name
+  - Res-Addr-Street Type
+  - Res-Addr-Street Direction Suffix
+  - Res-Addr-Unit Type
+  - Res-Addr-Unit Number
+  - Res-Addr-City
+  - Res-Addr-State
+  - Res-Addr-Zip Code
+  - Res-Addr-Zip 4
+  - Res-Addr-Carrier Route
+  - Res-Addr-Military Ind
+  - Mail-Addr-Line1
+  - Mail-Addr-Line2
+  - Mail-Addr-Line3
+  - Mail-Addr-Line4
+  - Mail-Addr-City
+  - Mail-Addr-State
+  - Mail-Addr-Zip Code
+  - Mail-Addr-Zip 4
+  - Mail-Addr-Carrier Route
+  - Mail-Addr-Military Ind
+  - Mail-Addr-Foreign Ind
+  - Political Party
+  - Precinct (RDED)
+  - Year of Birth
+  - Registration Date
+  - Party Affiliation Date
+  - Res Addr-Non-Standard
+  - Last Registration Update Date
+  - District-Congressional
+  - District-City Council (Wilmington Only)
+  - District-County Council (New Castle and Sussex Only)
+  - District-Election
+  - District-Levy Court (Kent Only)
+  - District-Municipality
+  - District-Representative
+  - District-School
+  - District-Senate
+
+
+columns:
+  County: character
+  Status: character
+  Title: character
+  Name-First: character
+  Name-Middle: character
+  Name-Last: character
+  Name-Suffix: character
+  Voter-ID: character
+  District-Municipality: character
+  Res-Addr-Development Name: character
+  Res-Addr-House No: character
+  Res-Addr-House No Suffix: character
+  Res-Addr-Street Direction Prefix: character
+  Res-Addr-Street Name: character
+  Res-Addr-Street Type: character
+  Res-Addr-Street Direction Suffix: character
+  Res-Addr-Unit Type: character
+  Res-Addr-Unit Number: character
+  Res-Addr-City: character
+  Res-Addr-State: character
+  Res-Addr-Zip Code: character
+  Res-Addr-Zip 4: character
+  Res-Addr-Carrier Route: character
+  Res-Addr-Military Ind: character
+  Mail-Addr-Line1: character
+  Mail-Addr-Line2: character
+  Mail-Addr-Line3: character
+  Mail-Addr-Line4: character
+  Mail-Addr-City: character
+  Mail-Addr-State: character
+  Mail-Addr-Zip Code: character
+  Mail-Addr-Zip 4: character
+  Mail-Addr-Carrier Route: character
+  Mail-Addr-Military Ind: character
+  Mail-Addr-Foreign Ind: character
+  Political Party: character
+  Precinct (RDED): character
+  Year of Birth: date
+  Registration Date: date
+  Party Affiliation Date: date
+  Voting History 1: character
+  Voting History 2: character
+  Voting History 3: character
+  Voting History 4: character
+  Voting History 5: character
+  Voting History 6: character
+  Voting History 7: character
+  Voting History 8: character
+  Voting History 9: character
+  Voting History 10: character
+  Res Addr-Non-Standard: character
+  Last Registration Update Date: date
+  District-Congressional: character
+  District-City Council (Wilmington Only): character
+  District-County Council (New Castle and Sussex Only): character
+  District-Election: character
+  District-Levy Court (Kent Only): character
+  District-Municipality: character
+  District-Representative: character
+  District-School: character
+  District-Senate : character
+
+election_columns:
+  - Voting History 1
+  - Voting History 2
+  - Voting History 3
+  - Voting History 4
+  - Voting History 5
+  - Voting History 6
+  - Voting History 7
+  - Voting History 8
+  - Voting History 9
+  - Voting History 10
+
+standard_colnames:
+  - County_Name
+  - Voter_Status
+  - Name_Title
+  - Name_First
+  - Name_Middle
+  - Name_Last
+  - Name_Suffix
+  - Voter_ID
+  - Municipality_Code
+  - Residence_Development
+  - House_Number
+  - House_Suffix
+  - Pre_Direction
+  - Street_Name
+  - Street_Type
+  - Post_Direction
+  - Unit_Type
+  - Unit_Number
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Residence_Zipcode_Plus
+  - Residence_Carrier
+  - Residence_Military
+  - Mailing_Address
+  - Mailing_Address_Line_2
+  - Mailing_Address_Line_3
+  - Mailing_Address_Line_4
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - Mailing_Zipcode_Plus
+  - Mailing_Carrier
+  - Mailing_Military
+  - Mailing_Foreign
+  - Party_Affiliation
+  - Precinct_Code
+  - Birth_Year
+  - Registration_Date
+  - Party_Affiliation_Date
+  - Vote_History_1
+  - Vote_History_2
+  - Vote_History_3
+  - Vote_History_4
+  - Vote_History_5
+  - Vote_History_6
+  - Vote_History_7
+  - Vote_History_8
+  - Vote_History_9
+  - Vote_History_10
+  - Address_Non_Standard
+  - Last_Updated_Date
+  - Congressional_District
+  - City_Council_District
+  - County_Council_District
+  - Election_District
+  - Court_District
+  - Municipality_District
+  - House_District
+  - School_District
+  - Senate_District
+
+standard_colpairs:
+  County: County_Name
+  Status: Voter_Status
+  Title: Name_Title
+  Name-First: Name_First
+  Name-Middle: Name_Middle
+  Name-Last: Name_Last
+  Name-Suffix: Name_Suffix
+  Voter-ID: Voter_ID
+  District-Municipality: Municipality_Code
+  Res-Addr-Development Name: Residence_Development
+  Res-Addr-House No: House_Number
+  Res-Addr-House No Suffix: House_Suffix
+  Res-Addr-Street Direction Prefix: Pre_Direction
+  Res-Addr-Street Name: Street_Name
+  Res-Addr-Street Type: Street_Type
+  Res-Addr-Street Direction Suffix: Post_Direction
+  Res-Addr-Unit Type: Unit_Type
+  Res-Addr-Unit Number: Unit_Number
+  Res-Addr-City: Residence_City
+  Res-Addr-State: Residence_State
+  Res-Addr-Zip Code: Residence_Zipcode
+  Res-Addr-Zip 4: Residence_Zipcode_Plus
+  Res-Addr-Carrier Route: Residence_Carrier
+  Res-Addr-Military Ind: Residence_Military
+  Mail-Addr-Line1: Mailing_Address
+  Mail-Addr-Line2: Mailing_Address_Line_2
+  Mail-Addr-Line3: Mailing_Address_Line_3
+  Mail-Addr-Line4: Mailing_Address_Line_4
+  Mail-Addr-City: Mailing_City
+  Mail-Addr-State: Mailing_State
+  Mail-Addr-Zip Code: Mailing_Zipcode
+  Mail-Addr-Zip 4: Mailing_Zipcode_Plus
+  Mail-Addr-Carrier Route: Mailing_Carrier
+  Mail-Addr-Military Ind: Mailing_Military
+  Mail-Addr-Foreign Ind: Mailing_Foreign
+  Political Party: Party_Affiliation
+  Precinct (RDED): Precinct_Code
+  Year of Birth: Birth_Year
+  Registration Date: Registration_Date
+  Party Affiliation Date: Party_Affiliation_Date
+  Voting History 1: Vote_History_1
+  Voting History 2: Vote_History_2
+  Voting History 3: Vote_History_3
+  Voting History 4: Vote_History_4
+  Voting History 5: Vote_History_5
+  Voting History 6: Vote_History_6
+  Voting History 7: Vote_History_7
+  Voting History 8: Vote_History_8
+  Voting History 9: Vote_History_9
+  Voting History 10: Vote_History_10
+  Res Addr-Non-Standard: Address_Non_Standard
+  Last Registration Update Date: Last_Updated_Date
+  District-Congressional: Congressional_District
+  District-City Council (Wilmington Only): City_Council_District
+  District-County Council (New Castle and Sussex Only): County_Council_District
+  District-Election: Election_District
+  District-Levy Court (Kent Only): Court_District
+  District-Municipality: Municipality_District
+  District-Representative: House_District
+  District-School: School_District
+  District-Senate : Senate_District
+
+
+county_codes:
+  Not_Provided: NP
+
+status_codes:
+  active: A
+  inactive: I
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+party_codes:
+  - REPUBLICAN
+  - DEMOCRATIC
+  - NO PARTY
+  - GREEN
+  - IND PTY OF DE
+  - LIBERTARIAN
+  - CONSTITUTION
+  - NONPARTISAN
+  - OTHER
+  - CONSERVATIVE
+  - LIBERAL
+  - AMERICAN
+  - BLUE ENIGMA
+  - REFORM
+  - WORKING FAM
+  - AMER DELTA
+  - NATURAL LAW
+  - SOCIALST WR
+
+num_party_codes: 18

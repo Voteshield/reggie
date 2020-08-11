@@ -1,0 +1,158 @@
+[
+    {
+        "name": "Adams",
+        "id": "AD"
+    },
+    {
+        "name": "Asotin",
+        "id": "AS"
+    },
+    {
+        "name": "Benton",
+        "id": "BE"
+    },
+    {
+        "name": "Chelan",
+        "id": "CH"
+    },
+    {
+        "name": "Clallam",
+        "id": "CM"
+    },
+    {
+        "name": "Clark",
+        "id": "CR"
+    },
+    {
+        "name": "Columbia",
+        "id": "CU"
+    },
+    {
+        "name": "Cowlitz",
+        "id": "CZ"
+    },
+    {
+        "name": "Douglas",
+        "id": "DG"
+    },
+    {
+        "name": "Ferry",
+        "id": "FE"
+    },
+    {
+        "name": "Franklin",
+        "id": "FR"
+    },
+    {
+        "name": "Garfield",
+        "id": "GA"
+    },
+    {
+        "name": "Grant",
+        "id": "GR"
+    },
+    {
+        "name": "Grays Harbor",
+        "id": "GY"
+    },
+    {
+        "name": "Island",
+        "id": "IS"
+    },
+    {
+        "name": "Jefferson",
+        "id": "JE"
+    },
+    {
+        "name": "King",
+        "id": "KI"
+    },
+    {
+        "name": "Kitsap",
+        "id": "KP"
+    },
+    {
+        "name": "Kittitas",
+        "id": "KS"
+    },
+    {
+        "name": "Klickitat",
+        "id": "KT"
+    },
+    {
+        "name": "Lewis",
+        "id": "LE"
+    },
+    {
+        "name": "Lincoln",
+        "id": "LI"
+    },
+    {
+        "name": "Mason",
+        "id": "MA"
+    },
+    {
+        "name": "Okanogan",
+        "id": "OK"
+    },
+    {
+        "name": "Pacific",
+        "id": "PA"
+    },
+    {
+        "name": "Pend Oreille",
+        "id": "PE"
+    },
+    {
+        "name": "Pierce",
+        "id": "PI"
+    },
+    {
+        "name": "San Juan",
+        "id": "SJ"
+    },
+    {
+        "name": "Skagit",
+        "id": "SK"
+    },
+    {
+        "name": "Skamania",
+        "id": "SM"
+    },
+    {
+        "name": "Snohomish",
+        "id": "SN"
+    },
+    {
+        "name": "Spokane",
+        "id": "SP"
+    },
+    {
+        "name": "Stevens",
+        "id": "ST"
+    },
+    {
+        "name": "Thurston",
+        "id": "TH"
+    },
+    {
+        "name": "Wahkiakum",
+        "id": "WK"
+    },
+    {
+        "name": "Walla Walla",
+        "id": "WL"
+    },
+    {
+        "name": "Whatcom",
+        "id": "WM"
+    },
+    {
+        "name": "Whitman",
+        "id": "WT"
+    },
+    {
+        "name": "Yakima",
+        "id": "YA"
+    }
+]

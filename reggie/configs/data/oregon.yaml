@@ -1,0 +1,220 @@
+# Oregon has one voting export file or voter file
+# (name: Ex-RegisteredVoters-nkramer-2019-02-07-131641.txt) updated last 02/15/2019
+# 1726 voters not listed on report
+# No history file
+
+file_type: .txt
+delimiter: '\t'
+state: oregon
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+date_format: ['%m-%d-%Y', '%Y']
+primary_locale_identifier: COUNTY
+numeric_primary_locale: FALSE
+party_identifier: PARTY_CODE
+birthday_identifier: BIRTH_DATE
+voter_id: VOTER_ID
+voter_status: STATUS
+voter_status_active: A
+voter_status_inactive: I
+democratic_party: DEM
+republican_party: REP
+# also some records with literal whitespace under party code
+no_party_affiliation: NAV
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: TRUE
+  separate_district_lookup_file: FALSE
+  vote_history_type: 'Serial'
+
+name_fields:
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - NAME_SUFFIX
+
+address_fields:
+  - RES_ADDRESS_1
+  - RES_ADDRESS_2
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIRECTION
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIRECTION
+  - UNIT_TYPE
+  - UNIT_NUM
+  - ADDR_NON_STD
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - ZIP_PLUS_FOUR
+  - EFF_ADDRESS_1
+  - EFF_ADDRESS_2
+  - EFF_ADDRESS_3
+  - EFF_ADDRESS_4
+  - EFF_CITY
+  - EFF_STATE
+  - EFF_ZIP_CODE
+  - EFF_ZIP_PLUS_FOUR
+
+column_names:
+  - VOTER_ID
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - NAME_SUFFIX
+  - BIRTH_DATE
+  - CONFIDENTIAL
+  - EFF_REGN_DATE
+  - STATUS
+  - PARTY_CODE
+  - PHONE_NUM
+  - UNLISTED
+  - COUNTY
+  - RES_ADDRESS_1
+  - RES_ADDRESS_2
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIRECTION
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIRECTION
+  - UNIT_TYPE
+  - UNIT_NUM
+  - ADDR_NON_STD
+  - CITY
+  - STATE
+  - ZIP_CODE
+  - ZIP_PLUS_FOUR
+  - EFF_ADDRESS_1
+  - EFF_ADDRESS_2
+  - EFF_ADDRESS_3
+  - EFF_ADDRESS_4
+  - EFF_CITY
+  - EFF_STATE
+  - EFF_ZIP_CODE
+  - EFF_ZIP_PLUS_FOUR
+  - ABSENTEE_TYPE
+  - PRECINCT_NAME
+  - PRECINCT
+  - SPLIT
+  - X
+
+columns:
+  VOTER_ID: character
+  FIRST_NAME: character
+  MIDDLE_NAME: character
+  LAST_NAME: character
+  NAME_SUFFIX: character
+  # just year
+  BIRTH_DATE: date
+  CONFIDENTIAL: character
+  EFF_REGN_DATE: date
+  STATUS: character
+  PARTY_CODE: character
+  PHONE_NUM: character
+  UNLISTED: character
+  COUNTY: character
+  RES_ADDRESS_1: character
+  RES_ADDRESS_2: character
+  HOUSE_NUM: character
+  HOUSE_SUFFIX: character
+  PRE_DIRECTION: character
+  STREET_NAME: character
+  STREET_TYPE: character
+  POST_DIRECTION: character
+  UNIT_TYPE: character
+  UNIT_NUM: character
+  ADDR_NON_STD: character
+  CITY: character
+  STATE: character
+  ZIP_CODE: character
+  ZIP_PLUS_FOUR: character
+  EFF_ADDRESS_1: character
+  EFF_ADDRESS_2: character
+  EFF_ADDRESS_3: character
+  EFF_ADDRESS_4: character
+  EFF_CITY: character
+  EFF_STATE: character
+  EFF_ZIP_CODE: character
+  EFF_ZIP_PLUS_FOUR: character
+  ABSENTEE_TYPE: character
+  PRECINCT_NAME: character
+  PRECINCT: character
+  SPLIT: character
+  X: character
+
+party_codes:
+  democratic_party: DEM
+  republican_party: REP
+  constitution_party: CON
+  independent_party: IND
+  libertarian_party: LBT
+  no_party_affiliated: NAV
+  other_party_affiliated: OTH
+  green_party: PGP
+  progressive_party: PRO
+  working_families_party_of_OR: WFP
+  active_but_protected: ACP
+
+num_party_codes: 12
+
+race_codes:
+  Not_Provided: NP
+
+gender_codes:
+  Not_Provided: NP
+
+county_codes:
+  Baker: 01
+  Benton: 02
+  Clackamas: 03
+  Clatsop: 04
+  Columbia: 05
+  Coos: 06
+  Crook: 07
+  Curry: 08
+  Deschutes: 09
+  Douglas: 10
+  Gilliam: 11
+  Grant: 12
+  Harney: 13
+  Hood River: 14
+  Jackson: 15
+  Jefferson: 16
+  Josephine: 17
+  Klamath: 18
+  Lake: 19
+  Lane: 20
+  Lincoln: 21
+  Linn: 22
+  Malheur: 23
+  Marion: 24
+  Morrow: 25
+  Multnomah: 26
+  Polk: 27
+  Sherman: 28
+  Tillamook: 29
+  Umatilla: 30
+  Union: 31
+  Wallowa: 32
+  Wasco: 33
+  Washington: 34
+  Wheeler: 35
+  Yamhill: 36
+
+voter_status_codes:
+  Active: A
+  Inactive: I
+  Active_But_Protected: ACP

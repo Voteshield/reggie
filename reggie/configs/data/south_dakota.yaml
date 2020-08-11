@@ -1,0 +1,248 @@
+# South Dakota has two .csv files - SWVoterHistory (14).csv and SearchExport-20181227-2023.csv
+
+file_type: .csv
+delimiter: ','
+state: south_dakota
+source: boe
+file_class: voter_history
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+
+# -- VoteShield -- #
+
+# for birthdate
+date_format: ['%m/%d/%Y', '%Y']
+primary_locale_identifier: County
+numeric_primary_locale: FALSE
+party_identifier: Party
+birthday_identifier: DOB
+voter_id: Id
+voter_status: Status
+voter_status_active: Active
+voter_status_inactive: Inactive
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation: NPA
+
+format:
+  separate_hist: TRUE
+  separate_counties_voter_file: FALSE
+  separate_counties_hist_file: FALSE
+  hist_election_rows: FALSE
+  columnar_elections: FALSE
+  separate_district_lookup_file: FALSE
+  vote_history_type: null
+
+name_fields:
+  - Last Name
+  - First Name
+  - Middle Name
+  - Suffix
+
+address_fields:
+  - Residential Address
+  - Residential City
+  - Residential State
+  - Residential Zip
+  - Mailing Address
+  - Mailing City
+  - Mailing State
+  - Mailing Zip
+  - County
+  - Mailing Country
+  - House Number
+  - Pre Street Dir
+  - Street Name
+  - Street Type
+  - Post Street Dir
+
+column_names:
+  - Id
+  - Last Name
+  - First Name
+  - Middle Name
+  - Suffix
+  - DOB
+  - Residential Address
+  - Residential City
+  - Residential State
+  - Residential Zip
+  - Status
+  - Party
+  - Other Party
+  - Phone Number
+  - Email
+  - Precinct Name
+  - City
+  - Ward
+  - School
+  - School Board Representation Area
+  - Senate District
+  - House District
+  - Commissioner District
+  - Fire District
+  - Original Registration Date
+  - Last Registration Date
+  - Last Updated Date
+  - Date Last Voted
+  - Mailing Address
+  - Mailing City
+  - Mailing State
+  - Mailing Zip
+  - County
+  - Mailing Country
+  - House Number
+  - Pre Street Dir
+  - Street Name
+  - Street Type
+  - Post Street Dir
+
+columns:
+  Id: character
+  Last Name: character
+  First Name: character
+  Middle Name: character
+  Suffix: character
+  DOB: date # just year
+  Residential Address: character
+  Residential City: character
+  Residential State: character
+  Residential Zip: character
+  Status: character
+  Party: character
+  Other Party: character
+  Phone Number: character
+  Email: character
+  Precinct Name: character
+  City: character
+  Ward: character
+  School: character
+  School Board Representation Area: character
+  Senate District: character
+  House District: character
+  Commissioner District: character
+  Fire District: character
+  Original Registration Date: date
+  Last Registration Date: date
+  Last Updated Date: date
+  Date Last Voted: date
+  Mailing Address: character
+  Mailing City: character
+  Mailing State: character
+  Mailing Zip: character
+  County: character
+  Mailing Country: character
+  House Number: character
+  Pre Street Dir: character
+  Street Name: character
+  Street Type: character
+  Post Street Dir: character
+
+election_columns:
+  VoterID: Id
+  ElectionDate: date
+  ElectionType: election
+  vhVoteType: votetype_history
+
+standard_colnames:
+  - Voter_ID
+  - Name_Last
+  - Name_First
+  - Name_Middle
+  - Name_Suffix
+  - Birth_Year
+  - Residence_Line1
+  - Residence_City
+  - Residence_State
+  - Residence_Zipcode
+  - Voter_Status
+  - Party_Affiliation
+  - Party_Affiliation_Unqual
+  - Phone_Number
+  - Email_Address
+  - Precinct_Name
+  - Municipality_City_Name
+  - Ward_Name
+  - School_District_Name
+  - School_Committee_Code
+  - Senate_District
+  - House_District
+  - County_Commission_District_Code
+  - Fire_District_Name
+  - Registration_Date
+  - Last_Registration_Date
+  - Last_Updated_Date
+  - Last_Vote_Date
+  - Mailing_Address
+  - Mailing_City
+  - Mailing_State
+  - Mailing_Zipcode
+  - County_Name
+  - Mailing_Country
+  - House_Number
+  - Pre_Direction
+  - Street_Name
+  - Street_Type
+  - Post_Direction
+
+standard_colpairs:
+  Id: Voter_ID
+  Last Name: Name_Last
+  First Name: Name_First
+  Middle Name: Name_Middle
+  Suffix: Name_Suffix
+  DOB: Birth_Year
+  Residential Address: Residence_Line1
+  Residential City: Residence_City
+  Residential State: Residence_State
+  Residential Zip: Residence_Zipcode
+  Status: Voter_Status
+  Party: Party_Affiliation
+  Other Party: Party_Affiliation_Unqual
+  Phone Number: Phone_Number
+  Email: Email_Address
+  Precinct Name: Precinct_Name
+  City: Municipality_City_Name
+  Ward: Ward_Name
+  School: School_District_Name
+  School Board Representation Area: School_Committee_Code
+  Senate District: Senate_District
+  House District: House_District
+  Commissioner District : County_Commission_District_Code
+  Fire District: Fire_District_Name
+  Original Registration Date: Registration_Date
+  Last Registration Date: Last_Registration_Date
+  Last Updated Date: Last_Updated_Date
+  Date Last Voted: Last_Vote_Date
+  Mailing Address: Mailing_Address
+  Mailing City: Mailing_City
+  Mailing State: Mailing_State
+  Mailing Zip: Mailing_Zipcode
+  County: County_Name
+  Mailing Country: Mailing_Country
+  House Number: House_Number
+  Pre Street Dir: Pre_Direction
+  Street Name: Street_Name
+  Street Type: Street_Type
+  Post Street Dir: Post_Direction
+
+status_codes:
+  Active: Active
+  Inactive: Inactive
+
+gender_codes:
+  Not_Provided: NP
+
+race_codes:
+  Not_Provided: NP
+
+party_codes:
+  democratic_party: DEM
+  republican_party: REP
+  no_party_affiliation: NPA
+  libertarian_party: LIB
+  independent_party: IND
+  other_party: OTH # in the next column over
+
+num_party_codes: 6
