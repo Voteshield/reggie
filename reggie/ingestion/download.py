@@ -435,7 +435,7 @@ class Preprocessor(Loader):
         all_files = []
 
         def filter_unnecessary_files(files):
-            unnecessary = [".png", "MACOS", "DS_Store"]
+            unnecessary = [".png", ".pdf", "MACOS", "DS_Store"]
             for item in unnecessary:
                 files = [n for n in files if item not in n["name"]]
             return files
