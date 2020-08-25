@@ -11,12 +11,13 @@ birthday_identifier: Date_of_Birth
 voter_status: Status_Code
 voter_status_active: V
 voter_status_inactive: S
-voter_status_cancelled: C 
+voter_status_cancelled: C
 party_identifier: party_identifier
+expected_number_of_files: 255
 no_party_affiliation: npa
 democratic_party: D
 republican_party: R
-date_format: 
+date_format:
   - '%Y%m%d'
   - '%Y-%m-%d'
 generated_columns:
@@ -459,6 +460,6 @@ county_names:
   Young: 252
   Zapata: 253
   Zavala: 254
-  
+
 ethnicity_options:
-  'Y': hispanic 
+  'Y': hispanic

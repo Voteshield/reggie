@@ -3,6 +3,7 @@ state: kansas
 abbreviation: ks
 source: boe
 file_class: voter_file
+expected_number_of_files: 1
 voter_id: text_registrant_id
 county_identifier: db_logid
 primary_locale_identifier: db_logid
@@ -81,7 +82,7 @@ summary_columns:
   - ages_50_64
   - ages_65_130
   - Democratic
-  - Republican 
+  - Republican
   - Libertarian
   - Unaffiliated
   - locale

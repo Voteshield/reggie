@@ -435,7 +435,7 @@ class Preprocessor(Loader):
         all_files = []
 
         def filter_unnecessary_files(files):
-            unnecessary = [".png", "MACOS", "DS_Store"]
+            unnecessary = [".png", "MACOS", "DS_Store", ".pdf", ".mdb"]
             for item in unnecessary:
                 files = [n for n in files if item not in n["name"]]
             return files
@@ -575,9 +575,23 @@ class Preprocessor(Loader):
                 df.drop(columns=[c], inplace=True)
         return df
 
+    def file_check(self,  voter_files, hist_files=None):
+        expected_voter = self.config["expected_number_of_files"]
+        print(expected_voter, voter_files)
+        if hist_files:
+            expected_hist = self.config["expected_number_of_hist_files"]
+            if expected_hist != hist_files:
+                raise ValueError("Incorrect hist file number")
+
+        if expected_voter != voter_files:
+            raise ValueError("Unexpected item in bagging area")
+        else:
+            raise ValueError("Correct number of files found")
+
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
+        self.file_check(len(new_files))
         widths_one = [3, 10, 10, 50, 50, 50, 50,
                       4, 1, 8, 9, 12, 2, 50, 12,
                       2, 12, 12, 50, 9, 110, 50,
@@ -682,6 +696,9 @@ class Preprocessor(Loader):
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
+
+        self.file_check(len(new_files))
+
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
@@ -717,6 +734,7 @@ class Preprocessor(Loader):
         logging.info("Minnesota: loading voter file")
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
+        self.file_check(len(new_files))
         voter_reg_df = pd.DataFrame(columns=self.config['ordered_columns'])
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
@@ -913,7 +931,7 @@ class Preprocessor(Loader):
                     'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
                 vh_files.append(i)
-
+        self.file_check(len(new_files))
         concat_history_file = concat_and_delete(vh_files)
 
         logging.info("Performing GA history manipulation")
@@ -995,6 +1013,8 @@ class Preprocessor(Loader):
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
+
+        self.file_check(len(new_files))
         voter_file = new_files[0] if "ElgbVtr" in new_files[0]["name"] \
             else new_files[1]
         hist_file = new_files[0] if "VtHst" in new_files[0]["name"] else \
@@ -1060,6 +1080,8 @@ class Preprocessor(Loader):
                 vote_history_files.append(i)
             elif ".txt" in i["name"]:
                 voter_files.append(i)
+
+        self.file_check(len(voter_files))
 
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
@@ -1132,6 +1154,7 @@ class Preprocessor(Loader):
     def preprocess_kansas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
+        self.file_check(len(new_files))
         for f in new_files:
             if (".txt" in f['name']) and ("._" not in f['name']) and \
                     ("description" not in f['name'].lower()):
@@ -1212,9 +1235,15 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
+
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
+        # add first file here
+        valid_files = len(remaining_files) + 1
+        self.file_check(valid_files)
 
+        print("did this happen?")
+        return
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
         buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4",
@@ -1336,6 +1365,7 @@ class Preprocessor(Loader):
 
     def preprocess_arizona2(self):
 
+
         def file_is_active(filename):
             for word in ['Canceled', 'Suspense', 'Inactive']:
                 if word in filename:
@@ -1370,6 +1400,8 @@ class Preprocessor(Loader):
 
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression="unzip")
+
+        self.file_check(len(new_files))
         active_files = [f for f in new_files if file_is_active(f['name'])]
         other_files = [f for f in new_files if not file_is_active(f['name'])]
 
@@ -1499,6 +1531,8 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer")
+        self.file_check(len(new_files))
+        # filtering pdfs in unpack_files means the lambda probably isn't necessary?
         self.main_file = list(filter(
             lambda x: x["name"][-4:] != ".pdf", new_files))[0]
         gc.collect()
@@ -1557,6 +1591,7 @@ class Preprocessor(Loader):
     def preprocess_north_carolina(self):
         new_files = self.unpack_files(
             file_obj=self.main_file)  # array of dicts
+        self.file_check(len(new_files))
 
         self.config = Config("north_carolina")
         for i in new_files:
@@ -1686,6 +1721,7 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config('michigan')
         new_files = self.unpack_files(file_obj=self.main_file)
+        self.file_check(len(new_files))
         voter_file = ([n for n in new_files if 'entire_state_v' in n['name'] or
                        'EntireStateVoters' in n['name']] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n['name'] or
@@ -1869,6 +1905,7 @@ class Preprocessor(Loader):
         election_maps = [f for f in new_files if "Election Map" in f["name"]]
         zone_codes = [f for f in new_files if "Codes" in f["name"]]
         zone_types = [f for f in new_files if "Types" in f["name"]]
+        self.file_check(len(voter_files), len(election_maps))
         counties = config["county_names"]
         main_df = None
         elections = 40
@@ -2089,6 +2126,7 @@ class Preprocessor(Loader):
         voter_files = [n for n in new_files if 'vlist' in n['name'].lower()]
         hist_files = [n for n in new_files if 'ehist' in n['name'].lower()]
 
+        self.file_check(len(voter_files), len(hist_files))
         voter_df = combine_dfs(voter_files)
         hist_df = combine_dfs(hist_files)
 
@@ -2158,7 +2196,7 @@ class Preprocessor(Loader):
     def preprocess_wisconsin(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
-
+        self.file_check(len(new_files))
         config = Config("wisconsin")
         preferred_files = [x for x in new_files
                            if (".txt" in x["name"])]
@@ -2264,6 +2302,9 @@ class Preprocessor(Loader):
         config = Config('new_hampshire')
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression='unzip')
+
+        self.file_check(len(new_files))
+
         for f in new_files:
             # ignore ".mdb" files
             if ('.xlsx' in f['name']) or ('.csv' in f['name']):
@@ -2340,6 +2381,7 @@ class Preprocessor(Loader):
         valid_files = []
         for file in new_files:
             valid_files.append(file['name'].lower())
+        self.file_check(len(new_files))
         # faster to just join them into a tab separated string
         valid_files = '\t'.join(valid_files)
         if 'history' not in valid_files or 'registered' not in valid_files:

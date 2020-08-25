@@ -4,6 +4,7 @@ abbreviation: oh
 source: boe_download
 native_file_extension: zip
 file_class: voter_file
+expected_number_of_files: 4
 voter_id: SOS_VOTERID
 county_identifier: COUNTY_NUMBER
 primary_locale_identifier: COUNTY_NUMBER

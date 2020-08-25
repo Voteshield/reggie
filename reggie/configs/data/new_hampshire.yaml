@@ -3,6 +3,7 @@ state: new_hampshire
 abbreviation: nh
 source: boe
 file_class: voter_file
+expected_number_of_files: 2
 voter_id: id_voter
 county_identifier: County
 primary_locale_identifier: County
@@ -183,5 +184,5 @@ county_names:
   hillsborough
   merrimack
   rockingham
-  strafford  
+  strafford
   sullivan

@@ -3,6 +3,7 @@ state: minnesota
 abbreviation: mn
 source: boe_download
 file_class: voter_file
+expected_number_of_files: 16
 voter_id: VoterId
 county_identifier: CountyCode
 primary_locale_identifier: CountyCode
@@ -18,7 +19,7 @@ republican_party: Republican
 no_party_affiliation: npa
 absentee_ballot_code: "'A'"
 missing_required_fields: true
-date_format: 
+date_format:
   - '%Y'
   - '%Y-%m-%d hh:mm:ss'
 match_fields:

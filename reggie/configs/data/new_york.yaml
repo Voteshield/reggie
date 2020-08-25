@@ -6,6 +6,7 @@ state: new_york
 abbreviation: ny
 source: boe
 file_class: voter_file
+expected_number_of_files: 1
 voter_id: sboeid
 county_identifier: countycode
 primary_locale_identifier: countycode

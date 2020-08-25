@@ -3,6 +3,8 @@ state: pennsylvania
 abbreviation: pa
 source: boe
 file_class: voter_file
+expected_number_of_files: 67
+expected_number_of_hist_files: 67
 voter_id: voter_id
 county_identifier: county
 primary_locale_identifier: county
