@@ -212,6 +212,7 @@ class Config(object):
             and (field not in exclude):
                 string_copy = df[field].astype(str)
                 stripped_copy = string_copy.str.strip()
+                stripped_copy = stripped_copy.str.split().str.join(" ")
                 lower_copy = stripped_copy.str.lower()
                 utf_decoded = lower_copy.str.encode('utf-8', errors='ignore')
                 df[field] = utf_decoded.str.decode('utf-8')
