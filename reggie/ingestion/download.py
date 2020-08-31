@@ -577,7 +577,7 @@ class Preprocessor(Loader):
 
     def file_check(self,  voter_files, hist_files=None):
         expected_voter = self.config["expected_number_of_files"]
-        print(expected_voter, voter_files)
+        # print(expected_voter, voter_files)
         if hist_files:
             expected_hist = self.config["expected_number_of_hist_files"]
             if expected_hist != hist_files:
@@ -585,8 +585,29 @@ class Preprocessor(Loader):
 
         if expected_voter != voter_files:
             raise ValueError("Unexpected item in bagging area")
+        # else:
+        #     raise ValueError("Correct number of files found")
+
+    def column_check(self, current_columns, expected_columns=None):
+        def difflist(li1, li2):
+            return list(list(set(li1) - set(li2)) + list(set(li2) - set(li1)))
+        if expected_columns is None:
+            expected_columns = self.config["ordered_columns"]
+        if set(current_columns) >= set(expected_columns):
+            raise ValueError("correct columns detected")
         else:
-            raise ValueError("Correct number of files found")
+            print("current:\n",current_columns)
+            print("-----|-----")
+            print("expected\n",expected_columns)
+            print("\n")
+            print(difflist(current_columns, expected_columns))
+            raise ValueError("Incorrect Columns")
+
+    def column_length_check(self, current_length):
+        if current_length != len(self.config["ordered_columns"]):
+            raise ValueError("the lengths don't match yo")
+        else:
+            raise ValueError("Things are correct ")
 
     def preprocess_texas(self):
         new_files = self.unpack_files(
@@ -920,18 +941,20 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
         vh_files = []
+        self.file_check(len(new_files))
+
         for i in new_files:
             if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 df_voters = self.read_csv_count_error_lines(
                     i["obj"], sep="|", quotechar='"', quoting=3,
                     error_bad_lines=False)
+                self.column_length_check(len(list(df_voters.columns)))
                 df_voters.columns = self.config["ordered_columns"]
                 df_voters['Registration_Number'] = df_voters[
                     'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
                 vh_files.append(i)
-        self.file_check(len(new_files))
         concat_history_file = concat_and_delete(vh_files)
 
         logging.info("Performing GA history manipulation")
@@ -1082,7 +1105,7 @@ class Preprocessor(Loader):
                 voter_files.append(i)
 
         self.file_check(len(voter_files))
-
+        # add hist check too here
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
         gc.collect()
@@ -1121,6 +1144,8 @@ class Preprocessor(Loader):
         logging.info("FLORIDA: loading main voter file")
         df_voters = self.read_csv_count_error_lines(concat_voter_file, header=None,
             sep="\t", error_bad_lines=False)
+
+        self.column_length_check(len(list(df_voters.columns)))
         df_voters.columns = self.config["ordered_columns"]
         df_voters = df_voters.set_index(self.config["voter_id"])
 
@@ -1240,10 +1265,8 @@ class Preprocessor(Loader):
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
         # add first file here
         valid_files = len(remaining_files) + 1
-        self.file_check(valid_files)
+        # self.file_check(valid_files)
 
-        print("did this happen?")
-        return
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
         buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4",
@@ -1251,9 +1274,20 @@ class Preprocessor(Loader):
         total_cols = main_cols + history_cols + buffer_cols
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
+        # print("headers", list(headers))
+        # print("history cols", history_cols)
+        #IOWA is...special
+        column_check_list = [x.replace(' ', '_').replace('.', '_') for x in headers if (x not in history_cols and 'CITY/SCHOOL' not in x)]
+        # print("column check list", column_check_list)
+        # self.column_check(column_check_list)
         headers = headers.tolist() + buffer_cols
+        # print(len(column_check_list), len(self.config["ordered_columns"]))
+        # self.column_check(list(column_check_list))
+        # raise ValueError("??")
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
+
+        # print(list(df_voters.columns))
 
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
@@ -1264,6 +1298,15 @@ class Preprocessor(Loader):
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
+        pd.set_option('display.max_rows', 50)
+        # pd.set_option('display.max_columns', None)
+        cols = ["CITY_1", "CITY"]
+        # df = df[df[cols].notnull().all(axis=1)]
+        print("this is boty city1 and city not null\n", df_voters[df_voters[cols].notnull().all(axis=1)])
+        print("this is just city_1 not null\n", df_voters[df_voters["CITY_1"].notnull()])
+        print("this is just city not null\n", df_voters[df_voters["CITY"].notnull()])
+
+        raise ValueError("stopping_")
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
@@ -1358,13 +1401,15 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+
+        print(list(df_voters.columns))
+        raise ValueError("let's stop")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
                         s3_bucket=self.s3_bucket)
 
     def preprocess_arizona2(self):
-
 
         def file_is_active(filename):
             for word in ['Canceled', 'Suspense', 'Inactive']:
@@ -1418,7 +1463,7 @@ class Preprocessor(Loader):
 
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
         history_columns = [c for c in main_df.columns if c[0].isdigit()]
-
+        self.column_check(voter_columns)
         to_normalize = history_columns + \
                        [self.config['party_identifier'], self.config['voter_status']]
         for c in to_normalize:
