@@ -273,7 +273,7 @@ class Loader(object):
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
     #
-    # def sevenzip_decompress(self, file_name):
+    # def sevefnzip_decompress(self, file_name):
     #     """
     #     handles decompression for 7zip files
     #     :param file_name: 7zip compressed file
@@ -593,8 +593,11 @@ class Preprocessor(Loader):
             return list(list(set(li1) - set(li2)) + list(set(li2) - set(li1)))
         if expected_columns is None:
             expected_columns = self.config["ordered_columns"]
-        if set(current_columns) >= set(expected_columns):
+        if set(current_columns) == set(expected_columns):
             raise ValueError("correct columns detected")
+        elif set(current_columns) >= set(expected_columns):
+            print("extra columns here", difflist(current_columns, expected_columns))
+            raise ValueError("more columns that expected detected")
         else:
             print("current:\n",current_columns)
             print("-----|-----")
@@ -1276,11 +1279,11 @@ class Preprocessor(Loader):
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
         # print("headers", list(headers))
         # print("history cols", history_cols)
-        #IOWA is...special
-        column_check_list = [x.replace(' ', '_').replace('.', '_') for x in headers if (x not in history_cols and 'CITY/SCHOOL' not in x)]
+        #IOWA is...special column check needs to happen after dataframe read because of all the renaming
+        # column_check_list = [x.replace(' ', '_').replace('.', '_') for x in headers if (x not in history_cols and 'CITY/SCHOOL' not in x)]
         # print("column check list", column_check_list)
         # self.column_check(column_check_list)
-        headers = headers.tolist() + buffer_cols
+        # headers = headers.tolist() + buffer_cols
         # print(len(column_check_list), len(self.config["ordered_columns"]))
         # self.column_check(list(column_check_list))
         # raise ValueError("??")
@@ -1295,16 +1298,11 @@ class Preprocessor(Loader):
                 skiprows=skiprows, names=total_cols, error_bad_lines=False)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
+        self.column_check(list(df_voters.columns))
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
         pd.set_option('display.max_rows', 50)
-        # pd.set_option('display.max_columns', None)
-        cols = ["CITY_1", "CITY"]
-        # df = df[df[cols].notnull().all(axis=1)]
-        print("this is boty city1 and city not null\n", df_voters[df_voters[cols].notnull().all(axis=1)])
-        print("this is just city_1 not null\n", df_voters[df_voters["CITY_1"].notnull()])
-        print("this is just city not null\n", df_voters[df_voters["CITY"].notnull()])
 
         raise ValueError("stopping_")
         # instead of iterating over all of the columns for each row, we should
