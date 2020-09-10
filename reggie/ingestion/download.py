@@ -581,36 +581,50 @@ class Preprocessor(Loader):
         if hist_files:
             expected_hist = self.config["expected_number_of_hist_files"]
             if expected_hist != hist_files:
-                raise ValueError("Incorrect hist file number")
+                raise ValueError("Incorrect number of hist files found")
 
         if expected_voter != voter_files:
-            raise ValueError("Unexpected item in bagging area")
+            print(expected_voter, voter_files)
+            raise ValueError("Remove this: Expected number Voter Files Found")
         # else:
         #     raise ValueError("Correct number of files found")
 
     def column_check(self, current_columns, expected_columns=None):
-        def difflist(li1, li2):
-            return list(list(set(li1) - set(li2)) + list(set(li2) - set(li1)))
+        # ignore = ['state']
+        # current_columns = [x for x in current_columns if x.lower() not in ignore]
+
+        def difflist(curr_cols, exp_cols):
+            return list(list(set(curr_cols) - set(exp_cols)) +
+                        list(set(exp_cols) - set(curr_cols)))
         if expected_columns is None:
             expected_columns = self.config["ordered_columns"]
         if set(current_columns) == set(expected_columns):
             raise ValueError("correct columns detected")
+        # checks here
         elif set(current_columns) >= set(expected_columns):
             print("extra columns here", difflist(current_columns, expected_columns))
-            raise ValueError("more columns that expected detected")
+            raise ValueError("more columns that expected detected but that's okay, "
+                             "the current columns given contain the extra columns above, log these but continue")
         else:
-            print("current:\n",current_columns)
-            print("-----|-----")
-            print("expected\n",expected_columns)
-            print("\n")
-            print(difflist(current_columns, expected_columns))
+            # print("current:\n", current_columns)
+            # print("-----|-----")
+            # print("expected\n", expected_columns)
+            print("columns expected not found in current columns", difflist(current_columns, expected_columns))
             raise ValueError("Incorrect Columns")
 
-    def column_length_check(self, current_length):
-        if current_length != len(self.config["ordered_columns"]):
-            raise ValueError("the lengths don't match yo")
+    def column_length_check(self, current_length, expected_length=None):
+        if not expected_length:
+            if current_length != len(self.config["ordered_columns"]):
+                print("current ", current_length, "expected: ", len(self.config["ordered_columns"]))
+                raise ValueError("the expected lengths don't match")
+            else:
+                raise ValueError("Remove this in final this: Things are correct in the else for column length check")
         else:
-            raise ValueError("Things are correct ")
+            # print("current length ", current_length, "| expected ", expected_length)
+            if current_length != expected_length:
+                raise ValueError("the lengths don't match")
+            else:
+                raise ValueError("Remove this in final this: Things are correct in the else for column length check")
 
     def preprocess_texas(self):
         new_files = self.unpack_files(
@@ -738,6 +752,7 @@ class Preprocessor(Loader):
         voting_history_cols = list(filter(
             lambda x: any([pre in x for pre in (
                 "GENERAL-", "SPECIAL-", "PRIMARY-")]), df.columns.values))
+        self.column_check(list(set(df.columns) - set(voting_history_cols)))
         total_records = df.shape[0]
         sorted_codes = voting_history_cols
         sorted_codes_dict = {k: {"index": i,
@@ -760,6 +775,7 @@ class Preprocessor(Loader):
             compression='unzip', file_obj=self.main_file)
         self.file_check(len(new_files))
         voter_reg_df = pd.DataFrame(columns=self.config['ordered_columns'])
+        print("voter reg df columns here?", voter_reg_df.columns)
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
@@ -772,9 +788,10 @@ class Preprocessor(Loader):
                     [voter_reg_df, self.read_csv_count_error_lines(
                         i['obj'], encoding='latin-1', error_bad_lines=False)],
                     axis=0)
-
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
+        self.column_check(list(voter_reg_df.columns))
+
         voter_reg_df['DOBYear'] = voter_reg_df['DOBYear'].astype(str).str[0:4]
 
         voter_hist_df["election_name"] = voter_hist_df["ElectionDate"] + \
@@ -1051,6 +1068,8 @@ class Preprocessor(Loader):
         df_hist.columns = self.config["hist_columns"]
         df_voters = self.read_csv_count_error_lines(voter_file["obj"], header=None,
             error_bad_lines=False)
+
+        self.column_length_check(len(df_voters.columns))
         df_voters.columns = self.config["ordered_columns"]
 
         sorted_codes = df_hist.date.unique().tolist()
@@ -1191,9 +1210,14 @@ class Preprocessor(Loader):
                     index_col=False, engine='c', error_bad_lines=False,
                     encoding='latin-1')
         try:
+            # When does this get called?
+            print("in the try")
             df.columns = self.config["ordered_columns"]
-        except:
+            self.column_length_check(len(list(df.columns)))
+        except ValueError:
             df.columns = self.config["ordered_columns_new"]
+            self.column_length_check(len(list(df.columns)), len(self.config["ordered_columns_new"]))
+
             for i in set(list(self.config["ordered_columns"])) - \
                      set(list(self.config["ordered_columns_new"])):
                 df[i] = None
@@ -1268,7 +1292,7 @@ class Preprocessor(Loader):
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
         # add first file here
         valid_files = len(remaining_files) + 1
-        # self.file_check(valid_files)
+        self.file_check(valid_files)
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
@@ -1277,20 +1301,9 @@ class Preprocessor(Loader):
         total_cols = main_cols + history_cols + buffer_cols
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
-        # print("headers", list(headers))
-        # print("history cols", history_cols)
         #IOWA is...special column check needs to happen after dataframe read because of all the renaming
-        # column_check_list = [x.replace(' ', '_').replace('.', '_') for x in headers if (x not in history_cols and 'CITY/SCHOOL' not in x)]
-        # print("column check list", column_check_list)
-        # self.column_check(column_check_list)
-        # headers = headers.tolist() + buffer_cols
-        # print(len(column_check_list), len(self.config["ordered_columns"]))
-        # self.column_check(list(column_check_list))
-        # raise ValueError("??")
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
-
-        # print(list(df_voters.columns))
 
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
@@ -1298,7 +1311,10 @@ class Preprocessor(Loader):
                 skiprows=skiprows, names=total_cols, error_bad_lines=False)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
-        self.column_check(list(df_voters.columns))
+        #generate list of columns to check TT
+        columns_to_check = [x.replace(" ", "_") for x in list(set(list(df_voters.columns)) -
+                                                              set(history_cols + buffer_cols))]
+        self.column_check(columns_to_check)
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
@@ -1400,8 +1416,6 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
-        print(list(df_voters.columns))
-        raise ValueError("let's stop")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
@@ -1582,6 +1596,7 @@ class Preprocessor(Loader):
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"], header=None, names=config["ordered_columns"],
             encoding='latin-1', error_bad_lines=False)
+        self.column_length_check(len(list(main_df.columns)))
         shutil.rmtree(os.path.dirname(self.main_file["name"]),
                       ignore_errors=True)
         gc.collect()
@@ -1644,6 +1659,9 @@ class Preprocessor(Loader):
                 voter_file = i
         voter_df = self.read_csv_count_error_lines(voter_file['obj'], sep="\t",
             quotechar='"', encoding='latin-1', error_bad_lines=False)
+
+        self.column_length_check(len(list(voter_df.columns)))
+
         vote_hist = self.read_csv_count_error_lines(vote_hist_file['obj'], sep="\t",
             quotechar='"', error_bad_lines=False)
 
@@ -1711,6 +1729,8 @@ class Preprocessor(Loader):
 
         # add empty column for party_identifier
         main_df[self.config["party_identifier"]] = np.nan
+
+        self.column_check(list(set(main_df.columns) - set(self.config['hist_columns'])))
 
         def add_history(main_df):
             # also save as sparse array since so many elections are stored
@@ -1791,6 +1811,7 @@ class Preprocessor(Loader):
         elif voter_file['name'][-3:] == 'csv':
             vdf = self.read_csv_count_error_lines(voter_file['obj'],
                 encoding='latin-1', na_filter=False, error_bad_lines=False)
+            # self.file_check()
             # rename 'STATE' field to not conflict with our 'state' field
             vdf.rename(columns={'STATE': 'STATE_ADDR'}, inplace=True)
         else:
@@ -1812,11 +1833,14 @@ class Preprocessor(Loader):
                 df['STATUS_DATE'] = '1970-01-01 00:00:00'
             return df
 
+
         vdf = self.reconcile_columns(vdf, config['columns'])
         vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=config['ordered_columns'])
         vdf[config['party_identifier']] = 'npa'
 
+        #checking after reconciliation seems a bit iffy
+        self.column_check(list(vdf.columns))
         logging.info('Loading history file: ' + hist_file['name'])
         if hist_file['name'][-3:] == 'lst':
             hcolspecs = [[0, 13], [13, 15], [15, 20],
@@ -2026,6 +2050,8 @@ class Preprocessor(Loader):
                 df = df.drop("election_{}".format(i), axis=1)
                 df = df.drop("district_{}".format(i + 1), axis=1)
 
+            #can check columns for each PA county
+            self.column_check(list(df.columns))
             if main_df is None:
                 main_df = df
             else:
@@ -2214,6 +2240,9 @@ class Preprocessor(Loader):
         voter_df['gender'] = voter_groups['voter_sex'].apply(lambda x: list(x)[-1])
         voter_df['registration_date'] = \
             voter_groups['voter_registrationDate'].apply(lambda x: list(x)[-1])
+
+        self.column_check(list(voter_df.columns))
+
         voter_df = self.config.coerce_dates(voter_df)
 
         voter_df['all_history'] = voter_groups['election_name'].apply(list)
@@ -2374,6 +2403,7 @@ class Preprocessor(Loader):
         voters_df[self.config['birthday_identifier']] = 0
         voters_df[self.config['voter_status']] = np.nan
 
+        self.column_check(list(voters_df.columns))
         voters_df = self.config.coerce_strings(voters_df)
         voters_df = self.config.coerce_numeric(
             voters_df, extra_cols=['ad_str3', 'mail_str3'])
