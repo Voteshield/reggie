@@ -8,6 +8,7 @@ voter_id: Voter_ID
 county_identifier: County_Code
 primary_locale_identifier: County_Code
 numeric_primary_locale: false
+precinct_identifier: Precinct
 birthday_identifier: Birth_Date
 voter_status: Voter_Status
 voter_status_active: ACT
