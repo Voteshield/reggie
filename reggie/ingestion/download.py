@@ -11,7 +11,7 @@ from reggie.configs.configs import Config
 from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
     format_column_name, generate_s3_key, get_metadata_for_key, \
     get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
-    s3, strcol_to_array, TooManyMalformedLines
+    s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError
 
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -586,6 +586,8 @@ class Preprocessor(Loader):
         if expected_voter != voter_files:
             print(expected_voter, voter_files)
             raise ValueError("Remove this: Expected number Voter Files Found")
+        else:
+            print("remove this, things are correct in filecheck")
 
     def column_check(self, current_columns, expected_columns=None):
 
@@ -595,19 +597,21 @@ class Preprocessor(Loader):
 
         if expected_columns is None:
             expected_columns = self.config["ordered_columns"]
-
         if set(current_columns) >= set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but might
             # be worth looking in to
-            print("extra columns here", difflist(current_columns, expected_columns))
-            logging.info("more columns that expected detected but that's okay, the current columns given contain the "
-                         "extra columns above: Extra columns {}").format(difflist(current_columns, expected_columns))
-            raise ValueError("more columns that expected detected but that's okay, "
+            # print("extra columns here", difflist(current_columns, expected_columns))
+            extra_cols = difflist(current_columns, expected_columns)
+            print(extra_cols)
+            logging.info("more columns that expected detected but that's okay, the current columns given contain the extra columns above: Extra columns {}".format(extra_cols))
+            raise ValueError("Remove this: more columns that expected detected but that's okay, "
                              "the current columns given contain the extra columns above, log these but continue")
         elif set(current_columns) != set(expected_columns):
             # Do the work here to say what was expected but not given?
             print("columns expected not found in current columns", difflist(current_columns, expected_columns))
             raise ValueError("Incorrect Columns")
+        else:
+            raise ValueError("Correct in Column check")
 
     def column_length_check(self, current_length, expected_length=None):
         if not expected_length:
@@ -888,7 +892,12 @@ class Preprocessor(Loader):
                             i['obj'], compression='gzip', error_bad_lines=False)
                         if len(new_df.columns) < len(self.config['master_voter_columns']):
                             new_df.insert(10, 'PHONE_NUM', np.nan)
-                        new_df.columns = self.config['master_voter_columns']
+                        try:
+                            new_df.columns = self.config['master_voter_columns']
+                        except ValueError:
+                            logging.info("Incorrect number of columns found for Colorado for file: {}".format(
+                                i['name']))
+                            raise
                         df_master_voter = pd.concat(
                             [df_master_voter, new_df], axis=0)
 
@@ -969,8 +978,11 @@ class Preprocessor(Loader):
                 df_voters = self.read_csv_count_error_lines(
                     i["obj"], sep="|", quotechar='"', quoting=3,
                     error_bad_lines=False)
-                self.column_length_check(len(list(df_voters.columns)))
-                df_voters.columns = self.config["ordered_columns"]
+                try:
+                    df_voters.columns = self.config["ordered_columns"]
+                except ValueError:
+                    logging.info("Incorrect number of columns found for Georgia")
+                    raise
                 df_voters['Registration_Number'] = df_voters[
                     'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
@@ -1069,9 +1081,12 @@ class Preprocessor(Loader):
         df_voters = self.read_csv_count_error_lines(voter_file["obj"], header=None,
             error_bad_lines=False)
 
-        self.column_length_check(len(df_voters.columns))
-        df_voters.columns = self.config["ordered_columns"]
-
+        # self.column_length_check(len(df_voters.columns))
+        try:
+            df_voters.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for Nevada")
+            raise
         sorted_codes = df_hist.date.unique().tolist()
         sorted_codes.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
         counts = df_hist.date.value_counts()
@@ -1127,14 +1142,17 @@ class Preprocessor(Loader):
                 voter_files.append(i)
 
         self.file_check(len(voter_files))
-        # add hist check too here
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
         gc.collect()
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
-        df_hist.columns = self.config["hist_columns"]
+        try:
+            df_hist.columns = self.config["hist_columns"]
+        except ValueError:
+            logging.info("Incorrect history columns found in Florida")
+            raise
         gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
@@ -1167,8 +1185,11 @@ class Preprocessor(Loader):
         df_voters = self.read_csv_count_error_lines(concat_voter_file, header=None,
             sep="\t", error_bad_lines=False)
 
-        self.column_length_check(len(list(df_voters.columns)))
-        df_voters.columns = self.config["ordered_columns"]
+        try:
+            df_voters.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for Flordia")
+            raise
         df_voters = df_voters.set_index(self.config["voter_id"])
 
         df_voters["all_history"] = all_history
@@ -1210,13 +1231,14 @@ class Preprocessor(Loader):
                     index_col=False, engine='c', error_bad_lines=False,
                     encoding='latin-1')
         try:
-            # When does this get called?
-            print("in the try")
             df.columns = self.config["ordered_columns"]
-            self.column_length_check(len(list(df.columns)))
         except ValueError:
-            df.columns = self.config["ordered_columns_new"]
-            self.column_length_check(len(list(df.columns)), len(self.config["ordered_columns_new"]))
+            try:
+                df.columns = self.config["ordered_columns_new"]
+            except ValueError:
+                logging.info("Incorrect number of columns found for Kansas")
+                raise
+            # self.column_length_check(len(list(df.columns)), len(self.config["ordered_columns_new"]))
 
             for i in set(list(self.config["ordered_columns"])) - \
                      set(list(self.config["ordered_columns_new"])):
@@ -1320,7 +1342,6 @@ class Preprocessor(Loader):
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
         pd.set_option('display.max_rows', 50)
 
-        raise ValueError("stopping_")
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
@@ -1811,7 +1832,6 @@ class Preprocessor(Loader):
         elif voter_file['name'][-3:] == 'csv':
             vdf = self.read_csv_count_error_lines(voter_file['obj'],
                 encoding='latin-1', na_filter=False, error_bad_lines=False)
-            # self.file_check()
             # rename 'STATE' field to not conflict with our 'state' field
             vdf.rename(columns={'STATE': 'STATE_ADDR'}, inplace=True)
         else:
@@ -1833,14 +1853,12 @@ class Preprocessor(Loader):
                 df['STATUS_DATE'] = '1970-01-01 00:00:00'
             return df
 
-
         vdf = self.reconcile_columns(vdf, config['columns'])
         vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=config['ordered_columns'])
         vdf[config['party_identifier']] = 'npa'
-
-        #checking after reconciliation seems a bit iffy
         self.column_check(list(vdf.columns))
+
         logging.info('Loading history file: ' + hist_file['name'])
         if hist_file['name'][-3:] == 'lst':
             hcolspecs = [[0, 13], [13, 15], [15, 20],

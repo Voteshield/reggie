@@ -18,6 +18,10 @@ class MissingElectionCodesError(Exception):
     pass
 
 
+class MissingColumnsError(Exception):
+    pass
+
+
 class TooManyMalformedLines(Exception):
     pass
 
