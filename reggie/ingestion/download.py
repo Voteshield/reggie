@@ -585,6 +585,7 @@ class Preprocessor(Loader):
 
         if expected_voter != voter_files:
             print(expected_voter, voter_files)
+            # add this back
             raise ValueError("Remove this: Expected number Voter Files Found")
         else:
             print("remove this, things are correct in filecheck")
@@ -602,29 +603,14 @@ class Preprocessor(Loader):
             # be worth looking in to
             # print("extra columns here", difflist(current_columns, expected_columns))
             extra_cols = difflist(current_columns, expected_columns)
-            print(extra_cols)
-            logging.info("more columns that expected detected but that's okay, the current columns given contain the extra columns above: Extra columns {}".format(extra_cols))
-            raise ValueError("Remove this: more columns that expected detected but that's okay, "
-                             "the current columns given contain the extra columns above, log these but continue")
+            logging.info("more columns that expected detected but that's okay, the current columns given contain the"
+                         "extra columns above: Extra columns {}".format(extra_cols))
         elif set(current_columns) != set(expected_columns):
             # Do the work here to say what was expected but not given?
             print("columns expected not found in current columns", difflist(current_columns, expected_columns))
             raise ValueError("Incorrect Columns")
-        else:
-            raise ValueError("Correct in Column check")
-
-    def column_length_check(self, current_length, expected_length=None):
-        if not expected_length:
-            if current_length != len(self.config["ordered_columns"]):
-                print("current ", current_length, "expected: ", len(self.config["ordered_columns"]))
-                raise ValueError("the expected lengths don't match")
-            else:
-                raise ValueError("Remove this in final version: Things are correct in the else for column length check")
-        else:
-            if current_length != expected_length:
-                raise ValueError("the lengths don't match, throw this error")
-            else:
-                raise ValueError("Remove this in finalversion : Things are correct in the else for column length check")
+        # else:
+        #     raise ValueError("Correct in Column check")
 
     def preprocess_texas(self):
         new_files = self.unpack_files(
@@ -1081,7 +1067,6 @@ class Preprocessor(Loader):
         df_voters = self.read_csv_count_error_lines(voter_file["obj"], header=None,
             error_bad_lines=False)
 
-        # self.column_length_check(len(df_voters.columns))
         try:
             df_voters.columns = self.config["ordered_columns"]
         except ValueError:
@@ -1238,7 +1223,6 @@ class Preprocessor(Loader):
             except ValueError:
                 logging.info("Incorrect number of columns found for Kansas")
                 raise
-            # self.column_length_check(len(list(df.columns)), len(self.config["ordered_columns_new"]))
 
             for i in set(list(self.config["ordered_columns"])) - \
                      set(list(self.config["ordered_columns_new"])):
@@ -1614,10 +1598,12 @@ class Preprocessor(Loader):
         self.main_file = list(filter(
             lambda x: x["name"][-4:] != ".pdf", new_files))[0]
         gc.collect()
+        # When given the names, the pandas read_csv will always work. If given too few column names it will
+        # assign the names to the columns to the end, skipping the beginning columns, if too many will add nan columnms
+        # checking length is useless here
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"], header=None, names=config["ordered_columns"],
             encoding='latin-1', error_bad_lines=False)
-        self.column_length_check(len(list(main_df.columns)))
         shutil.rmtree(os.path.dirname(self.main_file["name"]),
                       ignore_errors=True)
         gc.collect()
@@ -1681,13 +1667,20 @@ class Preprocessor(Loader):
         voter_df = self.read_csv_count_error_lines(voter_file['obj'], sep="\t",
             quotechar='"', encoding='latin-1', error_bad_lines=False)
 
-        self.column_length_check(len(list(voter_df.columns)))
-
         vote_hist = self.read_csv_count_error_lines(vote_hist_file['obj'], sep="\t",
             quotechar='"', error_bad_lines=False)
 
-        voter_df.columns = self.config["ordered_columns"]
-        vote_hist.columns = self.config["hist_columns"]
+        try:
+            voter_df.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for the voter file in North Carolina")
+            raise
+        try:
+            vote_hist.columns = self.config["hist_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for the history file in North Carolina")
+            raise
+
         valid_elections, counts = np.unique(vote_hist["election_desc"],
                                             return_counts=True)
         count_order = counts.argsort()[::-1]
