@@ -577,20 +577,38 @@ class Preprocessor(Loader):
 
     def file_check(self,  voter_files, hist_files=None):
         expected_voter = self.config["expected_number_of_files"]
-        # print(expected_voter, voter_files)
         if hist_files:
             expected_hist = self.config["expected_number_of_hist_files"]
             if expected_hist != hist_files:
                 raise ValueError("Incorrect number of hist files found")
 
         if expected_voter != voter_files:
-            print(expected_voter, voter_files)
             # add this back
-            raise ValueError("Remove this: Expected number Voter Files Found")
-        else:
-            print("remove this, things are correct in filecheck")
+            raise ValueError("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
+                                                                                                   voter_files))
 
     def column_check(self, current_columns, expected_columns=None):
+        extra_cols = []
+
+        def column_display(curr_cols, exp_cols):
+            missing_columns = []
+            unexpected_columns = []
+            unexpected_columns = list(set(curr_cols) - set(exp_cols))
+            missing_columns = list(set(exp_cols) - set(curr_cols))
+            max_len = 0
+            for c in (unexpected_columns + curr_cols):
+                if len(c) > max_len:
+                    max_len = len(c)
+            logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
+                                           "This File:".ljust(max_len)))
+            for idx in range(max(len(current_columns), len(expected_columns))):
+                a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
+                b = current_columns[idx] if idx < len(current_columns) else "(none)"
+                logging.info("\t{}\t{}".format(a.ljust(max_len),
+                                               b.ljust(max_len)))
+            logging.info("\n")
+            logging.info("Columns missing from this file: {}".format(missing_columns))
+            logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
 
         def difflist(curr_cols, exp_cols):
             return list(list(set(curr_cols) - set(exp_cols)) +
@@ -598,19 +616,23 @@ class Preprocessor(Loader):
 
         if expected_columns is None:
             expected_columns = self.config["ordered_columns"]
+
+        column_display(current_columns, expected_columns)
         if set(current_columns) >= set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but might
             # be worth looking in to
-            # print("extra columns here", difflist(current_columns, expected_columns))
             extra_cols = difflist(current_columns, expected_columns)
-            logging.info("more columns that expected detected but that's okay, the current columns given contain the"
-                         "extra columns above: Extra columns {}".format(extra_cols))
+            logging.info("more columns that expected detected, the current columns given contain the expected columns"
+                         "and these extra columns {}".format(extra_cols))
+            return extra_cols
         elif set(current_columns) != set(expected_columns):
             # Do the work here to say what was expected but not given?
-            print("columns expected not found in current columns", difflist(current_columns, expected_columns))
+            logging.info("columns expected not found in current columns: {}".format(difflist(current_columns,
+                                                                                             expected_columns)))
             raise ValueError("Incorrect Columns")
         # else:
         #     raise ValueError("Correct in Column check")
+        return extra_cols
 
     def preprocess_texas(self):
         new_files = self.unpack_files(
@@ -765,7 +787,6 @@ class Preprocessor(Loader):
             compression='unzip', file_obj=self.main_file)
         self.file_check(len(new_files))
         voter_reg_df = pd.DataFrame(columns=self.config['ordered_columns'])
-        print("voter reg df columns here?", voter_reg_df.columns)
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
             if "election" in i['name'].lower():
@@ -878,7 +899,21 @@ class Preprocessor(Loader):
                             i['obj'], compression='gzip', error_bad_lines=False)
                         if len(new_df.columns) < len(self.config['master_voter_columns']):
                             new_df.insert(10, 'PHONE_NUM', np.nan)
+                        # elif len(new_df.columns) > len(config['master_voter_columns']):
+                        #     extra_cols = \
+                        #         ['Early Childhood Development Services 2', 'Early Childhood Development Services']
                         try:
+                            # hacky workaround, files come in with spaces and non-standard capitalization
+                            # co requires assigning the master voter columns to these columns for normalization
+                            # but sometimes they add additional columns not on the master column list
+                            # to check the columns must have their spaces replaced but to remove they must be returned
+                            cleaned_cols = [x.upper().replace(' ', '_') for x in new_df.columns]
+                            extra_cols = self.column_check(cleaned_cols, self.config['master_voter_columns'])
+                            if len(extra_cols) > 0:
+                                replace_cols = []
+                                for col in extra_cols:
+                                    replace_cols.append(" ".join(w.capitalize() for w in col.replace('_', ' ').split()))
+                                new_df.drop(replace_cols, axis=1, errors='ignore', inplace=True)
                             new_df.columns = self.config['master_voter_columns']
                         except ValueError:
                             logging.info("Incorrect number of columns found for Colorado for file: {}".format(
@@ -886,6 +921,8 @@ class Preprocessor(Loader):
                             raise
                         df_master_voter = pd.concat(
                             [df_master_voter, new_df], axis=0)
+
+        raise ValueError("stopping CO")
 
         if df_voter.empty:
             df_voter = master_to_reg_df(df_master_voter)
