@@ -610,7 +610,6 @@ class Preprocessor(Loader):
                                                b.ljust(max_len)))
             logging.info("\n")
             logging.info("Columns missing from this file: {}".format(missing_columns))
-            logging.info("expected columns {}".format(expected_columns))
             logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
 
         def difflist(curr_cols, exp_cols):
@@ -902,18 +901,6 @@ class Preprocessor(Loader):
                             i['obj'], compression='gzip', error_bad_lines=False)
                         if len(new_df.columns) < len(self.config['master_voter_columns']):
                             new_df.insert(10, 'PHONE_NUM', np.nan)
-                        elif len(new_df.columns) > len(config['master_voter_columns']):
-                            # hacky workaround, files come in with spaces and non-standard capitalization
-                            # co requires assigning the master voter columns to these columns for normalization
-                            # but sometimes they add additional columns not on the master column list
-                            # to check the columns must have their spaces replaced but to remove they must be returned
-                            cleaned_cols = [x.upper().replace(' ', '_') for x in new_df.columns]
-                            extra_cols = self.column_check(cleaned_cols, self.config['master_voter_columns'])
-                            if len(extra_cols) > 0:
-                                replace_cols = []
-                                for col in extra_cols:
-                                    replace_cols.append(" ".join(w.capitalize() for w in col.replace('_', ' ').split()))
-                                new_df.drop(replace_cols, axis=1, errors='ignore', inplace=True)
                         try:
                             new_df.columns = self.config['master_voter_columns']
                         except ValueError:
