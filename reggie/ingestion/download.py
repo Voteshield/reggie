@@ -596,9 +596,10 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        def column_display(curr_cols):
+        # def column_display(expected_columns, missing_columns, unexpected_columns, current_columns):
+        def column_display():
             max_len = 0
-            for c in (unexpected_columns + curr_cols):
+            for c in (unexpected_columns + current_columns):
                 if len(c) > max_len:
                     max_len = len(c)
             logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
@@ -612,28 +613,33 @@ class Preprocessor(Loader):
             logging.info("Columns missing from this file: {}".format(missing_columns))
             logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
 
+        # column_display()
+
         def difflist(curr_cols, exp_cols):
             return list(list(set(curr_cols) - set(exp_cols)) +
                         list(set(exp_cols) - set(curr_cols)))
 
-        column_display(current_columns)
-        # if set(current_columns) >= set(expected_columns):
-        print(set(expected_columns).issubset(set(current_columns)))
-        if set(expected_columns).issubset(set(current_columns)):
-            # This is the case if there are more columns than expected, this won't cause the system to break but might
-            # be worth looking in to
-            # extra_cols = difflist(current_columns, expected_columns)
-            logging.info("more columns that expected detected, the current columns given contain the expected columns"
-                         "and these extra columns {}".format(unexpected_columns))
+        if set(current_columns) >= set(expected_columns):
+            # if set(expected_columns).issubset(set(current_columns)):
+                # This is the case if there are more columns than expected, this won't cause the system to break but
+                # might be worth looking in to
+            logging.info("more columns that expected detected, the current columns given contain the expected"
+                         "columns and these extra columns {}".format(unexpected_columns))
             return unexpected_columns
+            # else:
+            #     logging.info("more columns that expected detected, the current columns given do not contain the "
+            #                  " expected columns: {} \n and also contain these unexpected"
+            #                  "extra columns {}".format(missing_columns, unexpected_columns))
+            #     raise MissingColumnsError("{} state missing required columns: {}".format(self.state, missing_columns))
+
         elif set(current_columns) != set(expected_columns):
             # Do the work here to say what was expected but not given?
             logging.info("columns expected not found in current columns: {}".format(difflist(current_columns,
                                                                                              expected_columns)))
-            # raise ValueError
-            raise MissingColumnsError("{} state missing required columns: {}".format(self.state, missing_columns))
-        # else:
-        #     raise ValueError("Correct in Column check")
+            raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
+                                      expected_columns, missing_columns, unexpected_columns,
+                                      current_columns)
+
         return extra_cols
 
     def preprocess_texas(self):
@@ -1330,13 +1336,15 @@ class Preprocessor(Loader):
         total_cols = main_cols + history_cols + buffer_cols
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
-        #IOWA is...special column check needs to happen after dataframe read because of all the renaming
+        # IOWA is...special column check needs to happen after dataframe read because of all the renaming
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
-        #generate list of columns to check TT
+        # generate list of columns to check TT
         columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
                                                               set(history_cols + buffer_cols))]
-        self.column_check(columns_to_check)
+        columns_to_remove_temp = ['CITY_3', 'ZIP_CODE_2', 'STATE_2', 'ZIP_PLUS_2'] + self.config['blacklist_columns']
+        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove_temp]
+        self.column_check(columns_to_check, expected_columns)
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = self.read_csv_count_error_lines(i["obj"], header=None,
@@ -1444,7 +1452,6 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
-        raise ValueError("Stopping IA")
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),

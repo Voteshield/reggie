@@ -357,3 +357,6 @@ ordered_columns:
   - SEWER
   - LIGHT
   - MISCELLANEOUS
+blacklist_columns:
+  - POLITICAL_ORG
+  - LOSST_CONTIGUOUS_CITIES

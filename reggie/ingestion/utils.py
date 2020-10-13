@@ -19,7 +19,16 @@ class MissingElectionCodesError(Exception):
 
 
 class MissingColumnsError(Exception):
-    pass
+    def __init__(self, message, state, expected_columns, missing_columns, unexpected_columns, current_columns):
+        self.message = message
+        self.state = state
+        self.expected_columns = expected_columns
+        self.missing_columns = missing_columns
+        self.unexpected_columns = unexpected_columns
+        self.current_columns = current_columns
+
+    def __str__(self):
+        return self.message
 
 
 class TooManyMalformedLines(Exception):
