@@ -7,6 +7,7 @@ voter_id: voter_id
 county_identifier: county
 primary_locale_identifier: county
 numeric_primary_locale: false
+precinct_identifier: precinct_code
 valid_voting_methods: ['AP', 'AB', 'P']
 absentee_ballot_code: AB
 provisional_ballot_code: P
