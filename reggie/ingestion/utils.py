@@ -18,6 +18,18 @@ class MissingElectionCodesError(Exception):
     pass
 
 
+class MissingFilesError(Exception):
+    def __init__(self, message, state, expected_files, current_files):
+        self.message = message
+        self.state = state
+        self.expected_files = expected_files
+        self.current_files = current_files
+
+    def __str__(self):
+        return self.message
+    pass
+
+
 class MissingColumnsError(Exception):
     def __init__(self, message, state, expected_columns, missing_columns, unexpected_columns, current_columns):
         self.message = message
@@ -26,6 +38,17 @@ class MissingColumnsError(Exception):
         self.missing_columns = missing_columns
         self.unexpected_columns = unexpected_columns
         self.current_columns = current_columns
+
+    def __str__(self):
+        return self.message
+
+
+class MissingNumColumnsError(Exception):
+    def __init__(self, message, state, expected_num_columns, current_num_columns):
+        self.message = message
+        self.state = state
+        self.expected_num_columns = expected_num_columns
+        self.current_num_columns = current_num_columns
 
     def __str__(self):
         return self.message

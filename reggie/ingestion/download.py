@@ -11,7 +11,7 @@ from reggie.configs.configs import Config
 from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
     format_column_name, generate_s3_key, get_metadata_for_key, \
     get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
-    s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError
+    s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError, MissingFilesError, MissingNumColumnsError
 
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -155,7 +155,7 @@ class Loader(object):
     """
 
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, testing=False, s3_bucket=""):
+                 force_file=None, testing=False, ignore_checks=False, s3_bucket=""):
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
@@ -171,6 +171,7 @@ class Loader(object):
         self.obj_will_download = False
         self.meta = None
         self.testing = testing
+        self.ignore_checks = ignore_checks
         self.s3_bucket = s3_bucket
         if force_date is not None:
             self.download_date = parser.parse(force_date).isoformat()
@@ -580,12 +581,15 @@ class Preprocessor(Loader):
         if hist_files:
             expected_hist = self.config["expected_number_of_hist_files"]
             if expected_hist != hist_files:
-                raise ValueError("Incorrect number of hist files found")
+                raise MissingFilesError("{} state is missing history files".format(self.state), self.state,
+                                          expected_hist, hist_files)
 
         if expected_voter != voter_files:
             # add this back
-            raise ValueError("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
-                                                                                                   voter_files))
+            logging.info("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
+                                                                                               voter_files))
+            raise MissingFilesError("{} state is missing voter files".format(self.state), self.state,
+                                      expected_voter, voter_files)
 
     def column_check(self, current_columns, expected_columns=None):
 
@@ -596,7 +600,6 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        # def column_display(expected_columns, missing_columns, unexpected_columns, current_columns):
         def column_display():
             max_len = 0
             for c in (unexpected_columns + current_columns):
@@ -613,7 +616,7 @@ class Preprocessor(Loader):
             logging.info("Columns missing from this file: {}".format(missing_columns))
             logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
 
-        # column_display()
+        column_display()
 
         def difflist(curr_cols, exp_cols):
             return list(list(set(curr_cols) - set(exp_cols)) +
@@ -1155,7 +1158,8 @@ class Preprocessor(Loader):
             elif ".txt" in i["name"]:
                 voter_files.append(i)
 
-        self.file_check(len(voter_files))
+        if not self.ignore_checks:
+            self.file_check(len(voter_files))
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
         gc.collect()
@@ -1166,7 +1170,8 @@ class Preprocessor(Loader):
             df_hist.columns = self.config["hist_columns"]
         except ValueError:
             logging.info("Incorrect history columns found in Florida")
-            raise
+            raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
+                                      expected_num_columns, current_num_columns)
         gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
@@ -1251,7 +1256,8 @@ class Preprocessor(Loader):
                 df.columns = self.config["ordered_columns_new"]
             except ValueError:
                 logging.info("Incorrect number of columns found for Kansas")
-                raise
+                raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                             len(self.config["ordered_columns_new"]), len(df.columns))
 
             for i in set(list(self.config["ordered_columns"])) - \
                      set(list(self.config["ordered_columns_new"])):
@@ -1326,8 +1332,9 @@ class Preprocessor(Loader):
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
         # add first file here
-        valid_files = len(remaining_files) + 1
-        self.file_check(valid_files)
+        if not self.ignore_checks:
+            valid_files = len(remaining_files) + 1
+            self.file_check(valid_files)
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
@@ -1494,7 +1501,8 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression="unzip")
 
-        self.file_check(len(new_files))
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         active_files = [f for f in new_files if file_is_active(f['name'])]
         other_files = [f for f in new_files if not file_is_active(f['name'])]
 
@@ -1511,6 +1519,7 @@ class Preprocessor(Loader):
 
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
         history_columns = [c for c in main_df.columns if c[0].isdigit()]
+
         self.column_check(voter_columns)
         to_normalize = history_columns + \
                        [self.config['party_identifier'], self.config['voter_status']]
