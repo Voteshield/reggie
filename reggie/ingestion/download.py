@@ -273,22 +273,6 @@ class Loader(object):
                              os.path.dirname(file_name)))
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
-    #
-    # def sevefnzip_decompress(self, file_name):
-    #     """
-    #     handles decompression for 7zip files
-    #     :param file_name: 7zip compressed file
-    #     :return: tuple containing (name of new decompressed file if
-    #     successful, and a reference to the subprocess object which ran the
-    #     decompression)
-    #     """
-    #     seven_zip_file = Archive7z(file_name)
-    #     file_names = seven_zip_file.getnames()
-    #     logging.info("decompressing 7zip {} into {}".format(file_name,
-    #                                                         file_names))
-    #     file_objs = [{"name": name, "obj": seven_zip_file.getmember(name)} for
-    #                  name in file_names]
-    #     return file_objs
 
     def infer_compression(self, file_name):
         """
