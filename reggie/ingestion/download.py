@@ -585,7 +585,6 @@ class Preprocessor(Loader):
                                           expected_hist, hist_files)
 
         if expected_voter != voter_files:
-            # add this back
             logging.info("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
                                                                                                voter_files))
             raise MissingFilesError("{} state is missing voter files".format(self.state), self.state,
@@ -600,43 +599,17 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        def column_display():
-            max_len = 0
-            for c in (unexpected_columns + current_columns):
-                if len(c) > max_len:
-                    max_len = len(c)
-            logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
-                                           "This File:".ljust(max_len)))
-            for idx in range(max(len(current_columns), len(expected_columns))):
-                a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
-                b = current_columns[idx] if idx < len(current_columns) else "(none)"
-                logging.info("\t{}\t{}".format(a.ljust(max_len),
-                                               b.ljust(max_len)))
-            logging.info("\n")
-            logging.info("Columns missing from this file: {}".format(missing_columns))
-            logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
-
-        column_display()
-
         def difflist(curr_cols, exp_cols):
             return list(list(set(curr_cols) - set(exp_cols)) +
                         list(set(exp_cols) - set(curr_cols)))
 
         if set(current_columns) >= set(expected_columns):
-            # if set(expected_columns).issubset(set(current_columns)):
-                # This is the case if there are more columns than expected, this won't cause the system to break but
-                # might be worth looking in to
+            # This is the case if there are more columns than expected, this won't cause the system to break but
+            # might be worth looking in to
             logging.info("more columns that expected detected, the current columns given contain the expected"
                          "columns and these extra columns {}".format(unexpected_columns))
             return unexpected_columns
-            # else:
-            #     logging.info("more columns that expected detected, the current columns given do not contain the "
-            #                  " expected columns: {} \n and also contain these unexpected"
-            #                  "extra columns {}".format(missing_columns, unexpected_columns))
-            #     raise MissingColumnsError("{} state missing required columns: {}".format(self.state, missing_columns))
-
         elif set(current_columns) != set(expected_columns):
-            # Do the work here to say what was expected but not given?
             logging.info("columns expected not found in current columns: {}".format(difflist(current_columns,
                                                                                              expected_columns)))
             raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
