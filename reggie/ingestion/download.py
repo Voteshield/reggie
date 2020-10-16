@@ -326,7 +326,7 @@ class Loader(object):
 
         new_files = None
         inferred_compression = self.infer_compression(s3_file_obj["name"])
-        if compression_type is "infer":
+        if compression_type == "infer":
             if inferred_compression is not None:
                 compression_type = inferred_compression
             else:

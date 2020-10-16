@@ -9,6 +9,7 @@ voter_id: ncid
 county_identifier: county_id
 primary_locale_identifier: county_id
 numeric_primary_locale: true
+precinct_identifier: precinct_abbrv
 birthday_identifier: birth_year
 early_voter_identifier: absent_ind
 voter_status: status_cd
