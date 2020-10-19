@@ -3,6 +3,8 @@ state: new_jersey2
 abbreviation: nj
 source: boe
 file_class: voter_file
+expected_number_of_files: 21
+expected_number_of_hist_files: 21
 has_headers: true
 format:
   separate_hist: true

@@ -4,6 +4,7 @@ state: florida
 abbreviation: fl
 source: boe
 file_class: voter_file
+expected_number_of_files: 67
 voter_id: Voter_ID
 county_identifier: County_Code
 primary_locale_identifier: County_Code

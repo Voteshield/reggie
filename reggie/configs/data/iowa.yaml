@@ -4,6 +4,7 @@ state: iowa
 abbreviation: ia
 source: boe
 file_class: voter_file
+expected_number_of_files: 13
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
@@ -356,3 +357,6 @@ ordered_columns:
   - SEWER
   - LIGHT
   - MISCELLANEOUS
+blacklist_columns:
+  - POLITICAL_ORG
+  - LOSST_CONTIGUOUS_CITIES

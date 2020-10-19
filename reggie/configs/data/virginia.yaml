@@ -3,6 +3,7 @@ state: virginia
 abbreviation: va
 source: boe_download
 file_class: voter_file
+expected_number_of_files: 2
 has_headers: No
 voter_id: IDENTIFICATION_NUMBER
 county_identifier: LOCALITYNAME

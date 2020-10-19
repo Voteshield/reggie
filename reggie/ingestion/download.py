@@ -11,7 +11,7 @@ from reggie.configs.configs import Config
 from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
     format_column_name, generate_s3_key, get_metadata_for_key, \
     get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
-    s3, strcol_to_array, TooManyMalformedLines
+    s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError, MissingFilesError, MissingNumColumnsError
 
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
@@ -155,7 +155,7 @@ class Loader(object):
     """
 
     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, testing=False, s3_bucket=""):
+                 force_file=None, testing=False, ignore_checks=False, s3_bucket=""):
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
@@ -171,6 +171,7 @@ class Loader(object):
         self.obj_will_download = False
         self.meta = None
         self.testing = testing
+        self.ignore_checks = ignore_checks
         self.s3_bucket = s3_bucket
         if force_date is not None:
             self.download_date = parser.parse(force_date).isoformat()
@@ -272,22 +273,6 @@ class Loader(object):
                              os.path.dirname(file_name)))
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
-
-    def sevenzip_decompress(self, file_name):
-        """
-        handles decompression for 7zip files
-        :param file_name: 7zip compressed file
-        :return: tuple containing (name of new decompressed file if
-        successful, and a reference to the subprocess object which ran the
-        decompression)
-        """
-        seven_zip_file = Archive7z(file_name)
-        file_names = seven_zip_file.getnames()
-        logging.info("decompressing 7zip {} into {}".format(file_name,
-                                                            file_names))
-        file_objs = [{"name": name, "obj": seven_zip_file.getmember(name)} for
-                     name in file_names]
-        return file_objs
 
     def infer_compression(self, file_name):
         """
@@ -435,7 +420,7 @@ class Preprocessor(Loader):
         all_files = []
 
         def filter_unnecessary_files(files):
-            unnecessary = [".png", ".pdf", "MACOS", "DS_Store"]
+            unnecessary = [".png", "MACOS", "DS_Store", ".pdf", ".mdb"]
             for item in unnecessary:
                 files = [n for n in files if item not in n["name"]]
             return files
@@ -575,9 +560,49 @@ class Preprocessor(Loader):
                 df.drop(columns=[c], inplace=True)
         return df
 
+    def file_check(self,  voter_files, hist_files=None):
+        expected_voter = self.config["expected_number_of_files"]
+        if hist_files:
+            expected_hist = self.config["expected_number_of_hist_files"]
+            if expected_hist != hist_files:
+                raise MissingFilesError("{} state is missing history files".format(self.state), self.state,
+                                          expected_hist, hist_files)
+
+        if expected_voter != voter_files:
+            logging.info("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
+                                                                                               voter_files))
+            raise MissingFilesError("{} state is missing voter files".format(self.state), self.state,
+                                      expected_voter, voter_files)
+
+    def column_check(self, current_columns, expected_columns=None):
+
+        if expected_columns is None:
+            expected_columns = self.config["ordered_columns"]
+
+        extra_cols = []
+        unexpected_columns = list(set(current_columns) - set(expected_columns))
+        missing_columns = list(set(expected_columns) - set(current_columns))
+
+        if set(current_columns) >= set(expected_columns):
+            # This is the case if there are more columns than expected, this won't cause the system to break but
+            # might be worth looking in to
+            logging.info("more columns than expected detected, the current columns contain the expected "
+                         "columns along with these extra columns {}".format(unexpected_columns))
+            return unexpected_columns
+        elif set(current_columns) != set(expected_columns):
+            logging.info("columns expected not found in current columns: {}".format(missing_columns))
+            raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
+                                      expected_columns, missing_columns, unexpected_columns,
+                                      current_columns)
+
+        return extra_cols
+
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         widths_one = [3, 10, 10, 50, 50, 50, 50,
                       4, 1, 8, 9, 12, 2, 50, 12,
                       2, 12, 12, 50, 9, 110, 50,
@@ -610,7 +635,12 @@ class Preprocessor(Loader):
                 logging.info("Loading file {}".format(i))
                 new_df = pd.read_fwf(
                     i['obj'], widths=widths, header=None)
-                new_df.columns = self.config.raw_file_columns()
+                try:
+                    new_df.columns = self.config.raw_file_columns()
+                except ValueError:
+                    logging.info("Incorrect number of columns found for texas")
+                    raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                                 len(self.config.raw_file_columns()), len(new_df.columns))
                 if new_df['Election_Date'].head(n=100).isnull().sum() > 75:
                     df_voter = pd.concat(
                         [df_voter, new_df], axis=0, ignore_index=True)
@@ -682,6 +712,10 @@ class Preprocessor(Loader):
 
     def preprocess_ohio(self):
         new_files = self.unpack_files(file_obj=self.main_file)
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         for i in new_files:
             logging.info("Loading file {}".format(i))
             if "_22" in i['name']:
@@ -697,6 +731,7 @@ class Preprocessor(Loader):
         voting_history_cols = list(filter(
             lambda x: any([pre in x for pre in (
                 "GENERAL-", "SPECIAL-", "PRIMARY-")]), df.columns.values))
+        self.column_check(list(set(df.columns) - set(voting_history_cols)))
         total_records = df.shape[0]
         sorted_codes = voting_history_cols
         sorted_codes_dict = {k: {"index": i,
@@ -717,6 +752,9 @@ class Preprocessor(Loader):
         logging.info("Minnesota: loading voter file")
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         voter_reg_df = pd.DataFrame(columns=self.config['ordered_columns'])
         voter_hist_df = pd.DataFrame(columns=self.config['hist_columns'])
         for i in new_files:
@@ -730,9 +768,12 @@ class Preprocessor(Loader):
                     [voter_reg_df, self.read_csv_count_error_lines(
                         i['obj'], encoding='latin-1', error_bad_lines=False)],
                     axis=0)
-
         voter_reg_df[self.config["voter_status"]] = np.nan
         voter_reg_df[self.config["party_identifier"]] = np.nan
+
+        # if the dataframes are assigned columns to begin with, there will be nans due to concat if the columns are off
+        self.column_check(list(voter_reg_df.columns))
+
         voter_reg_df['DOBYear'] = voter_reg_df['DOBYear'].astype(str).str[0:4]
 
         voter_hist_df["election_name"] = voter_hist_df["ElectionDate"] + \
@@ -829,7 +870,13 @@ class Preprocessor(Loader):
                             i['obj'], compression='gzip', error_bad_lines=False)
                         if len(new_df.columns) < len(self.config['master_voter_columns']):
                             new_df.insert(10, 'PHONE_NUM', np.nan)
-                        new_df.columns = self.config['master_voter_columns']
+                        try:
+                            new_df.columns = self.config['master_voter_columns']
+                        except ValueError:
+                            logging.info("Incorrect number of columns found for Colorado for file: {}".format(
+                                i['name']))
+                            raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                                         len(self.config["master_voter_columns"]), len(new_df.columns))
                         df_master_voter = pd.concat(
                             [df_master_voter, new_df], axis=0)
 
@@ -902,18 +949,26 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
         vh_files = []
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         for i in new_files:
             if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 df_voters = self.read_csv_count_error_lines(
                     i["obj"], sep="|", quotechar='"', quoting=3,
                     error_bad_lines=False)
-                df_voters.columns = self.config["ordered_columns"]
+                try:
+                    df_voters.columns = self.config["ordered_columns"]
+                except ValueError:
+                    logging.info("Incorrect number of columns found for Georgia")
+                    raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                                 len(self.config["ordered_columns"]), len(df_voters.columns))
                 df_voters['Registration_Number'] = df_voters[
                     'Registration_Number'].astype(str).str.zfill(8)
             elif "TXT" in i["name"]:
                 vh_files.append(i)
-
         concat_history_file = concat_and_delete(vh_files)
 
         logging.info("Performing GA history manipulation")
@@ -995,6 +1050,9 @@ class Preprocessor(Loader):
 
     def preprocess_nevada(self):
         new_files = self.unpack_files(self.main_file, compression='unzip')
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         voter_file = new_files[0] if "ElgbVtr" in new_files[0]["name"] \
             else new_files[1]
         hist_file = new_files[0] if "VtHst" in new_files[0]["name"] else \
@@ -1005,7 +1063,13 @@ class Preprocessor(Loader):
         df_hist.columns = self.config["hist_columns"]
         df_voters = self.read_csv_count_error_lines(voter_file["obj"], header=None,
             error_bad_lines=False)
-        df_voters.columns = self.config["ordered_columns"]
+
+        try:
+            df_voters.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for Nevada")
+            raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                         len(self.config["ordered_columns"]), len(df_voters.columns))
 
         sorted_codes = df_hist.date.unique().tolist()
         sorted_codes.sort(key=lambda x: datetime.strptime(x, "%m/%d/%Y"))
@@ -1061,13 +1125,20 @@ class Preprocessor(Loader):
             elif ".txt" in i["name"]:
                 voter_files.append(i)
 
+        if not self.ignore_checks:
+            self.file_check(len(voter_files))
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
         gc.collect()
 
         logging.info("FLORIDA: loading voter history file")
         df_hist = pd.read_fwf(concat_history_file, header=None)
-        df_hist.columns = self.config["hist_columns"]
+        try:
+            df_hist.columns = self.config["hist_columns"]
+        except ValueError:
+            logging.info("Incorrect history columns found in Florida")
+            raise MissingNumColumnsError("{} state history is missing columns".format(self.state), self.state,
+                                         len(self.config["hist_columns"]), len(df_hist.columns))
         gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
@@ -1099,7 +1170,13 @@ class Preprocessor(Loader):
         logging.info("FLORIDA: loading main voter file")
         df_voters = self.read_csv_count_error_lines(concat_voter_file, header=None,
             sep="\t", error_bad_lines=False)
-        df_voters.columns = self.config["ordered_columns"]
+
+        try:
+            df_voters.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for Flordia")
+            raise MissingNumColumnsError("{} state is missing voters columns".format(self.state), self.state,
+                                         len(self.config["ordered_columns"]), len(df_voters.columns))
         df_voters = df_voters.set_index(self.config["voter_id"])
 
         df_voters["all_history"] = all_history
@@ -1132,6 +1209,10 @@ class Preprocessor(Loader):
     def preprocess_kansas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         for f in new_files:
             if (".txt" in f['name']) and ("._" not in f['name']) and \
                     ("description" not in f['name'].lower()):
@@ -1141,8 +1222,14 @@ class Preprocessor(Loader):
                     encoding='latin-1')
         try:
             df.columns = self.config["ordered_columns"]
-        except:
-            df.columns = self.config["ordered_columns_new"]
+        except ValueError:
+            try:
+                df.columns = self.config["ordered_columns_new"]
+            except ValueError:
+                logging.info("Incorrect number of columns found for Kansas")
+                raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                             len(self.config["ordered_columns_new"]), len(df.columns))
+
             for i in set(list(self.config["ordered_columns"])) - \
                      set(list(self.config["ordered_columns_new"])):
                 df[i] = None
@@ -1212,8 +1299,13 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
+
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
+        # add first file here
+        if not self.ignore_checks:
+            valid_files = len(remaining_files) + 1
+            self.file_check(valid_files)
 
         history_cols = self.config["election_columns"]
         main_cols = self.config['ordered_columns']
@@ -1222,10 +1314,15 @@ class Preprocessor(Loader):
         total_cols = main_cols + history_cols + buffer_cols
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
-        headers = headers.tolist() + buffer_cols
+        # IOWA is...special column check needs to happen after dataframe read because of all the renaming
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
-
+        # generate list of columns to check TT
+        columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
+                                                              set(history_cols + buffer_cols))]
+        columns_to_remove_temp = ['CITY_3', 'ZIP_CODE_2', 'STATE_2', 'ZIP_PLUS_2'] + self.config['blacklist_columns']
+        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove_temp]
+        self.column_check(columns_to_check, expected_columns)
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = self.read_csv_count_error_lines(i["obj"], header=None,
@@ -1235,6 +1332,8 @@ class Preprocessor(Loader):
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
+        pd.set_option('display.max_rows', 50)
+
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
         # also we should not compute the unique values until after, not before
@@ -1329,6 +1428,7 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
@@ -1370,6 +1470,9 @@ class Preprocessor(Loader):
 
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression="unzip")
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         active_files = [f for f in new_files if file_is_active(f['name'])]
         other_files = [f for f in new_files if not file_is_active(f['name'])]
 
@@ -1387,6 +1490,7 @@ class Preprocessor(Loader):
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
         history_columns = [c for c in main_df.columns if c[0].isdigit()]
 
+        self.column_check(voter_columns)
         to_normalize = history_columns + \
                        [self.config['party_identifier'], self.config['voter_status']]
         for c in to_normalize:
@@ -1499,9 +1603,16 @@ class Preprocessor(Loader):
         config = Config("new_york")
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer")
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+        # filtering pdfs in unpack_files means the lambda probably isn't necessary?
         self.main_file = list(filter(
             lambda x: x["name"][-4:] != ".pdf", new_files))[0]
         gc.collect()
+        # When given the names, the pandas read_csv will always work. If given csv has too few column names it will
+        # assign the names to the columns to the end, skipping the beginning columns, if too many will add nan columnms
+        # checking length is useless here?
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"], header=None, names=config["ordered_columns"],
             encoding='latin-1', error_bad_lines=False)
@@ -1558,6 +1669,9 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             file_obj=self.main_file)  # array of dicts
 
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         self.config = Config("north_carolina")
         for i in new_files:
             if ("ncvhis" in i['name']) and (".txt" in i['name']):
@@ -1566,11 +1680,22 @@ class Preprocessor(Loader):
                 voter_file = i
         voter_df = self.read_csv_count_error_lines(voter_file['obj'], sep="\t",
             quotechar='"', encoding='latin-1', error_bad_lines=False)
+
         vote_hist = self.read_csv_count_error_lines(vote_hist_file['obj'], sep="\t",
             quotechar='"', error_bad_lines=False)
 
-        voter_df.columns = self.config["ordered_columns"]
-        vote_hist.columns = self.config["hist_columns"]
+        try:
+            voter_df.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for the voter file in North Carolina")
+            raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
+                                         len(self.config["ordered_columns"]), len(voter_df.columns))
+        try:
+            vote_hist.columns = self.config["hist_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for the history file in North Carolina")
+            raise
+
         valid_elections, counts = np.unique(vote_hist["election_desc"],
                                             return_counts=True)
         count_order = counts.argsort()[::-1]
@@ -1616,6 +1741,8 @@ class Preprocessor(Loader):
     def preprocess_missouri(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
+
+        # File check doesn't work in this case, it's all over the place
         preferred_files = [x for x in new_files
                            if ("VotersList" in x["name"]) and
                            (".txt" in x["name"])]
@@ -1633,6 +1760,8 @@ class Preprocessor(Loader):
 
         # add empty column for party_identifier
         main_df[self.config["party_identifier"]] = np.nan
+
+        self.column_check(list(set(main_df.columns) - set(self.config['hist_columns'])))
 
         def add_history(main_df):
             # also save as sparse array since so many elections are stored
@@ -1686,6 +1815,8 @@ class Preprocessor(Loader):
     def preprocess_michigan(self):
         config = Config('michigan')
         new_files = self.unpack_files(file_obj=self.main_file)
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         voter_file = ([n for n in new_files if 'entire_state_v' in n['name'] or
                        'EntireStateVoters' in n['name']] + [None])[0]
         hist_file = ([n for n in new_files if 'entire_state_h' in n['name'] or
@@ -1869,6 +2000,10 @@ class Preprocessor(Loader):
         election_maps = [f for f in new_files if "Election Map" in f["name"]]
         zone_codes = [f for f in new_files if "Codes" in f["name"]]
         zone_types = [f for f in new_files if "Types" in f["name"]]
+
+        if not self.ignore_checks:
+            # election maps need to line up to voter files?
+            self.file_check(len(voter_files), len(election_maps))
         counties = config["county_names"]
         main_df = None
         elections = 40
@@ -1946,6 +2081,8 @@ class Preprocessor(Loader):
                 df = df.drop("election_{}".format(i), axis=1)
                 df = df.drop("district_{}".format(i + 1), axis=1)
 
+            # can check columns for each PA county?
+            self.column_check(list(df.columns))
             if main_df is None:
                 main_df = df
             else:
@@ -2089,6 +2226,8 @@ class Preprocessor(Loader):
         voter_files = [n for n in new_files if 'vlist' in n['name'].lower()]
         hist_files = [n for n in new_files if 'ehist' in n['name'].lower()]
 
+        if not self.ignore_checks:
+            self.file_check(len(voter_files), len(hist_files))
         voter_df = combine_dfs(voter_files)
         hist_df = combine_dfs(hist_files)
 
@@ -2133,6 +2272,9 @@ class Preprocessor(Loader):
         voter_df['gender'] = voter_groups['voter_sex'].apply(lambda x: list(x)[-1])
         voter_df['registration_date'] = \
             voter_groups['voter_registrationDate'].apply(lambda x: list(x)[-1])
+
+        self.column_check(list(voter_df.columns))
+
         voter_df = self.config.coerce_dates(voter_df)
 
         voter_df['all_history'] = voter_groups['election_name'].apply(list)
@@ -2159,6 +2301,9 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip")
 
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         config = Config("wisconsin")
         preferred_files = [x for x in new_files
                            if (".txt" in x["name"])]
@@ -2169,7 +2314,6 @@ class Preprocessor(Loader):
 
         main_df = self.read_csv_count_error_lines(
             main_file["obj"], sep='\t', error_bad_lines=False)
-
         logging.info("dataframe memory usage: {}".format(main_df.memory_usage(deep=True).sum()))
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(columns={"Voter Status": self.config["voter_status"]},
@@ -2194,7 +2338,7 @@ class Preprocessor(Loader):
         for column in main_df:
             if parse_histcols(column):
                 valid_elections.append(column)
-
+        self.column_check(list(set(main_df.columns) - set(valid_elections)))
         # sort from oldest election available to newest
         valid_elections = sorted(valid_elections, key=lambda date: parser.parse(date))
 
@@ -2264,6 +2408,9 @@ class Preprocessor(Loader):
         config = Config('new_hampshire')
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression='unzip')
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
+
         for f in new_files:
             # ignore ".mdb" files
             if ('.xlsx' in f['name']) or ('.csv' in f['name']):
@@ -2290,6 +2437,7 @@ class Preprocessor(Loader):
         voters_df[self.config['birthday_identifier']] = 0
         voters_df[self.config['voter_status']] = np.nan
 
+        self.column_check(list(voters_df.columns))
         voters_df = self.config.coerce_strings(voters_df)
         voters_df = self.config.coerce_numeric(
             voters_df, extra_cols=['ad_str3', 'mail_str3'])
@@ -2340,6 +2488,9 @@ class Preprocessor(Loader):
         valid_files = []
         for file in new_files:
             valid_files.append(file['name'].lower())
+
+        if not self.ignore_checks:
+            self.file_check(len(new_files))
         # faster to just join them into a tab separated string
         valid_files = '\t'.join(valid_files)
         if 'history' not in valid_files or 'registered' not in valid_files:
@@ -2353,6 +2504,7 @@ class Preprocessor(Loader):
                 logging.info("voter file found")
                 voters_df = self.read_csv_count_error_lines(f['obj'], error_bad_lines=False, encoding="ISO-8859-1")
         voters_df[self.config["party_identifier"]] = np.nan
+        self.column_check(list(voters_df.columns))
         voters_df = self.config.coerce_strings(voters_df)
         voters_df = self.config.coerce_numeric(
                 voters_df, extra_cols=['TOWNPREC_CODE_VALUE', 'SUPERDIST_CODE_VALUE',
