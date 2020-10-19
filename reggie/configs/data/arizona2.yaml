@@ -9,7 +9,7 @@ state: arizona2
 abbreviation: az
 source: boe
 file_class: voter_file
-expected_number_of_files: 8
+expected_number_of_files: 9
 voter_id: RegistrantID
 county_identifier: County
 primary_locale_identifier: County

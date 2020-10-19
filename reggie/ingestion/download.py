@@ -583,19 +583,14 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        def difflist(curr_cols, exp_cols):
-            return list(list(set(curr_cols) - set(exp_cols)) +
-                        list(set(exp_cols) - set(curr_cols)))
-
         if set(current_columns) >= set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
             # might be worth looking in to
-            logging.info("more columns that expected detected, the current columns given contain the expected"
-                         "columns and these extra columns {}".format(unexpected_columns))
+            logging.info("more columns than expected detected, the current columns contain the expected "
+                         "columns along with these extra columns {}".format(unexpected_columns))
             return unexpected_columns
         elif set(current_columns) != set(expected_columns):
-            logging.info("columns expected not found in current columns: {}".format(difflist(current_columns,
-                                                                                             expected_columns)))
+            logging.info("columns expected not found in current columns: {}".format(missing_columns))
             raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
                                       expected_columns, missing_columns, unexpected_columns,
                                       current_columns)
