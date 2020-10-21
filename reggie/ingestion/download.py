@@ -583,6 +583,26 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
+        def column_display():
+            max_len = 0
+            expected_columns.sort()
+            current_columns.sort()
+            for c in (unexpected_columns + current_columns):
+                if len(c) > max_len:
+                    max_len = len(c)
+            logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
+                                           "This File:".ljust(max_len)))
+            for idx in range(max(len(current_columns), len(expected_columns))):
+                a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
+                b = current_columns[idx] if idx < len(current_columns) else "(none)"
+                logging.info("\t{}\t{}".format(a.ljust(max_len),
+                                               b.ljust(max_len)))
+            logging.info("\n")
+            logging.info("Columns missing from this file: {}".format(missing_columns))
+            logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
+
+        column_display()
+
         if set(current_columns) >= set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
             # might be worth looking in to
@@ -1296,6 +1316,25 @@ class Preprocessor(Loader):
                         return True
             return False
 
+        def increment_columns(df, history_cols):
+            for col in df.columns:
+                if col not in history_cols:
+                    x = col.split(".")
+
+                    if x[-1].isdigit():
+                        if int(x[-1]) == 1:
+                            original_col = "_".join(x[:-1])
+                            incremented_col = original_col + "_1"
+                            df.rename(columns={original_col: incremented_col}, inplace=True)
+
+                        #else increment the rest
+                        x[-1] = int(x[-1]) + 1
+                        x[-1] = str(x[-1])
+                        x = "_".join(x)
+                        df.rename(columns={col: x}, inplace=True)
+
+                        # print(x)
+
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
@@ -1317,11 +1356,15 @@ class Preprocessor(Loader):
         # IOWA is...special column check needs to happen after dataframe read because of all the renaming
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
-        # generate list of columns to check TT
+        df_voters.rename(columns={'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES"}, inplace=True)
+        # generate list of columns to check
+        print(df_voters.loc[df_voters["POLITICAL_ORGANIZATION"].notnull(), ["POLITICAL_ORGANIZATION", "REGN_NUM", "FIRST_NAME"]])
+
+        increment_columns(df_voters, history_cols)
         columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
                                                               set(history_cols + buffer_cols))]
-        columns_to_remove_temp = ['CITY_3', 'ZIP_CODE_2', 'STATE_2', 'ZIP_PLUS_2'] + self.config['blacklist_columns']
-        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove_temp]
+        columns_to_remove = self.config['blacklist_columns']
+        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove]
         self.column_check(columns_to_check, expected_columns)
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
@@ -1429,6 +1472,9 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
+        pd.set_option("max_columns", None)
+        print_df = df_voters["all_history"]
+        print(print_df.values)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
