@@ -583,27 +583,27 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        def column_display():
-            max_len = 0
-            expected_columns.sort()
-            current_columns.sort()
-            for c in (unexpected_columns + current_columns):
-                if len(c) > max_len:
-                    max_len = len(c)
-            logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
-                                           "This File:".ljust(max_len)))
-            for idx in range(max(len(current_columns), len(expected_columns))):
-                a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
-                b = current_columns[idx] if idx < len(current_columns) else "(none)"
-                logging.info("\t{}\t{}".format(a.ljust(max_len),
-                                               b.ljust(max_len)))
-            logging.info("\n")
-            logging.info("Columns missing from this file: {}".format(missing_columns))
-            logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
+        # def column_display():
+        #     max_len = 0
+        #     expected_columns.sort()
+        #     current_columns.sort()
+        #     for c in (unexpected_columns + current_columns):
+        #         if len(c) > max_len:
+        #             max_len = len(c)
+        #     logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
+        #                                    "This File:".ljust(max_len)))
+        #     for idx in range(max(len(current_columns), len(expected_columns))):
+        #         a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
+        #         b = current_columns[idx] if idx < len(current_columns) else "(none)"
+        #         logging.info("\t{}\t{}".format(a.ljust(max_len),
+        #                                        b.ljust(max_len)))
+        #     logging.info("\n")
+        #     logging.info("Columns missing from this file: {}".format(missing_columns))
+        #     logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
+        #
+        # column_display()
 
-        column_display()
-
-        if set(current_columns) >= set(expected_columns):
+        if set(current_columns) > set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
             # might be worth looking in to
             logging.info("more columns than expected detected, the current columns contain the expected "
@@ -1316,40 +1316,14 @@ class Preprocessor(Loader):
                         return True
             return False
 
-        def increment_columns(df, history_cols):
-            for col in df.columns:
-                if col not in history_cols:
-                    column_name = col.split(".")
-
-                    if column_name[-1].isdigit():
-                        # checks if the current colum nis an incremented column already exists e.g. "CITY.1"
-                        # if it is, we need append the digit to the end of the "CITY" column and then increment
-                        # the "CITY.1" column to "CITY.2" to fit the old schema
-                        if int(column_name[-1]) == 1:
-                            # original col is everything up to the . and replace the spaces with "_" to match schema
-                            # e.g. "CITY"
-                            original_col = "_".join(x[:-1])
-                            incremented_col = original_col + "_1"
-
-                            # renames the plain column CITY to CITY_1 which is what we expect
-                            df.rename(columns={original_col: incremented_col}, inplace=True)
-
-                        # and then increment everything
-                        column_name[-1] = int(column_name[-1]) + 1
-                        column_name[-1] = str(column_name[-1])
-                        column_name = "_".join(column_name)
-                        df.rename(columns={col: column_name}, inplace=True)
-
-                        # print(x)
-
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
         logging.info("IOWA: reading in voter file")
 
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
-        # add first file here
         if not self.ignore_checks:
+            # add 1 for firs file
             valid_files = len(remaining_files) + 1
             self.file_check(valid_files)
 
@@ -1363,16 +1337,16 @@ class Preprocessor(Loader):
         # IOWA is...special column check needs to happen after dataframe read because of all the renaming
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers, error_bad_lines=False)
-        df_voters.rename(columns={'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES"}, inplace=True)
-        # generate list of columns to check
-        # Add columns
-        df_voters["POLITICAL_ORG"] = df_voters["POLITICAL_ORGANIZATION"]
-        increment_columns(df_voters, history_cols)
+        column_dict = {'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES", "CITY": "CITY_1", "CITY.1": "CITY_2",
+                       "CITY.2": "CITY_3", "STATE": "STATE_1", "STATE.1": "STATE_2", "ZIP_CODE": "ZIP_CODE_1",
+                       "ZIP_CODE.1": "ZIP_CODE_2", "ZIP_PLUS": "ZIP_PLUS_1", "ZIP_PLUS.1": "ZIP_PLUS_2"}
+        df_voters.rename(columns=column_dict, inplace=True, errors="ignore")
+        if "POLITICAL_ORG" not in df_voters.columns:
+            df_voters["POLITICAL_ORG"] = np.nan
         columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
                                                                                 set(history_cols + buffer_cols))]
-        columns_to_remove = []
-        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove]
-        self.column_check(columns_to_check, expected_columns)
+        self.column_check(columns_to_check)
+
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = self.read_csv_count_error_lines(i["obj"], header=None,
