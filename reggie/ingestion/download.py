@@ -1319,19 +1319,26 @@ class Preprocessor(Loader):
         def increment_columns(df, history_cols):
             for col in df.columns:
                 if col not in history_cols:
-                    x = col.split(".")
+                    column_name = col.split(".")
 
-                    if x[-1].isdigit():
-                        if int(x[-1]) == 1:
+                    if column_name[-1].isdigit():
+                        # checks if the current colum nis an incremented column already exists e.g. "CITY.1"
+                        # if it is, we need append the digit to the end of the "CITY" column and then increment
+                        # the "CITY.1" column to "CITY.2" to fit the old schema
+                        if int(column_name[-1]) == 1:
+                            # original col is everything up to the . and replace the spaces with "_" to match schema
+                            # e.g. "CITY"
                             original_col = "_".join(x[:-1])
                             incremented_col = original_col + "_1"
+
+                            # renames the plain column CITY to CITY_1 which is what we expect
                             df.rename(columns={original_col: incremented_col}, inplace=True)
 
-                        #else increment the rest
-                        x[-1] = int(x[-1]) + 1
-                        x[-1] = str(x[-1])
-                        x = "_".join(x)
-                        df.rename(columns={col: x}, inplace=True)
+                        # and then increment everything
+                        column_name[-1] = int(column_name[-1]) + 1
+                        column_name[-1] = str(column_name[-1])
+                        column_name = "_".join(column_name)
+                        df.rename(columns={col: column_name}, inplace=True)
 
                         # print(x)
 
