@@ -1358,12 +1358,12 @@ class Preprocessor(Loader):
             header=None, names=headers, error_bad_lines=False)
         df_voters.rename(columns={'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES"}, inplace=True)
         # generate list of columns to check
-        print(df_voters.loc[df_voters["POLITICAL_ORGANIZATION"].notnull(), ["POLITICAL_ORGANIZATION", "REGN_NUM", "FIRST_NAME"]])
-
+        # Add columns
+        df_voters["POLITICAL_ORG"] = df_voters["POLITICAL_ORGANIZATION"]
         increment_columns(df_voters, history_cols)
         columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
-                                                              set(history_cols + buffer_cols))]
-        columns_to_remove = self.config['blacklist_columns']
+                                                                                set(history_cols + buffer_cols))]
+        columns_to_remove = []
         expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove]
         self.column_check(columns_to_check, expected_columns)
         for i in remaining_files:
@@ -1472,9 +1472,9 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
-        pd.set_option("max_columns", None)
-        print_df = df_voters["all_history"]
-        print(print_df.values)
+        # print(df_voters.columns, len(list(df_voters.columns)), len(self.config["columns"]))
+
+
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
