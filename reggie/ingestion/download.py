@@ -1446,7 +1446,6 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
         pd.set_option("display.max_columns", None)
-        print(df_voters.head())
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
