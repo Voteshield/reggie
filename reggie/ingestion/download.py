@@ -1340,9 +1340,6 @@ class Preprocessor(Loader):
         columns_to_check = [x for x in normalized_headers if x not in history_cols]
         self.column_check(columns_to_check)
         headers_with_buffers = normalized_headers + buffer_cols
-        # column_dict = {'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES", "CITY": "CITY_1", "CITY.1": "CITY_2",
-        #                "CITY.2": "CITY_3", "STATE": "STATE_1", "STATE.1": "STATE_2", "ZIP_CODE": "ZIP_CODE_1",
-        #                "ZIP_CODE.1": "ZIP_CODE_2", "ZIP_PLUS": "ZIP_PLUS_1", "ZIP_PLUS.1": "ZIP_PLUS_2"}
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers_with_buffers, error_bad_lines=False)
 
@@ -1431,9 +1428,6 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
-        # wanted_cols = self.config["ordered_columns"] + \
-        #               self.config["ordered_generated_columns"]
-        # df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
 
@@ -1451,7 +1445,6 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
-        # print(list(df_voters.columns))
         pd.set_option("display.max_columns", None)
         print(df_voters.head())
         return FileItem(name="{}.processed".format(self.config["state"]),
