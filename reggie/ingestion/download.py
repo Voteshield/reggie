@@ -1334,29 +1334,27 @@ class Preprocessor(Loader):
         total_cols = main_cols + history_cols + buffer_cols
 
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
-        # IOWA is...special column check needs to happen after dataframe read because of all the renaming
-        df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
-            header=None, names=headers, error_bad_lines=False)
-        column_dict = {'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES", "CITY": "CITY_1", "CITY.1": "CITY_2",
-                       "CITY.2": "CITY_3", "STATE": "STATE_1", "STATE.1": "STATE_2", "ZIP_CODE": "ZIP_CODE_1",
-                       "ZIP_CODE.1": "ZIP_CODE_2", "ZIP_PLUS": "ZIP_PLUS_1", "ZIP_PLUS.1": "ZIP_PLUS_2"}
-        df_voters.rename(columns=column_dict, inplace=True, errors="ignore")
-        if "POLITICAL_ORG" not in df_voters.columns:
-            df_voters["POLITICAL_ORG"] = np.nan
-        columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
-                                                                                set(history_cols + buffer_cols))]
+        column_rename_dict = self.config["rename_columns"]
+        normalized_headers = [x if x not in column_rename_dict else column_rename_dict[x] for x in headers]
+        normalized_headers = [x.replace(" ", "_") for x in normalized_headers]
+        columns_to_check = [x for x in normalized_headers if x not in history_cols]
         self.column_check(columns_to_check)
+        headers_with_buffers = normalized_headers + buffer_cols
+        # column_dict = {'LOSST - CONTIGUOUS CITIES': "LOSST_CONTIGUOUS_CITIES", "CITY": "CITY_1", "CITY.1": "CITY_2",
+        #                "CITY.2": "CITY_3", "STATE": "STATE_1", "STATE.1": "STATE_2", "ZIP_CODE": "ZIP_CODE_1",
+        #                "ZIP_CODE.1": "ZIP_CODE_2", "ZIP_PLUS": "ZIP_PLUS_1", "ZIP_PLUS.1": "ZIP_PLUS_2"}
+        df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
+            header=None, names=headers_with_buffers, error_bad_lines=False)
 
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = self.read_csv_count_error_lines(i["obj"], header=None,
-                skiprows=skiprows, names=total_cols, error_bad_lines=False)
+                skiprows=skiprows, names=headers_with_buffers, error_bad_lines=False)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
-        pd.set_option('display.max_rows', 50)
 
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
@@ -1433,9 +1431,9 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
-        wanted_cols = self.config["ordered_columns"] + \
-                      self.config["ordered_generated_columns"]
-        df_voters = df_voters[wanted_cols]
+        # wanted_cols = self.config["ordered_columns"] + \
+        #               self.config["ordered_generated_columns"]
+        # df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
 
@@ -1453,9 +1451,9 @@ class Preprocessor(Loader):
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
 
-        # print(df_voters.columns, len(list(df_voters.columns)), len(self.config["columns"]))
-
-
+        # print(list(df_voters.columns))
+        pd.set_option("display.max_columns", None)
+        print(df_voters.head())
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
