@@ -1444,8 +1444,8 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+        df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
-        pd.set_option("display.max_columns", None)
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
                                                          index=False)),
