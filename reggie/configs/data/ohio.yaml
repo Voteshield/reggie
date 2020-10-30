@@ -20,7 +20,6 @@ date_format: '%Y-%m-%d'
 party_identifier: PARTY_AFFILIATION
 match_fields:
   - FIRST_NAME
-  - MIDDLE_NAME
   - LAST_NAME
   - DATE_OF_BIRTH
 name_fields:

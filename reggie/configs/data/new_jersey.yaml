@@ -31,7 +31,6 @@ conservative_party: CNV
 socialist_party: SSP
 match_fields:
   - first_name
-  - middle_name
   - last_name
   - dob
 name_fields:

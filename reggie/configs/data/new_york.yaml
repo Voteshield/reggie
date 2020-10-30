@@ -36,7 +36,6 @@ party_identifier: enrollment
 gender_identifier: gender
 match_fields:
   - firstname
-  - middlename
   - lastname
   - dob
 name_fields:

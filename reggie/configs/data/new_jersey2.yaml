@@ -33,7 +33,6 @@ valid_voting_methods: ['Machine', 'Mail In', 'Provisional', 'Emergency']
 match_fields:
   - last
   - first
-  - middle
   - dob
 name_fields:
   - last
