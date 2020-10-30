@@ -37,7 +37,6 @@ format:
   columnar_elections: false
 match_fields:
   - FIRST_NAME
-  - MIDDLE_NAME
   - LAST_NAME
   - BIRTH_YEAR
 name_fields:

@@ -24,7 +24,6 @@ date_format:
   - '%Y-%m-%d hh:mm:ss'
 match_fields:
   - FirstName
-  - MiddleName
   - LastName
   - DOBYear
 name_fields:

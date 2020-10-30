@@ -50,7 +50,6 @@ hist_columns:
   - PROVISIONAL
 match_fields:
   - FIRST_NAME
-  - MIDDLE_NAME
   - LAST_NAME
   - DOB
 name_fields:

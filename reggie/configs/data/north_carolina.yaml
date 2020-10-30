@@ -28,7 +28,6 @@ date_format: '%Y'
 party_identifier: party_cd
 match_fields:
   - first_name
-  - midl_name
   - last_name
   - birth_year
 name_fields:

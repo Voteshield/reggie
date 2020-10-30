@@ -21,7 +21,6 @@ no_party_affiliation: npa
 missing_required_fields: true
 match_fields:
   - First Name
-  - Middle Name
   - Last Name
   - Birthdate
 name_fields:

@@ -27,7 +27,6 @@ generated_columns:
   sparse_history: int[]
 match_fields:
   - First_name
-  - Middle_maiden_name
   - Last_name
   - Year_of_Birth
 name_fields:
