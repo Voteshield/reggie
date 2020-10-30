@@ -1327,19 +1327,25 @@ class Preprocessor(Loader):
             valid_files = len(remaining_files) + 1
             self.file_check(valid_files)
 
-        history_cols = self.config["election_columns"]
-        main_cols = self.config['ordered_columns']
         buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4",
                        "buffer5", "buffer6", "buffer7", "buffer8", "buffer9"]
-        total_cols = main_cols + history_cols + buffer_cols
 
+        # Reads the headers in on the first file given
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
+
+        # Gather the columns for renaming in order to fit the original schema in the database and then rename
+        # so that the columns in the header will fit what is expected
         column_rename_dict = self.config["rename_columns"]
         normalized_headers = [x if x not in column_rename_dict else column_rename_dict[x] for x in headers]
         normalized_headers = [x.replace(" ", "_") for x in normalized_headers]
-        columns_to_check = [x for x in normalized_headers if x not in history_cols]
+
+        columns_to_check = [x for x in normalized_headers if x not in self.config["election_columns"]]
         self.column_check(columns_to_check)
+
+        # Add the buffer columns back in for lines that contain extra commas
         headers_with_buffers = normalized_headers + buffer_cols
+
+        # Begin reading the file with the correct headers
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
             header=None, names=headers_with_buffers, error_bad_lines=False)
 
@@ -1444,6 +1450,8 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+
+        # Drop the election columns because they are no longer needed
         df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
         return FileItem(name="{}.processed".format(self.config["state"]),
