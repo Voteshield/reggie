@@ -583,7 +583,8 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        if set(current_columns) >= set(expected_columns):
+
+        if set(current_columns) > set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
             # might be worth looking in to
             logging.info("more columns than expected detected, the current columns contain the expected "
@@ -1302,37 +1303,42 @@ class Preprocessor(Loader):
 
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
         remaining_files = [f for f in new_files if not is_first_file(f["name"])]
-        # add first file here
         if not self.ignore_checks:
+            # add 1 for firs file
             valid_files = len(remaining_files) + 1
             self.file_check(valid_files)
 
-        history_cols = self.config["election_columns"]
-        main_cols = self.config['ordered_columns']
         buffer_cols = ["buffer0", "buffer1", "buffer2", "buffer3", "buffer4",
                        "buffer5", "buffer6", "buffer7", "buffer8", "buffer9"]
-        total_cols = main_cols + history_cols + buffer_cols
 
+        # Reads the headers in on the first file given
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
-        # IOWA is...special column check needs to happen after dataframe read because of all the renaming
+
+        # Gather the columns for renaming in order to fit the original schema in the database and then rename
+        # so that the columns in the header will fit what is expected
+        column_rename_dict = self.config["rename_columns"]
+        normalized_headers = [x if x not in column_rename_dict else column_rename_dict[x] for x in headers]
+        normalized_headers = [x.replace(" ", "_") for x in normalized_headers]
+
+        columns_to_check = [x for x in normalized_headers if x not in self.config["election_columns"]]
+        self.column_check(columns_to_check)
+
+        # Add the buffer columns back in for lines that contain extra commas
+        headers_with_buffers = normalized_headers + buffer_cols
+
+        # Begin reading the file with the correct headers
         df_voters = self.read_csv_count_error_lines(first_file["obj"], skiprows=1,
-            header=None, names=headers, error_bad_lines=False)
-        # generate list of columns to check TT
-        columns_to_check = [x.replace(" ", "_").replace(".", "_") for x in list(set(list(df_voters.columns)) -
-                                                              set(history_cols + buffer_cols))]
-        columns_to_remove_temp = ['CITY_3', 'ZIP_CODE_2', 'STATE_2', 'ZIP_PLUS_2'] + self.config['blacklist_columns']
-        expected_columns = [x for x in self.config["ordered_columns"] if x not in columns_to_remove_temp]
-        self.column_check(columns_to_check, expected_columns)
+            header=None, names=headers_with_buffers, error_bad_lines=False)
+
         for i in remaining_files:
             skiprows = 1 if "Part1" in i["name"] else 0
             new_df = self.read_csv_count_error_lines(i["obj"], header=None,
-                skiprows=skiprows, names=total_cols, error_bad_lines=False)
+                skiprows=skiprows, names=headers_with_buffers, error_bad_lines=False)
             df_voters = pd.concat([df_voters, new_df], axis=0)
 
         key_delim = "_"
         df_voters["all_history"] = ''
         df_voters = df_voters[df_voters.COUNTY != "COUNTY"]
-        pd.set_option('display.max_rows', 50)
 
         # instead of iterating over all of the columns for each row, we should
         # handle all this beforehand.
@@ -1409,9 +1415,6 @@ class Preprocessor(Loader):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
-        wanted_cols = self.config["ordered_columns"] + \
-                      self.config["ordered_generated_columns"]
-        df_voters = df_voters[wanted_cols]
         for c in df_voters.columns:
             df_voters[c].loc[df_voters[c].isnull()] = ""
 
@@ -1428,6 +1431,9 @@ class Preprocessor(Loader):
         df_voters['REGN_NUM'] = pd.to_numeric(df_voters['REGN_NUM'],
                                               errors='coerce').fillna(0)
         df_voters['REGN_NUM'] = df_voters['REGN_NUM'].astype(int)
+
+        # Drop the election columns because they are no longer needed
+        df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
         return FileItem(name="{}.processed".format(self.config["state"]),
                         io_obj=StringIO(df_voters.to_csv(encoding='utf-8',
