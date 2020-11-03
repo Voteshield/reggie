@@ -36,7 +36,6 @@ featureless_date_cols:
   - election_date
 match_fields:
   - First_Name
-  - Middle_Name
   - Last_Name
   - Date_of_Birth
 name_fields:

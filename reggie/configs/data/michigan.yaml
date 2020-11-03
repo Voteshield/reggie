@@ -26,7 +26,6 @@ missing_required_fields: true
 reason_code: cancellation_reason
 match_fields:
   - FIRST_NAME
-  - MIDDLE_NAME
   - LAST_NAME
   - YEAR_OF_BIRTH
 date_format:

@@ -31,7 +31,6 @@ date_format: '%m/%d/%Y'
 party_identifier: Party
 match_fields:
   - First_Name
-  - Middle_Name
   - Last_Name
   - Birth_Date
 name_fields:

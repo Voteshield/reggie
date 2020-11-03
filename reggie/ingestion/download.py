@@ -1486,7 +1486,7 @@ class Preprocessor(Loader):
                     else:
                         new_df.rename(columns={c: c.replace(' ', '')},
                                       inplace=True)
-
+                new_df.rename(columns={"YearofBirth": "DOB"}, inplace=True)
                 main_df = pd.concat([main_df, new_df], sort=False)
             return main_df
 
