@@ -583,25 +583,6 @@ class Preprocessor(Loader):
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
 
-        # def column_display():
-        #     max_len = 0
-        #     expected_columns.sort()
-        #     current_columns.sort()
-        #     for c in (unexpected_columns + current_columns):
-        #         if len(c) > max_len:
-        #             max_len = len(c)
-        #     logging.info("\t{}\t{}".format("Expected:".ljust(max_len),
-        #                                    "This File:".ljust(max_len)))
-        #     for idx in range(max(len(current_columns), len(expected_columns))):
-        #         a = expected_columns[idx] if idx < len(expected_columns) else "(none)"
-        #         b = current_columns[idx] if idx < len(current_columns) else "(none)"
-        #         logging.info("\t{}\t{}".format(a.ljust(max_len),
-        #                                        b.ljust(max_len)))
-        #     logging.info("\n")
-        #     logging.info("Columns missing from this file: {}".format(missing_columns))
-        #     logging.info("Unexpected columns in this file: {}".format(unexpected_columns))
-        #
-        # column_display()
 
         if set(current_columns) > set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
