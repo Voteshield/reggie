@@ -7,12 +7,10 @@ from dateutil import parser
 import json
 from reggie.reggie_constants import *
 from reggie.configs.configs import Config
-
 from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
     format_column_name, generate_s3_key, get_metadata_for_key, \
     get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
     s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError, MissingFilesError, MissingNumColumnsError
-
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
@@ -218,29 +216,14 @@ class Loader(object):
         :param file_name: .zip file
         :return: dictionary of file-like objects with their names as keys
         """
-        if self.state == "new_york":
-            new_loc = "/tmp/voteshield_{}".format(uuid.uuid4())
-            with open(new_loc, 'wb') as fh:
-                fh.write(file_name.getvalue())
-            new_loc_decomp = new_loc + "_decompressed"
-            logging.info("decompressing unzip {} into {} (NY file = on disk)"
-                         .format(new_loc, new_loc_decomp))
-            subprocess.call(['unzip', new_loc, '-d', new_loc_decomp])
-            os.remove(new_loc)
-            file_names = [os.path.join(new_loc_decomp, f) for f in
-                          os.listdir(new_loc_decomp)]
-            logging.info("file_names = {}".format(file_names))
-            # NY also has memory issues, so just read into csv from disk
-            file_objs = [{"name": name, "obj": name} for name in file_names]
-        else:
-            zip_file = ZipFile(file_name)
-            file_names = zip_file.namelist()
-            logging.info("decompressing unzip {} into {}".format(file_name,
-                                                                 file_names))
-            file_objs = []
-            for name in file_names:
-                file_objs.append({"name": name,
-                                  "obj": BytesIO(zip_file.read(name))})
+        zip_file = ZipFile(file_name)
+        file_names = zip_file.namelist()
+        logging.info("decompressing unzip {} into {}".format(file_name,
+                                                             file_names))
+        file_objs = []
+        for name in file_names:
+            file_objs.append({"name": name,
+                              "obj": BytesIO(zip_file.read(name))})
 
         return file_objs
 
@@ -1612,18 +1595,17 @@ class Preprocessor(Loader):
 
         if not self.ignore_checks:
             self.file_check(len(new_files))
-        # filtering pdfs in unpack_files means the lambda probably isn't necessary?
-        self.main_file = list(filter(
-            lambda x: x["name"][-4:] != ".pdf", new_files))[0]
+
+        # no longer include pdfs in file list anyway, can just assign main file
+        self.main_file = new_files[0]
         gc.collect()
         # When given the names, the pandas read_csv will always work. If given csv has too few column names it will
         # assign the names to the columns to the end, skipping the beginning columns, if too many will add nan columnms
-        # checking length is useless here?
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"], header=None, names=config["ordered_columns"],
             encoding='latin-1', error_bad_lines=False)
-        shutil.rmtree(os.path.dirname(self.main_file["name"]),
-                      ignore_errors=True)
+        logging.info("dataframe memory usage: {}".format(main_df.memory_usage(deep=True).sum()))
+
         gc.collect()
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
