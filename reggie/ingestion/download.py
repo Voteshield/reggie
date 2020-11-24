@@ -936,7 +936,6 @@ class Preprocessor(Loader):
         voter_files = []
         vh_files = []
         for i in new_files:
-            logging.info("this file = {}".format(i["name"]))
             if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
