@@ -932,27 +932,33 @@ class Preprocessor(Loader):
         logging.info("GEORGIA: loading voter and voter history file")
         new_files = self.unpack_files(
             compression='unzip', file_obj=self.main_file)
+
+        voter_files = []
         vh_files = []
-
-        if not self.ignore_checks:
-            self.file_check(len(new_files))
-
         for i in new_files:
             if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
-                df_voters = self.read_csv_count_error_lines(
-                    i["obj"], sep="|", quotechar='"', quoting=3,
-                    error_bad_lines=False)
-                try:
-                    df_voters.columns = self.config["ordered_columns"]
-                except ValueError:
-                    logging.info("Incorrect number of columns found for Georgia")
-                    raise MissingNumColumnsError("{} state is missing columns".format(self.state), self.state,
-                                                 len(self.config["ordered_columns"]), len(df_voters.columns))
-                df_voters['Registration_Number'] = df_voters[
-                    'Registration_Number'].astype(str).str.zfill(8)
-            elif "TXT" in i["name"]:
+                voter_files.append(i)
+            elif "txt" in i["name"].lower():
                 vh_files.append(i)
+        logging.info("Detected {} history files".format(len(vh_files)))
+
+        if not self.ignore_checks:
+            self.file_check(len(voter_files))
+
+        df_voters = self.read_csv_count_error_lines(
+            voter_files[0]["obj"], sep="|", quotechar='"', quoting=3,
+            error_bad_lines=False)
+        try:
+            df_voters.columns = self.config["ordered_columns"]
+        except ValueError:
+            logging.info("Incorrect number of columns found for Georgia")
+            raise MissingNumColumnsError("{} state is missing columns".format(
+                self.state), self.state, len(self.config["ordered_columns"]),
+                len(df_voters.columns))
+        df_voters['Registration_Number'] = df_voters[
+            'Registration_Number'].astype(str).str.zfill(8)
+
         concat_history_file = concat_and_delete(vh_files)
 
         logging.info("Performing GA history manipulation")
