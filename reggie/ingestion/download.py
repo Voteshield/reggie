@@ -134,31 +134,260 @@ class FileItem(object):
             .format(self.name, self.obj, s)
 
 
-class Loader(object):
-    """
-    this object should be used to perform downloads directly from
-    online resources which are specified by yaml files
-    in the config directory.
+# class Loader(object):
+#     """
+#     this object should be used to perform downloads directly from
+#     online resources which are specified by yaml files
+#     in the config directory.
+#
+#     A Loader uses filesystem resources for temporarily storing the files
+#     on disk during the chunk concatenation process,
+#     therefore __enter__ and __exit__ are defined to allow safe usage
+#     of Loader in a 'with' statement:
+#     for example:
+#     ```
+#         with Loader() as l:
+#             l.download_chunks()
+#             l.s3_dump()
+#     ```
+#     """
+#
+#     def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
+#                  force_file=None, testing=False, ignore_checks=False, s3_bucket=""):
+#         self.config_file_path = config_file
+#         config = Config(file_name=config_file)
+#         self.config = config
+#         self.chunk_urls = config[
+#             CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
+#         if "tmp" not in os.listdir("/"):
+#             os.system("mkdir /tmp")
+#         self.file_type = config["file_type"]
+#         self.source = config["source"]
+#         self.is_compressed = False
+#         self.checksum = None
+#         self.state = config["state"]
+#         self.obj_will_download = False
+#         self.meta = None
+#         self.testing = testing
+#         self.ignore_checks = ignore_checks
+#         self.s3_bucket = s3_bucket
+#         if force_date is not None:
+#             self.download_date = parser.parse(force_date).isoformat()
+#         else:
+#             self.download_date = datetime.now().isoformat()
+#         if force_file is not None:
+#             working_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+#             logging.info("copying {} to {}".format(force_file, working_file))
+#             shutil.copy2(force_file, working_file)
+#             self.main_file = FileItem(
+#                 "loader_force_file",
+#                 filename=working_file,
+#                 s3_bucket=self.s3_bucket)
+#         else:
+#             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
+#
+#         self.temp_files = [self.main_file]
+#
+#     def __enter__(self):
+#         return self
+#
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         return
+#
+#     def compress(self):
+#         """
+#         intended to be called after the consolidated (processed) file has been
+#         created and saved in self.main_file
+#         :param compression_type: gzip is default
+#         :return: None
+#         """
+#         if not self.is_compressed:
+#             logging.info("compressing")
+#             p = Popen(["gzip", "-c"], stdout=PIPE,
+#                       stderr=PIPE, stdin=PIPE)
+#             op, err = p.communicate(self.main_file.obj.read().encode())
+#             self.main_file.obj.seek(0)
+#             self.is_compressed = True
+#             self.main_file.obj = BytesIO(op)
+#
+#     def unzip_decompress(self, file_name):
+#         """
+#         handles decompression for .zip files
+#         :param file_name: .zip file
+#         :return: dictionary of file-like objects with their names as keys
+#         """
+#         zip_file = ZipFile(file_name)
+#         file_names = zip_file.namelist()
+#         logging.info("decompressing unzip {} into {}".format(file_name,
+#                                                              file_names))
+#         file_objs = []
+#         for name in file_names:
+#             file_objs.append({"name": name,
+#                               "obj": BytesIO(zip_file.read(name))})
+#
+#         return file_objs
+#
+#     def gunzip_decompress(self, file_obj, file_name):
+#         """
+#         handles decompression for .gz files
+#         :param file_name: .gz file
+#         :return: tuple containing (name of new decompressed file if
+#         successful, and a reference to the subprocess object which ran the
+#         decompression)
+#         """
+#         gzip_file = GzipFile(fileobj=file_obj)
+#         try:
+#             return [{"name": file_name + "decompressed",
+#                      "obj": BytesIO(gzip_file.read())}]
+#         except OSError:
+#             return None
+#
+#     def bunzip2_decompress(self, file_name):
+#         """
+#         handles decompression for .bz2 files
+#         :param file_name: .bz2 file
+#         :return: tuple containing (name of new decompressed file if
+#         successful, and a reference to the subprocess object which ran the
+#         decompression)
+#         """
+#         logging.info("decompressing {} {} to {}"
+#                      .format("bunzip2",
+#                              file_name,
+#                              os.path.dirname(file_name)))
+#         bz2_file = BZ2File(file_name)
+#         return [{"name": "decompressed_file", "obj": bz2_file}]
+#
+#     def infer_compression(self, file_name):
+#         """
+#         infer file type and map to compression type
+#         :param file_name: file in question
+#         :return: string (de)compression type or None
+#         """
+#         if file_name[-3:] == "bz2":
+#             compression_type = "bunzip2"
+#         elif file_name[-2:] == "gz":
+#             compression_type = "gunzip"
+#         elif file_name[-3:] == "zip":
+#             compression_type = "unzip"
+#         else:
+#             compression_type = None
+#         if compression_type is None:
+#             logging.info(
+#                 "could not infer the file type of {}".format(file_name))
+#         logging.info("compression type of {} is {}".format(
+#             file_name, compression_type))
+#         return compression_type
+#
+#     def decompress(self, s3_file_obj, compression_type="gunzip"):
+#         """
+#         decompress a file using either unzip or gunzip, unless the file is an
+#         .xlsx file, in which case it is returned as is (these files are
+#         compressed by default, and are unreadable in their unpacked form by
+#         pandas)
+#         :param s3_file_obj: the path of the file to be decompressed
+#         :param compression_type: available options - ["unzip", "gunzip"]
+#         :return: a (str, bool) tuple containing the location of the processed
+#         file and whether or not it was actually
+#         decompressed
+#         """
+#
+#         new_files = None
+#         inferred_compression = self.infer_compression(s3_file_obj["name"])
+#         if compression_type == "infer":
+#             if inferred_compression is not None:
+#                 compression_type = inferred_compression
+#             else:
+#                 compression_type = 'unzip'
+#         logging.info("decompressing {} using {}".format(s3_file_obj["name"],
+#                                                         compression_type))
+#
+#         if (s3_file_obj["name"].split(".")[-1].lower() == "xlsx") or \
+#                 (s3_file_obj["name"].split(".")[-1].lower() == "txt") or \
+#                 (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
+#                 (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
+#                 ("MACOS" in s3_file_obj["name"]):
+#                 # why was csv removed?
+#             logging.info("did not decompress {}".format(s3_file_obj["name"]))
+#             raise BadZipfile
+#         else:
+#             # convert to
+#             if isinstance(s3_file_obj["obj"], StringIO):
+#                 bytes_obj = BytesIO(s3_file_obj["obj"].read().encode())
+#             else:
+#                 bytes_obj = s3_file_obj["obj"]
+#             if compression_type == "unzip":
+#                 new_files = self.unzip_decompress(bytes_obj)
+#             elif compression_type == "bunzip2":
+#                 new_files = self.bunzip2_decompress(bytes_obj)
+#             else:
+#                 new_files = self.gunzip_decompress(bytes_obj,
+#                                                    s3_file_obj["name"])
+#
+#             if compression_type is not None and new_files is not None:
+#                 logging.info("decompression done: {}".format(s3_file_obj))
+#             else:
+#                 logging.info("did not decompress {}".format(s3_file_obj))
+#
+#         self.is_compressed = False
+#         return new_files
+#
+#     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
+#         if "native_file_extension" in self.config and \
+#                 file_class != "voter_file":
+#             k = generate_s3_key(file_class, self.state,
+#                                 self.source, self.download_date,
+#                                 self.config["native_file_extension"])
+#         else:
+#             k = generate_s3_key(file_class, self.state, self.source,
+#                                 self.download_date, "csv", "gz")
+#         return "testing/" + k if self.testing else k
+#
+#     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
+#         if not isinstance(file_item, FileItem):
+#             raise ValueError("'file_item' must be of type 'FileItem'")
+#         if file_class != PROCESSED_FILE_PREFIX:
+#             if self.config["state"] == 'ohio':
+#                 self.download_date = str(
+#                     ohio_get_last_updated().isoformat())[0:10]
+#             elif self.config["state"] == "north_carolina":
+#                 self.download_date = str(nc_date_grab())
+#         meta = self.meta if self.meta is not None else {}
+#         meta["last_updated"] = self.download_date
+#         s3.Object(self.s3_bucket, self.generate_key(file_class=file_class)).put(
+#             Body=file_item.obj, ServerSideEncryption='AES256')
+#         if file_class != RAW_FILE_PREFIX:
+#             s3.Object(self.s3_bucket, self.generate_key(
+#                 file_class=META_FILE_PREFIX) + ".json").put(
+#                 Body=json.dumps(meta), ServerSideEncryption='AES256')
+#
+#     def generate_local_key(self, meta=False):
+#         if meta:
+#             name = "meta_" + self.state + "_" + self.download_date + ".json"
+#         else:
+#             name = self.state + "_" + self.download_date + ".csv.gz"
+#         return name
+#
+#     def output_dataframe(self, file_item):
+#         return pd.read_csv(file_item.obj)
+#
+#     def local_dump(self, file_item):
+#         df = self.output_dataframe(file_item)
+#         df.to_csv(self.generate_local_key(), compression='gzip')
+#         with open(self.generate_local_key(meta=True), 'w') as fp:
+#             json.dump(self.meta, fp)
+#
 
-    A Loader uses filesystem resources for temporarily storing the files
-    on disk during the chunk concatenation process,
-    therefore __enter__ and __exit__ are defined to allow safe usage
-    of Loader in a 'with' statement:
-    for example:
-    ```
-        with Loader() as l:
-            l.download_chunks()
-            l.s3_dump()
-    ```
-    """
+class Preprocessor():
+    def __init__(self, raw_s3_file, config_file, force_date=None, force_file=None,
+                 testing=False, ignore_checks=False, s3_bucket="", **kwargs):
 
-    def __init__(self, config_file=CONFIG_OHIO_FILE, force_date=None,
-                 force_file=None, testing=False, ignore_checks=False, s3_bucket=""):
+        # Init change begin
         self.config_file_path = config_file
         config = Config(file_name=config_file)
         self.config = config
         self.chunk_urls = config[
             CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
+        # Probably remove
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
@@ -188,6 +417,19 @@ class Loader(object):
 
         self.temp_files = [self.main_file]
 
+        # Init change end
+        if force_date is None:
+            force_date = date_from_str(raw_s3_file)
+
+        # super(Preprocessor, self).__init__(
+        #     config_file=config_file, force_date=force_date,
+        #     **kwargs)
+        self.raw_s3_file = raw_s3_file
+
+        if self.raw_s3_file is not None:
+            self.main_file = self.s3_download()
+
+# Begin old loader functions
     def __enter__(self):
         return self
 
@@ -376,20 +618,8 @@ class Loader(object):
         with open(self.generate_local_key(meta=True), 'w') as fp:
             json.dump(self.meta, fp)
 
+### End old loader functions
 
-class Preprocessor(Loader):
-    def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
-        if force_date is None:
-            force_date = date_from_str(raw_s3_file)
-
-        super(Preprocessor, self).__init__(
-            config_file=config_file, force_date=force_date,
-            **kwargs)
-        self.raw_s3_file = raw_s3_file
-
-        if self.raw_s3_file is not None:
-            self.main_file = self.s3_download()
 
     def s3_download(self):
         name = "/tmp/voteshield_{}" \
@@ -581,6 +811,7 @@ class Preprocessor(Loader):
 
         return extra_cols
 
+    # Preprocessors begin here
     def preprocess_texas(self):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression='unzip')
