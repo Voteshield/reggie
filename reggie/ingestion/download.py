@@ -1466,8 +1466,6 @@ class Preprocessor(Loader):
         new_files = self.unpack_files(file_obj=self.main_file,
                                       compression="unzip")
 
-        if not self.ignore_checks:
-            self.file_check(len(new_files))
         active_files = [f for f in new_files if file_is_active(f['name'])]
         other_files = [f for f in new_files if not file_is_active(f['name'])]
 
