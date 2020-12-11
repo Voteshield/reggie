@@ -9,6 +9,7 @@ jurisdiction_identifier: JURISDICTION_CODE
 primary_locale_identifier: JURISDICTION_CODE
 numeric_primary_locale: true
 primary_locale_type: jurisdiction
+precinct_identifier: PRECINCT
 birthday_identifier: YEAR_OF_BIRTH
 early_voter_identifier: IS_PERMANENT_ABSENTEE_VOTER
 voter_status: VOTER_STATUS_TYPE_CODE
