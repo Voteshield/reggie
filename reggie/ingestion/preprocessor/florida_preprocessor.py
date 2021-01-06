@@ -1,4 +1,3 @@
-import json
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
