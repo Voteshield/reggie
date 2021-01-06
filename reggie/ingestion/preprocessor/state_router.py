@@ -8,7 +8,7 @@ from reggie.ingestion.preprocessor.arizona2_preprocessor import (
 from reggie.ingestion.preprocessor.colorado_preprocessor import (
     PreprocessColorado,
 )
-
+from reggie.ingestion.preprocessor.michigan_preprocessor import PreprocessMichigan
 
 # Check the function paramaters here, some might not need to be set here or need better names
 # Need to pull out: Alaska
@@ -45,6 +45,7 @@ def state_router(
         "arizona2": PreprocessArizona2,
         "colorado": PreprocessColorado,
         "iowa": PreprocessIowa,
+        "michigan": PreprocessMichigan,
     }
     if state in routes:
         # F is now some typs of class object?

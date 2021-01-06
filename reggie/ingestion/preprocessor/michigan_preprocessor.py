@@ -38,12 +38,6 @@ class PreprocessMichigan(Preprocessor):
             self.main_file = self.s3_download()
 
         # config = Config('michigan')
-        print(
-            "mi config: ",
-            self.config,
-            "\n\n",
-            self.config["elec_code_columns"],
-        )
         new_files = self.unpack_files(file_obj=self.main_file)
         if not self.ignore_checks:
             self.file_check(len(new_files))
@@ -269,8 +263,8 @@ class PreprocessMichigan(Preprocessor):
         }
 
         # Collect histories
-        vdf.set_index(config["voter_id"], drop=False, inplace=True)
-        hdf_id_groups = hdf.groupby(config["voter_id"])
+        vdf.set_index(self.config["voter_id"], drop=False, inplace=True)
+        hdf_id_groups = hdf.groupby(self.config["voter_id"])
         vdf["all_history"] = hdf_id_groups["ELECTION_NAME"].apply(list)
         vdf["votetype_history"] = hdf_id_groups["IS_ABSENTEE_VOTER"].apply(
             list
