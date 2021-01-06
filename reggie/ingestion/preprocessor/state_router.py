@@ -5,6 +5,10 @@ from reggie.ingestion.preprocessor.iowa_preprocessor import PreprocessIowa
 from reggie.ingestion.preprocessor.arizona2_preprocessor import (
     PreprocessArizona2,
 )
+from reggie.ingestion.preprocessor.colorado_preprocessor import (
+    PreprocessColorado,
+)
+
 
 # Check the function paramaters here, some might not need to be set here or need better names
 # Need to pull out: Alaska
@@ -39,6 +43,7 @@ def state_router(
     # ),
     routes = {
         "arizona2": PreprocessArizona2,
+        "colorado": PreprocessColorado,
         "iowa": PreprocessIowa,
     }
     if state in routes:
@@ -48,14 +53,16 @@ def state_router(
                 state, config_file, raw_s3_file
             )
         )
-        f = routes[state](raw_s3_file=raw_s3_file,
+        f = routes[state](
+            raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=None,
             force_file=None,
             testing=False,
             ignore_checks=False,
             s3_bucket=s3_bucket,
-            **kwargs)
+            **kwargs
+        )
         logging.info("preprocessing {}".format(state))
         return f
     else:
