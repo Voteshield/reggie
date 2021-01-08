@@ -152,7 +152,7 @@ class Preprocessor:
         self.file_type = config["file_type"]
         self.source = config["source"]
         self.is_compressed = False
-        # Deprecated
+        # Deprecated?
         self.checksum = None
         self.state = config["state"]
         # Maybe Deprecated
@@ -182,26 +182,15 @@ class Preprocessor:
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
-        # super(Preprocessor, self).__init__(
-        #     config_file=config_file, force_date=force_date,
-        #     **kwargs)
         self.raw_s3_file = raw_s3_file
 
 
-        # Todo: Either keep this here or remove it from other preproc objects?
-        # if self.raw_s3_file is not None:
-        #     self.main_file = self.s3_download()
-
-
-        ## Add correct preproc subclass here?
-
-
 # Begin old loader functions
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return
+#     def __enter__(self):
+#         return self
+#
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         return
 
     def compress(self):
         """
@@ -385,7 +374,7 @@ class Preprocessor:
         with open(self.generate_local_key(meta=True), 'w') as fp:
             json.dump(self.meta, fp)
 
-### End old loader functions
+# End old loader functions
 
     def s3_download(self):
         name = "/tmp/voteshield_{}" \
