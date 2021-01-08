@@ -8,10 +8,11 @@ from reggie.ingestion.preprocessor.arizona2_preprocessor import (
 from reggie.ingestion.preprocessor.colorado_preprocessor import (
     PreprocessColorado,
 )
-from reggie.ingestion.preprocessor.michigan_preprocessor import PreprocessMichigan
+from reggie.ingestion.preprocessor.michigan_preprocessor import (
+    PreprocessMichigan,
+)
 
 # Check the function paramaters here, some might not need to be set here or need better names
-# Need to pull out: Alaska
 
 
 def state_router(
