@@ -69,7 +69,6 @@ def get_object(key, fn, s3_bucket):
 
 def get_object_mem(key, s3_bucket):
     file_obj = BytesIO()
-    print("s3 bucket?", s3_bucket)
     s3.Bucket(s3_bucket).download_fileobj(Key=key, Fileobj=file_obj)
     return file_obj
 
@@ -379,7 +378,6 @@ class Preprocessor:
     def s3_download(self):
         name = "/tmp/voteshield_{}" \
             .format(self.raw_s3_file.split("/")[-1])
-        print("raw s3: ", self.raw_s3_file)
         return FileItem(key=self.raw_s3_file,
                         name=name,
                         s3_bucket=self.s3_bucket)
@@ -550,7 +548,6 @@ class Preprocessor:
         extra_cols = []
         unexpected_columns = list(set(current_columns) - set(expected_columns))
         missing_columns = list(set(expected_columns) - set(current_columns))
-
 
         if set(current_columns) > set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but

@@ -1,17 +1,26 @@
 import logging
-
-from reggie.ingestion.download import Preprocessor
-from reggie.ingestion.preprocessor.iowa_preprocessor import PreprocessIowa
-from reggie.ingestion.preprocessor.arizona2_preprocessor import (
-    PreprocessArizona2,
-)
-from reggie.ingestion.preprocessor.colorado_preprocessor import (
-    PreprocessColorado,
-)
-from reggie.ingestion.preprocessor.michigan_preprocessor import (
-    PreprocessMichigan,
-)
-from reggie.ingestion.preprocessor.ohio_preprocessor import PreprocessOhio
+from reggie.configs.configs import Config
+from .arizona_preprocessor import PreprocessArizona
+from .arizona2_preprocessor import PreprocessArizona2
+from .colorado_preprocessor import PreprocessColorado
+from .florida_preprocessor import PreprocessFlorida
+from .georgia_preprocessor import PreprocessGeorgia
+from .iowa_preprocessor import PreprocessIowa
+from .kansas_preprocessor import PreprocessKansas
+from .michigan_preprocessor import PreprocessMichigan
+from .minnesota_preprocessor import PreprocessMinnesota
+from .missouri_preprocessor import PreprocessMissouri
+from .nevada_preprocessor import PreprocessNevada
+from .new_hampshire_preprocessor import PreprocessNewHampshire
+from .new_jersey_preprocessor import PreprocessNewJersey
+from .new_jersey2_preprocessor import PreprocessNewJersey2
+from .new_york_preprocessor import PreprocessNewYork
+from .north_carolina_preprocessor import PreprocessNorthCarolina
+from .ohio_preprocessor import PreprocessOhio
+from .pennsylvania_preprocessor import PreprocessPennsylvania
+from .texas_preprocessor import PreprocessTexas
+from .virginia_preprocessor import PreprocessVirginia
+from .wisconsin_preprocessor import PreprocessWisconsin
 
 # Check the function paramaters here, some might not need to be set here or need better names
 
@@ -29,21 +38,36 @@ class StateRouter:
         s3_bucket="",
         **kwargs
     ):
-        print(config_file)
-        self.state = state
         self.raw_s3_file = raw_s3_file
         self.config_file = config_file
+        config = Config(file_name=config_file)
+        self.state = state if state is not None else config["state"]
         self.force_date = force_date
         self.force_file = force_file
         self.testing = testing
         self.ignore_checks = ignore_checks
         self.s3_bucket = s3_bucket
         self.routes = {
+            "arizona": PreprocessArizona,
             "arizona2": PreprocessArizona2,
             "colorado": PreprocessColorado,
+            "florida": PreprocessFlorida,
+            "georgia": PreprocessGeorgia,
             "iowa": PreprocessIowa,
-            "ohio": PreprocessOhio,
+            "kansas": PreprocessKansas,
             "michigan": PreprocessMichigan,
+            "minnesota": PreprocessMinnesota,
+            "missouri": PreprocessMissouri,
+            "nevada": PreprocessNevada,
+            "new_hampshire": PreprocessNewHampshire,
+            "new_jersey": PreprocessNewJersey,
+            "new_jersey2": PreprocessNewJersey2,
+            "new_york": PreprocessNewYork,
+            "north_carolina": PreprocessNorthCarolina,
+            "ohio": PreprocessOhio,
+            "pennsylvania": PreprocessPennsylvania,
+            "texas": PreprocessTexas,
+            "wisconsin": PreprocessWisconsin,
         }
 
     def __enter__(self):
@@ -71,8 +95,6 @@ class StateRouter:
                 **kwargs
             )
             logging.info("preprocessing {}".format(self.state))
-            # f.main_file = f.processed_file
-            # f.compress()
             return f
         else:
             raise NotImplementedError(
