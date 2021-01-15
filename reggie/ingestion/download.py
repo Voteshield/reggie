@@ -908,6 +908,13 @@ class Preprocessor(Loader):
         df_voter["vote_type"] = vote_type
         gc.collect()
 
+        # at some point mailing address field names changed
+        for num in ["1", "2", "3"]:
+            if f"MAIL_ADDR{num}" in df_voter.columns:
+                df_voter[f"MAILING_ADDRESS_{num}"] = \
+                    df_voter[f"MAIL_ADDR{num}"]
+                df_voter.drop(columns=[f"MAIL_ADDR{num}"], inplace=True)
+
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
         df_voter = self.config.coerce_numeric(df_voter, extra_cols=[
