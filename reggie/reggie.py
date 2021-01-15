@@ -9,9 +9,9 @@ def convert_voter_file(state=None, local_file=None,
     config_file = Config.config_file_from_state(state)
     file_date = str(datetime.datetime.strptime(file_date, '%Y-%m-%d').date())
     with StateRouter(None, raw_s3_file=None,
-                      config_file=config_file,
-                      force_file=local_file,
-                      force_date=file_date) as preprocessor:
+                     config_file=config_file,
+                     force_file=local_file,
+                     force_date=file_date) as preprocessor:
         file_item = preprocessor.execute()
         if not write_file:
             return(preprocessor.output_dataframe(file_item),
