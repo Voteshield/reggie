@@ -71,8 +71,8 @@ class StateRouter:
                 **kwargs
             )
             logging.info("preprocessing {}".format(self.state))
-            f.main_file = f.processed_file
-            f.compress()
+            # f.main_file = f.processed_file
+            # f.compress()
             return f
         else:
             raise NotImplementedError(
