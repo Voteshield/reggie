@@ -58,7 +58,6 @@ def state_download(state, s3_bucket):
             handle.close()
             logging.info("downloaded {} file".format(url))
         file_to_zip = today + ".zip"
-        print("file_to_zip", file_to_zip)
         logging.info("Zipping files")
         with zipfile.ZipFile(file_to_zip, 'w') as myzip:
             for f in zipped_files:
@@ -68,8 +67,6 @@ def state_download(state, s3_bucket):
             "OH file auto download",
             filename=file_to_zip,
             s3_bucket=s3_bucket)
-        print("testing?")
         loader = Preprocessor(config_file=config_file, force_date=today,
                         s3_bucket=s3_bucket)
-        raise ValueError("stopping?")
-        # loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
+        loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
