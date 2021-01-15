@@ -77,12 +77,6 @@ class StateRouter:
 
     def execute(self, **kwargs):
         if self.state in self.routes:
-            # F is now some typs of class object?
-            logging.info(
-                "state: {}, config: {}, main file: {}".format(
-                    self.state, self.config_file, self.raw_s3_file
-                )
-            )
             f = self.routes[self.state](
                 raw_s3_file=self.raw_s3_file,
                 config_file=self.config_file,
