@@ -23,138 +23,80 @@ from .virginia_preprocessor import PreprocessVirginia
 from .wisconsin_preprocessor import PreprocessWisconsin
 
 
-def StateRouter(
-    state,
-    raw_s3_file,
-    config_file,
-    force_date=None,
-    force_file=None,
-    testing=False,
-    ignore_checks=False,
-    s3_bucket="",
-    **kwargs
-):
-    routes = {
-        "arizona": PreprocessArizona,
-        "arizona2": PreprocessArizona2,
-        "colorado": PreprocessColorado,
-        "florida": PreprocessFlorida,
-        "georgia": PreprocessGeorgia,
-        "iowa": PreprocessIowa,
-        "kansas": PreprocessKansas,
-        "michigan": PreprocessMichigan,
-        "minnesota": PreprocessMinnesota,
-        "missouri": PreprocessMissouri,
-        "nevada": PreprocessNevada,
-        "new_hampshire": PreprocessNewHampshire,
-        "new_jersey": PreprocessNewJersey,
-        "new_jersey2": PreprocessNewJersey2,
-        "new_york": PreprocessNewYork,
-        "north_carolina": PreprocessNorthCarolina,
-        "ohio": PreprocessOhio,
-        "pennsylvania": PreprocessPennsylvania,
-        "texas": PreprocessTexas,
-        "virginia": PreprocessVirginia,
-        "wisconsin": PreprocessWisconsin,
-    }
-    if state in routes:
-        logging.info(
-            "state: {}, config: {}, main file: {}".format(
-                state, config_file, raw_s3_file
+class StateRouter:
+    def __init__(
+        self,
+        state,
+        raw_s3_file,
+        config_file,
+        force_date=None,
+        force_file=None,
+        testing=False,
+        ignore_checks=False,
+        s3_bucket="",
+        **kwargs
+    ):
+        self.raw_s3_file = raw_s3_file
+        self.config_file = config_file
+        config = Config(file_name=config_file)
+        self.state = state if state is not None else config["state"]
+        self.force_date = force_date
+        self.force_file = force_file
+        self.testing = testing
+        self.ignore_checks = ignore_checks
+        self.s3_bucket = s3_bucket
+        self.routes = {
+            "arizona": PreprocessArizona,
+            "arizona2": PreprocessArizona2,
+            "colorado": PreprocessColorado,
+            "florida": PreprocessFlorida,
+            "georgia": PreprocessGeorgia,
+            "iowa": PreprocessIowa,
+            "kansas": PreprocessKansas,
+            "michigan": PreprocessMichigan,
+            "minnesota": PreprocessMinnesota,
+            "missouri": PreprocessMissouri,
+            "nevada": PreprocessNevada,
+            "new_hampshire": PreprocessNewHampshire,
+            "new_jersey": PreprocessNewJersey,
+            "new_jersey2": PreprocessNewJersey2,
+            "new_york": PreprocessNewYork,
+            "north_carolina": PreprocessNorthCarolina,
+            "ohio": PreprocessOhio,
+            "pennsylvania": PreprocessPennsylvania,
+            "texas": PreprocessTexas,
+            "virginia": PreprocessVirginia,
+            "wisconsin": PreprocessWisconsin,
+        }
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return
+
+    def execute(self, **kwargs):
+        if self.state in self.routes:
+            # F is now some typs of class object?
+            logging.info(
+                "state: {}, config: {}, main file: {}".format(
+                    self.state, self.config_file, self.raw_s3_file
+                )
             )
-        )
-        f = routes[state](
-            raw_s3_file=raw_s3_file,
-            config_file=config_file,
-            force_date=force_date,
-            force_file=force_file,
-            testing=testing,
-            ignore_checks=ignore_checks,
-            s3_bucket=s3_bucket,
-            **kwargs
-        )
-        logging.info("preprocessing {}".format(state))
-        return f
-    else:
-        raise NotImplementedError(
-            "preprocess_{} has not yet been "
-            "implemented for the Preprocessor object".format(state)
-        )
-
-
-# class StateRouter:
-#     def __init__(
-#         self,
-#         state,
-#         raw_s3_file,
-#         config_file,
-#         force_date=None,
-#         force_file=None,
-#         testing=False,
-#         ignore_checks=False,
-#         s3_bucket="",
-#         **kwargs
-#     ):
-#         self.raw_s3_file = raw_s3_file
-#         self.config_file = config_file
-#         config = Config(file_name=config_file)
-#         self.state = state if state is not None else config["state"]
-#         self.force_date = force_date
-#         self.force_file = force_file
-#         self.testing = testing
-#         self.ignore_checks = ignore_checks
-#         self.s3_bucket = s3_bucket
-#         self.routes = {
-#             "arizona": PreprocessArizona,
-#             "arizona2": PreprocessArizona2,
-#             "colorado": PreprocessColorado,
-#             "florida": PreprocessFlorida,
-#             "georgia": PreprocessGeorgia,
-#             "iowa": PreprocessIowa,
-#             "kansas": PreprocessKansas,
-#             "michigan": PreprocessMichigan,
-#             "minnesota": PreprocessMinnesota,
-#             "missouri": PreprocessMissouri,
-#             "nevada": PreprocessNevada,
-#             "new_hampshire": PreprocessNewHampshire,
-#             "new_jersey": PreprocessNewJersey,
-#             "new_jersey2": PreprocessNewJersey2,
-#             "new_york": PreprocessNewYork,
-#             "north_carolina": PreprocessNorthCarolina,
-#             "ohio": PreprocessOhio,
-#             "pennsylvania": PreprocessPennsylvania,
-#             "texas": PreprocessTexas,
-#             "wisconsin": PreprocessWisconsin,
-#         }
-#
-#     def __enter__(self):
-#         return self
-#
-#     def __exit__(self, exc_type, exc_val, exc_tb):
-#         return
-#
-#     def execute(self, **kwargs):
-#         if self.state in self.routes:
-#             # F is now some typs of class object?
-#             logging.info(
-#                 "state: {}, config: {}, main file: {}".format(
-#                     self.state, self.config_file, self.raw_s3_file
-#                 )
-#             )
-#             f = self.routes[self.state](
-#                 raw_s3_file=self.raw_s3_file,
-#                 config_file=self.config_file,
-#                 force_date=self.force_date,
-#                 force_file=self.force_file,
-#                 testing=self.testing,
-#                 ignore_checks=self.ignore_checks,
-#                 s3_bucket=self.s3_bucket,
-#                 **kwargs
-#             )
-#             logging.info("preprocessing {}".format(self.state))
-#             return f
-#         else:
-#             raise NotImplementedError(
-#                 "preprocess_{} has not yet been "
-#                 "implemented for the Preprocessor object".format(self.state)
-#             )
+            f = self.routes[self.state](
+                raw_s3_file=self.raw_s3_file,
+                config_file=self.config_file,
+                force_date=self.force_date,
+                force_file=self.force_file,
+                testing=self.testing,
+                ignore_checks=self.ignore_checks,
+                s3_bucket=self.s3_bucket,
+                **kwargs
+            )
+            logging.info("preprocessing {}".format(self.state))
+            return f
+        else:
+            raise NotImplementedError(
+                "preprocess_{} has not yet been "
+                "implemented for the Preprocessor object".format(self.state)
+            )
