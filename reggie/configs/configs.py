@@ -48,7 +48,8 @@ class Config(object):
             return config_cache[config_file]
         else:
             with open(config_file) as f:
-                config = yaml.load(f)
+                # quiet the warnings and also be safe but ensure compatibility
+                config = yaml.load(f, Loader=yaml.FullLoader)
 
                 # add primary locale dict to config object
                 try:

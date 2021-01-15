@@ -1,5 +1,5 @@
 from reggie.configs.configs import Config
-from reggie.ingestion.download import Preprocessor
+from reggie.ingestion.preprocessor.state_router import StateRouter
 import datetime
 import click
 
@@ -8,8 +8,8 @@ def convert_voter_file(state=None, local_file=None,
                        file_date=None, write_file=False):
     config_file = Config.config_file_from_state(state)
     file_date = str(datetime.datetime.strptime(file_date, '%Y-%m-%d').date())
-    with Preprocessor(None,
-                      config_file,
+    with StateRouter(None, raw_s3_file=None,
+                      config_file=config_file,
                       force_file=local_file,
                       force_date=file_date) as preprocessor:
         file_item = preprocessor.execute()
