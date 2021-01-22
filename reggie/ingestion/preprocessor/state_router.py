@@ -23,38 +23,40 @@ from .virginia_preprocessor import PreprocessVirginia
 from .wisconsin_preprocessor import PreprocessWisconsin
 
 
-def state_router(state,
-        raw_s3_file,
-        config_file,
-        force_date=None,
-        force_file=None,
-        testing=False,
-        ignore_checks=False,
-        s3_bucket="",
-        **kwargs):
+def state_router(
+    state,
+    raw_s3_file,
+    config_file,
+    force_date=None,
+    force_file=None,
+    testing=False,
+    ignore_checks=False,
+    s3_bucket="",
+    **kwargs
+):
     routes = {
-                "arizona": PreprocessArizona,
-                "arizona2": PreprocessArizona2,
-                "colorado": PreprocessColorado,
-                "florida": PreprocessFlorida,
-                "georgia": PreprocessGeorgia,
-                "iowa": PreprocessIowa,
-                "kansas": PreprocessKansas,
-                "michigan": PreprocessMichigan,
-                "minnesota": PreprocessMinnesota,
-                "missouri": PreprocessMissouri,
-                "nevada": PreprocessNevada,
-                "new_hampshire": PreprocessNewHampshire,
-                "new_jersey": PreprocessNewJersey,
-                "new_jersey2": PreprocessNewJersey2,
-                "new_york": PreprocessNewYork,
-                "north_carolina": PreprocessNorthCarolina,
-                "ohio": PreprocessOhio,
-                "pennsylvania": PreprocessPennsylvania,
-                "texas": PreprocessTexas,
-                "virginia": PreprocessVirginia,
-                "wisconsin": PreprocessWisconsin,
-            }
+        "arizona": PreprocessArizona,
+        "arizona2": PreprocessArizona2,
+        "colorado": PreprocessColorado,
+        "florida": PreprocessFlorida,
+        "georgia": PreprocessGeorgia,
+        "iowa": PreprocessIowa,
+        "kansas": PreprocessKansas,
+        "michigan": PreprocessMichigan,
+        "minnesota": PreprocessMinnesota,
+        "missouri": PreprocessMissouri,
+        "nevada": PreprocessNevada,
+        "new_hampshire": PreprocessNewHampshire,
+        "new_jersey": PreprocessNewJersey,
+        "new_jersey2": PreprocessNewJersey2,
+        "new_york": PreprocessNewYork,
+        "north_carolina": PreprocessNorthCarolina,
+        "ohio": PreprocessOhio,
+        "pennsylvania": PreprocessPennsylvania,
+        "texas": PreprocessTexas,
+        "virginia": PreprocessVirginia,
+        "wisconsin": PreprocessWisconsin,
+    }
     if state in routes:
         f = routes[state](
             raw_s3_file=raw_s3_file,
@@ -71,9 +73,8 @@ def state_router(state,
     else:
         raise NotImplementedError(
             "preprocess_{} has not yet been "
-            "implemented for the Preprocessor object".format(state))
-
-
+            "implemented for the Preprocessor object".format(state)
+        )
 
 
 # class StateRouter:
