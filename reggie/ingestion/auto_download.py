@@ -69,4 +69,4 @@ def state_download(state, s3_bucket):
             s3_bucket=s3_bucket)
         loader = Preprocessor(config_file=config_file, raw_s3_file=None, force_date=today,
                         s3_bucket=s3_bucket)
-        # loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
+        loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
