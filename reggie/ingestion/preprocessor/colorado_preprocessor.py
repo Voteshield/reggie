@@ -23,7 +23,9 @@ class PreprocessColorado(Preprocessor):
             **kwargs
         )
         self.raw_s3_file = raw_s3_file
+        self.processed_file = None
 
+    def execute(self):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 

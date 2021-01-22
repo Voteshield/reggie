@@ -1,5 +1,5 @@
 from reggie.configs.configs import Config
-from reggie.ingestion.preprocessor.state_router import StateRouter
+from reggie.ingestion.preprocessor.state_router import state_router
 import datetime
 import click
 
