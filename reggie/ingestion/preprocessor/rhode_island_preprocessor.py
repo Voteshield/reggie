@@ -16,7 +16,7 @@ import gc
 import json
 
 
-class PreprocessSTATE(Preprocessor):
+class PreprocessRhodeIsland(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
 
         if force_date is None:

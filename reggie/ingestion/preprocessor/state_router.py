@@ -58,7 +58,7 @@ def state_router(
         "wisconsin": PreprocessWisconsin,
     }
     if state in routes:
-        f = routes[state](
+        preprocessor = routes[state](
             raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=force_date,
@@ -69,7 +69,7 @@ def state_router(
             **kwargs
         )
         # logging.info("preprocessing {}".format(state))
-        return f
+        return preprocessor
     else:
         raise NotImplementedError(
             "preprocess_{} has not yet been "
