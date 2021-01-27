@@ -183,8 +183,8 @@ class Preprocessor:
 
         self.raw_s3_file = raw_s3_file
 
-
 # Begin old loader functions
+
     def __enter__(self):
         return self
 
