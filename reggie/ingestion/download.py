@@ -145,17 +145,13 @@ class Preprocessor:
         self.config = config
         self.chunk_urls = config[
             CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
-        # Probably remove
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = config["file_type"]
         self.source = config["source"]
         self.is_compressed = False
-        # Deprecated?
         self.checksum = None
         self.state = config["state"]
-        # Maybe Deprecated
-        self.obj_will_download = False
         self.meta = None
         self.testing = testing
         self.ignore_checks = ignore_checks
@@ -183,8 +179,6 @@ class Preprocessor:
 
         self.raw_s3_file = raw_s3_file
 
-# Begin old loader functions
-
     def __enter__(self):
         return self
 
@@ -207,7 +201,8 @@ class Preprocessor:
             self.is_compressed = True
             self.main_file.obj = BytesIO(op)
 
-    def unzip_decompress(self, file_name):
+    @staticmethod
+    def unzip_decompress(file_name):
         """
         handles decompression for .zip files
         :param file_name: .zip file
@@ -224,7 +219,8 @@ class Preprocessor:
 
         return file_objs
 
-    def gunzip_decompress(self, file_obj, file_name):
+    @staticmethod
+    def gunzip_decompress(file_obj, file_name):
         """
         handles decompression for .gz files
         :param file_name: .gz file
@@ -239,7 +235,8 @@ class Preprocessor:
         except OSError:
             return None
 
-    def bunzip2_decompress(self, file_name):
+    @staticmethod
+    def bunzip2_decompress(file_name):
         """
         handles decompression for .bz2 files
         :param file_name: .bz2 file
@@ -254,7 +251,8 @@ class Preprocessor:
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
 
-    def infer_compression(self, file_name):
+    @staticmethod
+    def infer_compression(file_name):
         """
         infer file type and map to compression type
         :param file_name: file in question
@@ -303,7 +301,6 @@ class Preprocessor:
                 (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
                 (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
                 ("MACOS" in s3_file_obj["name"]):
-                # why was csv removed?
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -364,7 +361,8 @@ class Preprocessor:
             name = self.state + "_" + self.download_date + ".csv.gz"
         return name
 
-    def output_dataframe(self, file_item):
+    @staticmethod
+    def output_dataframe(file_item):
         return pd.read_csv(file_item.obj)
 
     def local_dump(self, file_item):
@@ -481,7 +479,8 @@ class Preprocessor:
         outfile.seek(0)
         return outfile
 
-    def read_csv_count_error_lines(self, file_obj, **kwargs):
+    @staticmethod
+    def read_csv_count_error_lines(file_obj, **kwargs):
         """
         Run pandas read_csv while redirecting stderr so we can keep a
         count of how many lines are malformed without erroring out.
@@ -517,7 +516,8 @@ class Preprocessor:
 
         return df
 
-    def reconcile_columns(self, df, expected_cols):
+    @staticmethod
+    def reconcile_columns(df, expected_cols):
         for c in expected_cols:
             if c not in df.columns:
                 df[c] = np.nan
