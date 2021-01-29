@@ -136,22 +136,58 @@ class FileItem(object):
 
 
 class Preprocessor:
+    """
+    A class used to contain the functions necessary for the state-specific preprocessors
+
+    Attributes
+    ----------
+    raw_s3_file: str
+        the name of the uploaded raw_s3_file
+    config_file_path : str
+        the file path for the config file for a specific state
+    config : Config object
+        the config object of the config_file_path
+    chunk_urls : str
+        the urls for data chunks
+    file_type : str
+        the expected filetype for a voter file
+    source : str
+        the source of the voter file
+    is_compressed : bool
+        whether or not the raw file is compressed
+    checksum : str
+    state : str
+        the state having a this preprocessor object being created for
+    meta : dict
+        dictionary containing the meta data for a file
+    testing : bool
+        whether or not this is a test object
+    ignore_checks : bool
+        a flag to set if the number of files for a state is expected to be different than defined in the state yaml
+    s3_bucket : str
+        the s3 bucket to write to
+    force_date : date
+        sets the download_date to the given date or now if none
+    force_file : str
+    temp_files : list
+        a list containing the temp files inside a voter file, will eventually be combined
+
+    """
     def __init__(self, raw_s3_file, config_file, force_date=None, force_file=None,
                  testing=False, ignore_checks=False, s3_bucket="", **kwargs):
 
         # Init change begin (adding loader object)
         self.config_file_path = config_file
-        config = Config(file_name=config_file)
-        self.config = config
-        self.chunk_urls = config[
-            CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in config else []
+        self.config = Config(file_name=config_file)
+        self.chunk_urls = self.config[
+            CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in self.config else []
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
-        self.file_type = config["file_type"]
-        self.source = config["source"]
+        self.file_type = self.config["file_type"]
+        self.source = self.config["source"]
         self.is_compressed = False
         self.checksum = None
-        self.state = config["state"]
+        self.state = self.config["state"]
         self.meta = None
         self.testing = testing
         self.ignore_checks = ignore_checks
