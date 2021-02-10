@@ -2,19 +2,15 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-    concat_and_delete,
 )
 from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
 import logging
 import pandas as pd
 import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from io import StringIO
 import numpy as np
 from datetime import datetime
 import gc
-import json
-
 
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -42,7 +38,7 @@ class PreprocessWisconsin(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        config = config_file
+        config = self.config_file
         preferred_files = [x for x in new_files if (".txt" in x["name"])]
         if len(preferred_files) > 0:
             main_file = preferred_files[0]

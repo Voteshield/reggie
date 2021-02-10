@@ -2,17 +2,14 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-    concat_and_delete,
 )
 from dateutil import parser
 from reggie.ingestion.utils import MissingNumColumnsError
 import logging
 import pandas as pd
-import datetime
 from io import StringIO
 import numpy as np
-from datetime import datetime
-import gc
+from datetime import datetime, date
 
 
 class PreprocessKansas(Preprocessor):
@@ -84,7 +81,7 @@ class PreprocessKansas(Preprocessor):
             except:
                 elect_year = -1
                 pass
-            if (elect_year < 1850) or (elect_year > dt.today().year + 1):
+            if (elect_year < 1850) or (elect_year > date.today().year + 1):
                 elect_year = None
             return elect_year
 

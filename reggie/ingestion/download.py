@@ -1,23 +1,17 @@
 import uuid
 from datetime import datetime
 from subprocess import Popen, PIPE
-from datetime import date as dt
 import pandas as pd
 from dateutil import parser
 import json
 from reggie.reggie_constants import *
 from reggie.configs.configs import Config
-from reggie.ingestion.utils import date_from_str, df_to_postgres_array_string, \
-    format_column_name, generate_s3_key, get_metadata_for_key, \
-    get_surrounding_dates, MissingElectionCodesError, normalize_columns, \
-    s3, strcol_to_array, TooManyMalformedLines, MissingColumnsError, MissingFilesError, MissingNumColumnsError
-# from reggie.ingestion.preprocessor.iowa_preprocessor import PreprocessIowa
+from reggie.ingestion.utils import date_from_str, generate_s3_key, normalize_columns, \
+    s3, TooManyMalformedLines, MissingColumnsError, MissingFilesError
 from xlrd.book import XLRDError
 from pandas.io.parsers import ParserError
 import shutil
 import numpy as np
-import subprocess
-import gc
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
 from bz2 import BZ2File
@@ -383,7 +377,7 @@ class Preprocessor:
                 self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        print(file_item, len(file_item.obj.getvalue()), self.generate_key(file_class=META_FILE_PREFIX))
+        print(file_item, self.s3_bucket, len(file_item.obj.getvalue()), self.generate_key(file_class=file_class))
         raise ValueError("stopping in dump")
         s3.Object(self.s3_bucket, self.generate_key(file_class=file_class)).put(
             Body=file_item.obj, ServerSideEncryption='AES256')

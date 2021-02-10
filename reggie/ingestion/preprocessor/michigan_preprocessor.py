@@ -2,11 +2,9 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-    concat_and_delete,
 )
 from dateutil import parser
 from reggie.ingestion.utils import (
-    MissingNumColumnsError,
     get_surrounding_dates,
     get_metadata_for_key,
     MissingElectionCodesError,
@@ -17,7 +15,6 @@ import datetime
 from io import StringIO
 import numpy as np
 from datetime import datetime
-import gc
 
 
 class PreprocessMichigan(Preprocessor):

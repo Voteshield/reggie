@@ -11,7 +11,6 @@ import datetime
 from io import StringIO
 import numpy as np
 from datetime import datetime
-import gc
 import json
 
 

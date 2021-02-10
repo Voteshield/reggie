@@ -1,6 +1,5 @@
 import json
 from reggie.ingestion.download import Preprocessor, date_from_str, FileItem
-import logging
 import pandas as pd
 import datetime
 from io import StringIO

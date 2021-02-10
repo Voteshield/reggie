@@ -2,14 +2,10 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-    concat_and_delete,
 )
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, strcol_to_array
-import logging
-import pandas as pd
+from reggie.ingestion.utils import strcol_to_array
 import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from io import StringIO
 import numpy as np
 from datetime import datetime
 import gc
@@ -36,7 +32,7 @@ class PreprocessNewYork(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        config = config_file
+        config = self.config_file
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer"
         )
