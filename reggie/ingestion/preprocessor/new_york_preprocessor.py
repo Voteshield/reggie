@@ -27,6 +27,7 @@ class PreprocessNewYork(Preprocessor):
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
+        self.config_file = config_file
 
     def execute(self):
         if self.raw_s3_file is not None:

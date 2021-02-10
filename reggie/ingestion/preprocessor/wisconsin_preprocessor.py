@@ -12,6 +12,7 @@ import numpy as np
 from datetime import datetime
 import gc
 
+
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
 
@@ -38,7 +39,6 @@ class PreprocessWisconsin(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        config = self.config_file
         preferred_files = [x for x in new_files if (".txt" in x["name"])]
         if len(preferred_files) > 0:
             main_file = preferred_files[0]
