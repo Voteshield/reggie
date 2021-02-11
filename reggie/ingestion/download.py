@@ -377,8 +377,6 @@ class Preprocessor:
                 self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
-        print(file_item, self.s3_bucket, len(file_item.obj.getvalue()), self.generate_key(file_class=file_class))
-        raise ValueError("stopping in dump")
         s3.Object(self.s3_bucket, self.generate_key(file_class=file_class)).put(
             Body=file_item.obj, ServerSideEncryption='AES256')
         if file_class != RAW_FILE_PREFIX:
