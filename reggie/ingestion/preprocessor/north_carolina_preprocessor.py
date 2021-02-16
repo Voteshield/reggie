@@ -26,6 +26,7 @@ class PreprocessNorthCarolina(Preprocessor):
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
+        self.config = config_file
 
     def execute(self):
         if self.raw_s3_file is not None:
@@ -38,7 +39,6 @@ class PreprocessNorthCarolina(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        self.config = config_file
         for i in new_files:
             if ("ncvhis" in i["name"]) and (".txt" in i["name"]):
                 vote_hist_file = i
