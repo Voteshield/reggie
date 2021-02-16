@@ -96,6 +96,6 @@ class PreprocessSouthDakota(Preprocessor):
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(df_voter.to_csv(encoding="latin-1", index=True)),
             s3_bucket=self.s3_bucket,
         )
