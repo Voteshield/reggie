@@ -33,7 +33,6 @@ class PreprocessNewYork(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        # config = self.config_file
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer"
         )
