@@ -4,6 +4,7 @@ from reggie.ingestion.download import (
     FileItem,
 )
 from reggie.ingestion.utils import format_column_name
+from reggie.configs.configs import Config
 import logging
 import pandas as pd
 import datetime
@@ -25,12 +26,13 @@ class PreprocessPennsylvania(Preprocessor):
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
+        self.config_file = config_file
 
     def execute(self):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        config = config_file
+        config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
         voter_files = [f for f in new_files if "FVE" in f["name"]]
         election_maps = [f for f in new_files if "Election Map" in f["name"]]

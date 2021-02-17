@@ -123,7 +123,7 @@ class PreprocessMinnesota(Preprocessor):
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(
-                voter_reg_df.to_csv(encoding="utf-8", index=False)
+                voter_reg_df.to_csv(encoding="utf-8")
             ),
             s3_bucket=self.s3_bucket,
         )

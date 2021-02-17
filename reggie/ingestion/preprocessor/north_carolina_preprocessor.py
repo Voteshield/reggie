@@ -4,6 +4,7 @@ from reggie.ingestion.download import (
     FileItem,
 )
 from reggie.ingestion.utils import MissingNumColumnsError
+from reggie.configs.configs import Config
 import logging
 import datetime
 from io import StringIO
@@ -26,6 +27,7 @@ class PreprocessNorthCarolina(Preprocessor):
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
+        self.config = Config(file_name=config_file)
 
     def execute(self):
         if self.raw_s3_file is not None:
@@ -38,7 +40,6 @@ class PreprocessNorthCarolina(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        self.config = config_file
         for i in new_files:
             if ("ncvhis" in i["name"]) and (".txt" in i["name"]):
                 vote_hist_file = i
@@ -136,6 +137,6 @@ class PreprocessNorthCarolina(Preprocessor):
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=True)),
             s3_bucket=self.s3_bucket,
         )

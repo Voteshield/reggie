@@ -153,6 +153,6 @@ class PreprocessFlorida(Preprocessor):
         logging.info("FLORIDA: writing out")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voters.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(df_voters.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )

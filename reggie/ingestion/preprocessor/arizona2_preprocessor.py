@@ -87,7 +87,6 @@ class PreprocessArizona2(Preprocessor):
                 "VRAZVoterID",
             ],
         )
-
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
         history_columns = [c for c in main_df.columns if c[0].isdigit()]
 
