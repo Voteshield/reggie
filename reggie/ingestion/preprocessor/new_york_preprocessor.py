@@ -33,7 +33,7 @@ class PreprocessNewYork(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        config = self.config_file
+        # config = self.config_file
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer"
         )
@@ -49,7 +49,7 @@ class PreprocessNewYork(Preprocessor):
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"],
             header=None,
-            names=config["ordered_columns"],
+            names=self.config["ordered_columns"],
             encoding="latin-1",
             error_bad_lines=False,
         )

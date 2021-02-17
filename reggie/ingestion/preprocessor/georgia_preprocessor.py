@@ -27,7 +27,7 @@ class PreprocessGeorgia(Preprocessor):
             **kwargs
         )
         self.raw_s3_file = raw_s3_file
-        self.config = config_file
+        self.config_file = config_file
         self.processed_file = None
 
     def execute(self):
@@ -203,6 +203,6 @@ class PreprocessGeorgia(Preprocessor):
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voters.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(df_voters.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )
