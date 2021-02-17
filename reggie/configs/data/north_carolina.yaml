@@ -373,14 +373,14 @@ county_names:
   YADKIN: 99,
   YANCEY: 0
 race_options:
-  'b  ': black
-  'w  ': white
-  'u  ': undefined
-  'i  ': american_indian_or_alaskan_native
-  'a  ': asian_or_pacific_islander
-  'm  ': multi_racial
-  'o  ': other
+  'b': black
+  'w': white
+  'u': undefined
+  'i': american_indian_or_alaskan_native
+  'a': asian_or_pacific_islander
+  'm': multi_racial
+  'o': other
 ethnicity_options:
-  'un ': undefined
-  'hl ': hispanic
-  'nl ': not_hispanic
+  'un': undefined
+  'hl': hispanic
+  'nl': not_hispanic
