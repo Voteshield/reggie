@@ -1,9 +1,0 @@
-pandas
-click
-numpy
-zipfile2
-PyYAML<4.3,>=3.10
-boto3
-requests<2.21,>=2.20.0
-xlrd
-bs4
