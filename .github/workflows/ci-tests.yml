@@ -25,10 +25,11 @@ jobs:
       # Reference: https://github.com/actions/cache/blob/main/examples.md#python---pip
       - uses: actions/cache@v2
         with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}-
+            ${{ runner.os }}-pip-
 
       - name: Install package (and dependencies)
         run: pip install -e .
