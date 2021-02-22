@@ -3,13 +3,16 @@
 # For more information see:
 # https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: API tests
+name: Unit tests
 
-on: [pull_request, push]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
       - name: Checkout code (and submodules)
@@ -17,10 +20,10 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Set up Python 3.8
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
 
       # Reference: https://github.com/actions/cache/blob/main/examples.md#python---pip
       - uses: actions/cache@v2
@@ -34,4 +37,6 @@ jobs:
       - name: Install package (and dependencies)
         run: pip install -e .
 
-      # TODO: Run tests
+      # Run tests
+      - name: Run tests
+        run: python -m pytest
