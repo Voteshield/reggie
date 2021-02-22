@@ -21,6 +21,7 @@ setuptools.setup(
         "requests<2.21,>=2.20.0",
         "xlrd>=1.2.0",
         "bs4>=0.0.1",
+        "pytest>=6.0.0",
     ],
     url="https://github.com/Voteshield/reggie",
     packages=setuptools.find_packages(),
