@@ -29,10 +29,10 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('setup.py') }}-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-${{ hashFiles('setup.py') }}-
-            ${{ runner.os }}-pip-
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('setup.py') }}-
+            ${{ runner.os }}-${{ matrix.python-version }}-pip-
 
       - name: Install package (and dependencies)
         run: pip install -e .
