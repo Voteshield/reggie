@@ -1,48 +1,71 @@
-# West Virginia has one .txt file
+# West Virginia has the following file, though the history
+# file is not always consistently there.
+#
+# - Voter file: Statewide_VRMMDDYY.txt (| delimited file)
+# - History file: SV PStatewide_VH.txt (| delimited file)
+##############################
 
-file_type: .txt
-delimiter: '|'
+# State basics
+##############################
 state: west_virginia
-source: boe
-file_class: voter_file
-has_headers: TRUE
-fixed_width: FALSE
-separate_hispanic_orign: FALSE
+abbreviation: wv
 
-# -- VoteShield -- #
+# Voter file
+##############################
 
-date_format: '%m/%d/%Y'
+# Voter file basics
+file_type: .txt
+delimiter: "|"
+has_headers: true
+fixed_width: false
+
+# General data type handling
+# 2/16/1942 0:00:00
+date_format: "%m/%d/%Y"
+
+# Voter ID
+voter_id: ID_VOTER
+match_fields:
+  - FIRST NAME
+  - LAST NAME
+  - DATE OF BIRTH
+
+# Locale fields
 primary_locale_identifier: County_Name
 numeric_primary_locale: FALSE
-party_identifier: PartyAffiliation
-birthday_identifier: DATE OF BIRTH
-voter_id: ID_VOTER
+precinct_identifier: Precinct_Number
+
+# Voter status fields.  Only Active or Inactive
 voter_status: Status
 voter_status_active: Active
 voter_status_inactive: Inactive
+
+# Demographic fields
+birthday_identifier: DATE OF BIRTH
+
+# Party fields
+party_identifier: PartyAffiliation
 # lots of whitespace in PartyAffiliation column before cleaning
 # also looks like write-in parties are allowed (lots of mispellings)
 democratic_party: Democrat
 republican_party: Republican
-no_party_affiliation:
-  - No Party Affiliation
-  - Unaffiliated
+libertarian_party: Libertarian
+# Could be No Party Affiliation or Unaffiliated
+no_party_affiliation: No Party Affiliation
 
-format:
-  separate_hist: FALSE
-  separate_counties_voter_file: FALSE
-  separate_counties_hist_file: FALSE
-  hist_election_rows: FALSE
-  columnar_elections: FALSE
-  separate_district_lookup_file: FALSE
-  vote_history_type: null
-
+# Name fields
 name_fields:
   - FIRST NAME
   - Mid
   - LAST NAME
   - Suffix
 
+standard_name_fields:
+  - FIRST NAME
+  - Mid
+  - LAST NAME
+
+# Address fields
 address_fields:
   - HOUSE NO
   - STREET
@@ -59,6 +82,8 @@ address_fields:
   - MAIL STATE
   - MAIL ZIP
 
+# All columns
+# ID_VOTER|County_Name|FIRST NAME|Mid|LAST NAME|Suffix|DATE OF BIRTH|SEX|HOUSE NO|STREET|STREET2|UNIT|CITY|STATE|ZIP|MAIL HOUSE NO|MAIL STREET|MAIL STREET2|MAIL UNIT|MAIL CITY|MAIL STATE|MAIL ZIP|REGISTRATION DATE|PartyAffiliation|Status|Congressional District|Senatorial District|Delegate District|Magisterial District|Precinct_Number|POLL_NAME
 column_names:
   - ID_VOTER
   - County_Name
@@ -93,41 +118,168 @@ column_names:
   - POLL_NAME
 
 columns:
-  ID_VOTER: character
-  County_Name: character
-  FIRST NAME: character
-  Mid: character
-  LAST NAME: character
-  Suffix: character
+  ID_VOTER: text
+  County_Name: text
+  FIRST NAME: text
+  Mid: text
+  LAST NAME: text
+  Suffix: text
   DATE OF BIRTH: date
-  SEX: character
-  HOUSE NO: character
-  STREET: character
-  STREET2: character
-  UNIT: character
-  CITY: character
-  STATE: character
-  ZIP: character
-  MAIL HOUSE NO: character
-  MAIL STREET: character
-  MAIL STREET2: character
-  MAIL UNIT: character
-  MAIL CITY: character
-  MAIL STATE: character
-  MAIL ZIP: character
+  SEX: text
+  HOUSE NO: text
+  STREET: text
+  STREET2: text
+  UNIT: text
+  CITY: text
+  STATE: text
+  ZIP: text
+  MAIL HOUSE NO: text
+  MAIL STREET: text
+  MAIL STREET2: text
+  MAIL UNIT: text
+  MAIL CITY: text
+  MAIL STATE: text
+  MAIL ZIP: text
   REGISTRATION DATE: date
-  PartyAffiliation: character
-  Status: character
-  Congressional District: character
-  Senatorial District: character
-  Delegate District: character
-  Magisterial District: character
-  Precinct_Number: character
-  POLL_NAME: character
+  PartyAffiliation: text
+  Status: text
+  Congressional District: text
+  Senatorial District: text
+  Delegate District: text
+  Magisterial District: text
+  Precinct_Number: text
+  POLL_NAME: text
 
-county_codes:
-  Not_Provided: NP
+ordered_columns:
+  - ID_VOTER
+  - County_Name
+  - FIRST NAME
+  - Mid
+  - LAST NAME
+  - Suffix
+  - DATE OF BIRTH
+  - SEX
+  - HOUSE NO
+  - STREET
+  - STREET2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - MAIL HOUSE NO
+  - MAIL STREET
+  - MAIL STREET2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+  - REGISTRATION DATE
+  - PartyAffiliation
+  - Status
+  - Congressional District
+  - Senatorial District
+  - Delegate District
+  - Magisterial District
+  - Precinct_Number
+  - POLL_NAME
 
+# Modifications table
+##############################
+primary_key:
+  - pre_date
+  - post_date
+  - ID_VOTER
+  - change_type
+
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  ID_VOTER: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+
+# Summary table
+##############################
+summary_columns:
+  - date
+  - state
+  - locale
+  - totals
+  - male
+  - female
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - unaffiliated
+  - democratic
+  - republican
+  - libertarian
+
+summary_types:
+  - timestamp
+  - text
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+
+# Voter history
+##############################
+
+# id_voter|id_election|dt_election|Election_Name|cd_election_type|cd_election_cat|fl_absentee|fl_challenged|fl_early_voting|fl_regular
+hist_columns:
+  - id_voter
+  - id_election
+  - dt_election
+  - Election_Name
+  - cd_election_type
+  - cd_election_cat
+  - fl_absentee
+  - fl_challenged
+  - fl_early_voting
+  - fl_regular
+
+hist_columns_types:
+  id_voter: text
+  id_election: text
+  dt_election: date
+  Election_Name: text
+  cd_election_type: text
+  cd_election_cat: text
+  fl_absentee: text
+  fl_challenged: text
+  fl_early_voting: text
+  fl_regular: text
+
+# Voter history and other fields
+##############################
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  # absentee, early-voting, regular
+  votetype_history: text[]
+  # Challenged (boolean)
+  challenged_history: integer[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+  - challenged_history
+
+# Custom configuration
+# (legacy, unsure if needed yet)
+##############################
 status_codes:
   active: Active
   inactive: Inactive
@@ -142,10 +294,7 @@ gender_codes:
   Unknown:
     - N
     - nan
-    -
-
-race_codes:
-  Not_Provided: NP
+    - ""
 
 party_codes:
   no_party_affiliation:
@@ -160,5 +309,3 @@ party_codes:
     - Independent
     - Independent Party
   other: Other
-
-num_party_codes: 230
