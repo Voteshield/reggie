@@ -1,1 +1,1 @@
-from reggie.reggie import convert_voter_file, convert_cli
+from reggie.main import convert_voter_file, convert_cli

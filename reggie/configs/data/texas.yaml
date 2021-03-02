@@ -13,7 +13,7 @@ voter_status_active: V
 voter_status_inactive: S
 voter_status_cancelled: C
 party_identifier: party_identifier
-expected_number_of_files: 255
+expected_number_of_files: 510
 no_party_affiliation: npa
 democratic_party: D
 republican_party: R
