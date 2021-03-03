@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 Click-based CLI for Reggie processing.
 """

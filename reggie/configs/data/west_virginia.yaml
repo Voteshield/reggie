@@ -18,6 +18,7 @@ file_type: .txt
 delimiter: "|"
 has_headers: true
 fixed_width: false
+source: boe
 
 # General data type handling
 # 2/16/1942 0:00:00
@@ -31,7 +32,7 @@ match_fields:
   - DATE OF BIRTH
 
 # Locale fields
-primary_locale_identifier: County_Name
+primary_locale_identifier: County_ID
 numeric_primary_locale: FALSE
 precinct_identifier: Precinct_Number
 
@@ -86,6 +87,8 @@ address_fields:
 # ID_VOTER|County_Name|FIRST NAME|Mid|LAST NAME|Suffix|DATE OF BIRTH|SEX|HOUSE NO|STREET|STREET2|UNIT|CITY|STATE|ZIP|MAIL HOUSE NO|MAIL STREET|MAIL STREET2|MAIL UNIT|MAIL CITY|MAIL STATE|MAIL ZIP|REGISTRATION DATE|PartyAffiliation|Status|Congressional District|Senatorial District|Delegate District|Magisterial District|Precinct_Number|POLL_NAME
 column_names:
   - ID_VOTER
+  # Generated from name
+  - County_ID
   - County_Name
   - FIRST NAME
   - Mid
@@ -119,6 +122,7 @@ column_names:
 
 columns:
   ID_VOTER: text
+  County_ID: text
   County_Name: text
   FIRST NAME: text
   Mid: text
@@ -281,31 +285,26 @@ ordered_generated_columns:
 # (legacy, unsure if needed yet)
 ##############################
 status_codes:
-  active: Active
-  inactive: Inactive
+  active:
+    - Active
+  inactive:
+    - Inactive
 
 gender_codes:
-  Male:
+  male:
     - M
     - m
-  Female:
+  female:
     - F
     - f
-  Unknown:
+  unknown:
     - N
     - nan
     - ""
+    - " "
 
-party_codes:
-  no_party_affiliation:
-    - No Party Affiliation
-    - Unaffiliated
-  democratic_party: Democrat
-  republican_party: Republican
-  green_party: Green
-  libertarian_party: Libertarian
-  mountain_party: Mountain
-  independent:
-    - Independent
-    - Independent Party
-  other: Other
+# Party codes are very variable, so done in code
+
+locales_counties:
+  barbour: Barbour
+  berkeley: Berkeley
