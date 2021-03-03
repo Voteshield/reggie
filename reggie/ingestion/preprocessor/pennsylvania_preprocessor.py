@@ -10,6 +10,7 @@ import pandas as pd
 import datetime
 from io import StringIO
 from datetime import datetime
+import time
 
 
 class PreprocessPennsylvania(Preprocessor):
@@ -46,6 +47,7 @@ class PreprocessPennsylvania(Preprocessor):
         main_df = None
         elections = 40
         dfcols = config["ordered_columns"][:-3]
+        # could be consolidated into one loop but elections is only 40 long and the order here matters
         for i in range(elections):
             dfcols.extend(["district_{}".format(i + 1)])
         for i in range(elections):
@@ -53,7 +55,26 @@ class PreprocessPennsylvania(Preprocessor):
             dfcols.extend(["election_{}_party".format(i + 1)])
         dfcols.extend(config["ordered_columns"][-3:])
 
-        for c in counties:
+        # helper
+        def return_election_string(x, electon_dict_map):
+            elect_map = electon_dict_map.copy()
+            no_nan_cols = x.dropna()
+            hist_list = []
+            for i, value in enumerate(no_nan_cols):
+                hist_string = ""
+                election_key = no_nan_cols.index[i].split('_')[1]
+                election = "_".join(no_nan_cols.index[i].split('_')[:2])
+                if int(election_key) in elect_map.keys():
+                    hist_string += elect_map[int(election_key)]
+                    hist_string += " "
+                    elect_map.pop(int(election_key))
+                    hist_string += f'{no_nan_cols[election + "_vote_method"]} '
+                    hist_string += f'{no_nan_cols[election + "_party"]}'
+                if hist_string != "":
+                    hist_list.append(hist_string)
+            return hist_list
+        # for c in counties:
+        for idx, c in enumerate(counties):
             logging.info("Processing {}".format(c))
             c = format_column_name(c)
             try:
@@ -91,74 +112,21 @@ class PreprocessPennsylvania(Preprocessor):
                 names=["county", "number", "abbr", "title"],
                 error_bad_lines=False,
             )
-            df = df.replace('"')
-            edf = edf.replace('"')
-            zdf = zdf.replace('"')
-            edf.index = edf["number"]
-
-            for i in range(elections):
-                s = pd.Series(index=df.index)
-                # Blair isn't sending all their election codes
-                try:
-                    s[:] = (
-                        edf.iloc[i]["title"] + " " + edf.iloc[i]["date"] + " "
-                    )
-                except IndexError:
-                    s[:] = "UNSPECIFIED"
-                df["election_{}".format(i)] = (
-                    s
-                    + df["election_{}_vote_method".format(i + 1)].apply(str)
-                    + " "
-                    + df["election_{}_party".format(i + 1)]
-                )
-                df.loc[
-                    df["election_{}_vote_method".format(i + 1)].isna(),
-                    "election_{}".format(i),
-                ] = pd.np.nan
-                df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
-                df = df.drop("election_{}_party".format(i + 1), axis=1)
-
-                df["district_{}".format(i + 1)] = df[
-                    "district_{}".format(i + 1)
-                ].map(
-                    zdf.drop_duplicates("code")
-                    .reset_index()
-                    .set_index("code")["title"]
-                )
-                df["district_{}".format(i + 1)] += ", Type: " + df[
-                    "district_{}".format(i + 1)
-                ].map(
-                    zdf.drop_duplicates("title")
-                    .reset_index()
-                    .set_index("title")["number"]
-                ).map(
-                    tdf.set_index("number")["title"]
-                )
-
-            df["all_history"] = df[
-                ["election_{}".format(i) for i in range(elections)]
-            ].values.tolist()
-            df["all_history"] = df["all_history"].map(
-                lambda L: list(filter(pd.notna, L))
-            )
-            df["districts"] = df[
-                ["district_{}".format(i + 1) for i in range(elections)]
-            ].values.tolist()
-            df["districts"] = df["districts"].map(
-                lambda L: list(filter(pd.notna, L))
-            )
-
+            vote_history = df.iloc[:, 70:110]
+            vote_columns = vote_history.columns.to_list()
+            edf["election_list"] = edf["title"] + " " + edf["date"]
+            election_map = pd.Series(edf.election_list.values, index=edf.number).to_dict()
+            # vectorize if time or possible?
+            df["all_history"] = df[vote_columns].apply(return_election_string, args=(election_map,), axis=1)
             for i in range(elections):
                 df = df.drop("election_{}".format(i), axis=1)
                 df = df.drop("district_{}".format(i + 1), axis=1)
-
             # can check columns for each PA county?
             self.column_check(list(df.columns))
             if main_df is None:
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
-
         main_df = config.coerce_dates(main_df)
         main_df = config.coerce_numeric(
             main_df,
