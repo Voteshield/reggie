@@ -7,6 +7,10 @@ venv
 venv3
 .vscode
 working-data
+# Output from the cli doesn't allow to determine
+/*.csv
+/*.json
+*.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
