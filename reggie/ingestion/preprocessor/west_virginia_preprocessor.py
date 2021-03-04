@@ -62,7 +62,7 @@ class PreprocessWestVirginia(Preprocessor):
         new_files = [n for n in self.unpack_files(self.main_file, compression="unzip")]
 
         # Should only be one voter file
-        voter_file_regex = re.compile("statewide.*vr")
+        voter_file_regex = re.compile(".*statewide.*vr")
         voter_files = [
             n for n in new_files if voter_file_regex.match(n["name"].lower())
         ]
@@ -119,14 +119,24 @@ class PreprocessWestVirginia(Preprocessor):
         status_dict = self.config_lookup_to_dict(self.config["status_codes"])
         df_voters.loc[:, "Status"] = df_voters.loc[:, "Status"].map(status_dict)
 
+        # Clean up districts by removing leading zeroes, but keep as strings
+        for field in [
+            "Congressional District",
+            "Senatorial District",
+            "Delegate District",
+            "Magisterial District",
+            "Precinct_Number",
+        ]:
+            df_voters[field] = df_voters[field].apply(
+                lambda x: x.lstrip("0") if isinstance(x, str) else x
+            )
+
         # Coerce dates
         df_voters = self.config.coerce_dates(df_voters)
 
         # Set index
-        # TODO: Is this helpful higher up?
-        df_voter = df_voters.set_index(config["voter_id"])
-
-        voters_dict_02 = df_voters.to_dict()
+        # TODO: Is this necessary?  Is this helpful higher up?
+        df_voters = df_voters.set_index(config["voter_id"])
 
         # TODO: Voter history
 
@@ -188,8 +198,13 @@ class PreprocessWestVirginia(Preprocessor):
         for c, v in config_values.items():
             for i in v:
                 if i is None:
-                    converted[" "] = c
-                converted[i] = c
+                    converted[""] = c
+                elif i == "nan":
+                    # converted[np.nan] = c
+                    converted[float("nan")] = c
+                    converted["nan"] = c
+                else:
+                    converted[i] = c
 
         return converted
 

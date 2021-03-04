@@ -299,7 +299,9 @@ gender_codes:
     - f
   unknown:
     - N
+    - n
     - nan
+    - NaN
     - ""
     - " "
 
@@ -308,3 +310,56 @@ gender_codes:
 locales_counties:
   barbour: Barbour
   berkeley: Berkeley
+  hancock: Hancock
+  jefferson: Jefferson
+  boone: Boone
+  braxton: Braxton
+  brooke: Brooke
+  cabell: Cabell
+  calhoun: Calhoun
+  clay: Clay
+  doddridge: Doddridge
+  fayette: Fayette
+  gilmer: Gilmer
+  grant: Grant
+  greenbrier: Greenbrier
+  hampshire: Hampshire
+  hardy: Hardy
+  harrison: Harrison
+  jackson: Jackson
+  marion: Marion
+  kanawha: Kanawha
+  lewis: Lewis
+  lincoln: Lincoln
+  logan: Logan
+  mason: Mason
+  monongalia: Monongalia
+  marshall: Marshall
+  mcdowell: McDowell
+  mercer: Mercer
+  mineral: Mineral
+  mingo: Mingo
+  morgan: Morgon
+  monroe: Monroe
+  nicholas: Nicholas
+  raleigh: Raleigh
+  ohio: Ohio
+  pendleton: Pendleton
+  pleasants: Pleasants
+  pocahontas: Pocahontas
+  preston: Preston
+  putnam: Putnam
+  randolph: Randolph
+  ritchie: Ritchie
+  roane: Roana
+  summers: Summers
+  taylor: Taylor
+  tucker: Tucker
+  tyler: Tyler
+  upshur: Upshur
+  wayne: Wayne
+  webster: Webster
+  wetzel: Wetzel
+  wirt: Wirt
+  wood: Wood
+  wyoming: Wyoming
