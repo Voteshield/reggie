@@ -59,12 +59,20 @@ class PreprocessPennsylvania(Preprocessor):
         def list_map(df_sub, columns, zone_dict=None):
             def mapping(li, zone_dict=zone_dict):
                 if zone_dict is None:
-                    li = [x for x in li if x != 'nan']
+                    li = [x for x in li if x != "nan"]
                     return li
                 else:
-                    li = [zone_dict[x] for x in li if x != 'nan' and x in zone_dict]
+                    li = [
+                        zone_dict[x]
+                        for x in li
+                        if x != "nan" and x in zone_dict
+                    ]
                     return li
-            return pd.Series(map(mapping, df_sub[columns].values.astype(str).tolist()))
+
+            return pd.Series(
+                map(mapping, df_sub[columns].values.astype(str).tolist())
+            )
+
         # for c in counties:
         for idx, c in enumerate(counties):
             logging.info("Processing {}".format(c))
@@ -95,13 +103,23 @@ class PreprocessPennsylvania(Preprocessor):
             zdf = self.read_csv_count_error_lines(
                 zones["obj"],
                 sep="\t",
-                names=["county", "number", "code", "title"],
+                names=[
+                    "county_name",
+                    "zone_number",
+                    "zone_code",
+                    "zone_description",
+                ],
                 error_bad_lines=False,
             )
             tdf = self.read_csv_count_error_lines(
                 types["obj"],
                 sep="\t",
-                names=["county", "number", "abbr", "title"],
+                names=[
+                    "county_name",
+                    "zone_number",
+                    "zone_short_name",
+                    "zone_long_name",
+                ],
                 error_bad_lines=False,
             )
             # format the election data to merge
@@ -112,20 +130,38 @@ class PreprocessPennsylvania(Preprocessor):
 
             # create a dict of the election data and the number in the given file, this corresponds to the column
             # location in the file
-            election_map = pd.Series(edf.election_list.values, index=edf.number).to_dict()
+            election_map = pd.Series(
+                edf.election_list.values, index=edf.number
+            ).to_dict()
             # merge the zone files together
-            unholy_union = zdf.merge(tdf, how='left', on='zone_number')
+            unholy_union = zdf.merge(tdf, how="left", on="zone_number")
             # format a column that contains the zone description and the name so that it matches the current district
             # field
-            unholy_union["combined"] = unholy_union["zone_description"] + " Type: " + unholy_union["zone_long_name"]
+            unholy_union["combined"] = (
+                unholy_union["zone_description"]
+                + " Type: "
+                + unholy_union["zone_long_name"]
+            )
 
             # create a dict that contains the zone code as the key and the long name string as the value
-            zone_dict = dict(zip(unholy_union.zone_code.astype(str), unholy_union.combined))
+            zone_dict = dict(
+                zip(unholy_union.zone_code.astype(str), unholy_union.combined)
+            )
             # gathers the pairs of election columns to iterate over both at the same time
             vote_li = list(zip(df.columns[70:110:2], df.columns[71:110:2]))
             district_df = df[district_columns]
             # get the value from the eleciton map key, then combine it with the value in the party and vote type cells
-            vote_hist_df = pd.DataFrame({i: election_map[int(i.split("_")[1])] + " " + df[i] + " " + df[j] for i, j in vote_li})
+            vote_hist_df = pd.DataFrame(
+                {
+                    i: election_map[int(i.split("_")[1])]
+                    + " "
+                    + df[i]
+                    + " "
+                    + df[j]
+                    for i, j in vote_li
+                    if int(i.split("_")[1]) in zone_dict
+                }
+            )
 
             # Unnecessary
             cols_to_drop = vote_hist_df.columns
@@ -133,8 +169,8 @@ class PreprocessPennsylvania(Preprocessor):
             vote_hist_df = list_map(vote_hist_df, cols_to_drop)
             district_ser = list_map(district_df, district_columns, zone_dict)
 
-            df['all_history'] = vote_hist_df
-            df['districts'] = district_ser
+            df["all_history"] = vote_hist_df
+            df["districts"] = district_ser
             df.drop(vote_columns, axis=1, inplace=True)
             df.drop(district_columns, axis=1, inplace=True)
 
@@ -147,6 +183,8 @@ class PreprocessPennsylvania(Preprocessor):
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
+
+        logging.info("coercing")
         main_df = config.coerce_dates(main_df)
         main_df = config.coerce_numeric(
             main_df,
