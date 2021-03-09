@@ -75,7 +75,7 @@ class PreprocessPennsylvania(Preprocessor):
 
         # for c in counties:
         for idx, c in enumerate(counties):
-            logging.info("Processing {}".format(c))
+            logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
             try:
                 voter_file = next(
@@ -206,9 +206,9 @@ class PreprocessPennsylvania(Preprocessor):
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
-
-        self.processed_file = FileItem(
-            name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
-            s3_bucket=self.s3_bucket,
-        )
+        return main_df
+        # self.processed_file = FileItem(
+        #     name="{}.processed".format(self.config["state"]),
+        #     io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+        #     s3_bucket=self.s3_bucket,
+        #)
