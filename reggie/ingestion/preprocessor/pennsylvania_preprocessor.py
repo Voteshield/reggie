@@ -11,6 +11,17 @@ import datetime
 from io import StringIO
 from datetime import datetime
 import time
+from collections import defaultdict
+'''
+Notes:
+Currently there is votetype information, but it is not being utilized in the featuers
+
+
+There is the STRANGEST pandas error in Bedford county when creating the temporary dataframe
+"ValueError: unknown type str1056" investigate more, but this error doesn't show up anywhere else and the solutions
+for similar errors are to wait for pandas releases. It's something in pandas expressions evaluate I think types are
+wrong?
+'''
 
 
 class PreprocessPennsylvania(Preprocessor):
@@ -47,12 +58,18 @@ class PreprocessPennsylvania(Preprocessor):
         main_df = None
         elections = 40
         dfcols = config["ordered_columns"][:-3]
+
+        # add dtypes to the columns here, so far it's the only thing that fixes the strange error
+        history_types = {}
+
         # could be consolidated into one loop but elections is only 40 long and the order here matters
         for i in range(elections):
             dfcols.extend(["district_{}".format(i + 1)])
         for i in range(elections):
             dfcols.extend(["election_{}_vote_method".format(i + 1)])
+            history_types["election_{}_vote_method".format(i + 1)] = str
             dfcols.extend(["election_{}_party".format(i + 1)])
+            history_types["election_{}_party".format(i + 1)] = str
         dfcols.extend(config["ordered_columns"][-3:])
 
         # help, python maps are so much faster
@@ -74,6 +91,9 @@ class PreprocessPennsylvania(Preprocessor):
             )
 
         # for c in counties:
+        sorted_codes = []
+        counts = pd.Series()
+        sorted_code_dict = defaultdict(int)
         for idx, c in enumerate(counties):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
@@ -92,13 +112,13 @@ class PreprocessPennsylvania(Preprocessor):
                 voter_file["obj"],
                 sep="\t",
                 names=dfcols,
-                error_bad_lines=False,
+                error_bad_lines=False, dtype=history_types
             )
             edf = self.read_csv_count_error_lines(
                 election_map["obj"],
                 sep="\t",
                 names=["county", "number", "title", "date"],
-                error_bad_lines=False,
+                error_bad_lines=False, dtype={'county': str, 'number': str, 'title': str, 'date': str}
             )
             zdf = self.read_csv_count_error_lines(
                 zones["obj"],
@@ -124,6 +144,8 @@ class PreprocessPennsylvania(Preprocessor):
             )
             # format the election data to merge
             edf["election_list"] = edf["title"] + " " + edf["date"]
+
+            edf["sorted_codes_col"] = edf["date"] + "_" + edf["title"]
 
             vote_columns = df.columns[70:150].to_list()
             district_columns = df.columns[30:70].to_list()
@@ -153,16 +175,30 @@ class PreprocessPennsylvania(Preprocessor):
             # get the value from the eleciton map key, then combine it with the value in the party and vote type cells
             vote_hist_df = pd.DataFrame(
                 {
-                    i: election_map[int(i.split("_")[1])]
+                    i: election_map[i.split("_")[1]]
                     + " "
                     + df[i]
                     + " "
                     + df[j]
                     for i, j in vote_li
-                    if int(i.split("_")[1]) in zone_dict
+                    if i.split("_")[1] in election_map
                 }
             )
+            # print(vote_hist_df)
+            # Begin the insanity
+            # `````````````````````remove me
+            # edf["sorted_codes_col"] = edf["sorted_codes_col"].str.replace(" ", "_")
+            # print("edf: \n",edf)
+            sorted_codes.extend(edf['sorted_codes_col'].str.replace(" ", "_").values)
+            counts = vote_hist_df.count()
+            for i in counts.index:
+                current_key = election_map[i.split("_")[1]]
+                print(current_key)
+                sorted_code_dict[current_key] += counts[i]
 
+            print(sorted_code_dict)
+            #
+            # `````````````````end stupidity
             # Unnecessary
             cols_to_drop = vote_hist_df.columns
             # converts the dataframe to a series that contains the list of elections participate in indexed on position
@@ -178,6 +214,7 @@ class PreprocessPennsylvania(Preprocessor):
             #     df["districts"] = df[district_columns].apply(return_district_string, args=(zone_dict,), axis=1)
             # return df
             # can check columns for each PA county?
+
             self.column_check(list(df.columns))
             if main_df is None:
                 main_df = df
@@ -206,6 +243,7 @@ class PreprocessPennsylvania(Preprocessor):
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
         }
+        # to verify more easily
         return main_df
         # self.processed_file = FileItem(
         #     name="{}.processed".format(self.config["state"]),
