@@ -93,7 +93,7 @@ class PreprocessPennsylvania(Preprocessor):
         # for c in counties:
         sorted_codes = []
         counts = pd.Series()
-        sorted_code_dict = defaultdict(int)
+        sorted_code_dict = defaultdict(defaultdict)
         for idx, c in enumerate(counties):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
@@ -193,10 +193,17 @@ class PreprocessPennsylvania(Preprocessor):
             counts = vote_hist_df.count()
             for i in counts.index:
                 current_key = election_map[i.split("_")[1]]
-                print(current_key)
-                sorted_code_dict[current_key] += counts[i]
+                if current_key in sorted_code_dict:
+                    sorted_code_dict[current_key]['count'] += counts[i]
+                else:
+                    current_date = edf.loc[edf['number'] == i.split("_")[1]]['date'].values[0]
+                    testing = defaultdict(str)
+                    testing['date'] = current_date
+                    testing['count'] = counts[i]
+                    sorted_code_dict[current_key] = testing
+                    # sorted_code_dict[current_key] = {'date': current_date, 'count': counts[i]}
 
-            print(sorted_code_dict)
+            # print(sorted_code_dict)
             #
             # `````````````````end stupidity
             # Unnecessary
