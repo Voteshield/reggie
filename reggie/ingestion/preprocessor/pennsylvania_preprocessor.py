@@ -64,16 +64,6 @@ class PreprocessPennsylvania(Preprocessor):
         # add dtypes to the columns here, so far it's the only thing that fixes the strange error
         history_types = {}
 
-        # could be consolidated into one loop but elections is only 40 long and the order here matters
-        # for i in range(elections):
-        #     dfcols.extend(["district_{}".format(i + 1)])
-        # for i in range(elections):
-        #     dfcols.extend(["election_{}_vote_method".format(i + 1)])
-        #     history_types["election_{}_vote_method".format(i + 1)] = str
-        #     dfcols.extend(["election_{}_party".format(i + 1)])
-        #     history_types["election_{}_party".format(i + 1)] = str
-        # dfcols.extend(config["ordered_columns"][-3:])
-
         # help, python maps are so much faster
         def list_map(df_sub, columns, zone_dict=None):
             def mapping(li, zone_dict=zone_dict):
@@ -158,21 +148,21 @@ class PreprocessPennsylvania(Preprocessor):
                 edf.election_list.str.upper().values, index=edf.number
             ).to_dict()
             # merge the zone files together
-            unholy_union = zdf.merge(tdf, how="left", on="zone_number")
+            merged_zones = zdf.merge(tdf, how="left", on="zone_number")
             # format a column that contains the zone description and the name so that it matches the current district
             # field
-            unholy_union["combined"] = (
-                unholy_union["zone_description"]
+            merged_zones["combined"] = (
+                merged_zones["zone_description"]
                 + " Type: "
-                + unholy_union["zone_long_name"]
+                + merged_zones["zone_long_name"]
             )
 
             # create a dict that contains the zone code as the key and the long name string as the value
             zone_dict = dict(
-                zip(unholy_union.zone_code.astype(str), unholy_union.combined)
+                zip(merged_zones.zone_code.astype(str), merged_zones.combined)
             )
             # gathers the pairs of election columns to iterate over both at the same time
-            vote_li = list(zip(df.columns[70:110:2], df.columns[71:110:2]))
+            vote_colum_list = list(zip(df.columns[70:110:2], df.columns[71:110:2]))
             district_df = df[district_columns]
             # get the value from the eleciton map key, then combine it with the value in the party and vote type cells
             vote_hist_df = pd.DataFrame(
@@ -182,16 +172,11 @@ class PreprocessPennsylvania(Preprocessor):
                     + df[i]
                     + " "
                     + df[j]
-                    for i, j in vote_li
+                    for i, j in vote_colum_list
                     if i.split("_")[1] in election_map
                 }
             )
-            # print(vote_hist_df)
-            # Begin the insanity
-            # `````````````````````remove me
-            # don't use this
-            # edf["sorted_codes_col"] = edf["sorted_codes_col"].str.replace(" ", "_")
-            # print("edf: \n",edf)
+
             counts = vote_hist_df.count()
             for i in counts.index:
                 current_key = election_map[i.split("_")[1]]
@@ -200,19 +185,12 @@ class PreprocessPennsylvania(Preprocessor):
                     sorted_code_dict[current_key]['count'] += int(counts[i])
                 else:
                     current_date = edf.loc[edf['number'] == i.split("_")[1]]['date'].values[0]
-                    testing = defaultdict(str)
-                    testing['date'] = current_date
-                    testing['count'] = int(counts[i])
-                    sorted_code_dict[current_key] = testing
-                    # sorted_code_dict[current_key] = {'date': current_date, 'count': counts[i]}
-
-            # print(sorted_code_dict)
-            #
-            # `````````````````end stupidity
-            # Unnecessary
-            cols_to_drop = vote_hist_df.columns
+                    new_dict_entry = defaultdict(str)
+                    new_dict_entry['date'] = current_date
+                    new_dict_entry['count'] = int(counts[i])
+                    sorted_code_dict[current_key] = new_dict_entry
             # converts the dataframe to a series that contains the list of elections participate in indexed on position
-            vote_hist_df = list_map(vote_hist_df, cols_to_drop)
+            vote_hist_df = list_map(vote_hist_df, vote_hist_df.columns)
             district_ser = list_map(district_df, district_columns, zone_dict)
 
             df["all_history"] = vote_hist_df
@@ -220,13 +198,8 @@ class PreprocessPennsylvania(Preprocessor):
             df.drop(vote_columns, axis=1, inplace=True)
             df.drop(district_columns, axis=1, inplace=True)
 
-            #     df["all_history"] = df[vote_columns].apply(return_election_string, args=(election_map,), axis=1)
-            #     df["districts"] = df[district_columns].apply(return_district_string, args=(zone_dict,), axis=1)
-            # return df
-            # can check columns for each PA county?
             cols_to_check = [col for col in list(df.columns) if col not in vote_columns and col not in district_columns]
-            # self.column_check(list(df.columns))
-            # print(cols_to_check)
+
             self.column_check(list(df.columns), cols_to_check)
             if main_df is None:
                 main_df = df
@@ -236,8 +209,7 @@ class PreprocessPennsylvania(Preprocessor):
         for index, key in enumerate(sorted_keys):
             sorted_code_dict[key[0]]['index'] = index
             sorted_codes.append(key[0])
-        print(dict(sorted_code_dict))
-        print(sorted_codes)
+
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
         main_df = config.coerce_numeric(
@@ -262,11 +234,10 @@ class PreprocessPennsylvania(Preprocessor):
             "array_encoding": json.dumps(sorted_code_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        print(self.meta)
         # to verify more easily
-        return main_df
-        # self.processed_file = FileItem(
-        #     name="{}.processed".format(self.config["state"]),
-        #     io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
-        #     s3_bucket=self.s3_bucket,
-        #)
+        # return main_df
+        self.processed_file = FileItem(
+            name="{}.processed".format(self.config["state"]),
+            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+            s3_bucket=self.s3_bucket,
+        )
