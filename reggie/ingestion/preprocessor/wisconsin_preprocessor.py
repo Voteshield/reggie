@@ -51,6 +51,7 @@ class PreprocessWisconsin(Preprocessor):
                 main_file["obj"], sep="\t", error_bad_lines=False
             )
         except UnicodeDecodeError:
+            main_file["obj"].seek(0)
             main_df = self.read_csv_count_error_lines(
                 main_file["obj"], sep=",", encoding="latin-1",
                 error_bad_lines=False
