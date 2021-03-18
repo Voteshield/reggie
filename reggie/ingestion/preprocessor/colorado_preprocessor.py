@@ -176,8 +176,15 @@ class PreprocessColorado(Preprocessor):
         # at some point mailing address field names changed
         for num in ["1", "2", "3"]:
             if f"MAIL_ADDR{num}" in df_voter.columns:
-                df_voter[f"MAILING_ADDRESS_{num}"] = \
-                    df_voter[f"MAIL_ADDR{num}"]
+                # if both are present, combine them
+                if f"MAILING_ADDRESS_{num}" in df_voter.columns:
+                    df_voter[f"MAILING_ADDRESS_{num}"] = np.where(
+                        df_voter[f"MAILING_ADDRESS_{num}"].isnull(),
+                        df_voter[f"MAIL_ADDR{num}"],
+                        df_voter[f"MAILING_ADDRESS_{num}"])
+                else:
+                    df_voter[f"MAILING_ADDRESS_{num}"] = \
+                        df_voter[f"MAIL_ADDR{num}"]
                 df_voter.drop(columns=[f"MAIL_ADDR{num}"], inplace=True)
 
         df_voter = self.config.coerce_strings(df_voter)
