@@ -521,14 +521,20 @@ class Preprocessor:
         sys.stderr.flush()
         original_stderr = sys.stderr
 
+        num_skipped = 0
+        df = None
         try:
             sys.stderr = ErrorLog()
             df = pd.read_csv(file_obj, **kwargs)
             num_skipped = sys.stderr.count_skipped_lines()
             sys.stderr.print_log_string()   # still print original warning output
             sys.stderr = original_stderr
+        except UnicodeDecodeError:
+            sys.stderr = original_stderr
+            raise
         except Exception as e:
-            logging.error(e)
+            logging.error("{}: {}".format(type(e), e))
+            sys.stderr = original_stderr
 
         if num_skipped > 0:
             logging.info(
