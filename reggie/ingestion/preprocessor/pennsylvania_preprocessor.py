@@ -159,6 +159,7 @@ class PreprocessPennsylvania(Preprocessor):
 
             # create a dict of the formatted string election data with the index number in the given file, this
             # corresponds to the column index beginning at the start of the vote columns in the dataframe (starting at 1)
+            # Todo: This upper is causing a pretty big diff but I am not sure if I care?
             election_map = pd.Series(
                 edf.election_list.str.upper().values, index=edf.number
             ).to_dict()
@@ -181,8 +182,8 @@ class PreprocessPennsylvania(Preprocessor):
 
             # Gather the pairs of election columns to iterate over both at the same time to collect the information
             # contained in both of the columns per election
-            vote_column_list = list(zip(df.columns[70:110:2], df.columns[71:110:2]))
-            
+            vote_column_list = list(zip(df.columns[70:150:2], df.columns[71:150:2]))
+
             # todo: probably don't need this dataframe either
             district_df = df[district_columns]
 
