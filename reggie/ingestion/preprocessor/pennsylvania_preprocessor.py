@@ -101,6 +101,7 @@ class PreprocessPennsylvania(Preprocessor):
         # for c in counties:
         sorted_codes = []
         sorted_code_dict = defaultdict(defaultdict)
+        dtypes = {row: 'str' for row in config['ordered_columns']}
         for idx, c in enumerate(counties):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
@@ -120,7 +121,7 @@ class PreprocessPennsylvania(Preprocessor):
                 voter_file["obj"],
                 sep="\t",
                 names=dfcols,
-                error_bad_lines=False, dtype=config['dtypes']
+                error_bad_lines=False, dtype=dtypes
             )
             edf = self.read_csv_count_error_lines(
                 election_map["obj"],
