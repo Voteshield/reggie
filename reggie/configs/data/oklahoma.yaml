@@ -13,7 +13,7 @@ separate_hispanic_origin: FALSE
 # -- VoteShield -- #
 
 date_format: '%m/%d/%Y'
-primary_locale_identifier: county_code
+primary_locale_identifier: county
 numeric_primary_locale: TRUE
 party_identifier: PolitalAff
 birthday_identifier: DateOfBirth
@@ -21,12 +21,30 @@ voter_id: VoterID
 voter_status: Status
 voter_status_active: A
 voter_status_inactive: I
-democratic_party: DEM
-republican_party: REP
-no_party_affiliation: IND
+party_aliases:
+  democratic_party: DEM
+  republican_party: REP
+  libertarian_party: LIB
+  # Everyone is registered to a party in OK?
+  no_party_affiliation: IND
+  
 
+#OK has pretty great absentee codes
+#IP = Voted in person at polling place
+#AI = Voted absentee in person
+#AB = Absentee
+#PI = Physically Incapacitated
+#CI = Absentee - Care of Physically Incapacitated
+#EI = Absentee - Emergency Incapacitated
+#MI = Absentee - Military
+#OV = Absentee - Overseas
+#NH = Absentee - Nursing Home Voter
+valid_voting_methods: ['IP', 'AI', 'AB', 'PI', 'CI', 'EI', 'MI', 'OV', 'NH']
+
+# Todo: Check ballotshield interation with this (but here is plural)
+absentee_ballot_codes: ['AB', 'CI', 'EI', 'MI', 'OV', 'NH', 'AI']
 format:
-  separate_hist: TRUE
+  separate_hist: TRUE # sort of
   separate_counties_voter_file: TRUE
   separate_counties_hist_file: TRUE
   hist_election_rows: FALSE
@@ -34,12 +52,20 @@ format:
   separate_district_lookup_file: FALSE
   vote_history_type: 'Sporadic'
 
+match_fields:
+  -FirstName
+  -LastName
+  -DateOfBirth
+
 name_fields:
   - LastName
   - FirstName
   - MiddleName
   - Suffix
-
+standard_name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
 address_fields:
   - StreetNum
   - StreetDir
@@ -53,7 +79,148 @@ address_fields:
   - MailCity
   - MailState
   - MailZip
-
+primary_key:
+  - pre_date
+  - post_date
+  - VoterID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  VoterID: int
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - dem
+  - rep
+  - ind
+  - lib
+  - locale
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
+  - text
+columns:
+  Precinct: int
+  LastName: text
+  FirstName: text
+  MiddleName: text
+  Suffix: text
+  VoterID: int
+  PolitalAff: text
+  Status: text
+  StreetNum: text
+  StreetDir: text
+  StreetName: text
+  StreetType: text
+  BldgNum: text
+  City: text
+  Zip: text
+  DateOfBirth: date
+  OriginalRegistration: date
+  MailStreet1: text
+  MailStreet2: text
+  MailCity: text
+  MailState: text
+  MailZip: text
+  Muni: text
+  # float in dataframe but numeric?
+  MuniSub: int
+  School: text
+  # same as above
+  SchoolSub: int
+  TechCenter: text
+  TechCenterSub: text
+  CountyComm: text
+  VoterHist1: date
+  HistMethod1: text
+  VoterHist2: date
+  HistMethod2: text
+  VoterHist3: date
+  HistMethod3: text
+  VoterHist4: date
+  HistMethod4: text
+  VoterHist5: date
+  HistMethod5: text
+  VoterHist6: date
+  HistMethod6: text
+  VoterHist7: date
+  HistMethod7: text
+  VoterHist8: date
+  HistMethod8: text
+  VoterHist9: date
+  HistMethod9: text
+  VoterHist10: date
+  HistMethod10: text
+# Todo: Some of these are ints
+dtypes:
+  Precinct: int64
+  LastName: string
+  FirstName: string
+  MiddleName: string
+  Suffix: string
+  VoterID: int64
+  PolitalAff: string
+  Status: string
+  StreetNum: string
+  StreetDir: string
+  StreetName: string
+  StreetType: string
+  BldgNum: string
+  City: string
+  Zip: string
+  stringOfBirth: string
+  OriginalRegistration: string
+  MailStreet1: string
+  MailStreet2: string
+  MailCity: string
+  MailState: string
+  MailZip: string
+  Muni: string
+  MuniSub: float64
+  School: string
+  SchoolSub: float64
+  TechCenter: string
+  TechCenterSub: string
+  CountyComm: string
+  VoterHist1: string
+  HistMethod1: string
+  VoterHist2: string
+  HistMethod2: string
+  VoterHist3: string
+  HistMethod3: string
+  VoterHist4: string
+  HistMethod4: string
+  VoterHist5: string
+  HistMethod5: string
+  VoterHist6: string
+  HistMethod6: string
+  VoterHist7: string
+  HistMethod7: string
+  VoterHist8: string
+  HistMethod8: string
+  VoterHist9: string
+  HistMethod9: string
+  VoterHist10: string
+  HistMethod10: string
 column_names:
   - Precinct
   - LastName
@@ -104,57 +271,12 @@ column_names:
   - HistMethod9
   - VoterHist10
   - HistMethod10
-
-columns:
-  Precinct: character
-  LastName: character
-  FirstName: character
-  MiddleName: character
-  Suffix: character
-  VoterID: character
-  PolitalAff: character
-  Status: character
-  StreetNum: character
-  StreetDir: character
-  StreetName: character
-  StreetType: character
-  BldgNum: character
-  City: character
-  Zip: character
-  DateOfBirth: date
-  OriginalRegistration: date
-  MailStreet1: character
-  MailStreet2: character
-  MailCity: character
-  MailState: character
-  MailZip: character
-  Muni: character
-  MuniSub: character
-  School: character
-  SchoolSub: character
-  TechCenter: character
-  TechCenterSub: character
-  CountyComm: character
-  VoterHist1: date
-  HistMethod1: character
-  VoterHist2: date
-  HistMethod2: character
-  VoterHist3: date
-  HistMethod3: character
-  VoterHist4: date
-  HistMethod4: character
-  VoterHist5: date
-  HistMethod5: character
-  VoterHist6: date
-  HistMethod6: character
-  VoterHist7: date
-  HistMethod7: character
-  VoterHist8: date
-  HistMethod8: character
-  VoterHist9: date
-  HistMethod9: character
-  VoterHist10: date
-  HistMethod10: character
+  # additional columns
+  - CongressionalDistrict
+  - StateSenateDistrict
+  - StateHouseDistrict
+  - CountyCommissioner
+  - PollSite
 
 ballot_type_classes:
   in_person: IP
