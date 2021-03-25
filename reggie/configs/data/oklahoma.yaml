@@ -87,7 +87,7 @@ primary_key:
 base_columns:
   pre_date: timestamp
   post_date: timestamp
-  VoterID: int
+  VoterID: text
   change_type: text
   pre_value: text
   post_value: text
@@ -124,13 +124,14 @@ columns:
   FirstName: text
   MiddleName: text
   Suffix: text
-  VoterID: int
+  VoterID: text
   PolitalAff: text
   Status: text
   StreetNum: text
   StreetDir: text
   StreetName: text
   StreetType: text
+  StreetPostDir: text
   BldgNum: text
   City: text
   Zip: text
@@ -171,19 +172,21 @@ columns:
   VoterHist10: date
   HistMethod10: text
 # Todo: Some of these are ints
+# Todo: voterid needs to be a string because otherwise the leading 0's are truncated
 dtypes:
   Precinct: int64
   LastName: string
   FirstName: string
   MiddleName: string
   Suffix: string
-  VoterID: int64
+  VoterID: string
   PolitalAff: string
   Status: string
   StreetNum: string
   StreetDir: string
   StreetName: string
   StreetType: string
+  StreetPostDir: string
   BldgNum: string
   City: string
   Zip: string
