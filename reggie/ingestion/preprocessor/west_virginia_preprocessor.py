@@ -7,6 +7,7 @@ import logging
 import datetime
 from datetime import datetime
 from dateutil import parser
+from math import isnan
 import gc
 import json
 from io import StringIO, BytesIO, SEEK_END, SEEK_SET
@@ -49,7 +50,8 @@ class PreprocessWestVirginia(Preprocessor):
 
     def execute(self):
         """
-        Main preprocessor function.
+        Main preprocessor function.  Looks through files and converts voter files
+        and history files.  Should set self.main_file with combined dataframe.
         """
         # Shortcut to config
         config = self.config.data
@@ -89,10 +91,10 @@ class PreprocessWestVirginia(Preprocessor):
         df_voters.insert(
             1,
             "County_ID",
-            df_voters.apply(lambda row: slugify(row.County_Name), axis=1),
+            df_voters.County_Name.map(slugify),
         )
 
-        # Make sure counties are valid as defined in confid
+        # Make sure counties are valid as defined in config
         # counties = df_voters.County_ID.unique()
         self.check_column_has_valid_values(
             df_voters,
@@ -110,7 +112,6 @@ class PreprocessWestVirginia(Preprocessor):
         )
 
         # Party clean
-        parties = df_voters.PartyAffiliation.unique()
         df_voters.PartyAffiliation = df_voters.PartyAffiliation.apply(
             self.clean_party_value
         )
@@ -138,7 +139,87 @@ class PreprocessWestVirginia(Preprocessor):
         # TODO: Is this necessary?  Is this helpful higher up?
         df_voters = df_voters.set_index(config["voter_id"])
 
-        # TODO: Voter history
+        # Get voter history file
+        voter_history_regex = re.compile(".*statewide.*vh")
+        voter_histories = [
+            n for n in new_files if voter_history_regex.match(n["name"].lower())
+        ]
+        if len(voter_histories) > 1:
+            raise UnexpectedNumberOfFilesError(
+                f"{config['state']} has too many voter history files."
+            )
+        if len(voter_files) < 1:
+            # TODO: What to do when no history.
+            logging.info(f"{config['state']} unable to find a history file.")
+            pass
+        else:
+            voter_history = voter_histories[0]
+
+            # Read voter file into pandas dataframe
+            df_history = pd.read_csv(
+                voter_history["obj"],
+                sep=config["delimiter"],
+                encoding="latin-1",
+                dtype=str,
+                header=0 if config["has_headers"] else None,
+            )
+
+            # all_history: text[]
+            # sparse_history: int[]
+            # # absentee, early-voting, regular
+            # votetype_history: text[]
+            # # Challenged (boolean)
+            # challenged_history: integer[]
+
+            # Create new column that aggregrates the type of vote
+            # TODO: This is very slow
+            df_history["votetype"] = df_history.apply(
+                lambda row: self.derive_votetype(row), axis=1
+            )
+
+            # Clean the challenged flag, which looks to only be checked
+            # if the voter voted absentee
+            df_history["fl_challenged"] = df_history["fl_challenged"].apply(
+                self.clean_challenged_value
+            )
+
+            # Create dataframe of valid elections
+            election_columns = [
+                "id_election",
+                "dt_election",
+                "Election_Name",
+                "cd_election_type",
+                "cd_election_cat",
+            ]
+            df_elections_all = df_history[election_columns]
+            df_elections = (
+                df_elections_all.groupby(election_columns).sum().reset_index()
+            )
+
+            # Clean up
+            df_elections["Election_Name"] = df_elections["Election_Name"].apply(
+                lambda x: x.strip()
+            )
+            df_elections = self.config.coerce_dates(
+                df_elections, col_list="hist_columns_types"
+            )
+
+            # Sort by ascending date
+            df_elections = df_elections.sort_values(by=["dt_election"])
+
+            df_elections_dict = df_elections.to_dict()
+
+            # Group history by voter id, then attach relevante group data to
+            # voter dataframe
+            df_history_grouped = df_history.groupby("id_voter")
+            df_voters["all_history"] = df_history_grouped["id_election"].apply(list)
+            df_voters["votetype_history"] = df_history_grouped["votetype"].apply(list)
+            df_voters["challenged_history"] = df_history_grouped["fl_challenged"].apply(
+                list
+            )
+
+            df_history_dict = df_history.to_dict()
+            df_voters_dict = df_voters.to_dict()
 
         # Create meta data
         self.meta = {
@@ -173,6 +254,37 @@ class PreprocessWestVirginia(Preprocessor):
         for k, v in lookup.items():
             if v.match(value):
                 return k
+
+        return "unknown"
+
+    def clean_challenged_value(self, value):
+        true_regex = re.compile("^y$", re.IGNORECASE)
+        false_regex = re.compile("^n$", re.IGNORECASE)
+
+        if not isinstance(value, str):
+            return None
+        elif true_regex.match(value):
+            return True
+        elif false_regex.match(value):
+            return False
+
+        return None
+
+    def derive_votetype(self, row):
+        """
+        Given row in voter history, make a consistent vote type.
+        """
+        true_regex = re.compile("^y$", re.IGNORECASE)
+        # false_regex = re.compile("^n$", re.IGNORECASE)
+
+        if isinstance(row["fl_absentee"], str) and true_regex.match(row["fl_absentee"]):
+            return "absentee"
+        elif isinstance(row["fl_early_voting"], str) and true_regex.match(
+            row["fl_early_voting"]
+        ):
+            return "early"
+        elif isinstance(row["fl_regular"], str) and true_regex.match(row["fl_regular"]):
+            return "regular"
 
         return "unknown"
 
