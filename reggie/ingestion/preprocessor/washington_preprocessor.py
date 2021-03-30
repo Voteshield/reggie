@@ -1,20 +1,26 @@
-from reggie.ingestion.download import (
-    Preprocessor,
-    date_from_str,
-    FileItem,
-    concat_and_delete,
-)
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
-import logging
-import pandas as pd
 import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
 import json
+import logging
 
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from detect_delimiter import detect
+
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    concat_and_delete,
+    date_from_str,
+)
+from reggie.ingestion.utils import (
+    MissingNumColumnsError,
+    format_column_name,
+)
 
 class PreprocessWashington(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -45,18 +51,36 @@ class PreprocessWashington(Preprocessor):
         voter_file = [n for n in new_files if "vrdb" in n["name"].lower()][0]
         hist_files = [n for n in new_files if "history" in n["name"].lower()]
 
+        # There are two possible separators. Detect it first.
+        line = voter_file["obj"].readline().decode()
+        delimiter = detect(line)
+        voter_file["obj"].seek(0)
         df_voter = pd.read_csv(
-            voter_file["obj"], sep="\t", encoding="latin-1", dtype=str
+            voter_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
         )
-        df_hist = pd.concat(
-            [
-                pd.read_csv(n["obj"], sep="\t", encoding="latin-1", dtype=str)
-                for n in hist_files
-            ],
-            ignore_index=True,
-        )
+        df_hist = pd.DataFrame()
+        for hist_file in hist_files:
+            line = hist_file["obj"].readline().decode()
+            delimiter = detect(line)
+            hist_file["obj"].seek(0)
+            temp = pd.read_csv(
+                hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
+            )
+            df_hist = df_hist.append(temp, ignore_index=True)
 
         # --- handling the voter history file --- #
+
+        # TODO: REMOVE THIS, Randomly selecting subset of rows for testing
+        df_hist = df_hist.sample(100000)
+
+        # Need to fix the differently named VoterHistoryID
+        # and VotingHistoryID columns
+        if {"VotingHistoryID", "VoterHistoryID"}.issubset(df_hist.columns):
+            df_hist["VotingHistoryID"] = (
+                df_hist.pop("VoterHistoryID").fillna(
+                    df_hist.pop("VotingHistoryID")
+                )
+            )
 
         # can't find voter history documentation in any yaml, hardcoding column name
         election_dates = pd.to_datetime(
@@ -128,7 +152,8 @@ class PreprocessWashington(Preprocessor):
             "array_decoding": json.dumps(sorted_elections),
         }
 
-        self.is_compressed = False
+        # TODO: REMOVE THIS
+        df_voter.to_csv("WAtest.csv", encoding="utf-8", index=True)
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),

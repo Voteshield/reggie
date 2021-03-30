@@ -20,6 +20,8 @@ voter_status_inactive: I
 democratic_party: null
 republican_party: null
 no_party_affiliation: null
+abbreviation: wa
+precinct_identifer: CountyCode
 
 format:
   separate_hist: true
@@ -36,6 +38,11 @@ name_fields:
   - MName
   - LName
   - NameSuffix
+
+standard_name_fields:
+  - FName
+  - MName
+  - LName
 
 address_fields:
   - RegStNum
@@ -56,6 +63,11 @@ address_fields:
   - MailCity
   - MailZip
   - MailCountry
+
+match_fields:
+  - FName
+  - LName
+  - Birthdate
 
 column_names:
   - StateVoterID
@@ -100,55 +112,101 @@ column_names:
   - StatusCode
 
 columns:
-  StateVoterID: character
+  StateVoterID: text
 # Obsolete as of 2012
-#  CountyVoterID: character
-  Title: character
-  FName: character
-  MName: character
-  LName: character
-  NameSuffix: character
+#  CountyVoterID: text
+  Title: text
+  FName: text
+  MName: text
+  LName: text
+  NameSuffix: text
   Birthdate: date
-  Gender: character
-  RegStNum: character
-  RegStFrac: character
-  RegStName: character
-  RegStType: character
-  RegUnitType: character
-  RegStPreDirection: character
-  RegStPostDirection: character
-  RegUnitNum: character
-  RegCity: character
-  RegState: character
-  RegZipCode: character
-  CountyCode: character
-  PrecinctCode: character
-  PrecinctPart: character
-  LegislativeDistrict: character
-  CongressionalDistrict: character
-  Mail1: character
-  Mail2: character
-  Mail3: character
-  Mail4: character
-  MailCity: character
-  MailZip: character
-  MailCountry: character
+  Gender: text
+  RegStNum: text
+  RegStFrac: text
+  RegStName: text
+  RegStType: text
+  RegUnitType: text
+  RegStPreDirection: text
+  RegStPostDirection: text
+  RegUnitNum: text
+  RegCity: text
+  RegState: text
+  RegZipCode: text
+  CountyCode: text
+  PrecinctCode: text
+  PrecinctPart: text
+  LegislativeDistrict: text
+  CongressionalDistrict: text
+  Mail1: text
+  Mail2: text
+  Mail3: text
+  Mail4: text
+  MailCity: text
+  MailZip: text
+  MailCountry: text
   Registrationdate: date
 # AbsenteeType obsolete as of 2011
-# AbsenteeType: character
+# AbsenteeType: text
   LastVoted: date
-  StatusCode: character
+  StatusCode: text
+
+ordered_columns:
+  - StateVoterID
+  - Title
+  - FName
+  - MName
+  - LName
+  - NameSuffix
+  - Birthdate
+  - Gender
+  - RegStNum
+  - RegStFrac
+  - RegStName
+  - RegStType
+  - RegUnitType
+  - RegStPreDirection
+  - RegStPostDirection
+  - RegUnitNum
+  - RegCity
+  - RegState
+  - RegZipCode
+  - CountyCode
+  - PrecinctCode
+  - PrecinctPart
+  - LegislativeDistrict
+  - CongressionalDistrict
+  - Mail1
+  - Mail2
+  - Mail3
+  - Mail4
+  - MailCity
+  - MailZip
+  - MailCountry
+  - Registrationdate
+  - LastVoted
+  - StatusCode
 
 column_classes (districts and precincts files):
-  CountyCode: character
-  County: character
-  DistrictType: character
-  DistrictID: character
-  DistrictCode: character
-  DistrictName: character
-  PrecinctCode: character
-  PrecinctName: character
-  PrecinctPart: character
+  CountyCode: text
+  County: text
+  DistrictType: text
+  DistrictID: text
+  DistrictCode: text
+  DistrictName: text
+  PrecinctCode: text
+  PrecinctName: text
+  PrecinctPart: text
+
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  county_history: text[]
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - county_history
 
 column_names_districts:
   - CountyCode
@@ -225,3 +283,39 @@ party_codes:
 
 num_party_codes:
   Not_Provided: NP
+
+# Database stuff  
+primary_key:
+  - pre_date
+  - post_date
+  - StateVoterID
+  - change_type
+
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  StateVoterID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - locale
+
+summary_types:
+  - int
+  - timestamp
+  - text
+  - int
+  - int
+  - int
+  - int
+  - text
