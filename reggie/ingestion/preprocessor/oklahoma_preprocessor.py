@@ -5,7 +5,7 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
+from reggie.ingestion.utils import MissingNumColumnsError, format_column_name, MissingFilesError
 import logging
 import pandas as pd
 import datetime
@@ -14,6 +14,12 @@ import numpy as np
 from datetime import datetime
 import gc
 import json
+
+"""
+Todo:
+Add Important Columns and check order (currently precicnts are added before County)
+
+"""
 
 
 class PreprocessOklahoma(Preprocessor):
@@ -36,78 +42,68 @@ class PreprocessOklahoma(Preprocessor):
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(self.main_file)
-
-        voter_files = [n for n in new_files if "vr.csv" in n["name"].lower()]
+        voter_files = [n for n in new_files if "vr.csv" or "precincts.csv" in n["name"].lower()]
+        self.file_check(len(voter_files))
         hist_files = [n for n in new_files if "vh.csv" in n["name"].lower()]
-        precinct_file = [
-            n for n in new_files if "precinct" in n["name"].lower()
-        ][0]
 
-        # --- handling the vote history file --- #
+        vdf = pd.DataFrame()
+        hdf, precincts = pd.DataFrame()
+        dtypes = self.config['dtypes']
+        cty_map = dict([(value, key) for key, value in self.config['county_codes'].items()])
 
-        df_hist = pd.concat(
-            [pd.read_csv(n["obj"], dtype=str) for n in hist_files],
+        def county_map(pct):
+            def mapping(prec):
+                county = cty_map[prec[:2]]
+                return county
+
+            return pd.Series(
+                map(mapping, pct.tolist())
+            )
+
+        for file in voter_files:
+            if "vr.csv" in file.lower():
+                temp_vdf = pd.read_csv(file["obj"], dtype=dtypes)
+                vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
+            elif "precincts.csv" in file.lower():
+                precincts = pd.read_csv(file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
+                precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
+        if precincts.empty:
+            raise ValueError("Missing Precicnts file")
+
+        vdf = vdf.merge(precincts, how='left', on='Precinct')
+
+        hdf = pd.concat(
+            [pd.read_csv(n["obj"], dtype={'VoterID': 'string'}) for n in hist_files],
             ignore_index=True,
         )
 
-        election_dates = pd.to_datetime(
-            df_hist.loc[:, "ElectionDate"], errors="coerce"
-        ).dt
-        elections, counts = np.unique(election_dates.date, return_counts=True)
-        sorted_elections_dict = {
-            str(k): {
-                "index": i,
-                "count": int(counts[i]),
-                "date": k.strftime("%m/%d/%Y"),
-            }
-            for i, k in enumerate(elections)
+        valid_elections, counts = np.unique(hdf["ElectionDate"], return_counts=True)
+
+        count_order = counts.argsort()[::-1]
+        valid_elections = valid_elections[count_order]
+        counts = counts[count_order]
+
+        sorted_codes = valid_elections.tolist()
+        sorted_codes_dict = {
+            k: {"index": i, "count": int(counts[i]), "date": date_from_str(k)}
+            for i, k in enumerate(sorted_codes)
         }
-        sorted_elections = list(sorted_elections_dict.keys())
-
-        df_hist.loc[:, "all_history"] = election_dates.date.apply(str)
-        df_hist.loc[:, "sparse_history"] = df_hist.loc[:, "all_history"].map(
-            lambda x: int(sorted_elections_dict[x]["index"])
+        hdf["array_position"] = hdf["ElectionDate"].map(
+            lambda x: int(sorted_codes_dict[x]["index"])
         )
-
-        voter_groups = df_hist.groupby(self.config["voter_id"])
-        all_history = voter_groups["all_history"].apply(list)
-        sparse_history = voter_groups["sparse_history"].apply(list)
-        votetype_history = (
-            voter_groups["VotingMethod"].apply(list).rename("votetype_history")
-        )
-        df_hist = pd.concat(
-            [all_history, sparse_history, votetype_history], axis=1
-        )
-
-        # --- handling the voter file --- #
-
-        # no primary locale column, county code is in file name only
-        dfs = []
-        for n in voter_files:
-            df = pd.read_csv(n["obj"], dtype=str)
-            df.loc[:, "county_code"] = str(n["name"][-9:-7])
-            dfs.append(df)
-
-        df_voter = pd.concat(dfs, ignore_index=True)
-
-        df_voter = self.config.coerce_dates(df_voter)
-        df_voter = self.config.coerce_strings(
-            df_voter, exclude=[self.config["voter_id"]]
-        )
-        df_voter = self.config.coerce_numeric(df_voter)
-        df_voter = df_voter.loc[:, ~df_voter.columns.str.contains("Hist\w+\d")]
-        df_voter = df_voter.set_index(self.config["voter_id"])
-
-        df_voter = df_voter.join(df_hist)
+        voter_groups = hdf.groupby('VoterID')
+        vdf['all_history'] = voter_groups["ElectionDate"].apply(list)
+        vdf['sparse_history'] = voter_groups["array_position"].apply(list)
+        vdf['vote_type'] = voter_groups["VotingMethod"].apply(list)
 
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_elections_dict),
-            "array_decoding": json.dumps(sorted_elections),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=True)),
+            io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=True)),
             s3_bucket=self.s3_bucket,
         )

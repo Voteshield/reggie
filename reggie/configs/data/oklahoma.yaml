@@ -9,12 +9,12 @@ file_class: voter_file
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
-
 # -- VoteShield -- #
-
+expected_number_of_files: 77
 date_format: '%m/%d/%Y'
 primary_locale_identifier: county
-numeric_primary_locale: TRUE
+# keep the county as string, have to derive it anyway
+numeric_primary_locale: False
 party_identifier: PolitalAff
 birthday_identifier: DateOfBirth
 voter_id: VoterID
@@ -44,7 +44,7 @@ valid_voting_methods: ['IP', 'AI', 'AB', 'PI', 'CI', 'EI', 'MI', 'OV', 'NH']
 # Todo: Check ballotshield interation with this (but here is plural)
 absentee_ballot_codes: ['AB', 'CI', 'EI', 'MI', 'OV', 'NH', 'AI']
 format:
-  separate_hist: TRUE # sort of
+  separate_hist: TRUE # the hist file contains way more history than the columns
   separate_counties_voter_file: TRUE
   separate_counties_hist_file: TRUE
   hist_election_rows: FALSE
@@ -92,6 +92,21 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
+# todo: check in with about all these generated columns
+generated_columns:
+  all_history: varchar[]
+  votetype_history: varchar[]
+  county_history: int[]
+  jurisdiction_history: int[]
+  schooldistrict_history: int[]
+  sparse_history: int[]
+ordered_generated_columns:
+  - all_history
+  - votetype_history
+  - county_history
+  - jurisdiction_history
+  - schooldistrict_history
+  - sparse_history
 summary_columns:
   - totals
   - date
@@ -119,7 +134,7 @@ summary_types:
   - int
   - text
 columns:
-  Precinct: int
+  Precinct: text
   LastName: text
   FirstName: text
   MiddleName: text
@@ -143,7 +158,7 @@ columns:
   MailState: text
   MailZip: text
   Muni: text
-  # float in dataframe but numeric?
+  #todo: float in dataframe but numeric, check how postgres deals with...everything?
   MuniSub: int
   School: text
   # same as above
@@ -171,10 +186,67 @@ columns:
   HistMethod9: text
   VoterHist10: date
   HistMethod10: text
+  County: text
+hist_columns:
+  - VoterID
+  - ElectionDate
+  - VotingMethod
+ordered_columns:
+  - Precinct
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - VoterID
+  - PolitalAff
+  - Status
+  - StreetNum
+  - StreetDir
+  - StreetName
+  - StreetType
+  - StreetPostDir
+  - BldgNum
+  - City
+  - Zip
+  - DateOfBirth
+  - OriginalRegistration
+  - MailStreet1
+  - MailStreet2
+  - MailCity
+  - MailState
+  - MailZip
+  - Muni
+  - MuniSub
+  - School
+  - SchoolSub
+  - TechCenter
+  - TechCenterSub
+  - CountyComm
+  - VoterHist1
+  - HistMethod1
+  - VoterHist2
+  - HistMethod2
+  - VoterHist3
+  - HistMethod3
+  - VoterHist4
+  - HistMethod4
+  - VoterHist5
+  - HistMethod5
+  - VoterHist6
+  - HistMethod6
+  - VoterHist7
+  - HistMethod7
+  - VoterHist8
+  - HistMethod8
+  - VoterHist9
+  - HistMethod9
+  - VoterHist10
+  - HistMethod10
+  - County
 # Todo: Some of these are ints
-# Todo: voterid needs to be a string because otherwise the leading 0's are truncated
+# Todo: voterid, precicnt needs to be a string because python really hates leading 0's
 dtypes:
-  Precinct: int64
+  Precinct: string
   LastName: string
   FirstName: string
   MiddleName: string
@@ -292,84 +364,85 @@ ballot_type_classes:
   absentee_overseas: OV
   absentee_nursing_home: NH
 
+#Todo: Check this doesn't mess anyone else up
 county_codes:
-  Adair: 01
-  Alfalfa: 02
-  Atoka: 03
-  Beaver: 04
-  Beckham: 05
-  Blaine: 06
-  Bryan: 07
-  Caddo: 08
-  Canadian: 09
-  Carter: 10
-  Cherokee: 11
-  Choctaw: 12
-  Cimarron: 13
-  Cleveland: 14
-  Coal: 15
-  Comanche: 16
-  Cotton: 17
-  Craig: 18
-  Creek: 19
-  Custer: 20
-  Delaware: 21
-  Dewey: 22
-  Ellis: 23
-  Garfield: 24
-  Garvin: 25
-  Grady: 26
-  Grant: 27
-  Greer: 28
-  Harmon: 29
-  Harper: 30
-  Haskell: 31
-  Hughes: 32
-  Jackson: 33
-  Jefferson: 34
-  Johnston: 35
-  Kay: 36
-  Kingfisher: 37
-  Kiowa: 38
-  Latimer: 39
-  Le Flore: 40
-  Lincoln: 41
-  Logan: 42
-  Love: 43
-  McClain: 44
-  McCurtain: 45
-  McIntosh: 46
-  Major: 47
-  Marshall: 48
-  Mayes: 49
-  Murray: 50
-  Muskogee: 51
-  Noble: 52
-  Nowata: 53
-  Okfuskee: 54
-  Oklahoma: 55
-  Okmulgee: 56
-  Osage: 57
-  Ottawa: 58
-  Pawnee: 59
-  Payne: 60
-  Pittsburg: 61
-  Pontotoc: 62
-  Pottawatomie: 63
-  Pushmataha: 64
-  Roger Mills: 65
-  Rogers: 66
-  Seminole: 67
-  Sequoyah: 68
-  Stephens: 69
-  Texas: 70
-  Tillman: 71
-  Tulsa: 72
-  Wagoner: 73
-  Washington: 74
-  Washita: 75
-  Woods: 76
-  Woodward: 77
+  Adair: '01'
+  Alfalfa: '02'
+  Atoka: '03'
+  Beaver: '04'
+  Beckham: '05'
+  Blaine: '06'
+  Bryan: '07'
+  Caddo: '08'
+  Canadian: '09'
+  Carter: '10'
+  Cherokee: '11'
+  Choctaw: '12'
+  Cimarron: '13'
+  Cleveland: '14'
+  Coal: '15'
+  Comanche: '16'
+  Cotton: '17'
+  Craig: '18'
+  Creek: '19'
+  Custer: '20'
+  Delaware: '21'
+  Dewey: '22'
+  Ellis: '23'
+  Garfield: '24'
+  Garvin: '25'
+  Grady: '26'
+  Grant: '27'
+  Greer: '28'
+  Harmon: '29'
+  Harper: '30'
+  Haskell: '31'
+  Hughes: '32'
+  Jackson: '33'
+  Jefferson: '34'
+  Johnston: '35'
+  Kay: '36'
+  Kingfisher: '37'
+  Kiowa: '38'
+  Latimer: '39'
+  Le Flore: '40'
+  Lincoln: '41'
+  Logan: '42'
+  Love: '43'
+  McClain: '44'
+  McCurtain: '45'
+  McIntosh: '46'
+  Major: '47'
+  Marshall: '48'
+  Mayes: '49'
+  Murray: '50'
+  Muskogee: '51'
+  Noble: '52'
+  Nowata: '53'
+  Okfuskee: '54'
+  Oklahoma: '55'
+  Okmulgee: '56'
+  Osage: '57'
+  Ottawa: '58'
+  Pawnee: '59'
+  Payne: '60'
+  Pittsburg: '61'
+  Pontotoc: '62'
+  Pottawatomie: '63'
+  Pushmataha: '64'
+  Roger Mills: '65'
+  Rogers: '66'
+  Seminole: '67'
+  Sequoyah: '68'
+  Stephens: '69'
+  Texas: '70'
+  Tillman: '71'
+  Tulsa: '72'
+  Wagoner: '73'
+  Washington: '74'
+  Washita: '75'
+  Woods: '76'
+  Woodward: '77'
 
 gender_codes:
   Not_Provided: NP
