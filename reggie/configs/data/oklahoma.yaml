@@ -186,6 +186,12 @@ columns:
   HistMethod9: text
   VoterHist10: date
   HistMethod10: text
+  # todo: check these types, some are int and some are str
+  CongressionalDistrict: int
+  StateSenateDistrict: int
+  StateHouseDistrict: int
+  CountyCommissioner: int
+  PollSite: text
   County: text
 hist_columns:
   - VoterID
@@ -242,6 +248,11 @@ ordered_columns:
   - HistMethod9
   - VoterHist10
   - HistMethod10
+  - CongressionalDistrict
+  - StateSenateDistrict
+  - StateHouseDistrict
+  - CountyCommissioner
+  - PollSite
   - County
 # Todo: Some of these are ints
 # Todo: voterid, precicnt needs to be a string because python really hates leading 0's
