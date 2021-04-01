@@ -21,6 +21,7 @@ voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
 voter_status_uocava: AU
+reason_code: reasoncode
 democratic_party: DEM
 republican_party: REP
 conservative_party: CON
