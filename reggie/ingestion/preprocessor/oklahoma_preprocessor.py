@@ -42,12 +42,12 @@ class PreprocessOklahoma(Preprocessor):
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(self.main_file)
-        voter_files = [n for n in new_files if "vr.csv" or "precincts.csv" in n["name"].lower()]
+        voter_files = [n for n in new_files if "ctysw_vr" in n["name"].lower()]
         self.file_check(len(voter_files))
-        hist_files = [n for n in new_files if "vh.csv" in n["name"].lower()]
-
+        hist_files = [n for n in new_files if "ctysw_vh" in n["name"].lower()]
         vdf = pd.DataFrame()
-        hdf, precincts = pd.DataFrame()
+        hdf = pd.DataFrame()
+        precincts = pd.DataFrame()
         dtypes = self.config['dtypes']
         cty_map = dict([(value, key) for key, value in self.config['county_codes'].items()])
 
@@ -61,10 +61,10 @@ class PreprocessOklahoma(Preprocessor):
             )
 
         for file in voter_files:
-            if "vr.csv" in file.lower():
-                temp_vdf = pd.read_csv(file["obj"], dtype=dtypes)
+            if "vr.csv" in file["name"].lower():
+                temp_vdf = pd.read_csv(file["obj"], encoding='latin', dtype=dtypes)
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
-            elif "precincts.csv" in file.lower():
+            elif "precincts.csv" in file["name"].lower():
                 precincts = pd.read_csv(file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
                 precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
@@ -72,17 +72,18 @@ class PreprocessOklahoma(Preprocessor):
 
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
-        hdf = pd.concat(
-            [pd.read_csv(n["obj"], dtype={'VoterID': 'string'}) for n in hist_files],
-            ignore_index=True,
-        )
+        vdf['county'] = county_map(vdf['Precinct'])
+
+        for file in hist_files:
+            temp_hdf = pd.read_csv(file["obj"], dtype={'VoterID': 'string'})
+            hdf = pd.concat(
+                [hdf, temp_hdf], ignore_index=True,
+            )
 
         valid_elections, counts = np.unique(hdf["ElectionDate"], return_counts=True)
-
         count_order = counts.argsort()[::-1]
         valid_elections = valid_elections[count_order]
         counts = counts[count_order]
-
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {
             k: {"index": i, "count": int(counts[i]), "date": date_from_str(k)}
@@ -91,10 +92,11 @@ class PreprocessOklahoma(Preprocessor):
         hdf["array_position"] = hdf["ElectionDate"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
-        voter_groups = hdf.groupby('VoterID')
-        vdf['all_history'] = voter_groups["ElectionDate"].apply(list)
-        vdf['sparse_history'] = voter_groups["array_position"].apply(list)
-        vdf['vote_type'] = voter_groups["VotingMethod"].apply(list)
+        vdf.set_index(self.config["voter_id"], drop=False, inplace=True)
+        voter_groups = hdf.groupby(self.config["voter_id"])
+        vdf["all_history"] = voter_groups["ElectionDate"].apply(list)
+        vdf["sparse_history"] = voter_groups["array_position"].apply(list)
+        vdf["votetype_history"] = voter_groups["VotingMethod"].apply(list)
 
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),

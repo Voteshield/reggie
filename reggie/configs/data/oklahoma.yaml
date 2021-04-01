@@ -10,7 +10,7 @@ has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
 # -- VoteShield -- #
-expected_number_of_files: 77
+expected_number_of_files: 78
 date_format: '%m/%d/%Y'
 primary_locale_identifier: county
 # keep the county as string, have to derive it anyway
@@ -376,6 +376,7 @@ ballot_type_classes:
   absentee_nursing_home: NH
 
 #Todo: Check this doesn't mess anyone else up
+# Counties in the new dataframe will be the string name of the counties
 county_codes:
   Adair: '01'
   Alfalfa: '02'
