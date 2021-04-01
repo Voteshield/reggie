@@ -263,8 +263,6 @@ class PreprocessPennsylvania(Preprocessor):
             "array_encoding": json.dumps(sorted_code_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        # to verify more easily
-        # return main_df
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
