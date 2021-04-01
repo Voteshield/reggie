@@ -15,7 +15,6 @@ from collections import defaultdict
 import json
 
 """
-File Notes:
 The Pennsylvania files come in sets, consisting of 4 files per county. The first is the voter file which contains
 the history columns.
 These history columns consist of two columns per election (for votetype and party) for 40 elections (80 columns total)
@@ -62,7 +61,7 @@ class PreprocessPennsylvania(Preprocessor):
         main_df = None
         dfcols = config["ordered_columns"]
 
-        # create a mapping that returns a series based on the values across rows of cells.
+        # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
         # consolidates the non nan values into one string that can be appended as a column later for the all_history and
         # the districts columns
         def list_map(df_sub, columns, zone_dict=None):
@@ -98,7 +97,6 @@ class PreprocessPennsylvania(Preprocessor):
                 )
                 zones = next(f for f in zone_codes if c in f["name"].lower())
                 types = next(f for f in zone_types if c in f["name"].lower())
-            # Todo: eventually refactor this, potentially prone to undefined behavior
             except StopIteration:
                 continue
             df = self.read_csv_count_error_lines(
@@ -143,14 +141,14 @@ class PreprocessPennsylvania(Preprocessor):
                 error_bad_lines=False,
             )
 
-            # RF note: format the election data into the format expected in the original all_history column
+            # Refactor note: format the election data into the format expected in the original all_history column
             edf["election_list"] = edf["title"] + " " + edf["date"]
 
             # Gather the positional vote and distict columns
             district_columns = df.columns[30:70].to_list()
             vote_columns = df.columns[70:150].to_list()
 
-            # create a dict of the formatted string election data with the index number in the given file, this
+            # create a dict of the formatted election data using the index number in the given file, this
             # corresponds to the column index beginning at the start of the vote columns in the dataframe
             # Index begins starting at 1
             # Todo: This upper is causing a pretty big diff but I am not sure if I care?
@@ -180,12 +178,10 @@ class PreprocessPennsylvania(Preprocessor):
                 zip(df.columns[70:150:2], df.columns[71:150:2])
             )
 
-            # todo: probably don't need this dataframe either
-            # district_df = df[district_columns]
-
-            # get the value from the eleciton map key, then combine it with the value in the party and vote type cells
-            # Create a history dataframe containing, as cells the election name as gathered in the election file, the
-            # vote type (AP, A etc), and the party all separated by spaces
+            # get the value from the eleciton map key for the election name,
+            # then combine it with the value in the party and vote type cells for the full election information
+            # Creates a history dataframe containing, as cells, the election name as gathered in the election file, the
+            # vote type (AP, A etc), and the party information, all separated by spaces
             # The columns are all named election_#_vote_type but the cells contain the relevant information
             vote_hist_df = pd.DataFrame(
                 {
@@ -209,7 +205,6 @@ class PreprocessPennsylvania(Preprocessor):
                 if current_key in sorted_code_dict:
                     sorted_code_dict[current_key]["count"] += int(counts[i])
                 else:
-                    # todo: consolidate this into one dict call if possible
                     current_date = edf.loc[edf["number"] == i.split("_")[1]][
                         "date"
                     ].values[0]
