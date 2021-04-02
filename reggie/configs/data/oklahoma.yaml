@@ -159,10 +159,11 @@ columns:
   MailZip: text
   Muni: text
   #todo: float in dataframe but numeric, check how postgres deals with...everything?
-  MuniSub: int
+  # older files have it as text?
+  MuniSub: text
   School: text
   # same as above
-  SchoolSub: int
+  SchoolSub: text
   TechCenter: text
   TechCenterSub: text
   CountyComm: text
@@ -281,9 +282,9 @@ dtypes:
   MailState: string
   MailZip: string
   Muni: string
-  MuniSub: float64
+  MuniSub: string
   School: string
-  SchoolSub: float64
+  SchoolSub: string
   TechCenter: string
   TechCenterSub: string
   CountyComm: string

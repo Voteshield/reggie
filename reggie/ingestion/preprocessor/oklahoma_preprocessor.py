@@ -14,6 +14,7 @@ import numpy as np
 from datetime import datetime
 import gc
 import json
+import re
 
 """
 Todo:
@@ -42,12 +43,15 @@ class PreprocessOklahoma(Preprocessor):
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(self.main_file)
-        voter_files = [n for n in new_files if "ctysw_vr" in n["name"].lower()]
-        self.file_check(len(voter_files))
-        hist_files = [n for n in new_files if "ctysw_vh" in n["name"].lower()]
+        # voter_files = [n for n in new_files if "ctysw_vr" in n["name"].lower()]
+        # probably don't need all these loopw
+        precincts_file = [x for x in new_files if 'precincts' in x["name"].lower()][0]
+        voter_files = list(filter(lambda v: re.match('cty[0-9]+_vr', v["name"].lower()), new_files))
+        # self.file_check(len(voter_files))
+        # hist_files = [n for n in new_files if "ctysw_vh" in n["name"].lower()]
+        hist_files = list(filter(lambda v: re.match('cty[0-9]+_vh', v["name"].lower()), new_files))
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
-        precincts = pd.DataFrame()
         dtypes = self.config['dtypes']
         cty_map = dict([(value, key) for key, value in self.config['county_codes'].items()])
 
@@ -64,16 +68,16 @@ class PreprocessOklahoma(Preprocessor):
             if "vr.csv" in file["name"].lower():
                 temp_vdf = pd.read_csv(file["obj"], encoding='latin', dtype=dtypes)
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
-            elif "precincts.csv" in file["name"].lower():
-                precincts = pd.read_csv(file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
-                precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
+
+        precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
+        precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
 
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
-        vdf['county'] = county_map(vdf['Precinct'])
-
+        vdf['County'] = county_map(vdf['Precinct'])
+        self.reconcile_columns(vdf, self.config["columns"])
         for file in hist_files:
             temp_hdf = pd.read_csv(file["obj"], dtype={'VoterID': 'string'})
             hdf = pd.concat(
@@ -97,15 +101,15 @@ class PreprocessOklahoma(Preprocessor):
         vdf["all_history"] = voter_groups["ElectionDate"].apply(list)
         vdf["sparse_history"] = voter_groups["array_position"].apply(list)
         vdf["votetype_history"] = voter_groups["VotingMethod"].apply(list)
-
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
 
+        # raise ValueError("stopping")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=True)),
+            io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=False)),
             s3_bucket=self.s3_bucket,
         )
