@@ -2,8 +2,8 @@ pandas
 click
 numpy
 zipfile2
-PyYAML<4.3,>=3.10
+PyYAML
 boto3
-requests<2.21,>=2.20.0
+requests
 xlrd
 bs4
