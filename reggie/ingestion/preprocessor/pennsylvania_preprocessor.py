@@ -59,7 +59,9 @@ class PreprocessPennsylvania(Preprocessor):
             self.file_check(len(voter_files), len(election_maps))
         counties = config["county_names"]
         main_df = None
-        dfcols = config["ordered_columns"]
+        # Preserving the order of the file sent, but concatinating the district and election columns which were
+        # dropped in the legacy processed file
+        dfcols = config["ordered_columns"][:-3] + config["district_columns"] + config["election_columns"] + config["ordered_columns"][-3:]
 
         # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
         # consolidates the non nan values into one string that can be appended as a column later for the all_history and
