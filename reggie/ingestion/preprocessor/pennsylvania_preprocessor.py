@@ -90,8 +90,7 @@ class PreprocessPennsylvania(Preprocessor):
 
         sorted_codes = []
         sorted_code_dict = defaultdict(defaultdict)
-        dtypes = {row: "str" for row in config["ordered_columns"]}
-        # for c in counties:
+        dtypes = {col: "str" for col in dfcols}
         for idx, c in enumerate(counties):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
@@ -158,13 +157,11 @@ class PreprocessPennsylvania(Preprocessor):
             # create a dict of the formatted election data using the index number in the given file, this
             # corresponds to the column index beginning at the start of the vote columns in the dataframe
             # Index begins starting at 1
-            # Todo: This upper is causing a pretty big diff but I am not sure if I care?
             election_map = pd.Series(
                 edf.election_list.values, index=edf.number
             ).to_dict()
 
             # merge the zone files together to consolidate the information in one dataframe
-            # todo: just add the info to the one dataframe rather than create a new one
             zdf = zdf.merge(tdf, how="left", on="zone_number")
             # format a column field that contains the zone description and the name so
             # that it matches the current district field
