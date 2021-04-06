@@ -120,7 +120,7 @@ class PreprocessWashington(Preprocessor):
         df_voter = df_voter.loc[
             :, df_voter.columns.isin(self.config["column_names"])
         ]
-        df_voter = df_voter.set_index(self.config["voter_id"])
+        df_voter = df_voter.set_index(self.config["voter_id"], drop=False)
 
         # pandas loads any numeric column with NaN values as floats
         # causing formatting trouble during execute() with a few columns
@@ -146,6 +146,14 @@ class PreprocessWashington(Preprocessor):
         # add voter history
         df_voter = df_voter.join(df_hist)
 
+        # Make sure all columns are present
+        expected_cols = (
+            self.config["ordered_columns"]
+            + self.config["ordered_generated_columns"]
+        )
+        df_voter = self.reconcile_columns(df_voter, expected_cols)
+        df_voter = df_voter[expected_cols]
+
         self.meta = {
             "message": "washington_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_elections_dict),
@@ -153,10 +161,10 @@ class PreprocessWashington(Preprocessor):
         }
 
         # TODO: REMOVE THIS
-        df_voter.to_csv("WAtest.csv", encoding="utf-8", index=True)
+        df_voter.to_csv("WAtest.csv", encoding="utf-8", index=False)
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=True)),
+            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=False)),
             s3_bucket=self.s3_bucket,
         )
