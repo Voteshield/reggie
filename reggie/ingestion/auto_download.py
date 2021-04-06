@@ -1,9 +1,15 @@
 from reggie.configs.configs import Config
 import requests
 import zipfile
-from reggie.ingestion.download import Loader, FileItem, ohio_get_last_updated, nc_date_grab
-from reggie.reggie_constants import RAW_FILE_PREFIX
+from reggie.ingestion.download import FileItem, ohio_get_last_updated, nc_date_grab
+from reggie.reggie_constants import RAW_FILE_PREFIX, PROCESSED_FILE_PREFIX, META_FILE_PREFIX
 import logging
+from reggie.ingestion.utils import s3
+import json
+from dateutil import parser
+import bs4
+from urllib.request import urlopen
+from reggie.ingestion.download import Preprocessor
 
 
 def state_download(state, s3_bucket):
@@ -31,7 +37,7 @@ def state_download(state, s3_bucket):
             "NC file auto download",
             filename=file_to_zip,
             s3_bucket=s3_bucket)
-        loader = Loader(config_file=config_file, force_date=today,
+        loader = Preprocessor(config_file=config_file, raw_s3_file=None, force_date=today,
                         s3_bucket=s3_bucket)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)
 
@@ -61,6 +67,6 @@ def state_download(state, s3_bucket):
             "OH file auto download",
             filename=file_to_zip,
             s3_bucket=s3_bucket)
-        loader = Loader(config_file=config_file, force_date=today,
+        loader = Preprocessor(config_file=config_file, raw_s3_file=None, force_date=today,
                         s3_bucket=s3_bucket)
         loader.s3_dump(file_to_zip, file_class=RAW_FILE_PREFIX)

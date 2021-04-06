@@ -18,6 +18,7 @@ voter_status_inactive: I
 voter_status_cancelled: R
 voter_status_denied: D
 voter_status_temporary: S
+reason_code: voter_status_reason_desc
 democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB
@@ -373,14 +374,14 @@ county_names:
   YADKIN: 99,
   YANCEY: 0
 race_options:
-  'b  ': black
-  'w  ': white
-  'u  ': undefined
-  'i  ': american_indian_or_alaskan_native
-  'a  ': asian_or_pacific_islander
-  'm  ': multi_racial
-  'o  ': other
+  'b': black
+  'w': white
+  'u': undefined
+  'i': american_indian_or_alaskan_native
+  'a': asian_or_pacific_islander
+  'm': multi_racial
+  'o': other
 ethnicity_options:
-  'un ': undefined
-  'hl ': hispanic
-  'nl ': not_hispanic
+  'un': undefined
+  'hl': hispanic
+  'nl': not_hispanic

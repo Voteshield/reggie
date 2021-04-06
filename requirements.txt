@@ -1,3 +1,4 @@
+
 pandas
 click
 numpy
@@ -7,3 +8,4 @@ boto3
 requests
 xlrd
 bs4
+pytest
