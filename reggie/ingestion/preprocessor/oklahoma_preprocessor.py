@@ -68,12 +68,13 @@ class PreprocessOklahoma(Preprocessor):
             if "vr.csv" in file["name"].lower():
                 temp_vdf = pd.read_csv(file["obj"], encoding='latin', dtype=dtypes)
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
+        vdf.drop_duplicates(inplace=True)
+
 
         precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
         precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
-
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
         vdf['County'] = county_map(vdf['Precinct'])

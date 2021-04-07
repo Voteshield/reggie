@@ -21,13 +21,11 @@ voter_id: VoterID
 voter_status: Status
 voter_status_active: A
 voter_status_inactive: I
-party_aliases:
-  democratic_party: DEM
-  republican_party: REP
-  libertarian_party: LIB
-  # Everyone is registered to a party in OK?
-  no_party_affiliation: IND
-  
+democratic_party: DEM
+republican_party: REP
+conservative_party: CON
+# Everyone has ap arty here?
+no_party_affiliation: IND
 
 #OK has pretty great absentee codes
 #IP = Voted in person at polling place
