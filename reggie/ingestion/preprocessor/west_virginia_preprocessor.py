@@ -229,6 +229,10 @@ class PreprocessWestVirginia(Preprocessor):
             #            'array_decoding': json.dumps()
         }
 
+        # Attach for testing and more direct access
+        # See: https://github.com/Voteshield/reggie/issues/50
+        self.processed_df = df_voters
+
         # Create file from processed dataframe
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),

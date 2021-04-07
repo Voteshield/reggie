@@ -22,5 +22,6 @@ def convert_voter_file(state=None, local_file=None, file_date=None, write_file=F
         return (
             preprocessor.output_dataframe(preprocessor.processed_file),
             preprocessor.meta,
+            preprocessor,
         )
     preprocessor.local_dump(preprocessor.processed_file)
