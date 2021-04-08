@@ -164,6 +164,10 @@ ordered_columns:
   - precinct_split_id
   - date_last_changed
   - legacy_id
+  - home_phone
+  - county
+  - mail_country
+district_columns:
   - district_1
   - district_2
   - district_3
@@ -204,6 +208,7 @@ ordered_columns:
   - district_38
   - district_39
   - district_40
+election_columns:
   - election_1_vote_method
   - election_1_party
   - election_2_vote_method
@@ -284,9 +289,6 @@ ordered_columns:
   - election_39_party
   - election_40_vote_method
   - election_40_party
-  - home_phone
-  - county
-  - mail_country
 county_names:
   - Adams
   - Allegheny
