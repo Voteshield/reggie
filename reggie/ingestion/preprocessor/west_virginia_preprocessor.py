@@ -252,7 +252,7 @@ class PreprocessWestVirginia(Preprocessor):
             "libertarian": re.compile("libertarian"),
             "independent": re.compile("independent"),
             "green": re.compile("green"),
-            "unaffliated": re.compile("(unaffliated|no.*affliation)"),
+            "unaffiliated": re.compile("(unaffiliated|no.*affiliation)"),
         }
 
         for k, v in lookup.items():
