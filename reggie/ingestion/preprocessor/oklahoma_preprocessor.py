@@ -70,8 +70,9 @@ class PreprocessOklahoma(Preprocessor):
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
         vdf.drop_duplicates(inplace=True)
 
-
-        precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype={'PrecinctCode': 'string'})
+        precinct_dtypes = {'PrecinctCode': 'string', 'CongressionalDistrict': 'int64', 'StateSenateDistrict': 'int64', 
+                           'StateHouseDistrict': 'int64', 'CountyCommissioner': 'int64', 'PollSite': 'string'}
+        precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype=precinct_dtypes)
         precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
