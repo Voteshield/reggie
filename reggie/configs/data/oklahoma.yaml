@@ -12,7 +12,7 @@ separate_hispanic_origin: FALSE
 # -- VoteShield -- #
 expected_number_of_files: 78
 date_format: '%m/%d/%Y'
-primary_locale_identifier: county
+primary_locale_identifier: County
 # keep the county as string, have to derive it anyway
 numeric_primary_locale: False
 party_identifier: PolitalAff
@@ -54,7 +54,6 @@ match_fields:
   - FirstName
   - LastName
   - DateOfBirth
-
 name_fields:
   - LastName
   - FirstName
