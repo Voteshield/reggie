@@ -51,9 +51,9 @@ format:
   vote_history_type: 'Sporadic'
 
 match_fields:
-  -FirstName
-  -LastName
-  -DateOfBirth
+  - FirstName
+  - LastName
+  - DateOfBirth
 
 name_fields:
   - LastName
