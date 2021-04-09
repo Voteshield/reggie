@@ -106,19 +106,22 @@ class PreprocessOklahoma(Preprocessor):
 
         # The hist columns in the vdf are unecessary because we get a separate hist file that is more complete.
         hist_columns = [col for col in vdf.columns if "voterhist" in col.lower() or "histmethod" in col.lower()]
+        vdf = self.config.coerce_numeric(vdf)
+        vdf = self.config.coerce_strings(vdf)
+        vdf = self.config.coerce_dates(vdf)
         vdf.drop(hist_columns, inplace=True)
         vdf.set_index(self.config["voter_id"], drop=False, inplace=True)
         voter_groups = hdf.groupby(self.config["voter_id"])
         vdf["all_history"] = voter_groups["ElectionDate"].apply(list)
         vdf["sparse_history"] = voter_groups["array_position"].apply(list)
         vdf["votetype_history"] = voter_groups["VotingMethod"].apply(list)
+        
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
 
-        raise ValueError("stopping")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=False)),

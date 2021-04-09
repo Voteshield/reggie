@@ -97,9 +97,6 @@ generated_columns:
 ordered_generated_columns:
   - all_history
   - votetype_history
-  - county_history
-  - jurisdiction_history
-  - schooldistrict_history
   - sparse_history
 summary_columns:
   - totals
