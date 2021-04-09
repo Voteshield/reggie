@@ -93,9 +93,6 @@ base_columns:
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]
-  county_history: int[]
-  jurisdiction_history: int[]
-  schooldistrict_history: int[]
   sparse_history: int[]
 ordered_generated_columns:
   - all_history
@@ -164,26 +161,6 @@ columns:
   TechCenter: text
   TechCenterSub: text
   CountyComm: text
-  VoterHist1: date
-  HistMethod1: text
-  VoterHist2: date
-  HistMethod2: text
-  VoterHist3: date
-  HistMethod3: text
-  VoterHist4: date
-  HistMethod4: text
-  VoterHist5: date
-  HistMethod5: text
-  VoterHist6: date
-  HistMethod6: text
-  VoterHist7: date
-  HistMethod7: text
-  VoterHist8: date
-  HistMethod8: text
-  VoterHist9: date
-  HistMethod9: text
-  VoterHist10: date
-  HistMethod10: text
   # todo: check these types, some are int and some are str
   CongressionalDistrict: int
   StateSenateDistrict: int
@@ -226,26 +203,6 @@ ordered_columns:
   - TechCenter
   - TechCenterSub
   - CountyComm
-  - VoterHist1
-  - HistMethod1
-  - VoterHist2
-  - HistMethod2
-  - VoterHist3
-  - HistMethod3
-  - VoterHist4
-  - HistMethod4
-  - VoterHist5
-  - HistMethod5
-  - VoterHist6
-  - HistMethod6
-  - VoterHist7
-  - HistMethod7
-  - VoterHist8
-  - HistMethod8
-  - VoterHist9
-  - HistMethod9
-  - VoterHist10
-  - HistMethod10
   - CongressionalDistrict
   - StateSenateDistrict
   - StateHouseDistrict
@@ -335,26 +292,6 @@ column_names:
   - TechCenter
   - TechCenterSub
   - CountyComm
-  - VoterHist1
-  - HistMethod1
-  - VoterHist2
-  - HistMethod2
-  - VoterHist3
-  - HistMethod3
-  - VoterHist4
-  - HistMethod4
-  - VoterHist5
-  - HistMethod5
-  - VoterHist6
-  - HistMethod6
-  - VoterHist7
-  - HistMethod7
-  - VoterHist8
-  - HistMethod8
-  - VoterHist9
-  - HistMethod9
-  - VoterHist10
-  - HistMethod10
   # additional columns
   - CongressionalDistrict
   - StateSenateDistrict

@@ -20,6 +20,14 @@ import re
 Todo:
 Add Important Columns and check order (currently precicnts are added before County)
 
+
+VF Columns:
+Todo: Fill out
+
+VH Columns: 
+  - VoterID
+  - ElectionDate
+  - VotingMethod 
 """
 
 
@@ -43,12 +51,9 @@ class PreprocessOklahoma(Preprocessor):
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(self.main_file)
-        # voter_files = [n for n in new_files if "ctysw_vr" in n["name"].lower()]
-        # probably don't need all these loopw
         precincts_file = [x for x in new_files if 'precincts' in x["name"].lower()][0]
         voter_files = list(filter(lambda v: re.match('cty[0-9]+_vr', v["name"].lower()), new_files))
         # self.file_check(len(voter_files))
-        # hist_files = [n for n in new_files if "ctysw_vh" in n["name"].lower()]
         hist_files = list(filter(lambda v: re.match('cty[0-9]+_vh', v["name"].lower()), new_files))
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
@@ -98,6 +103,10 @@ class PreprocessOklahoma(Preprocessor):
         hdf["array_position"] = hdf["ElectionDate"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
+
+        # The hist columns in the vdf are unecessary because we get a separate hist file that is more complete.
+        hist_columns = [col for col in vdf.columns if "voterhist" in col.lower() or "histmethod" in col.lower()]
+        vdf.drop(hist_columns, inplace=True)
         vdf.set_index(self.config["voter_id"], drop=False, inplace=True)
         voter_groups = hdf.groupby(self.config["voter_id"])
         vdf["all_history"] = voter_groups["ElectionDate"].apply(list)
@@ -109,7 +118,7 @@ class PreprocessOklahoma(Preprocessor):
             "array_decoding": json.dumps(sorted_codes),
         }
 
-        # raise ValueError("stopping")
+        raise ValueError("stopping")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=False)),
