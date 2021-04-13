@@ -11,7 +11,7 @@ fixed_width: false
 date_format: '%m/%d/%Y'
 primary_locale_identifier: CountyCode
 numeric_primary_locale: FALSE
-party_identifier: null
+party_identifier: party_identifier
 birthday_identifier: Birthdate
 voter_id: StateVoterID
 voter_status: StatusCode
@@ -150,6 +150,7 @@ columns:
 # AbsenteeType: text
   LastVoted: date
   StatusCode: text
+  party_identifier: text
 
 ordered_columns:
   - StateVoterID
@@ -186,6 +187,7 @@ ordered_columns:
   - Registrationdate
   - LastVoted
   - StatusCode
+  - party_identifier
 
 column_classes (districts and precincts files):
   CountyCode: text

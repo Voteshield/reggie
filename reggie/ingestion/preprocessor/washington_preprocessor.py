@@ -1,6 +1,5 @@
 import datetime
 import json
-import logging
 
 from datetime import datetime
 from dateutil import parser
@@ -145,6 +144,10 @@ class PreprocessWashington(Preprocessor):
 
         # add voter history
         df_voter = df_voter.join(df_hist)
+
+        # Add party_idenitfier dummy values, 
+        # since WA doesn't have party info
+        df_voter.loc[:, self.config["party_identifier"]] = "npa"
 
         # Make sure all columns are present
         expected_cols = (
