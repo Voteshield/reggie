@@ -53,6 +53,8 @@ class PreprocessWashington(Preprocessor):
         # There are two possible separators. Detect it first.
         line = voter_file["obj"].readline().decode()
         delimiter = detect(line)
+        # Return to the beginning of the buffer to read the data now that we
+        # know what the separator is.
         voter_file["obj"].seek(0)
         df_voter = pd.read_csv(
             voter_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
@@ -68,11 +70,7 @@ class PreprocessWashington(Preprocessor):
             df_hist = df_hist.append(temp, ignore_index=True)
 
         # --- handling the voter history file --- #
-
-        # TODO: REMOVE THIS, Randomly selecting subset of rows for testing
-        df_hist = df_hist.sample(100000)
-
-        # Need to fix the differently named VoterHistoryID
+        # Need to fix/combine the differently named VoterHistoryID
         # and VotingHistoryID columns
         if {"VotingHistoryID", "VoterHistoryID"}.issubset(df_hist.columns):
             df_hist["VotingHistoryID"] = (
@@ -114,7 +112,6 @@ class PreprocessWashington(Preprocessor):
         )
 
         # --- handling the voter file --- #
-
         # some columns have become obsolete
         df_voter = df_voter.loc[
             :, df_voter.columns.isin(self.config["column_names"])
@@ -162,9 +159,6 @@ class PreprocessWashington(Preprocessor):
             "array_encoding": json.dumps(sorted_elections_dict),
             "array_decoding": json.dumps(sorted_elections),
         }
-
-        # TODO: REMOVE THIS
-        df_voter.to_csv("WAtest.csv", encoding="utf-8", index=False)
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
