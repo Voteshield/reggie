@@ -23,7 +23,7 @@ voter_status_active: A
 voter_status_inactive: I
 democratic_party: DEM
 republican_party: REP
-conservative_party: CON
+libertarian_party: LIB
 # Everyone has ap arty here?
 no_party_affiliation: IND
 
@@ -401,7 +401,6 @@ status_codes:
 party_codes:
   democratic_party: DEM
   republican_party: REP
-  libertarian_party: LIB
   no_party_affiliated: IND
 
 num_party_codes: 4
