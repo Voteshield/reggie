@@ -137,7 +137,7 @@ class PreprocessWestVirginia(Preprocessor):
 
         # Set index
         # TODO: Is this necessary?  Is this helpful higher up?
-        df_voters = df_voters.set_index(config["voter_id"])
+        df_voters = df_voters.set_index(config["voter_id"], drop=False)
 
         # Get voter history file
         voter_history_regex = re.compile(".*statewide.*vh")
@@ -200,6 +200,7 @@ class PreprocessWestVirginia(Preprocessor):
             df_elections["Election_Name"] = df_elections["Election_Name"].apply(
                 lambda x: x.strip()
             )
+            df_elections_dict = df_elections.to_dict()
             df_elections = self.config.coerce_dates(
                 df_elections, col_list="hist_columns_types"
             )
@@ -217,9 +218,6 @@ class PreprocessWestVirginia(Preprocessor):
             df_voters["challenged_history"] = df_history_grouped["fl_challenged"].apply(
                 list
             )
-
-            df_history_dict = df_history.to_dict()
-            df_voters_dict = df_voters.to_dict()
 
         # Create meta data
         self.meta = {

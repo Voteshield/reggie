@@ -29,9 +29,9 @@ def test_wv_preprocessor():
     df_processed = preprocessor.processed_df
 
     # Check column names
-    # ?? What about ID_VOTER (it's an index, which isn't a column?)
     actual_list = df_processed.columns.values.tolist()
     expected_list = [
+        "ID_VOTER",
         "County_ID",
         "County_Name",
         "FIRST NAME",
@@ -73,6 +73,18 @@ def test_wv_preprocessor():
     # Check voter ids
     actual_list = df_processed.index.values.tolist()
     expected_list = ["000000001", "000000002", "000000003"]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check county ids
+    actual_list = list(df_processed["County_ID"])
+    expected_list = ["barbour", "barbour", "berkeley"]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check raw county names
+    actual_list = list(df_processed["County_Name"])
+    expected_list = ["BARBOUR", "BARBOUR", "BERKELEY"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
@@ -248,3 +260,6 @@ def test_wv_preprocessor():
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check meta data
+    # TODO
