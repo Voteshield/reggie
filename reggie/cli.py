@@ -29,6 +29,19 @@ import click
 )
 @click.option("--write_file", required=False, default=True, is_flag=True)
 def convert_cli(state, local_file, file_date, write_file):
+    """Runs Reggie's main function, `convert_voter_file`.
+
+    Parameters
+    ----------
+    state : string
+        Same as `convert_voter_file`, a state identifier.
+    local_file : string
+        Same as `convert_voter_file`, the path to the voter file.
+    file_date : [type]
+        Same as `convert_voter_file`, the file to the path in form "YYYY-MM-DD", will use the current date if not provided.
+    write_file : bool
+        Same as `convert_voter_file`, whether to write file.
+    """
     if file_date is None:
         file_date = datetime.datetime.today().date().isoformat()
     convert_voter_file(

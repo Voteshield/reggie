@@ -12,7 +12,8 @@ from reggie import convert_voter_file
 
 def test_wv_preprocessor():
     """
-    Basic smoke test to make sure the parts are there.
+    Tests that the West Virginia preprocessor produces the data
+    as expected.
     """
     test_data_directory = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
