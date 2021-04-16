@@ -2,6 +2,8 @@ import pytest
 
 # Dependencies for testings
 import os
+import datetime
+import json
 import pandas as pd
 
 # Dependencies to test
@@ -131,7 +133,7 @@ def test_wv_preprocessor():
             "10004",
             "10005",
         ],
-        ["1", "100", "1000", "1000", "1003", "1004", "1005", "10001", "10003"],
+        ["1", "100", "1000", "1002", "1003", "1004", "1005", "10001", "10003"],
         [
             "1",
             "1001",
@@ -261,5 +263,64 @@ def test_wv_preprocessor():
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
-    # Check meta data
-    # TODO
+    # Check meta data message
+    now = datetime.datetime.now()
+    year = now.strftime("%Y")
+    assert preprocessor.meta["message"].startswith(f"west_virginia_{year}")
+
+    # Check meta data array_encoding
+    expected_dict = {
+        "1000": {"index": 0, "count": 2, "date": "05/14/1996"},
+        "100": {"index": 1, "count": 2, "date": "11/05/1996"},
+        "1": {"index": 2, "count": 3, "date": "03/18/2000"},
+        "1001": {"index": 3, "count": 2, "date": "05/09/2000"},
+        "1002": {"index": 4, "count": 3, "date": "11/07/2000"},
+        "1009": {"index": 5, "count": 1, "date": "05/14/2002"},
+        "1010": {"index": 6, "count": 1, "date": "11/05/2002"},
+        "1003": {"index": 7, "count": 3, "date": "05/11/2004"},
+        "1004": {"index": 8, "count": 3, "date": "11/02/2004"},
+        "20000": {"index": 9, "count": 1, "date": "06/14/2005"},
+        "1005": {"index": 10, "count": 2, "date": "06/25/2005"},
+        "20001": {"index": 11, "count": 1, "date": "11/07/2006"},
+        "20002": {"index": 12, "count": 1, "date": "07/14/2007"},
+        "20003": {"index": 13, "count": 1, "date": "05/13/2008"},
+        "20004": {"index": 14, "count": 1, "date": "06/14/2011"},
+        "20005": {"index": 15, "count": 1, "date": "01/21/2012"},
+        "10000": {"index": 16, "count": 1, "date": "05/10/2016"},
+        "20006": {"index": 17, "count": 1, "date": "05/10/2016"},
+        "10001": {"index": 18, "count": 2, "date": "11/08/2016"},
+        "10004": {"index": 19, "count": 1, "date": "10/07/2017"},
+        "10002": {"index": 20, "count": 2, "date": "05/08/2018"},
+        "10003": {"index": 21, "count": 3, "date": "11/06/2018"},
+        "10005": {"index": 22, "count": 2, "date": "06/09/2020"},
+    }
+    assert preprocessor.meta["array_encoding"] == json.dumps(expected_dict)
+
+    # Check meta data array_decoding
+    expected_list = [
+        "1000",
+        "100",
+        "1",
+        "1001",
+        "1002",
+        "1009",
+        "1010",
+        "1003",
+        "1004",
+        "20000",
+        "1005",
+        "20001",
+        "20002",
+        "20003",
+        "20004",
+        "20005",
+        "10000",
+        "20006",
+        "10001",
+        "10004",
+        "10002",
+        "10003",
+        "10005",
+    ]
+    actual_list = preprocessor.meta["array_decoding"]
+    assert actual_list == json.dumps(expected_list)

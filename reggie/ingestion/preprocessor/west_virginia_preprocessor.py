@@ -149,9 +149,12 @@ class PreprocessWestVirginia(Preprocessor):
                 f"{config['state']} has too many voter history files."
             )
         if len(voter_files) < 1:
-            # TODO: What to do when no history.
             logging.info(f"{config['state']} unable to find a history file.")
-            pass
+
+            # Create meta data
+            self.meta = {
+                "message": "{}_{}".format(config["state"], datetime.now().isoformat())
+            }
         else:
             voter_history = voter_histories[0]
 
@@ -183,33 +186,6 @@ class PreprocessWestVirginia(Preprocessor):
                 self.clean_challenged_value
             )
 
-            # Create dataframe of valid elections
-            election_columns = [
-                "id_election",
-                "dt_election",
-                "Election_Name",
-                "cd_election_type",
-                "cd_election_cat",
-            ]
-            df_elections_all = df_history[election_columns]
-            df_elections = (
-                df_elections_all.groupby(election_columns).sum().reset_index()
-            )
-
-            # Clean up
-            df_elections["Election_Name"] = df_elections["Election_Name"].apply(
-                lambda x: x.strip()
-            )
-            df_elections_dict = df_elections.to_dict()
-            df_elections = self.config.coerce_dates(
-                df_elections, col_list="hist_columns_types"
-            )
-
-            # Sort by ascending date
-            df_elections = df_elections.sort_values(by=["dt_election"])
-
-            df_elections_dict = df_elections.to_dict()
-
             # Group history by voter id, then attach relevante group data to
             # voter dataframe
             df_history_grouped = df_history.groupby("id_voter")
@@ -219,13 +195,47 @@ class PreprocessWestVirginia(Preprocessor):
                 list
             )
 
-        # Create meta data
-        self.meta = {
-            "message": "{}_{}".format(config["state"], datetime.now().isoformat())
-            # vote history not available
-            #            'array_encoding': json.dumps(),
-            #            'array_decoding': json.dumps()
-        }
+            # Create dataframe of valid elections
+            election_columns = ["id_election", "dt_election", "Election_Name"]
+            df_elections_all = df_history[election_columns]
+            df_elections = (
+                df_elections_all.reset_index()
+                .groupby(election_columns)
+                .count()
+                .rename({"index": "count"}, axis=1)
+                .reset_index()
+            )
+
+            # Clean up
+            df_elections["Election_Name"] = df_elections["Election_Name"].apply(
+                lambda x: x.strip()
+            )
+            df_elections = self.config.coerce_dates(
+                df_elections, col_list="hist_columns_types"
+            )
+
+            # Sort by ascending date
+            df_elections = df_elections.sort_values(by=["dt_election"]).reset_index()
+
+            # Create dict for encoding
+            array_encoding = {}
+            for k, row in df_elections.iterrows():
+                array_encoding[row["id_election"]] = {
+                    "index": k,
+                    "count": row["count"],
+                    # TODO: The documentation specifically says this should be MM/DD/YYYY,
+                    # but other files have the more standard YYYY-MM-DD
+                    # https://github.com/Voteshield/Inspector/wiki/Adding-a-State
+                    "date": row["dt_election"].strftime("%m/%d/%Y")
+                    # "name": row["Election_Name"]
+                }
+
+            # Create meta data
+            self.meta = {
+                "message": "{}_{}".format(config["state"], datetime.now().isoformat()),
+                "array_encoding": json.dumps(array_encoding),
+                "array_decoding": json.dumps(list(df_elections["id_election"])),
+            }
 
         # Attach for testing and more direct access
         # See: https://github.com/Voteshield/reggie/issues/50
