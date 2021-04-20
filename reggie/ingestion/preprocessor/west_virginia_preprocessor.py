@@ -176,9 +176,7 @@ class PreprocessWestVirginia(Preprocessor):
 
             # Create new column that aggregrates the type of vote
             # TODO: This is very slow
-            df_history["votetype"] = df_history.apply(
-                lambda row: self.derive_votetype(row), axis=1
-            )
+            df_history["votetype"] = df_history.apply(self.derive_votetype, axis=1)
 
             # Clean the challenged flag, which looks to only be checked
             # if the voter voted absentee
@@ -223,9 +221,8 @@ class PreprocessWestVirginia(Preprocessor):
                 array_encoding[row["id_election"]] = {
                     "index": k,
                     "count": row["count"],
-                    # TODO: The documentation specifically says this should be MM/DD/YYYY,
-                    # but other files have the more standard YYYY-MM-DD
-                    # https://github.com/Voteshield/Inspector/wiki/Adding-a-State
+                    # This should be MM/DD/YYYY
+                    # See: https://github.com/Voteshield/Inspector/wiki/Adding-a-State
                     "date": row["dt_election"].strftime("%m/%d/%Y")
                     # "name": row["Election_Name"]
                 }
@@ -244,7 +241,7 @@ class PreprocessWestVirginia(Preprocessor):
         # Create file from processed dataframe
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voters.to_csv(encoding="utf-8", index=True)),
+            io_obj=StringIO(df_voters.to_csv(encoding="utf-8", index=False)),
             s3_bucket=self.s3_bucket,
         )
 
