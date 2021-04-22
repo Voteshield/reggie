@@ -4,7 +4,7 @@
 file_type: .csv
 delimiter: ','
 state: oklahoma
-source: boe
+source: boe_download
 file_class: voter_file
 has_headers: TRUE
 fixed_width: FALSE
