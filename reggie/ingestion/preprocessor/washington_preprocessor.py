@@ -19,6 +19,7 @@ from reggie.ingestion.download import (
     date_from_str,
 )
 from reggie.ingestion.utils import (
+    MissingColumnsError,
     MissingNumColumnsError,
     format_column_name,
 )
@@ -53,7 +54,8 @@ class PreprocessWashington(Preprocessor):
         hist_files = [n for n in new_files if "history" in n["name"].lower()]
 
         if not self.ignore_checks:
-            self.file_check(len(voter_file), hist_files=len(hist_files))
+            # We're already automatically limiting voter_file to one entry
+            self.file_check(len([voter_file]), hist_files=len(hist_files))
 
         # There are two possible separators. Detect it first.
         line = voter_file["obj"].readline().decode()
@@ -160,7 +162,7 @@ class PreprocessWashington(Preprocessor):
         # below
         try:
             self.column_check(list(df_voter.columns))
-        except MissingColumnError:
+        except MissingColumnsError:
             pass
 
         # Make sure all columns are present
