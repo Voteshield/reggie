@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 
 from datetime import datetime
 from dateutil import parser
@@ -10,6 +11,7 @@ import pandas as pd
 
 from detect_delimiter import detect
 
+from reggie.reggie_constants import NO_PARTY_PLACEHOLDER
 from reggie.ingestion.download import (
     FileItem,
     Preprocessor,
@@ -50,6 +52,9 @@ class PreprocessWashington(Preprocessor):
         voter_file = [n for n in new_files if "vrdb" in n["name"].lower()][0]
         hist_files = [n for n in new_files if "history" in n["name"].lower()]
 
+        if not self.ignore_checks:
+            self.file_check(len(voter_file), hist_files=len(hist_files))
+
         # There are two possible separators. Detect it first.
         line = voter_file["obj"].readline().decode()
         delimiter = detect(line)
@@ -59,6 +64,10 @@ class PreprocessWashington(Preprocessor):
         df_voter = pd.read_csv(
             voter_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
         )
+
+        # TODO: REMOVE THIS, Randomly selecting subset of rows for testing
+        df_voter = df_voter.sample(100000)
+
         df_hist = pd.DataFrame()
         for hist_file in hist_files:
             line = hist_file["obj"].readline().decode()
@@ -70,6 +79,7 @@ class PreprocessWashington(Preprocessor):
             df_hist = df_hist.append(temp, ignore_index=True)
 
         # --- handling the voter history file --- #
+
         # Need to fix/combine the differently named VoterHistoryID
         # and VotingHistoryID columns
         if {"VotingHistoryID", "VoterHistoryID"}.issubset(df_hist.columns):
@@ -89,7 +99,7 @@ class PreprocessWashington(Preprocessor):
             str(k): {
                 "index": i,
                 "count": int(counts[i]),
-                "date": k.strftime("%Y-%m-%d"),
+                "date": k.strftime("%m/%d/%Y"),
             }
             for i, k in enumerate(elections)
         }
@@ -116,7 +126,7 @@ class PreprocessWashington(Preprocessor):
         df_voter = df_voter.loc[
             :, df_voter.columns.isin(self.config["column_names"])
         ]
-        df_voter = df_voter.set_index(self.config["voter_id"], drop=False)
+        df_voter = df_voter.set_index(self.config["voter_id"])
 
         # pandas loads any numeric column with NaN values as floats
         # causing formatting trouble during execute() with a few columns
@@ -144,24 +154,34 @@ class PreprocessWashington(Preprocessor):
 
         # Add party_idenitfier dummy values, 
         # since WA doesn't have party info
-        df_voter.loc[:, self.config["party_identifier"]] = "npa"
+        df_voter.loc[:, self.config["party_identifier"]] = NO_PARTY_PLACEHOLDER
+
+        # Check for missing columns; catch error because we're fixing them
+        # below
+        try:
+            self.column_check(list(df_voter.columns))
+        except MissingColumnError:
+            pass
 
         # Make sure all columns are present
         expected_cols = (
             self.config["ordered_columns"]
             + self.config["ordered_generated_columns"]
         )
+        # Remove the index column to avoid duplication
+        expected_cols.remove(self.config["voter_id"])
+
         df_voter = self.reconcile_columns(df_voter, expected_cols)
         df_voter = df_voter[expected_cols]
 
         self.meta = {
-            "message": "washington_{}".format(datetime.now().isoformat()),
+            "message": f"washington_{datetime.now().isoformat()}",
             "array_encoding": json.dumps(sorted_elections_dict),
             "array_decoding": json.dumps(sorted_elections),
         }
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(df_voter.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )

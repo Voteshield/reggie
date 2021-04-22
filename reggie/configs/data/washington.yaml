@@ -21,7 +21,9 @@ democratic_party: null
 republican_party: null
 no_party_affiliation: null
 abbreviation: wa
-precinct_identifer: CountyCode
+precinct_identifier: PrecinctCode
+expected_number_of_files: 1
+expected_number_of_hist_files: 2
 
 format:
   separate_hist: true
@@ -276,15 +278,6 @@ gender_codes:
   Male: M
   Female: F
   Unknown: U
-
-race_codes:
-  Not_Provided: NP
-
-party_codes:
-  Not_Provided: NP
-
-num_party_codes:
-  Not_Provided: NP
 
 # Database stuff  
 primary_key:
