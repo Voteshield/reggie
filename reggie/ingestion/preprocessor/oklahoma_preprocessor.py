@@ -83,8 +83,6 @@ class PreprocessOklahoma(Preprocessor):
         precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
-        print(vdf.columns)
-        print(vdf.head())
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
         vdf['County'] = county_map(vdf['Precinct'])
