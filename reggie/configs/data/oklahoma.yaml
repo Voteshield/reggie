@@ -40,7 +40,6 @@ no_party_affiliation: IND
 #NH = Absentee - Nursing Home Voter
 valid_voting_methods: ['IP', 'AI', 'AB', 'PI', 'CI', 'EI', 'MI', 'OV', 'NH']
 
-# Todo: Check ballotshield interation with this (but here is plural)
 absentee_ballot_codes: ['AB', 'CI', 'EI', 'MI', 'OV', 'NH', 'AI']
 format:
   separate_hist: TRUE # the hist file contains way more history than the columns
@@ -90,7 +89,6 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-# todo: check in with about all these generated columns
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]
@@ -150,16 +148,12 @@ columns:
   MailState: text
   MailZip: text
   Muni: text
-  #todo: float in dataframe but numeric, check how postgres deals with...everything?
-  # older files have it as text?
   MuniSub: text
   School: text
-  # same as above
   SchoolSub: text
   TechCenter: text
   TechCenterSub: text
   CountyComm: text
-  # todo: check these types, some are int and some are str
   CongressionalDistrict: int
   StateSenateDistrict: int
   StateHouseDistrict: int
@@ -207,8 +201,7 @@ ordered_columns:
   - CountyCommissioner
   - PollSite
   - County
-# Todo: Some of these are ints
-# Todo: voterid, precicnt needs to be a string because python really hates leading 0's
+# voterid, precicnt needs to be a string because python really hates leading 0's
 dtypes:
   Precinct: string
   LastName: string
