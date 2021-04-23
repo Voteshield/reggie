@@ -52,9 +52,11 @@ class PreprocessOklahoma(Preprocessor):
 
         new_files = self.unpack_files(self.main_file)
         precincts_file = [x for x in new_files if 'precincts' in x["name"].lower()][0]
-        voter_files = list(filter(lambda v: re.match('cty[0-9]+_vr', v["name"].lower()), new_files))
+        if precincts_file is None:
+            raise ValueError("Missing Precincts File")
+        voter_files = list(filter(lambda v: re.search('cty[0-9]+_vr.csv', v["name"].lower()), new_files))
         # self.file_check(len(voter_files))
-        hist_files = list(filter(lambda v: re.match('cty[0-9]+_vh', v["name"].lower()), new_files))
+        hist_files = list(filter(lambda v: re.search('cty[0-9]+_vh.csv', v["name"].lower()), new_files))
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         dtypes = self.config['dtypes']
@@ -81,6 +83,8 @@ class PreprocessOklahoma(Preprocessor):
         precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
+        print(vdf.columns)
+        print(vdf.head())
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
         vdf['County'] = county_map(vdf['Precinct'])
