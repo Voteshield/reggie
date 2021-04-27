@@ -10,6 +10,21 @@ import pandas as pd
 import datetime
 from io import StringIO
 from datetime import datetime
+from dateutil import parser
+from collections import defaultdict
+import json
+
+"""
+The Pennsylvania files come in sets, consisting of 4 files per county. The first is the voter file which contains
+the history columns.
+These history columns consist of two columns per election (for votetype and party) for 40 elections (80 columns total)
+ these are positional in the dataframe,
+There is an additional election map file, which contains the information about each election indexed on their position
+
+Pennsylvania also divides the districts into 40 positional columns which correspond to the two zone files given. One
+containing the information on the zone types and the other which maps to the zone codes found in the fields in the
+district columns in the dataframe
+"""
 
 
 class PreprocessPennsylvania(Preprocessor):
@@ -44,17 +59,40 @@ class PreprocessPennsylvania(Preprocessor):
             self.file_check(len(voter_files), len(election_maps))
         counties = config["county_names"]
         main_df = None
-        elections = 40
-        dfcols = config["ordered_columns"][:-3]
-        for i in range(elections):
-            dfcols.extend(["district_{}".format(i + 1)])
-        for i in range(elections):
-            dfcols.extend(["election_{}_vote_method".format(i + 1)])
-            dfcols.extend(["election_{}_party".format(i + 1)])
-        dfcols.extend(config["ordered_columns"][-3:])
+        # Preserving the order of the file sent, but concatinating the district and election columns which were
+        # dropped in the legacy processed file
+        dfcols = (
+            config["ordered_columns"][:-3]
+            + config["district_columns"]
+            + config["election_columns"]
+            + config["ordered_columns"][-3:]
+        )
 
-        for c in counties:
-            logging.info("Processing {}".format(c))
+        # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
+        # consolidates the non nan values into one string that can be appended as a column later for the all_history and
+        # the districts columns
+        def list_map(df_sub, columns, zone_dict=None):
+            def mapping(li, zone_dict=zone_dict):
+                if zone_dict is None:
+                    li = [x for x in li if x != "nan"]
+                    return li
+                else:
+                    li = [
+                        zone_dict[x]
+                        for x in li
+                        if x != "nan" and x in zone_dict
+                    ]
+                    return li
+
+            return pd.Series(
+                map(mapping, df_sub[columns].values.astype(str).tolist())
+            )
+
+        sorted_codes = []
+        sorted_code_dict = defaultdict(defaultdict)
+        dtypes = {col: "str" for col in dfcols}
+        for idx, c in enumerate(counties):
+            logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
             try:
                 voter_file = next(
@@ -72,93 +110,138 @@ class PreprocessPennsylvania(Preprocessor):
                 sep="\t",
                 names=dfcols,
                 error_bad_lines=False,
+                dtype=dtypes,
             )
             edf = self.read_csv_count_error_lines(
                 election_map["obj"],
                 sep="\t",
                 names=["county", "number", "title", "date"],
                 error_bad_lines=False,
+                dtype={
+                    "county": str,
+                    "number": str,
+                    "title": str,
+                    "date": str,
+                },
             )
             zdf = self.read_csv_count_error_lines(
                 zones["obj"],
                 sep="\t",
-                names=["county", "number", "code", "title"],
+                names=[
+                    "county_name",
+                    "zone_number",
+                    "zone_code",
+                    "zone_description",
+                ],
                 error_bad_lines=False,
             )
             tdf = self.read_csv_count_error_lines(
                 types["obj"],
                 sep="\t",
-                names=["county", "number", "abbr", "title"],
+                names=[
+                    "county_name",
+                    "zone_number",
+                    "zone_short_name",
+                    "zone_long_name",
+                ],
                 error_bad_lines=False,
             )
-            df = df.replace('"')
-            edf = edf.replace('"')
-            zdf = zdf.replace('"')
-            edf.index = edf["number"]
 
-            for i in range(elections):
-                s = pd.Series(index=df.index)
-                # Blair isn't sending all their election codes
-                try:
-                    s[:] = (
-                        edf.iloc[i]["title"] + " " + edf.iloc[i]["date"] + " "
-                    )
-                except IndexError:
-                    s[:] = "UNSPECIFIED"
-                df["election_{}".format(i)] = (
-                    s
-                    + df["election_{}_vote_method".format(i + 1)].apply(str)
+            # Refactor note: format the election data into the format expected in the original all_history column
+            edf["election_list"] = edf["title"] + " " + edf["date"]
+
+            # Gather the positional vote and distict columns
+            district_columns = df.columns[30:70].to_list()
+            vote_columns = df.columns[70:150].to_list()
+
+            # create a dict of the formatted election data using the index number in the given file, this
+            # corresponds to the column index beginning at the start of the vote columns in the dataframe
+            # Index begins starting at 1
+            election_map = pd.Series(
+                edf.election_list.values, index=edf.number
+            ).to_dict()
+
+            # merge the zone files together to consolidate the information in one dataframe
+            zdf = zdf.merge(tdf, how="left", on="zone_number")
+            # format a column field that contains the zone description and the name so
+            # that it matches the current district field
+            zdf["combined"] = (
+                zdf["zone_description"] + " Type: " + zdf["zone_long_name"]
+            )
+
+            # create a dict that utilizes the zone code as the key and the long name string as the value
+            zone_dict = dict(zip(zdf.zone_code.astype(str), zdf.combined))
+
+            # Gather the pairs of election columns to iterate over both at the same time to collect the information
+            # contained in both of the columns per election
+            vote_column_list = list(
+                zip(df.columns[70:150:2], df.columns[71:150:2])
+            )
+
+            # get the value from the eleciton map key for the election name,
+            # then combine it with the value in the party and vote type cells for the full election information
+            # Creates a history dataframe containing, as cells, the election name as gathered in the election file, the
+            # vote type (AP, A etc), and the party information, all separated by spaces
+            # The columns are all named election_#_vote_type but the cells contain the relevant information
+            vote_hist_df = pd.DataFrame(
+                {
+                    i: election_map[i.split("_")[1]]
                     + " "
-                    + df["election_{}_party".format(i + 1)]
-                )
-                df.loc[
-                    df["election_{}_vote_method".format(i + 1)].isna(),
-                    "election_{}".format(i),
-                ] = pd.np.nan
-                df = df.drop("election_{}_vote_method".format(i + 1), axis=1)
-                df = df.drop("election_{}_party".format(i + 1), axis=1)
-
-                df["district_{}".format(i + 1)] = df[
-                    "district_{}".format(i + 1)
-                ].map(
-                    zdf.drop_duplicates("code")
-                    .reset_index()
-                    .set_index("code")["title"]
-                )
-                df["district_{}".format(i + 1)] += ", Type: " + df[
-                    "district_{}".format(i + 1)
-                ].map(
-                    zdf.drop_duplicates("title")
-                    .reset_index()
-                    .set_index("title")["number"]
-                ).map(
-                    tdf.set_index("number")["title"]
-                )
-
-            df["all_history"] = df[
-                ["election_{}".format(i) for i in range(elections)]
-            ].values.tolist()
-            df["all_history"] = df["all_history"].map(
-                lambda L: list(filter(pd.notna, L))
-            )
-            df["districts"] = df[
-                ["district_{}".format(i + 1) for i in range(elections)]
-            ].values.tolist()
-            df["districts"] = df["districts"].map(
-                lambda L: list(filter(pd.notna, L))
+                    + df[i]
+                    + " "
+                    + df[j]
+                    for i, j in vote_column_list
+                    if i.split("_")[1] in election_map
+                }
             )
 
-            for i in range(elections):
-                df = df.drop("election_{}".format(i), axis=1)
-                df = df.drop("district_{}".format(i + 1), axis=1)
+            # counts for the metadata
+            counts = vote_hist_df.count()
+            for i in counts.index:
+                current_key = election_map[i.split("_")[1]]
 
-            # can check columns for each PA county?
-            self.column_check(list(df.columns))
+                # Metadata needs to be _ separated not space
+                current_key = "_".join(current_key.split())
+                if current_key in sorted_code_dict:
+                    sorted_code_dict[current_key]["count"] += int(counts[i])
+                else:
+                    current_date = edf.loc[edf["number"] == i.split("_")[1]][
+                        "date"
+                    ].values[0]
+                    new_dict_entry = defaultdict(str)
+                    new_dict_entry["date"] = current_date
+                    new_dict_entry["count"] = int(counts[i])
+                    sorted_code_dict[current_key] = new_dict_entry
+            # converts the dataframe to a series that contains the list of elections participate in indexed on position
+            vote_hist_df = list_map(vote_hist_df, vote_hist_df.columns)
+            districts = list_map(
+                df[district_columns], district_columns, zone_dict
+            )
+
+            df["all_history"] = vote_hist_df
+            df["districts"] = districts
+            df.drop(vote_columns, axis=1, inplace=True)
+            df.drop(district_columns, axis=1, inplace=True)
+
+            cols_to_check = [
+                col
+                for col in list(df.columns)
+                if col not in vote_columns and col not in district_columns
+            ]
+
+            self.column_check(list(df.columns), cols_to_check)
             if main_df is None:
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
+        sorted_keys = sorted(
+            sorted_code_dict.items(), key=lambda x: parser.parse(x[1]["date"])
+        )
+        for index, key in enumerate(sorted_keys):
+            sorted_code_dict[key[0]]["index"] = index
+            sorted_codes.append(key[0])
 
+        logging.info("coercing")
         main_df = config.coerce_dates(main_df)
         main_df = config.coerce_numeric(
             main_df,
@@ -179,8 +262,9 @@ class PreprocessPennsylvania(Preprocessor):
         logging.info("Writing CSV")
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_code_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
-
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
