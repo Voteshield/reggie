@@ -67,9 +67,6 @@ class PreprocessWashington(Preprocessor):
             voter_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
         )
 
-        # TODO: REMOVE THIS, Randomly selecting subset of rows for testing
-        df_voter = df_voter.sample(100000)
-
         df_hist = pd.DataFrame()
         for hist_file in hist_files:
             line = hist_file["obj"].readline().decode()
