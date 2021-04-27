@@ -14,7 +14,7 @@ separate_hispanic_origin: FALSE
 expected_number_of_files: 78
 date_format: '%m/%d/%Y'
 primary_locale_identifier: County
-# keep the county as string, have to derive it anyway
+county_identifier: County
 numeric_primary_locale: False
 party_identifier: PolitalAff
 birthday_identifier: DateOfBirth
@@ -201,7 +201,6 @@ ordered_columns:
   - CountyCommissioner
   - PollSite
   - County
-# voterid, precicnt needs to be a string because python really hates leading 0's
 dtypes:
   Precinct: string
   LastName: string
@@ -301,7 +300,6 @@ ballot_type_classes:
   absentee_overseas: OV
   absentee_nursing_home: NH
 
-#Todo: Check this doesn't mess anyone else up
 # Counties in the new dataframe will be the string name of the counties
 county_codes:
   Adair: '01'
@@ -381,20 +379,3 @@ county_codes:
   Washita: '75'
   Woods: '76'
   Woodward: '77'
-
-gender_codes:
-  Not_Provided: NP
-
-race_codes:
-  Not_Provided: NP
-
-status_codes:
-  Active: A
-  Inactive: I
-
-party_codes:
-  democratic_party: DEM
-  republican_party: REP
-  no_party_affiliated: IND
-
-num_party_codes: 4
