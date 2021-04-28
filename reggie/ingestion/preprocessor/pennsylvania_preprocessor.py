@@ -59,7 +59,14 @@ class PreprocessPennsylvania(Preprocessor):
             self.file_check(len(voter_files), len(election_maps))
         counties = config["county_names"]
         main_df = None
-        dfcols = config["ordered_columns"]
+        # Preserving the order of the file sent, but concatinating the district and election columns which were
+        # dropped in the legacy processed file
+        dfcols = (
+            config["ordered_columns"][:-3]
+            + config["district_columns"]
+            + config["election_columns"]
+            + config["ordered_columns"][-3:]
+        )
 
         # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
         # consolidates the non nan values into one string that can be appended as a column later for the all_history and
@@ -83,8 +90,7 @@ class PreprocessPennsylvania(Preprocessor):
 
         sorted_codes = []
         sorted_code_dict = defaultdict(defaultdict)
-        dtypes = {row: "str" for row in config["ordered_columns"]}
-        # for c in counties:
+        dtypes = {col: "str" for col in dfcols}
         for idx, c in enumerate(counties):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
@@ -151,26 +157,20 @@ class PreprocessPennsylvania(Preprocessor):
             # create a dict of the formatted election data using the index number in the given file, this
             # corresponds to the column index beginning at the start of the vote columns in the dataframe
             # Index begins starting at 1
-            # Todo: This upper is causing a pretty big diff but I am not sure if I care?
             election_map = pd.Series(
                 edf.election_list.values, index=edf.number
             ).to_dict()
 
             # merge the zone files together to consolidate the information in one dataframe
-            # todo: just add the info to the one dataframe rather than create a new one
             zdf = zdf.merge(tdf, how="left", on="zone_number")
             # format a column field that contains the zone description and the name so
             # that it matches the current district field
             zdf["combined"] = (
-                zdf["zone_description"]
-                + " Type: "
-                + zdf["zone_long_name"]
+                zdf["zone_description"] + " Type: " + zdf["zone_long_name"]
             )
 
             # create a dict that utilizes the zone code as the key and the long name string as the value
-            zone_dict = dict(
-                zip(zdf.zone_code.astype(str), zdf.combined)
-            )
+            zone_dict = dict(zip(zdf.zone_code.astype(str), zdf.combined))
 
             # Gather the pairs of election columns to iterate over both at the same time to collect the information
             # contained in both of the columns per election
@@ -214,7 +214,9 @@ class PreprocessPennsylvania(Preprocessor):
                     sorted_code_dict[current_key] = new_dict_entry
             # converts the dataframe to a series that contains the list of elections participate in indexed on position
             vote_hist_df = list_map(vote_hist_df, vote_hist_df.columns)
-            districts = list_map(df[district_columns], district_columns, zone_dict)
+            districts = list_map(
+                df[district_columns], district_columns, zone_dict
+            )
 
             df["all_history"] = vote_hist_df
             df["districts"] = districts
