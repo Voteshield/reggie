@@ -94,11 +94,18 @@ class PreprocessWashington(Preprocessor):
         ).dt
 
         elections, counts = np.unique(election_dates.date, return_counts=True)
+
+        def convert_date(k):
+            try:
+                k.strftime("%m/%d/%Y")
+            except ValueError:
+                return "unknown"
+
         sorted_elections_dict = {
             str(k): {
                 "index": i,
                 "count": int(counts[i]),
-                "date": k.strftime("%m/%d/%Y"),
+                "date": convert_date(k),
             }
             for i, k in enumerate(elections)
         }
