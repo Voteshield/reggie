@@ -147,9 +147,16 @@ class PreprocessNewJersey2(Preprocessor):
         voter_df["gender"] = voter_groups["voter_sex"].apply(
             lambda x: list(x)[-1]
         )
-        voter_df["registration_date"] = voter_groups[
-            "voter_registrationDate"
-        ].apply(lambda x: list(x)[-1])
+
+        # at some point in in late 2020-early 2021 NJ started adding a reg_date
+        # column and deprecating the registration_date information in the
+        # voter_history file
+        if "reg_date" in voter_df.columns:
+            voter_df.rename({"reg_date": "registration_date"}, inplace=True)
+        else:
+            voter_df["registration_date"] = voter_groups[
+                "voter_registrationDate"
+            ].apply(lambda x: list(x)[-1])
 
         self.column_check(list(voter_df.columns))
 
