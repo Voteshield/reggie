@@ -152,7 +152,9 @@ class PreprocessNewJersey2(Preprocessor):
         # column and deprecating the registration_date information in the
         # voter_history file
         if "reg_date" in voter_df.columns:
-            voter_df.rename({"reg_date": "registration_date"}, inplace=True)
+            voter_df.rename(
+                columns={"reg_date": "registration_date"}, inplace=True
+            )
         else:
             voter_df["registration_date"] = voter_groups[
                 "voter_registrationDate"
