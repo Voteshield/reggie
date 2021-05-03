@@ -64,7 +64,11 @@ class PreprocessWashington(Preprocessor):
         # know what the separator is.
         voter_file["obj"].seek(0)
         df_voter = pd.read_csv(
-            voter_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
+            voter_file["obj"],
+            sep=delimiter,
+            encoding="latin-1",
+            dtype=str,
+            error_bad_lines=False
         )
 
         df_hist = pd.DataFrame()
