@@ -196,6 +196,7 @@ class PreprocessWestVirginia(Preprocessor):
             )
 
             # Create dataframe of valid elections
+            logging.info(f'[{config["state"]}] Grouping history by election.')
             election_columns = ["id_election", "dt_election", "Election_Name"]
             df_elections_all = df_history[election_columns]
             df_elections = (
@@ -207,9 +208,7 @@ class PreprocessWestVirginia(Preprocessor):
             )
 
             # Clean up
-            df_elections["Election_Name"] = df_elections["Election_Name"].apply(
-                lambda x: x.strip()
-            )
+            df_elections["Election_Name"] = df_elections["Election_Name"].str.strip()
             df_elections = self.config.coerce_dates(
                 df_elections, col_list="hist_columns_types"
             )
@@ -219,24 +218,26 @@ class PreprocessWestVirginia(Preprocessor):
 
             # Create dict for encoding
             logging.info(
-                f'[{config["state"]}] Creating dictionary for history encoding.'
+                f'[{config["state"]}] Creating dictionary from {df_elections.size} elections for history encoding.'
             )
             array_encoding = {}
             for k, row in df_elections.iterrows():
                 try:
-                    array_encoding[row["id_election"]] = {
-                        "index": k,
-                        "count": row["count"],
-                        # This should be MM/DD/YYYY
-                        # See: https://github.com/Voteshield/Inspector/wiki/Adding-a-State
-                        "date": row["dt_election"].strftime("%m/%d/%Y")
-                        # "name": row["Election_Name"]
-                    }
-                except ValueError as e:
-                    logging.debug(f"{row}")
-                    raise e
+                    # This should be MM/DD/YYYY
+                    # See: https://github.com/Voteshield/Inspector/wiki/Adding-a-State
+                    election_date = row["dt_election"].strftime("%m/%d/%Y")
+                except ValueError:
+                    election_date = ""
+
+                array_encoding[row["id_election"]] = {
+                    "index": k,
+                    "count": row["count"],
+                    "date": election_date
+                    # "name": row["Election_Name"]
+                }
 
             # Create meta data
+            logging.info(f'[{config["state"]}] Compiling meta output.')
             self.meta = {
                 "message": "{}_{}".format(config["state"], datetime.now().isoformat()),
                 "array_encoding": json.dumps(array_encoding),
