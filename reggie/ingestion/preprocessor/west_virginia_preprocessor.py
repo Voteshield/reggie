@@ -79,6 +79,7 @@ class PreprocessWestVirginia(Preprocessor):
         voter_file = voter_files[0]
 
         # Read voter file into pandas dataframe
+        logging.info(f'[{config["state"]}] Loading voter file.')
         df_voters = pd.read_csv(
             voter_file["obj"],
             sep=config["delimiter"],
@@ -137,6 +138,7 @@ class PreprocessWestVirginia(Preprocessor):
 
         # Set index
         # TODO: Is this necessary?  Is this helpful higher up?
+        logging.info(f'[{config["state"]}] Setting index on voter file.')
         df_voters = df_voters.set_index(config["voter_id"], drop=False)
 
         # Get voter history file
@@ -146,10 +148,10 @@ class PreprocessWestVirginia(Preprocessor):
         ]
         if len(voter_histories) > 1:
             raise UnexpectedNumberOfFilesError(
-                f"{config['state']} has too many voter history files."
+                f"[{config['state']}] Too many voter history files."
             )
         if len(voter_files) < 1:
-            logging.info(f"{config['state']} unable to find a history file.")
+            logging.info(f"[{config['state']}] Unable to find a history file.")
 
             # Create meta data
             self.meta = {
@@ -159,6 +161,7 @@ class PreprocessWestVirginia(Preprocessor):
             voter_history = voter_histories[0]
 
             # Read voter file into pandas dataframe
+            logging.info(f'[{config["state"]}] Loading history file.')
             df_history = pd.read_csv(
                 voter_history["obj"],
                 sep=config["delimiter"],
@@ -167,25 +170,24 @@ class PreprocessWestVirginia(Preprocessor):
                 header=0 if config["has_headers"] else None,
             )
 
-            # all_history: text[]
-            # sparse_history: int[]
-            # # absentee, early-voting, regular
-            # votetype_history: text[]
-            # # Challenged (boolean)
-            # challenged_history: integer[]
+            # Starting transformations
+            logging.info(f'[{config["state"]}] Starting history transformations.')
 
             # Create new column that aggregrates the type of vote
-            # TODO: This is very slow
-            df_history["votetype"] = df_history.apply(self.derive_votetype, axis=1)
+            # NOTE: This assumes that "Y" is always used for yes
+            df_history["votetype"] = "unknown"
+            df_history.votetype[df_history.fl_absentee == "Y"] = "absentee"
+            df_history.votetype[df_history.fl_early_voting == "Y"] = "early"
+            df_history.votetype[df_history.fl_regular == "Y"] = "regular"
 
             # Clean the challenged flag, which looks to only be checked
             # if the voter voted absentee
-            df_history["fl_challenged"] = df_history["fl_challenged"].apply(
-                self.clean_challenged_value
-            )
+            # NOTE: Assuming empty is not challenged i.e. False
+            df_history.fl_challenged = df_history.fl_challenged == "Y"
 
-            # Group history by voter id, then attach relevante group data to
+            # Group history by voter id, then attach relevant group data to
             # voter dataframe
+            logging.info(f'[{config["state"]}] Grouping history by voter.')
             df_history_grouped = df_history.groupby("id_voter")
             df_voters["all_history"] = df_history_grouped["id_election"].apply(list)
             df_voters["votetype_history"] = df_history_grouped["votetype"].apply(list)
@@ -216,16 +218,23 @@ class PreprocessWestVirginia(Preprocessor):
             df_elections = df_elections.sort_values(by=["dt_election"]).reset_index()
 
             # Create dict for encoding
+            logging.info(
+                f'[{config["state"]}] Creating dictionary for history encoding.'
+            )
             array_encoding = {}
             for k, row in df_elections.iterrows():
-                array_encoding[row["id_election"]] = {
-                    "index": k,
-                    "count": row["count"],
-                    # This should be MM/DD/YYYY
-                    # See: https://github.com/Voteshield/Inspector/wiki/Adding-a-State
-                    "date": row["dt_election"].strftime("%m/%d/%Y")
-                    # "name": row["Election_Name"]
-                }
+                try:
+                    array_encoding[row["id_election"]] = {
+                        "index": k,
+                        "count": row["count"],
+                        # This should be MM/DD/YYYY
+                        # See: https://github.com/Voteshield/Inspector/wiki/Adding-a-State
+                        "date": row["dt_election"].strftime("%m/%d/%Y")
+                        # "name": row["Election_Name"]
+                    }
+                except ValueError as e:
+                    logging.debug(f"{row}")
+                    raise e
 
             # Create meta data
             self.meta = {
@@ -263,37 +272,6 @@ class PreprocessWestVirginia(Preprocessor):
         for k, v in lookup.items():
             if v.match(value):
                 return k
-
-        return "unknown"
-
-    def clean_challenged_value(self, value):
-        true_regex = re.compile("^y$", re.IGNORECASE)
-        false_regex = re.compile("^n$", re.IGNORECASE)
-
-        if not isinstance(value, str):
-            return None
-        elif true_regex.match(value):
-            return True
-        elif false_regex.match(value):
-            return False
-
-        return None
-
-    def derive_votetype(self, row):
-        """
-        Given row in voter history, make a consistent vote type.
-        """
-        true_regex = re.compile("^y$", re.IGNORECASE)
-        # false_regex = re.compile("^n$", re.IGNORECASE)
-
-        if isinstance(row["fl_absentee"], str) and true_regex.match(row["fl_absentee"]):
-            return "absentee"
-        elif isinstance(row["fl_early_voting"], str) and true_regex.match(
-            row["fl_early_voting"]
-        ):
-            return "early"
-        elif isinstance(row["fl_regular"], str) and true_regex.match(row["fl_regular"]):
-            return "regular"
 
         return "unknown"
 
