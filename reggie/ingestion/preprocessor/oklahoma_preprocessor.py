@@ -16,20 +16,6 @@ import gc
 import json
 import re
 
-"""
-Todo:
-Add Important Columns and check order (currently precicnts are added before County)
-
-
-VF Columns:
-Todo: Fill out
-
-VH Columns: 
-  - VoterID
-  - ElectionDate
-  - VotingMethod 
-"""
-
 
 class PreprocessOklahoma(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -55,13 +41,14 @@ class PreprocessOklahoma(Preprocessor):
         if precincts_file is None:
             raise ValueError("Missing Precincts File")
         voter_files = list(filter(lambda v: re.search('cty[0-9]+_vr.csv', v["name"].lower()), new_files))
-        # self.file_check(len(voter_files))
+        self.file_check(len(voter_files) + 1)
         hist_files = list(filter(lambda v: re.search('cty[0-9]+_vh.csv', v["name"].lower()), new_files))
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         dtypes = self.config['dtypes']
         cty_map = dict([(value, key) for key, value in self.config['county_codes'].items()])
 
+        # Returns the string county name for the county code contained in the first two characters of the precicnct string
         def county_map(pct):
             def mapping(prec):
                 county = cty_map[prec[:2]]
@@ -77,6 +64,7 @@ class PreprocessOklahoma(Preprocessor):
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
         vdf.drop_duplicates(inplace=True)
 
+        # Read and merge the precincts file to the main df
         precinct_dtypes = {'PrecinctCode': 'string', 'CongressionalDistrict': 'int64', 'StateSenateDistrict': 'int64', 
                            'StateHouseDistrict': 'int64', 'CountyCommissioner': 'int64', 'PollSite': 'string'}
         precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype=precinct_dtypes)
@@ -85,7 +73,10 @@ class PreprocessOklahoma(Preprocessor):
             raise ValueError("Missing Precicnts file")
         vdf = vdf.merge(precincts, how='left', on='Precinct')
 
+        # Add the county column
         vdf['County'] = county_map(vdf['Precinct'])
+
+        # At one point OK added some columns, this adds them to older files for backwards compatibility
         self.reconcile_columns(vdf, self.config["columns"])
         for file in hist_files:
             temp_hdf = pd.read_csv(file["obj"], dtype={'VoterID': 'string'})
