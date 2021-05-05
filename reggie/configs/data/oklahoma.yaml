@@ -9,8 +9,7 @@ file_class: voter_file
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
-# -- VoteShield -- #
-# includes precint file
+# expected file number includes precinct file
 expected_number_of_files: 78
 date_format: '%m/%d/%Y'
 primary_locale_identifier: County
@@ -25,7 +24,7 @@ voter_status_inactive: I
 democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB
-# Everyone has ap arty here?
+# Everyone in OK is registered to a party, and IND is used as NPA
 no_party_affiliation: IND
 
 #OK has pretty great absentee codes
@@ -39,10 +38,9 @@ no_party_affiliation: IND
 #OV = Absentee - Overseas
 #NH = Absentee - Nursing Home Voter
 valid_voting_methods: ['IP', 'AI', 'AB', 'PI', 'CI', 'EI', 'MI', 'OV', 'NH']
-
 absentee_ballot_codes: ['AB', 'CI', 'EI', 'MI', 'OV', 'NH', 'AI']
 format:
-  separate_hist: TRUE # the hist file contains way more history than the columns
+  separate_hist: TRUE
   separate_counties_voter_file: TRUE
   separate_counties_hist_file: TRUE
   hist_election_rows: FALSE
@@ -164,6 +162,8 @@ hist_columns:
   - VoterID
   - ElectionDate
   - VotingMethod
+
+# The county column is added in the preprocessor
 ordered_columns:
   - Precinct
   - LastName
@@ -252,42 +252,6 @@ dtypes:
   HistMethod9: string
   VoterHist10: string
   HistMethod10: string
-column_names:
-  - Precinct
-  - LastName
-  - FirstName
-  - MiddleName
-  - Suffix
-  - VoterID
-  - PolitalAff
-  - Status
-  - StreetNum
-  - StreetDir
-  - StreetName
-  - StreetType
-  - BldgNum
-  - City
-  - Zip
-  - DateOfBirth
-  - OriginalRegistration
-  - MailStreet1
-  - MailStreet2
-  - MailCity
-  - MailState
-  - MailZip
-  - Muni
-  - MuniSub
-  - School
-  - SchoolSub
-  - TechCenter
-  - TechCenterSub
-  - CountyComm
-  # additional columns
-  - CongressionalDistrict
-  - StateSenateDistrict
-  - StateHouseDistrict
-  - CountyCommissioner
-  - PollSite
 
 ballot_type_classes:
   in_person: IP
@@ -299,8 +263,7 @@ ballot_type_classes:
   absentee_military: MI
   absentee_overseas: OV
   absentee_nursing_home: NH
-
-# Counties in the new dataframe will be the string name of the counties
+# Counties in the processed file will have a column "county" will be the string name of the counties
 county_codes:
   Adair: '01'
   Alfalfa: '02'
