@@ -8,7 +8,9 @@ fixed_width: false
 
 # -- VoteShield -- #
 
-date_format: '%Y-%m-%d'
+date_format:
+  - "%m/%d/%Y"
+  - "%Y-%m-%d"
 primary_locale_identifier: CountyCode
 numeric_primary_locale: FALSE
 party_identifier: party_identifier
