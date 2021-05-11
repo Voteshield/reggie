@@ -155,8 +155,10 @@ class PreprocessNewJersey2(Preprocessor):
             voter_df.rename(
                 columns={"reg_date": "registration_date"}, inplace=True
             )
-            # remove the UTC
-            voter_df['registration_date'] = pd.to_datetime(voter_df.registration_date).dt.tz_localize(None)
+            # remove the UTC, does not fail if not utc
+            voter_df["registration_date"] = pd.to_datetime(
+                voter_df.registration_date
+            ).dt.tz_localize(None)
         else:
             voter_df["registration_date"] = voter_groups[
                 "voter_registrationDate"
