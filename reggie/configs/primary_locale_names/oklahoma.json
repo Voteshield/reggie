@@ -1,310 +1,79 @@
 [
-    {
-        "name": "Adair",
-        "id": "1"
-    },
-    {
-        "name": "Alfalfa",
-        "id": "2"
-    },
-    {
-        "name": "Atoka",
-        "id": "3"
-    },
-    {
-        "name": "Beaver",
-        "id": "4"
-    },
-    {
-        "name": "Beckham",
-        "id": "5"
-    },
-    {
-        "name": "Blaine",
-        "id": "6"
-    },
-    {
-        "name": "Bryan",
-        "id": "7"
-    },
-    {
-        "name": "Caddo",
-        "id": "08"
-    },
-    {
-        "name": "Canadian",
-        "id": "09"
-    },
-    {
-        "name": "Carter",
-        "id": "10"
-    },
-    {
-        "name": "Cherokee",
-        "id": "11"
-    },
-    {
-        "name": "Choctaw",
-        "id": "12"
-    },
-    {
-        "name": "Cimarron",
-        "id": "13"
-    },
-    {
-        "name": "Cleveland",
-        "id": "14"
-    },
-    {
-        "name": "Coal",
-        "id": "15"
-    },
-    {
-        "name": "Comanche",
-        "id": "16"
-    },
-    {
-        "name": "Cotton",
-        "id": "17"
-    },
-    {
-        "name": "Craig",
-        "id": "18"
-    },
-    {
-        "name": "Creek",
-        "id": "19"
-    },
-    {
-        "name": "Custer",
-        "id": "20"
-    },
-    {
-        "name": "Delaware",
-        "id": "21"
-    },
-    {
-        "name": "Dewey",
-        "id": "22"
-    },
-    {
-        "name": "Ellis",
-        "id": "23"
-    },
-    {
-        "name": "Garfield",
-        "id": "24"
-    },
-    {
-        "name": "Garvin",
-        "id": "25"
-    },
-    {
-        "name": "Grady",
-        "id": "26"
-    },
-    {
-        "name": "Grant",
-        "id": "27"
-    },
-    {
-        "name": "Greer",
-        "id": "28"
-    },
-    {
-        "name": "Harmon",
-        "id": "29"
-    },
-    {
-        "name": "Harper",
-        "id": "30"
-    },
-    {
-        "name": "Haskell",
-        "id": "31"
-    },
-    {
-        "name": "Hughes",
-        "id": "32"
-    },
-    {
-        "name": "Jackson",
-        "id": "33"
-    },
-    {
-        "name": "Jefferson",
-        "id": "34"
-    },
-    {
-        "name": "Johnston",
-        "id": "35"
-    },
-    {
-        "name": "Kay",
-        "id": "36"
-    },
-    {
-        "name": "Kingfisher",
-        "id": "37"
-    },
-    {
-        "name": "Kiowa",
-        "id": "38"
-    },
-    {
-        "name": "Latimer",
-        "id": "39"
-    },
-    {
-        "name": "Le Flore",
-        "id": "40"
-    },
-    {
-        "name": "Lincoln",
-        "id": "41"
-    },
-    {
-        "name": "Logan",
-        "id": "42"
-    },
-    {
-        "name": "Love",
-        "id": "43"
-    },
-    {
-        "name": "McClain",
-        "id": "44"
-    },
-    {
-        "name": "McCurtain",
-        "id": "45"
-    },
-    {
-        "name": "McIntosh",
-        "id": "46"
-    },
-    {
-        "name": "Major",
-        "id": "47"
-    },
-    {
-        "name": "Marshall",
-        "id": "48"
-    },
-    {
-        "name": "Mayes",
-        "id": "49"
-    },
-    {
-        "name": "Murray",
-        "id": "50"
-    },
-    {
-        "name": "Muskogee",
-        "id": "51"
-    },
-    {
-        "name": "Noble",
-        "id": "52"
-    },
-    {
-        "name": "Nowata",
-        "id": "53"
-    },
-    {
-        "name": "Okfuskee",
-        "id": "54"
-    },
-    {
-        "name": "Oklahoma",
-        "id": "55"
-    },
-    {
-        "name": "Okmulgee",
-        "id": "56"
-    },
-    {
-        "name": "Osage",
-        "id": "57"
-    },
-    {
-        "name": "Ottawa",
-        "id": "58"
-    },
-    {
-        "name": "Pawnee",
-        "id": "59"
-    },
-    {
-        "name": "Payne",
-        "id": "60"
-    },
-    {
-        "name": "Pittsburg",
-        "id": "61"
-    },
-    {
-        "name": "Pontotoc",
-        "id": "62"
-    },
-    {
-        "name": "Pottawatomie",
-        "id": "63"
-    },
-    {
-        "name": "Pushmataha",
-        "id": "64"
-    },
-    {
-        "name": "Roger Mills",
-        "id": "65"
-    },
-    {
-        "name": "Rogers",
-        "id": "66"
-    },
-    {
-        "name": "Seminole",
-        "id": "67"
-    },
-    {
-        "name": "Sequoyah",
-        "id": "68"
-    },
-    {
-        "name": "Stephens",
-        "id": "69"
-    },
-    {
-        "name": "Texas",
-        "id": "70"
-    },
-    {
-        "name": "Tillman",
-        "id": "71"
-    },
-    {
-        "name": "Tulsa",
-        "id": "72"
-    },
-    {
-        "name": "Wagoner",
-        "id": "73"
-    },
-    {
-        "name": "Washington",
-        "id": "74"
-    },
-    {
-        "name": "Washita",
-        "id": "75"
-    },
-    {
-        "name": "Woods",
-        "id": "76"
-    },
-    {
-        "name": "Woodward",
-        "id": "77"
-    }
+  { "name": "Adair", "id": "adair" },
+  { "name": "Alfalfa", "id": "alfalfa" },
+  { "name": "Atoka", "id": "atoka" },
+  { "name": "Beaver", "id": "beaver" },
+  { "name": "Beckham", "id": "beckham" },
+  { "name": "Blaine", "id": "blaine" },
+  { "name": "Bryan", "id": "bryan" },
+  { "name": "Caddo", "id": "caddo" },
+  { "name": "Canadian", "id": "canadian" },
+  { "name": "Carter", "id": "carter" },
+  { "name": "Cherokee", "id": "cherokee" },
+  { "name": "Choctaw", "id": "choctaw" },
+  { "name": "Cimarron", "id": "cimarron" },
+  { "name": "Cleveland", "id": "cleveland" },
+  { "name": "Coal", "id": "coal" },
+  { "name": "Comanche", "id": "comanche" },
+  { "name": "Cotton", "id": "cotton" },
+  { "name": "Craig", "id": "craig" },
+  { "name": "Creek", "id": "creek" },
+  { "name": "Custer", "id": "custer" },
+  { "name": "Delaware", "id": "delaware" },
+  { "name": "Dewey", "id": "cewey" },
+  { "name": "Ellis", "id": "ellis" },
+  { "name": "Garfield", "id": "garfield" },
+  { "name": "Garvin", "id": "garvin" },
+  { "name": "Grady", "id": "grady" },
+  { "name": "Grant", "id": "grant" },
+  { "name": "Greer", "id": "greer" },
+  { "name": "Harmon", "id": "harmon" },
+  { "name": "Harper", "id": "harper" },
+  { "name": "Haskell", "id": "haskell" },
+  { "name": "Hughes", "id": "hughes" },
+  { "name": "Jackson", "id": "jackson" },
+  { "name": "Jefferson", "id": "jefferson" },
+  { "name": "Johnston", "id": "johnston" },
+  { "name": "Kay", "id": "kay" },
+  { "name": "Kingfisher", "id": "kingfisher" },
+  { "name": "Kiowa", "id": "kiowa" },
+  { "name": "Latimer", "id": "latimer" },
+  { "name": "Le Flore", "id": "le flore" },
+  { "name": "Lincoln", "id": "lincoln" },
+  { "name": "Logan", "id": "logan" },
+  { "name": "Love", "id": "love" },
+  { "name": "McClain", "id": "mcclain" },
+  { "name": "McCurtain", "id": "mccurtain" },
+  { "name": "McIntosh", "id": "mcintosh" },
+  { "name": "Major", "id": "major" },
+  { "name": "Marshall", "id": "marshall" },
+  { "name": "Mayes", "id": "mayes" },
+  { "name": "Murray", "id": "murray" },
+  { "name": "Muskogee", "id": "muskogee" },
+  { "name": "Noble", "id": "noble" },
+  { "name": "Nowata", "id": "nowata" },
+  { "name": "Okfuskee", "id": "okfuskee" },
+  { "name": "Oklahoma", "id": "oklahoma_county" },
+  { "name": "Okmulgee", "id": "okmulgee" },
+  { "name": "Osage", "id": "osage" },
+  { "name": "Ottawa", "id": "ottawa" },
+  { "name": "Pawnee", "id": "pawnee" },
+  { "name": "Payne", "id": "payne" },
+  { "name": "Pittsburg", "id": "pittsburg" },
+  { "name": "Pontotoc", "id": "pontotoc" },
+  { "name": "Pottawatomie", "id": "pottawatomie" },
+  { "name": "Pushmataha", "id": "pushmataha" },
+  { "name": "Roger Mills", "id": "roger mills" },
+  { "name": "Rogers", "id": "rogers" },
+  { "name": "Seminole", "id": "seminole" },
+  { "name": "Sequoyah", "id": "sequoyah" },
+  { "name": "Stephens", "id": "stephens" },
+  { "name": "Texas", "id": "texas" },
+  { "name": "Tillman", "id": "tillman" },
+  { "name": "Tulsa", "id": "tulsa" },
+  { "name": "Wagoner", "id": "wagoner" },
+  { "name": "Washington", "id": "washington" },
+  { "name": "Washita", "id": "washita" },
+  { "name": "Woods", "id": "woods" },
+  { "name": "Woodward", "id": "woodward" }
 ]
