@@ -157,7 +157,7 @@ class PreprocessNewJersey2(Preprocessor):
             )
             # remove the UTC, does not fail if not utc
             voter_df["registration_date"] = pd.to_datetime(
-                voter_df.registration_date
+                voter_df.registration_date, errors='coerce'
             ).dt.tz_localize(None)
         else:
             voter_df["registration_date"] = voter_groups[
