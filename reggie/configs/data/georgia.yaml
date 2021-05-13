@@ -8,7 +8,7 @@ expected_number_of_files: 1
 voter_id: Registration_Number
 county_identifier: County_code
 primary_locale_identifier: County_code
-numeric_primary_locale: false
+numeric_primary_locale: true
 precinct_identifier: County_precinct_id
 birthday_identifier: Year_of_Birth
 voter_status: Voter_status

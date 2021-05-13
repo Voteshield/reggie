@@ -219,14 +219,8 @@ class Config(object):
                 df[field] = utf_decoded.str.decode('utf-8')
         return df
 
-    def admissible_change_types(self):
-        change_types = [col for col in self.data["ordered_columns"]
-                        if (col not in self.history_change_types() and
-                            col != self.data["voter_id"])]
-        return change_types
-
-    def history_change_types(self):
-        history_cols = [
+    def no_diff_columns(self):
+        cols = [
             "all_history",
             "primary_history",
             "special_history",
@@ -246,6 +240,7 @@ class Config(object):
             "Date_last_voted",
             "Date_changed",
             "Last_contact_date",
+            "birth_age",
             "text_election_code_1",
             "text_election_code_2",
             "text_election_code_3",
@@ -263,7 +258,7 @@ class Config(object):
             "election_type_history",
             "election_category_history",
             "town_history"]
-        return history_cols
+        return cols
 
     def get_locale_field(self, locale_type):
         """
