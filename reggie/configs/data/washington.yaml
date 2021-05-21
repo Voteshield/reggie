@@ -11,6 +11,7 @@ fixed_width: false
 date_format:
   - "%m/%d/%Y"
   - "%Y-%m-%d"
+county_identifier: CountyCode
 primary_locale_identifier: CountyCode
 numeric_primary_locale: FALSE
 party_identifier: party_identifier
