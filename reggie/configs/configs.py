@@ -258,6 +258,11 @@ class Config(object):
             "election_type_history",
             "election_category_history",
             "town_history"]
+
+        # North Carolina has many not-very-interesting columns
+        if self.data["state"] == "north_carolina":
+            cols = cols + self.data["no_diff_columns"]
+
         return cols
 
     def get_locale_field(self, locale_type):

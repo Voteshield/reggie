@@ -385,3 +385,32 @@ ethnicity_options:
   'un': undefined
   'hl': hispanic
   'nl': not_hispanic
+no_diff_columns:
+  - absent_ind
+  - birth_place
+  - Confidential_ind
+  - county_commiss_abbrv
+  - dist_1_abbrv
+  - dist_2_abbrv
+  - drivers_lic
+  - fire_dist_abbrv
+  - fire_dist_desc
+  - full_phone_number
+  - judic_dist_abbrv
+  - munic_dist_abbrv
+  - municipality_abbrv
+  - precinct_abbrv
+  - rescue_dist_abbrv
+  - rescue_dist_desc
+  - sanit_dist_abbrv
+  - sanit_dist_desc
+  - school_dist_abbrv
+  - school_dist_desc
+  - sewer_dist_abbrv
+  - sewer_dist_desc
+  - super_court_abbrv
+  - township_abbrv
+  - vtd_abbrv
+  - ward_abbrv
+  - water_dist_abbrv
+  - water_dist_desc
