@@ -219,47 +219,6 @@ class Config(object):
                 df[field] = utf_decoded.str.decode('utf-8')
         return df
 
-    def no_diff_columns(self):
-        cols = [
-            "all_history",
-            "primary_history",
-            "special_history",
-            "general_history",
-            "sparse_history",
-            "vote_type",
-            "votetype_history",
-            "county_history",
-            "jurisdiction_history",
-            "schooldistrict_history",
-            "all_voting_methods",
-            "party_history",
-            "coded_history",
-            "verbose_history",
-            "voterhistory",
-            "lastvoteddate",
-            "Date_last_voted",
-            "Date_changed",
-            "Last_contact_date",
-            "birth_age",
-            "text_election_code_1",
-            "text_election_code_2",
-            "text_election_code_3",
-            "text_election_code_4",
-            "text_election_code_5",
-            "text_election_code_6",
-            "text_election_code_7",
-            "text_election_code_8",
-            "text_election_code_9",
-            "text_election_code_10",
-            "Election_Date",
-            "Election_Type",
-            "Election_Party",
-            "Election_Voting_Method",
-            "election_type_history",
-            "election_category_history",
-            "town_history"]
-        return cols
-
     def get_locale_field(self, locale_type):
         """
         Return field name (e.g. "county_code") for a standardized locale type.
