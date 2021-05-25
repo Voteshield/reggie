@@ -8,6 +8,7 @@ import numpy as np
 from datetime import datetime
 import gc
 from reggie.ingestion.utils import date_from_str, MissingNumColumnsError
+import chardet
 
 
 class PreprocessColorado(Preprocessor):
@@ -68,12 +69,19 @@ class PreprocessColorado(Preprocessor):
                     and not master_vf_version
                 ):
                     logging.info("reading in {}".format(i["name"]))
+                    result = chardet.detect(i["obj"].read(10000))
+                    if result['encoding'] == 'ascii':
+                        print('making it latin')
+                        encoding = 'latin-1'
+                    else:
+                        encoding = result['encoding']
+                    i["obj"].seek(0)
                     df_voter = pd.concat(
                         [
                             df_voter,
                             self.read_csv_count_error_lines(
                                 i["obj"],
-                                encoding="latin-1",
+                                encoding=encoding,
                                 error_bad_lines=False,
                             ),
                         ],
