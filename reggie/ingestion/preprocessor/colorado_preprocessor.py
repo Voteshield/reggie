@@ -21,7 +21,7 @@ class PreprocessColorado(Preprocessor):
             raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=force_date,
-            **kwargs
+            **kwargs,
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
@@ -69,12 +69,12 @@ class PreprocessColorado(Preprocessor):
                     and not master_vf_version
                 ):
                     logging.info("reading in {}".format(i["name"]))
-                    result = chardet.detect(i["obj"].read(10000))
-                    if result['encoding'] == 'ascii':
-                        encoding = 'latin-1'
+                    encoding_result = chardet.detect(i["obj"].read(10000))
+                    if encoding_result["encoding"] == "ascii":
+                        encoding = "latin-1"
                         index_col = None
                     else:
-                        encoding = result['encoding']
+                        encoding = encoding_result["encoding"]
                         index_col = False
                     i["obj"].seek(0)
                     df_voter = pd.concat(
@@ -191,10 +191,12 @@ class PreprocessColorado(Preprocessor):
                     df_voter[f"MAILING_ADDRESS_{num}"] = np.where(
                         df_voter[f"MAILING_ADDRESS_{num}"].isnull(),
                         df_voter[f"MAIL_ADDR{num}"],
-                        df_voter[f"MAILING_ADDRESS_{num}"])
+                        df_voter[f"MAILING_ADDRESS_{num}"],
+                    )
                 else:
-                    df_voter[f"MAILING_ADDRESS_{num}"] = \
-                        df_voter[f"MAIL_ADDR{num}"]
+                    df_voter[f"MAILING_ADDRESS_{num}"] = df_voter[
+                        f"MAIL_ADDR{num}"
+                    ]
                 df_voter.drop(columns=[f"MAIL_ADDR{num}"], inplace=True)
 
         df_voter = self.config.coerce_strings(df_voter)
