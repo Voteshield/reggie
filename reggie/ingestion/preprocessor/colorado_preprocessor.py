@@ -71,10 +71,11 @@ class PreprocessColorado(Preprocessor):
                     logging.info("reading in {}".format(i["name"]))
                     result = chardet.detect(i["obj"].read(10000))
                     if result['encoding'] == 'ascii':
-                        print('making it latin')
                         encoding = 'latin-1'
+                        index_col = None
                     else:
                         encoding = result['encoding']
+                        index_col = False
                     i["obj"].seek(0)
                     df_voter = pd.concat(
                         [
@@ -83,6 +84,7 @@ class PreprocessColorado(Preprocessor):
                                 i["obj"],
                                 encoding=encoding,
                                 error_bad_lines=False,
+                                index_col=index_col,
                             ),
                         ],
                         axis=0,
