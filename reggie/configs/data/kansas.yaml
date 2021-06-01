@@ -72,32 +72,6 @@ base_columns:
   post_value: text
   state: text
   text_registrant_id: int
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - Democratic
-  - Republican
-  - Libertarian
-  - Unaffiliated
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 generated_columns:
   all_history: int[]
 ordered_generated_columns:

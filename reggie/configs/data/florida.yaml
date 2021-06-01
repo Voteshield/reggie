@@ -84,54 +84,12 @@ base_columns:
   state: text
 additional_snapshot_columns:
   all_history: text[]
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - REP
-  - DEM
-  - NPA
-  - CPF
-  - ECO
-  - GRE
-  - LPF
-  - PSL
-  - REF
-  - INT
-  - IDP
-  - AIP
-  - locale
 hist_columns:
   - county
   - VoterID
   - date
   - election_type
   - vote_type
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   County_Code: text
   Voter_ID: text

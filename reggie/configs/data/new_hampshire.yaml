@@ -70,22 +70,6 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-summary_columns:
-  - totals
-  - date
-  - state
-  - dem
-  - rep
-  - und
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - text
 columns:
   id_voter: int
   nm_last: text

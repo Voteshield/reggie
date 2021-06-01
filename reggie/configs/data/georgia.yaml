@@ -81,24 +81,6 @@ base_columns:
   state: varchar
   party_identifier: text
 has_headers: YES
-summary_columns:
-  - totals
-  - date
-  - state
-  - locale
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
 columns:
   County_code: int
   Registration_Number: text

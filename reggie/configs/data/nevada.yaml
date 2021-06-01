@@ -75,40 +75,6 @@ ordered_generated_columns:
   - votetype_history
   - sparse_history
 has_headers: NO
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - Independent_American_Party
-  - Republican
-  - Democrat
-  - Non_Partisan
-  - Libertarian_Party
-  - Other_All_Others
-  - Green_Party
-  - Natural_Law_Party
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   VoterID: int
   County: varchar

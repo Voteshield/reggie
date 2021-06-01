@@ -66,32 +66,6 @@ base_columns:
   post_value: text
   state: text
   ncid: text
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - REP
-  - UNA
-  - DEM
-  - LIB
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
 data_chunk_links:
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvoter_Statewide.zip
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvhis_Statewide.zip

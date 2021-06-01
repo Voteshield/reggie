@@ -94,38 +94,6 @@ base_columns:
   pre_value: text
   post_value: text
   state: text
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - dem
-  - rep
-  - pnd
-  - oth
-  - ind
-  - lbt
-  - grn
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
     RegistrantID: int
     RegistrationDate: date

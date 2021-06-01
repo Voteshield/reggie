@@ -96,32 +96,6 @@ ordered_generated_columns:
   - all_history
   - votetype_history
   - sparse_history
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - dem
-  - rep
-  - ind
-  - lib
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   Precinct: text
   LastName: text

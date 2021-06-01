@@ -61,24 +61,6 @@ base_columns:
   post_value: text
   state: text
   VoterId: text
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
 additional_snapshot_columns:
   all_history: text[]
 generated_columns:

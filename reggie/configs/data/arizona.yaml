@@ -115,44 +115,6 @@ ordered_generated_columns:
   - all_history
   - all_voting_methods
 has_headers: YES
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - Republican
-  - Democratic
-  - Party_Not_Designated
-  - Independent
-  - Other
-  - Libertarian
-  - Green
-  - Liberal
-  - Reform
-  - Americans_Elect
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
     county: varchar
     cde_registrant_status: varchar

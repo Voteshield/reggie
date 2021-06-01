@@ -85,29 +85,11 @@ additional_snapshot_columns:
   all_history: text[]
   sparse_history: int[]
   vote_type: text[]
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - locale
 hist_columns:
   - Election_Date
   - Election_Type
   - Election_Party
   - Election_Voting_Method
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
 columns:
   County_Code: int
   Precinct: text
