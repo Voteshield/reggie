@@ -69,6 +69,11 @@ class PreprocessColorado(Preprocessor):
                     and not master_vf_version
                 ):
                     logging.info("reading in {}".format(i["name"]))
+                    # Colorado has a couple different encodings they send us, the format that is detected as ascii will
+                    # error out if not read in as latin-1
+                    # The format that is typically detected as utf-8-sig needs to have the index col explicitly set to
+                    # false, or else pandas will attempt to read the voterid column
+                    # in as the index and the history won't apply
                     encoding_result = chardet.detect(i["obj"].read(10000))
                     if encoding_result["encoding"] == "ascii":
                         encoding = "latin-1"
