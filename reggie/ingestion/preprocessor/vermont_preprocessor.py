@@ -39,7 +39,10 @@ class PreprocessVermont(Preprocessor):
             def mapping(li):
                 li = [x for x in li if x != "nan"]
                 return li
-            return pd.Series(map(mapping, df[columns].values.astype(str).tolist()))
+
+            return pd.Series(
+                map(mapping, df[columns].values.astype(str).tolist())
+            )
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
         self.file_check(len(new_files))
@@ -52,8 +55,13 @@ class PreprocessVermont(Preprocessor):
         vdf.drop(columns=unnamed_cols, inplace=True)
         self.column_check(list(vdf.columns))
         # Will probably need to drop election columns for snapshot differencer
-        election_columns = [col for col in vdf.columns if 'election' in col.lower()]
-        rename_dict = {col: col.replace(" Participation", "").replace(" ", "_") for col in election_columns}
+        election_columns = [
+            col for col in vdf.columns if "election" in col.lower()
+        ]
+        rename_dict = {
+            col: col.replace(" Participation", "").replace(" ", "_")
+            for col in election_columns
+        }
 
         vdf.rename(columns=rename_dict, inplace=True)
 
@@ -62,7 +70,8 @@ class PreprocessVermont(Preprocessor):
         # Replacing the boolean values in the cells with the election name for processing
         for c in list(rename_dict.values()):
             vdf.loc[:, c] = vdf.loc[:, c].map(
-                {"T": c.replace(" ", "_"), "F": np.nan})
+                {"T": c.replace(" ", "_"), "F": np.nan}
+            )
 
         election_counts = vdf[election_columns].count()
         sorted_codes_dict = {
@@ -71,15 +80,15 @@ class PreprocessVermont(Preprocessor):
                 "count": k,
                 "date": str(
                     datetime.strptime(election_counts.index[i][:4], "%Y")
-                        .date()
-                        .strftime("%m/%d/%Y")
+                    .date()
+                    .strftime("%m/%d/%Y")
                 ),
             }
             for i, k in enumerate(election_counts)
         }
         sorted_elections = list(sorted_codes_dict.keys())
 
-        vdf['all_history'] = hist_map(vdf[election_columns], election_columns)
+        vdf["all_history"] = hist_map(vdf[election_columns], election_columns)
 
         def insert_code_bin(arr):
             if isinstance(arr, list):
