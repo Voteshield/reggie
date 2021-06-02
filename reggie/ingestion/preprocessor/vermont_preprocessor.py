@@ -53,11 +53,13 @@ class PreprocessVermont(Preprocessor):
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
-        self.column_check(list(vdf.columns))
-        # Will probably need to drop election columns for snapshot differencer
         election_columns = [
             col for col in vdf.columns if "election" in col.lower()
         ]
+        cols_to_check = [x for x in vdf.columns if x not in election_columns]
+        self.column_check(cols_to_check)
+        # Will probably need to drop election columns for snapshot differencer
+
         rename_dict = {
             col: col.replace(" Participation", "").replace(" ", "_")
             for col in election_columns
@@ -112,6 +114,7 @@ class PreprocessVermont(Preprocessor):
             "array_decoding": json.dumps(sorted_elections),
         }
 
+        return vdf
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=True)),

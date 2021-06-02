@@ -88,7 +88,7 @@ summary_columns:
 summary_types:
   - int
   - timestamp
-  - varchar
+  - text
   - int
   - int
   - int
@@ -138,40 +138,74 @@ column_names:
 
 #Columns have hist columns removed because their names change
 columns:
-  VoterID: varchar
-  Last Name: varchar
-  First Name: varchar
-  Middle Name: varchar
-  Suffix: varchar
-  Legal Address Line 1: varchar
-  Legal Address Line 2: varchar
-  Legal Address City: varchar
-  Legal Address State: varchar
-  Legal Address Zip: varchar
-  Mailing Address Line 1: varchar
-  Mailing Address Line 2: varchar
-  Mailing Address City: varchar
-  Mailing Address State: varchar
-  Mailing Address Zip: varchar
+  VoterID: text
+  Last Name: text
+  First Name: text
+  Middle Name: text
+  Suffix: text
+  Legal Address Line 1: text
+  Legal Address Line 2: text
+  Legal Address City: text
+  Legal Address State: text
+  Legal Address Zip: text
+  Mailing Address Line 1: text
+  Mailing Address Line 2: text
+  Mailing Address City: text
+  Mailing Address State: text
+  Mailing Address Zip: text
   Year of Birth: date
   Date of Registration: date
   Date last Voted: date
-  Status: varchar
-  Town of Registration: varchar
-  County: varchar
-  Senate District: varchar
-  Town-Nemrc Number: varchar
-  Voting District: varchar
-  Polling Location: varchar
-  Police District: varchar
-  Sewer District: varchar
-  Garbage District: varchar
-  School District: varchar
-  Fire District: varchar
-  Water District: varchar
-  Village: varchar
-  Ward: varchar
+  Status: text
+  Town of Registration: text
+  County: text
+  Senate District: text
+  Town-Nemrc Number: text
+  Voting District: text
+  Polling Location: text
+  Police District: text
+  Sewer District: text
+  Garbage District: text
+  School District: text
+  Fire District: text
+  Water District: text
+  Village: text
+  Ward: text
 
+ordered_columns:
+  - VoterID
+  - Last Name
+  - First Name
+  - Middle Name
+  - Suffix
+  - Legal Address Line 1
+  - Legal Address Line 2
+  - Legal Address City
+  - Legal Address State
+  - Legal Address Zip
+  - Mailing Address Line 1
+  - Mailing Address Line 2
+  - Mailing Address City
+  - Mailing Address State
+  - Mailing Address Zip
+  - Year of Birth
+  - Date of Registration
+  - Date last Voted
+  - Status
+  - Town of Registration
+  - County
+  - Senate District
+  - Town-Nemrc Number
+  - Voting District
+  - Polling Location
+  - Police District
+  - Sewer District
+  - Garbage District
+  - School District
+  - Fire District
+  - Water District
+  - Village
+  - Ward
 
 county_codes:
   Addison: 001
