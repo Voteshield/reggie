@@ -1,5 +1,7 @@
 #Vermont has one voter file (name: September 2019 VT Statewide Voter File 9.3.2019.txt)
-
+#Vermont files contain limited history in the form of several columns containing boolean values for general eletctions
+#Vermont maintains as status field with active and Challeneged (for inactive) as well as a field for registrants under
+#the age of 18 at the time of registration (N18)
 file_type: .txt
 delimiter: '|'
 state: vermont
@@ -8,22 +10,25 @@ file_class: voter_file
 has_headers: TRUE
 fixed_width: FALSE
 separate_hispanic_origin: FALSE
-
-# -- VoteShield -- #
-
 date_format: ['%m/%d/%Y', '%Y']
+expected_number_of_files: 1
 primary_locale_identifier: County
+county_identifier: County
 numeric_primary_locale: FALSE
-party_identifier: null
+# Vermont doesn't have parties
 birthday_identifier: Year of Birth
 voter_id: VoterID
 voter_status: Status
 voter_status_active: Active
 voter_status_inactive: Challenged
-democratic_party: null
-republican_party: null
-no_party_affiliation: null
-
+# Currently not used
+voter_status_waitlist: N18
+democratic_party: None
+republican_party: None
+no_party_affiliation: npa
+# Placeholder
+party_identifier: party_identifier
+# Todo: Remove/cleanup
 format:
   separate_hist: FALSE
   separate_counties_voter_file: FALSE
@@ -51,6 +56,45 @@ address_fields:
   - Mailing Address State
   - Mailing Address Zip
 
+primary_key:
+  - pre_date
+  - post_date
+  - VoterID
+  - change_type
+base_columns:
+  pre_date: timestamp
+  post_date: timestamp
+  VoterID: text
+  change_type: text
+  pre_value: text
+  post_value: text
+  state: text
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+summary_columns:
+  - totals
+  - date
+  - state
+  - ages_18_34
+  - ages_35_49
+  - ages_50_64
+  - ages_65_130
+  - npa
+  - locale
+summary_types:
+  - int
+  - timestamp
+  - varchar
+  - int
+  - int
+  - int
+  - int
+  - int
+  - int
 column_names:
   - VoterID
   - Last Name
@@ -92,137 +136,42 @@ column_names:
   - Village
   - Ward
 
+#Columns have hist columns removed because their names change
 columns:
-  VoterID: character
-  Last Name: character
-  First Name: character
-  Middle Name: character
-  Suffix: character
-  Legal Address Line 1: character
-  Legal Address Line 2: character
-  Legal Address City: character
-  Legal Address State: character
-  Legal Address Zip: character
-  Mailing Address Line 1: character
-  Mailing Address Line 2: character
-  Mailing Address City: character
-  Mailing Address State: character
-  Mailing Address Zip: character
+  VoterID: varchar
+  Last Name: varchar
+  First Name: varchar
+  Middle Name: varchar
+  Suffix: varchar
+  Legal Address Line 1: varchar
+  Legal Address Line 2: varchar
+  Legal Address City: varchar
+  Legal Address State: varchar
+  Legal Address Zip: varchar
+  Mailing Address Line 1: varchar
+  Mailing Address Line 2: varchar
+  Mailing Address City: varchar
+  Mailing Address State: varchar
+  Mailing Address Zip: varchar
   Year of Birth: date
   Date of Registration: date
   Date last Voted: date
-  2008 Gen Election Participation: character
-  2010 Gen Election Participation: character
-  2012 Gen Election Participation: character
-  2014 Gen Election Participation: character
-  2016 Gen Election Participation: character
-  2018 Gen Election Participation: character
-  Status: character
-  Town of Registration: character
-  County: character
-  Senate District: character
-  Town-Nemrc Number: character
-  Voting District: character
-  Polling Location: character
-  Police District: character
-  Sewer District: character
-  Garbage District: character
-  School District: character
-  Fire District: character
-  Water District: character
-  Village: character
-  Ward: character
+  Status: varchar
+  Town of Registration: varchar
+  County: varchar
+  Senate District: varchar
+  Town-Nemrc Number: varchar
+  Voting District: varchar
+  Polling Location: varchar
+  Police District: varchar
+  Sewer District: varchar
+  Garbage District: varchar
+  School District: varchar
+  Fire District: varchar
+  Water District: varchar
+  Village: varchar
+  Ward: varchar
 
-
-standard_colnames:
-  - Voter_ID
-  - Name_Last
-  - Name_First
-  - Name_Middle
-  - Name_Suffix
-  - Residence_Address_Line_1
-  - Residence_Address_Line_2
-  - Residence_City
-  - Residence_State
-  - Residence_Zipcode
-  - Mailing_Address_Line_1
-  - Mailing_Address_Line_2
-  - Mailing_City
-  - Mailing_State
-  - Mailing_Zipcode
-  - Birth_Year
-  - Registration_Date
-  - Last_Vote_Date
-  - Election_Date
-  - Election_Date_2
-  - Election_Date_3
-  - Election_Date_4
-  - Election_Date_5
-  - Election_Date_6
-  - Voter_Status
-  - Registration_Town
-  - County_Name
-  - Senate_District_Name
-  - Town_Code
-  - District_Code
-  - Polling_Location
-  - Police_District_Code
-  - Sewer_District_Code
-  - Garbage_District_Code
-  - School_District_Code
-  - Fire_District_Code
-  - Water_District_Code
-  - Village_Name
-  - Ward_Code
-
-standard_colpairs:
-  VoterID: Voter_ID
-  Last Name: Name_Last
-  First Name: Name_First
-  Middle Name: Name_Middle
-  Suffix: Name_Suffix
-  Legal Address Line 1: Residence_Address_Line_1
-  Legal Address Line 2: Residence_Address_Line_2
-  Legal Address City: Residence_City
-  Legal Address State: Residence_State
-  Legal Address Zip: Residence_Zipcode
-  Mailing Address Line 1: Mailing_Address_Line_1
-  Mailing Address Line 2: Mailing_Address_Line_2
-  Mailing Address City: Mailing_City
-  Mailing Address State: Mailing_State
-  Mailing Address Zip: Mailing_Zipcode
-  Year of Birth: Birth_Year
-  Date of Registration: Registration_Date
-  Date last Voted: Last_Vote_Date
-  2008 Gen Election Participation: Election_Date
-  2010 Gen Election Participation: Election_Date_2
-  2012 Gen Election Participation: Election_Date_3
-  2014 Gen Election Participation: Election_Date_4
-  2016 Gen Election Participation: Election_Date_5
-  2018 Gen Election Participation: Election_Date_6
-  Status: Voter_Status
-  Town of Registration: Registration_Town
-  County: County_Name
-  Senate District: Senate_District_Name
-  Town-Nemrc Number: Town_Code
-  Voting District: District_Code
-  Polling Location: Polling_Location
-  Police District: Police_District_Code
-  Sewer District: Sewer_District_Code
-  Garbage District: Garbage_District_Code
-  School District: School_District_Code
-  Fire District: Fire_District_Code
-  Water District: Water_District_Code
-  Village: Village_Name
-  Ward: Ward_Code
-
-election_columns:
-  - 2008 Gen Election Participation
-  - 2010 Gen Election Participation
-  - 2012 Gen Election Participation
-  - 2014 Gen Election Participation
-  - 2016 Gen Election Participation
-  - 2018 Gen Election Participation
 
 county_codes:
   Addison: 001
@@ -489,21 +438,3 @@ town_codes:
   Woodstock: 261
   Worcester: 262
 
-
-gender_codes:
-  Not_Provided: NP
-
-race_codes:
-  Not_Provided: NP
-
-status_codes:
-  Active: Active
-  Challenged: Challenged
-  Pre-Registered: N-18
-
-party_codes:
-  #not provided (Party_Affiliation or Party_Last_Voted)
-  Not_Provided: NP
-
-num_party_codes:
-  Not_Provided: NP
