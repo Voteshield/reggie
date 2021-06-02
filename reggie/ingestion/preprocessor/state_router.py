@@ -17,9 +17,11 @@ from .new_jersey2_preprocessor import PreprocessNewJersey2
 from .new_york_preprocessor import PreprocessNewYork
 from .north_carolina_preprocessor import PreprocessNorthCarolina
 from .ohio_preprocessor import PreprocessOhio
+from .oklahoma_preprocessor import PreprocessOklahoma
 from .pennsylvania_preprocessor import PreprocessPennsylvania
 from .texas_preprocessor import PreprocessTexas
 from .virginia_preprocessor import PreprocessVirginia
+from .washington_preprocessor import PreprocessWashington
 from .west_virginia_preprocessor import PreprocessWestVirginia
 from .wisconsin_preprocessor import PreprocessWisconsin
 
@@ -53,9 +55,11 @@ def state_router(
         "new_york": PreprocessNewYork,
         "north_carolina": PreprocessNorthCarolina,
         "ohio": PreprocessOhio,
+        "oklahoma": PreprocessOklahoma,
         "pennsylvania": PreprocessPennsylvania,
         "texas": PreprocessTexas,
         "virginia": PreprocessVirginia,
+        "washington": PreprocessWashington,
         "west_virginia": PreprocessWestVirginia,
         "wisconsin": PreprocessWisconsin,
     }

@@ -8,12 +8,13 @@ expected_number_of_files: 1
 voter_id: Registration_Number
 county_identifier: County_code
 primary_locale_identifier: County_code
-numeric_primary_locale: false
+numeric_primary_locale: true
 precinct_identifier: County_precinct_id
 birthday_identifier: Year_of_Birth
 voter_status: Voter_status
 voter_status_active: A
 voter_status_inactive: I
+reason_code: status_reason
 party_identifier: party_identifier
 democratic_party: None
 republican_party: None

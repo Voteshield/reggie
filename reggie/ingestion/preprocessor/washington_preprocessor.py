@@ -1,20 +1,28 @@
-from reggie.ingestion.download import (
-    Preprocessor,
-    date_from_str,
-    FileItem,
-    concat_and_delete,
-)
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
-import logging
-import pandas as pd
 import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
 import json
+import logging
 
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from detect_delimiter import detect
+
+from reggie.reggie_constants import NO_PARTY_PLACEHOLDER
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    concat_and_delete,
+    date_from_str,
+)
+from reggie.ingestion.utils import (
+    MissingColumnsError,
+    MissingNumColumnsError,
+    format_column_name,
+)
 
 class PreprocessWashington(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -45,18 +53,44 @@ class PreprocessWashington(Preprocessor):
         voter_file = [n for n in new_files if "vrdb" in n["name"].lower()][0]
         hist_files = [n for n in new_files if "history" in n["name"].lower()]
 
+        if not self.ignore_checks:
+            # We're already automatically limiting voter_file to one entry
+            self.file_check(len([voter_file]), hist_files=len(hist_files))
+
+        # There are two possible separators. Detect it first.
+        line = voter_file["obj"].readline().decode()
+        delimiter = detect(line)
+        # Return to the beginning of the buffer to read the data now that we
+        # know what the separator is.
+        voter_file["obj"].seek(0)
         df_voter = pd.read_csv(
-            voter_file["obj"], sep="\t", encoding="latin-1", dtype=str
-        )
-        df_hist = pd.concat(
-            [
-                pd.read_csv(n["obj"], sep="\t", encoding="latin-1", dtype=str)
-                for n in hist_files
-            ],
-            ignore_index=True,
+            voter_file["obj"],
+            sep=delimiter,
+            encoding="latin-1",
+            dtype=str,
+            error_bad_lines=False
         )
 
+        df_hist = pd.DataFrame()
+        for hist_file in hist_files:
+            line = hist_file["obj"].readline().decode()
+            delimiter = detect(line)
+            hist_file["obj"].seek(0)
+            temp = pd.read_csv(
+                hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
+            )
+            df_hist = df_hist.append(temp, ignore_index=True)
+
         # --- handling the voter history file --- #
+
+        # Need to fix/combine the differently named VoterHistoryID
+        # and VotingHistoryID columns
+        if {"VotingHistoryID", "VoterHistoryID"}.issubset(df_hist.columns):
+            df_hist["VotingHistoryID"] = (
+                df_hist.pop("VoterHistoryID").fillna(
+                    df_hist.pop("VotingHistoryID")
+                )
+            )
 
         # can't find voter history documentation in any yaml, hardcoding column name
         election_dates = pd.to_datetime(
@@ -64,11 +98,18 @@ class PreprocessWashington(Preprocessor):
         ).dt
 
         elections, counts = np.unique(election_dates.date, return_counts=True)
+
+        def convert_date(k):
+            try:
+                k.strftime("%m/%d/%Y")
+            except ValueError:
+                return "unknown"
+
         sorted_elections_dict = {
             str(k): {
                 "index": i,
                 "count": int(counts[i]),
-                "date": k.strftime("%Y-%m-%d"),
+                "date": convert_date(k),
             }
             for i, k in enumerate(elections)
         }
@@ -91,7 +132,6 @@ class PreprocessWashington(Preprocessor):
         )
 
         # --- handling the voter file --- #
-
         # some columns have become obsolete
         df_voter = df_voter.loc[
             :, df_voter.columns.isin(self.config["column_names"])
@@ -122,16 +162,36 @@ class PreprocessWashington(Preprocessor):
         # add voter history
         df_voter = df_voter.join(df_hist)
 
+        # Add party_idenitfier dummy values, 
+        # since WA doesn't have party info
+        df_voter.loc[:, self.config["party_identifier"]] = NO_PARTY_PLACEHOLDER
+
+        # Check for missing columns; catch error because we're fixing them
+        # below
+        try:
+            self.column_check(list(df_voter.columns))
+        except MissingColumnsError:
+            pass
+
+        # Make sure all columns are present
+        expected_cols = (
+            self.config["ordered_columns"]
+            + self.config["ordered_generated_columns"]
+        )
+        # Remove the index column to avoid duplication
+        expected_cols.remove(self.config["voter_id"])
+
+        df_voter = self.reconcile_columns(df_voter, expected_cols)
+        df_voter = df_voter[expected_cols]
+
         self.meta = {
-            "message": "washington_{}".format(datetime.now().isoformat()),
+            "message": f"washington_{datetime.now().isoformat()}",
             "array_encoding": json.dumps(sorted_elections_dict),
             "array_decoding": json.dumps(sorted_elections),
         }
 
-        self.is_compressed = False
-
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voter.to_csv(encoding="utf-8", index=True)),
+            io_obj=StringIO(df_voter.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )
