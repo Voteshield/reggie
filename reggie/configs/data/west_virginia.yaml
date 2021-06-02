@@ -220,10 +220,12 @@ summary_columns:
   - ages_35_49
   - ages_50_64
   - ages_65_130
-  - unaffiliated
-  - democratic
-  - republican
-  - libertarian
+  # Note: These need to match with the values that we
+  # transform to.
+  - no_party_affiliation
+  - democratic_party
+  - republican_party
+  - libertarian_party
 
 summary_types:
   - timestamp

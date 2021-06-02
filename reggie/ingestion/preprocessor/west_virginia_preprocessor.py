@@ -133,8 +133,11 @@ class PreprocessWestVirginia(Preprocessor):
                 lambda x: x.lstrip("0") if isinstance(x, str) else x
             )
 
-        # Coerce dates
+        # Coerce values for cleanup
         df_voters = self.config.coerce_dates(df_voters)
+        df_voters = self.config.coerce_strings(
+            df_voters, exclude=[self.config["voter_id"], "County_Name"]
+        )
 
         # Set index
         logging.info(f'[{config["state"]}] Setting index on voter file.')

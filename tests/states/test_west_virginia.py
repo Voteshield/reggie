@@ -93,7 +93,7 @@ def test_wv_preprocessor():
 
     # Check first names
     actual_list = list(df_processed["FIRST NAME"])
-    expected_list = ["FIRST01", "FIRST02", "FIRST03"]
+    expected_list = ["first01", "first02", "first03"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
