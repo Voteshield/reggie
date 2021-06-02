@@ -137,9 +137,11 @@ class PreprocessWestVirginia(Preprocessor):
         df_voters = self.config.coerce_dates(df_voters)
 
         # Set index
-        # TODO: Is this necessary?  Is this helpful higher up?
         logging.info(f'[{config["state"]}] Setting index on voter file.')
         df_voters = df_voters.set_index(config["voter_id"], drop=False)
+
+        # Check columns with what is expected
+        self.column_check(df_voters.columns)
 
         # Get voter history file
         voter_history_regex = re.compile(".*statewide.*vh")

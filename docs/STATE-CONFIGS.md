@@ -45,15 +45,16 @@ Values that describe basics about the state itself.
 
 Values that describe the voter file.
 
-| Field                      | Type    | Values      | Description                                         | Example                                               |
-| -------------------------- | ------- | ----------- | --------------------------------------------------- | ----------------------------------------------------- | ------------ |
-| `file_type`                | string  | ???         | The type of file it is.                             | `txt`                                                 |
-| `delimiter`                | string  |             | For CSV-like files, the delimiting character .      | `"                                                    | "`           |
-| `has_headers`              | boolean | `true       | false`                                              | For CSV-like files, whether the first row is headers. | `true`       |
-| `fixed_width`              | boolean | `true       | false`                                              | Whether the file is a fixed-width formatted file.     | `true`       |
-| `file_class`               | string  | `voter_file | ???`                                                | ?????                                                 | `voter_file` |
-| `source`                   | string  | `boe        | ???`                                                | ????? (required)                                      | `boe`        |
-| `expected_number_of_files` | number  |             | The number of files to be expected from the source. | `3`                                                   |
+| Field                           | Type    | Values      | Description                                                 | Example                                               |
+| ------------------------------- | ------- | ----------- | ----------------------------------------------------------- | ----------------------------------------------------- | ------------ |
+| `file_type`                     | string  | ???         | The type of file it is.                                     | `txt`                                                 |
+| `delimiter`                     | string  |             | For CSV-like files, the delimiting character .              | `"                                                    | "`           |
+| `has_headers`                   | boolean | `true       | false`                                                      | For CSV-like files, whether the first row is headers. | `true`       |
+| `fixed_width`                   | boolean | `true       | false`                                                      | Whether the file is a fixed-width formatted file.     | `true`       |
+| `file_class`                    | string  | `voter_file | ???`                                                        | ?????                                                 | `voter_file` |
+| `source`                        | string  | `boe        | ???`                                                        | ????? (required)                                      | `boe`        |
+| `expected_number_of_files`      | number  |             | The number of files to be expected from the source.         | `3`                                                   |
+| `expected_number_of_hist_files` | number  |             | The number of history files to be expected from the source. | `3`                                                   |
 
 ### General data parsing
 
@@ -76,11 +77,12 @@ Fields that help describe voter identifiters.
 
 Configuration around locales.
 
-| Field                       | Type    | Values | Description                                                                           | Example                                                                                     |
-| --------------------------- | ------- | ------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ------- |
-| `primary_locale_identifier` | string  |        | The name of the column that defines the primary locale, which is usually the country. | `County_Name`                                                                               |
-| `numeric_primary_locale`    | boolean | `true  | false`                                                                                | Whether the primary locale column is a number column and we should coerce it into a number. | `false` |
-| `precinct_identifier`       | string  |        | The name of the column that identifies the precinct ID.                               | `County_Name`                                                                               |
+| Field                       | Type    | Values | Description                                                                          | Example                                                                                     |
+| --------------------------- | ------- | ------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ------- |
+| `county_identifier`         | string  |        | The name of the column that defines the county identifier.                           | `County_Name`                                                                               |
+| `primary_locale_identifier` | string  |        | The name of the column that defines the primary locale, which is usually the county. | `County_Name`                                                                               |
+| `numeric_primary_locale`    | boolean | `true  | false`                                                                               | Whether the primary locale column is a number column and we should coerce it into a number. | `false` |
+| `precinct_identifier`       | string  |        | The name of the column that identifies the precinct ID.                              | `County_Name`                                                                               |
 
 **NOTE**: Identifiers should NOT be coerced into numbers and should remain strings.
 
@@ -183,6 +185,12 @@ These are necessary if there is voter history information.
 | --------------------------- | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
 | `generated_columns`         | dictionary |        | Dictionary that maps new columns generatored from Reggie (preprocess) to their data types.                                  | `all_history: text[]`<br>`- sparse_history: int[]`<br>... |
 | `ordered_generated_columns` | list       |        | List of the name of new columns generatored from Reggie (preprocess) in the order they will be added to the database table. | `- all_history`<br>`- sparse_history`<br>...              |
+
+## Ballot or voting config
+
+| Field                  | Type   | Values | Description                               | Example    |
+| ---------------------- | ------ | ------ | ----------------------------------------- | ---------- |
+| `absentee_ballot_code` | string |        | The code used to define an absentee vote. | `absentee` |
 
 ## Customized config
 

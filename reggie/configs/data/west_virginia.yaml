@@ -19,6 +19,8 @@ delimiter: "|"
 has_headers: true
 fixed_width: false
 source: boe
+expected_number_of_files: 1
+expected_number_of_hist_files: 1
 
 # General data type handling
 # 2/16/1942 0:00:00
@@ -32,6 +34,7 @@ match_fields:
   - DATE OF BIRTH
 
 # Locale fields
+county_identifier: County_ID
 primary_locale_identifier: County_ID
 numeric_primary_locale: FALSE
 precinct_identifier: Precinct_Number
@@ -281,8 +284,7 @@ ordered_generated_columns:
   - votetype_history
   - challenged_history
 
-# Custom configuration
-# (legacy, unsure if needed yet)
+# Custom configuration user for tranformatoin
 ##############################
 status_codes:
   active:
@@ -307,6 +309,8 @@ gender_codes:
 
 # Party codes are very variable, so done in code
 
+# These are mostly used to check that data is correct
+# TODO: PreProcessor could read from the json file.
 locales_counties:
   barbour: Barbour
   berkeley: Berkeley
@@ -363,3 +367,8 @@ locales_counties:
   wirt: Wirt
   wood: Wood
   wyoming: Wyoming
+
+# Ballot information
+##############################
+
+absentee_ballot_code: absentee
