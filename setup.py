@@ -24,6 +24,7 @@ setuptools.setup(
         "pytest>=6.0.0",
         "detect_delimiter>=0.1.1",
         "openpyxl>=3.0.5",
+        "chardet>=4.0.0",
     ],
     url="https://github.com/Voteshield/reggie",
     packages=setuptools.find_packages(),

@@ -10,3 +10,4 @@ PyYAML>=5.3.1
 requests>=2.20.0
 xlrd>=1.2.0
 zipfile2>=0.0.12
+chardet>=4.0.0
