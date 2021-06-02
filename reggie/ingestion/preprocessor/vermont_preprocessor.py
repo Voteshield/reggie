@@ -42,6 +42,7 @@ class PreprocessVermont(Preprocessor):
             return pd.Series(map(mapping, df[columns].values.astype(str).tolist()))
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
+        self.file_check(len(new_files))
         voter_file = [
             n for n in new_files if "voter file" in n["name"].lower()
         ][0]
@@ -49,14 +50,14 @@ class PreprocessVermont(Preprocessor):
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
-
+        self.column_check(list(vdf.columns))
         # Will probably need to drop election columns for snapshot differencer
         election_columns = [col for col in vdf.columns if 'election' in col.lower()]
         rename_dict = {col: col.replace(" Participation", "").replace(" ", "_") for col in election_columns}
 
         vdf.rename(columns=rename_dict, inplace=True)
 
-        #Just need to sort once
+        # Just need to sort once
         election_columns = sorted(list(rename_dict.values()))
         # Replacing the boolean values in the cells with the election name for processing
         for c in list(rename_dict.values()):
