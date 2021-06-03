@@ -20,6 +20,7 @@ from .ohio_preprocessor import PreprocessOhio
 from .oklahoma_preprocessor import PreprocessOklahoma
 from .pennsylvania_preprocessor import PreprocessPennsylvania
 from .texas_preprocessor import PreprocessTexas
+from .vermont_preprocessor import PreprocessVermont
 from .virginia_preprocessor import PreprocessVirginia
 from .washington_preprocessor import PreprocessWashington
 from .wisconsin_preprocessor import PreprocessWisconsin
@@ -57,6 +58,7 @@ def state_router(
         "oklahoma": PreprocessOklahoma,
         "pennsylvania": PreprocessPennsylvania,
         "texas": PreprocessTexas,
+        "vermont": PreprocessVermont,
         "virginia": PreprocessVirginia,
         "washington": PreprocessWashington,
         "wisconsin": PreprocessWisconsin,

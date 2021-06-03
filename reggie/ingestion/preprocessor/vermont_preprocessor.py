@@ -114,7 +114,6 @@ class PreprocessVermont(Preprocessor):
             "array_decoding": json.dumps(sorted_elections),
         }
 
-        return vdf
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=True)),
