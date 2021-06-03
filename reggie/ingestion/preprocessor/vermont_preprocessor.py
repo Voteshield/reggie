@@ -56,11 +56,11 @@ class PreprocessVermont(Preprocessor):
         election_columns = [
             col for col in vdf.columns if "election" in col.lower()
         ]
+        vdf[self.config["party_identifier"]] = np.nan
+
         cols_to_check = [x for x in vdf.columns if x not in election_columns]
         self.column_check(cols_to_check)
         # Will probably need to drop election columns for snapshot differencer
-
-        vdf[self.config["party_identifier"]] = np.nan
 
         rename_dict = {
             col: col.replace(" Participation", "").replace(" ", "_")
