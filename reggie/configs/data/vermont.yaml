@@ -171,6 +171,9 @@ columns:
   Water District: text
   Village: text
   Ward: text
+  # dummy column
+  party_identifier: text
+
 
 ordered_columns:
   - VoterID
@@ -206,6 +209,7 @@ ordered_columns:
   - Water District
   - Village
   - Ward
+  - party_identifier
 
 county_codes:
   Addison: 001
