@@ -60,6 +60,8 @@ class PreprocessVermont(Preprocessor):
         self.column_check(cols_to_check)
         # Will probably need to drop election columns for snapshot differencer
 
+        vdf[self.config["party_identifier"]] = np.nan
+
         rename_dict = {
             col: col.replace(" Participation", "").replace(" ", "_")
             for col in election_columns
