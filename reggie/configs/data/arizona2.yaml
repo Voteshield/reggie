@@ -189,6 +189,3 @@ ordered_generated_columns:
   - sparse_history
   - votetype_history
   - party_history
-cancel_data_fields:
-  - StatusReason
-  - EffectiveDateofChange

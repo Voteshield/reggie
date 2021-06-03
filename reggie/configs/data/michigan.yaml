@@ -272,7 +272,3 @@ elec_code_columns:
   - Election_Code
   - Date
   - Title
-cancel_data_fields:
-  - CANCELLATION_REASON
-  - STATUS_DATE
-  - STATUS_USER_CODE
