@@ -59,19 +59,6 @@ address_fields:
   - UnitType
   - UnitNumber
   - ZipCode
-primary_key:
-  - pre_date
-  - post_date
-  - Voter Reg Number
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  Voter Reg Number: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 format:
   separate_hist: false
   separate_counties_voter_file: false

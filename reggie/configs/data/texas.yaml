@@ -68,19 +68,6 @@ address_fields:
   - Mailing_City
   - Mailing_State
   - Mailing_Zipcode
-primary_key:
-  - pre_date
-  - post_date
-  - VUID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VUID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 additional_snapshot_columns:
   all_history: text[]
   sparse_history: int[]

@@ -47,25 +47,12 @@ address_fields:
   - City
   - State_addr
   - Zip
-primary_key:
-  - pre_date
-  - post_date
-  - County_Voter_ID
-  - change_type
 format:
   separate_hist: true
   separate_counties_voter_file: false
   separate_counties_hist_file: false
   hist_election_rows: true
   columnar_elections: false
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  County_Voter_ID: varchar
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: text[]
   votetype_history: text[]

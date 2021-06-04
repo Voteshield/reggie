@@ -81,19 +81,6 @@ address_fields:
   - MailingState
   - MailingZip
   - MailingCountry
-primary_key:
-  - pre_date
-  - post_date
-  - RegistrantID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  RegistrantID: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 columns:
     RegistrantID: int
     RegistrationDate: date

@@ -49,25 +49,12 @@ address_fields:
   - Mailing City
   - Mailing State
   - Mailing ZipCode
-primary_key:
-  - pre_date
-  - post_date
-  - Voter ID
-  - change_type
 format:
   separate_hist: false
   separate_counties_voter_file: false
   separate_counties_hist_file: false
   hist_election_rows: false
   columnar_elections: true
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  Voter ID: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: int[]
 ordered_generated_columns:

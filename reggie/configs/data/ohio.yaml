@@ -47,19 +47,6 @@ address_fields:
   - MAILING_ZIP_PLUS4
   - MAILING_COUNTRY
   - MAILING_POSTAL_CODE
-primary_key:
-  - pre_date
-  - post_date
-  - SOS_VOTERID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  SOS_VOTERID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 additional_snapshot_columns:
   all_history: text[]
   general_history: text[]

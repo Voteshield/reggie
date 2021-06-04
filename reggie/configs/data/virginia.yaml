@@ -85,19 +85,6 @@ address_fields:
   - MAILING_CITY
   - MAILING_STATE
   - MAILING_STATE
-primary_key:
-  - pre_date
-  - post_date
-  - IDENTIFICATION_NUMBER
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  IDENTIFICATION_NUMBER: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 format:
   separate_hist: true
   separate_counties_voter_file: false

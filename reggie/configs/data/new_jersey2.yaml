@@ -53,19 +53,6 @@ address_fields:
   - apt_unit
   - city
   - zip
-primary_key:
-  - pre_date
-  - post_date
-  - id
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  id: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 columns:
   id: text
   leg_id: int

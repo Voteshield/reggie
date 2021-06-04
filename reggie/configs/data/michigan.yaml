@@ -76,19 +76,6 @@ format:
     - "Voter File Layout.DOC"
     - "Voter File Layout.pdf"
     - .~lock.Voter_File_Layout.DOC#
-primary_key:
-  - pre_date
-  - post_date
-  - VOTER_IDENTIFICATION_NUMBER
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VOTER_IDENTIFICATION_NUMBER: bigint
-  change_type: varchar
-  pre_value: varchar
-  post_value: varchar
-  state: varchar
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]

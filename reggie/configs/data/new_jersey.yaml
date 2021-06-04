@@ -65,19 +65,6 @@ address_fields:
 format:
   separate_hist: True
   segmented_files: false
-primary_key:
-  - pre_date
-  - post_date
-  - voter_id
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  voter_id: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: varchar[]
   party_history: varchar[]

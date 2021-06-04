@@ -56,12 +56,6 @@ address_fields:
   - Mail_address_2
   - Mail_address_3
   - Mail_country
-primary_key:
-  - pre_date
-  - post_date
-  - Registration_Number
-  - change_type
-
 ordered_generated_columns:
   - all_history
   - sparse_history
@@ -71,15 +65,6 @@ format:
   separate_counties_hist_file: false
   hist_election_rows: true
   columnar_elections: false
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  Registration_Number: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
-  party_identifier: text
 has_headers: YES
 columns:
   County_code: int

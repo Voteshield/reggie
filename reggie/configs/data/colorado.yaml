@@ -75,19 +75,6 @@ address_fields:
   - MAILING_ZIP_CODE
   - MAILING_ZIP_PLUS
   - MAILING_COUNTRY
-primary_key:
-  - pre_date
-  - post_date
-  - VOTER_ID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VOTER_ID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 additional_snapshot_columns:
   all_history: text[]
   vote_type: text[]

@@ -53,19 +53,6 @@ address_fields:
   - mail_city
   - mail_state
   - mail_zipcode
-primary_key:
-  - pre_date
-  - post_date
-  - ncid
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
-  ncid: text
 data_chunk_links:
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvoter_Statewide.zip
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvhis_Statewide.zip

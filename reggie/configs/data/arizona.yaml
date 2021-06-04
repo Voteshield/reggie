@@ -95,19 +95,6 @@ format:
   segmented_files: true
   ignore_files:
   - LEGEND.xlsx
-primary_key:
-  - pre_date
-  - post_date
-  - text_registrant_id
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  text_registrant_id: varchar
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: text[]
   all_voting_methods: text[]

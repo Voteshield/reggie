@@ -64,19 +64,6 @@ format:
   segmented_files: false
   ignore_files:
    - FOIL_VOTER_LIST_LAYOUT.pdf
-primary_key:
-  - pre_date
-  - post_date
-  - sboeid
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  sboeid: varchar
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: int[]
 ordered_generated_columns:

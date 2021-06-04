@@ -75,19 +75,6 @@ address_fields:
   - MailCity
   - MailState
   - MailZip
-primary_key:
-  - pre_date
-  - post_date
-  - VoterID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VoterID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]
