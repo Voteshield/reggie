@@ -56,49 +56,12 @@ address_fields:
 format:
   separate_hist: false
   segmented_files: true
-primary_key:
-  - pre_date
-  - post_date
-  - voter_id
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  voter_id: varchar
-  change_type: varchar
-  pre_value: varchar
-  post_value: varchar
-  state: varchar
 generated_columns:
   all_history: varchar[]
   districts: varchar[]
 ordered_generated_columns:
   - all_history
   - districts
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - R
-  - D
-  - NF
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - varchar
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - varchar
 columns:
   voter_id: varchar
   title: varchar

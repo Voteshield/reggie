@@ -75,19 +75,6 @@ address_fields:
   - MailCity
   - MailState
   - MailZip
-primary_key:
-  - pre_date
-  - post_date
-  - VoterID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VoterID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]
@@ -96,32 +83,6 @@ ordered_generated_columns:
   - all_history
   - votetype_history
   - sparse_history
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - dem
-  - rep
-  - ind
-  - lib
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   Precinct: text
   LastName: text

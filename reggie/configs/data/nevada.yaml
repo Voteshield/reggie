@@ -47,25 +47,12 @@ address_fields:
   - City
   - State_addr
   - Zip
-primary_key:
-  - pre_date
-  - post_date
-  - County_Voter_ID
-  - change_type
 format:
   separate_hist: true
   separate_counties_voter_file: false
   separate_counties_hist_file: false
   hist_election_rows: true
   columnar_elections: false
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  County_Voter_ID: varchar
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: varchar
 generated_columns:
   all_history: text[]
   votetype_history: text[]
@@ -75,40 +62,6 @@ ordered_generated_columns:
   - votetype_history
   - sparse_history
 has_headers: NO
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - Independent_American_Party
-  - Republican
-  - Democrat
-  - Non_Partisan
-  - Libertarian_Party
-  - Other_All_Others
-  - Green_Party
-  - Natural_Law_Party
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   VoterID: int
   County: varchar
