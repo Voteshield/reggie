@@ -137,6 +137,7 @@ class Config(object):
         date_fields = [x for x in date_fields if x in df.columns]
         for field in date_fields:
             df[field] = df[field].apply(str)
+            df[field] = df[field].str.strip()
             df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
                 df[field] = pd.to_datetime(df[field],
