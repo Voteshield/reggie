@@ -50,11 +50,6 @@ address_fields:
   - mail_city
   - mail_st
   - mail_zip5
-primary_key:
-  - pre_date
-  - post_date
-  - id_voter
-  - change_type
 format:
   separate_hist: true
   separate_counties_voter_file: false
@@ -62,30 +57,6 @@ format:
   hist_election_rows: true
   columnar_elections: false
 has_headers: YES
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  id_voter: int
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
-summary_columns:
-  - totals
-  - date
-  - state
-  - dem
-  - rep
-  - und
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - text
 columns:
   id_voter: int
   nm_last: text

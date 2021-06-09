@@ -25,6 +25,7 @@ setuptools.setup(
         "python-slugify>=4.0.1",
         "detect_delimiter>=0.1.1",
         "openpyxl>=3.0.5",
+        "chardet>=4.0.0",
     ],
     url="https://github.com/Voteshield/reggie",
     packages=setuptools.find_packages(),
