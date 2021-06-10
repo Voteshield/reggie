@@ -55,46 +55,12 @@ address_fields:
   - Mailing Address City
   - Mailing Address State
   - Mailing Address Zip
-
-primary_key:
-  - pre_date
-  - post_date
-  - VoterID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VoterID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 generated_columns:
   all_history: text[]
   sparse_history: int[]
 ordered_generated_columns:
   - all_history
   - sparse_history
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - npa
-  - locale
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
 column_names:
   - VoterID
   - Last Name
