@@ -75,39 +75,9 @@ address_fields:
   - MAILING_ZIP_CODE
   - MAILING_ZIP_PLUS
   - MAILING_COUNTRY
-primary_key:
-  - pre_date
-  - post_date
-  - VOTER_ID
-  - change_type
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  VOTER_ID: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
 additional_snapshot_columns:
   all_history: text[]
   vote_type: text[]
-summary_columns:
-  - totals
-  - date
-  - state
-  - ages_18_34
-  - ages_35_49
-  - ages_50_64
-  - ages_65_130
-  - REP
-  - DEM
-  - UAF
-  - LBR
-  - ACN
-  - GRN
-  - UNI
-  - APV
-  - locale
 hist_columns:
   - VOTER_ID
   - ELECTION_TYPE
@@ -116,23 +86,6 @@ hist_columns:
   - VOTING_METHOD
   - PARTY
   - COUNTY_NAME
-summary_types:
-  - int
-  - timestamp
-  - text
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - int
-  - text
 columns:
   VOTER_ID: text
   COUNTY: text
