@@ -155,6 +155,7 @@ columns:
 # AbsenteeType: text
   LastVoted: date
   StatusCode: text
+  StatusCodeOrig: text
   party_identifier: text
 
 ordered_columns:
@@ -192,6 +193,7 @@ ordered_columns:
   - Registrationdate
   - LastVoted
   - StatusCode
+  - StatusCodeOrig
   - party_identifier
 
 column_classes (districts and precincts files):
@@ -276,6 +278,20 @@ status_codes:
   cancelled_felon: CF
   cancelled_deceased: CS
   cancelled_transferred: CT
+
+status_codes_remap:
+  A: A
+  Active: A
+  A-DUP: A
+  P: A
+  Pending: A
+  PDETH: A
+  PDUPL: A
+  PFELN: A
+  I: I
+  Inactive: I
+  I-DUP: I
+  IM-DUP: I
 
 gender_codes:
   Male: M
