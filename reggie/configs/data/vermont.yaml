@@ -19,8 +19,8 @@ numeric_primary_locale: FALSE
 birthday_identifier: Year of Birth
 voter_id: VoterID
 voter_status: Status
-voter_status_active: Active
-voter_status_inactive: Challenged
+voter_status_active: ACTIVE
+voter_status_inactive: CHALLENGED
 # Currently not used
 voter_status_waitlist: N18
 democratic_party: None
@@ -441,4 +441,6 @@ town_codes:
   Woodford: 260
   Woodstock: 261
   Worcester: 262
-
+no_diff_columns:
+  - Mailing Address in care of
+  - Telephone

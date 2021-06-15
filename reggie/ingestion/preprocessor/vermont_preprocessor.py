@@ -45,11 +45,10 @@ class PreprocessVermont(Preprocessor):
             )
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
-        self.file_check(len(new_files))
+        # self.file_check(len(new_files))
         voter_file = [
-            n for n in new_files if "voter file" in n["name"].lower()
+            n for n in new_files if "voter file" or "Statewidevoters" in n["name"].lower()
         ][0]
-
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
