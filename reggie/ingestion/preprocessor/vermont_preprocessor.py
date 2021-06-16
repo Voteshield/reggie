@@ -59,7 +59,6 @@ class PreprocessVermont(Preprocessor):
 
         cols_to_check = [x for x in vdf.columns if x not in election_columns]
         self.column_check(cols_to_check)
-        # Will probably need to drop election columns for snapshot differencer
 
         rename_dict = {
             col: col.replace(" Participation", "").replace(" ", "_")

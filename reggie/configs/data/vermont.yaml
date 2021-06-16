@@ -441,6 +441,3 @@ town_codes:
   Woodford: 260
   Woodstock: 261
   Worcester: 262
-no_diff_columns:
-  - Mailing Address in care of
-  - Telephone
