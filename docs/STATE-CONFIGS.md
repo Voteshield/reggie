@@ -6,19 +6,6 @@ State configuration files are used to describe the state as well as how we inges
 
 State config files are found in the `reggie/configs/data/` directory and are in YAML format.
 
-## Required fields
-
-The following fields are required in the config for Reggie:
-
-- ??
-
-The following fields are required in the config for VoteShield:
-
-- `voter_status`
-- `birthday_identifier`
-- `party_identifier`
-- ??
-
 ## State config
 
 ### State basics
@@ -34,10 +21,10 @@ Values that describe basics about the state itself.
 
 ### File basics
 
-| Field                    | Type    | Values | Description | Example                                                                   |
-| ------------------------ | ------- | ------ | ----------- | ------------------------------------------------------------------------- | ------ |
-| `format.segmented_files` | boolean | `true  | false`      | Affects download ???                                                      | `true` |
-| `format.separate_hist`   | boolean | `true  | false`      | History is a separate file from the voter file. (No reference in code???) | `true` |
+| Field                    | Type    | Values          | Description                                                               | Example |
+| ------------------------ | ------- | --------------- | ------------------------------------------------------------------------- | ------- |
+| `format.segmented_files` | boolean | `true`, `false` | Affects download ???                                                      | `true`  |
+| `format.separate_hist`   | boolean | `true`, `false` | History is a separate file from the voter file. (No reference in code???) | `true`  |
 
 ## Voter file config
 
@@ -45,16 +32,16 @@ Values that describe basics about the state itself.
 
 Values that describe the voter file.
 
-| Field                           | Type    | Values      | Description                                                 | Example                                               |
-| ------------------------------- | ------- | ----------- | ----------------------------------------------------------- | ----------------------------------------------------- | ------------ |
-| `file_type`                     | string  | ???         | The type of file it is.                                     | `txt`                                                 |
-| `delimiter`                     | string  |             | For CSV-like files, the delimiting character .              | `"                                                    | "`           |
-| `has_headers`                   | boolean | `true       | false`                                                      | For CSV-like files, whether the first row is headers. | `true`       |
-| `fixed_width`                   | boolean | `true       | false`                                                      | Whether the file is a fixed-width formatted file.     | `true`       |
-| `file_class`                    | string  | `voter_file | ???`                                                        | ?????                                                 | `voter_file` |
-| `source`                        | string  | `boe        | ???`                                                        | ????? (required)                                      | `boe`        |
-| `expected_number_of_files`      | number  |             | The number of files to be expected from the source.         | `3`                                                   |
-| `expected_number_of_hist_files` | number  |             | The number of history files to be expected from the source. | `3`                                                   |
+| Field                           | Type    | Values              | Description                                                   | Example      |
+| ------------------------------- | ------- | ------------------- | ------------------------------------------------------------- | ------------ |
+| `file_type`                     | string  | ???                 | The type of file it is.                                       | `txt`        |
+| `delimiter`                     | string  |                     | For CSV-like files, the delimiting character .                | `,`          |
+| `has_headers`                   | boolean | `true`, `false`     | For CSV-like files, whether the first row is headers.         | `true`       |
+| `fixed_width`                   | boolean | `true`, `false`     | Whether the file is a fixed-width formatted file.             | `true`       |
+| `file_class`                    | string  | `voter_file`, `???` | Used to create the path where the processed file gets put to. | `voter_file` |
+| `source`                        | string  | `boe`, `???`        | Used to create the path where the processed file gets put to. | `boe`        |
+| `expected_number_of_files`      | number  |                     | The number of files to be expected from the source.           | `3`          |
+| `expected_number_of_hist_files` | number  |                     | The number of history files to be expected from the source.   | `3`          |
 
 ### General data parsing
 
@@ -145,24 +132,6 @@ Fields that describe the columns in the voter file.
 | `column_names`    | list       |        | Complete list of the names of the all the columns.                                                                                              | `- voter_id`<br>`- first_name`<br>...            |
 | `columns`         | dictionary |        | Complete dictionary that maps the column names from `column_names` to the data type which should be `text`, `int`, `date`, `timestamps`, or ??. | `voterid: character`<br>`birthdate: date`<br>... |
 | `ordered_columns` | list       |        | Complete list of the column names from `column_names` in the order they will go into the database table ??.                                     | `- voter_id`<br>`- first_name`<br>...            |
-
-## Modifications configs
-
-### Setup
-
-| Field          | Type       | Values | Description                                                                                                                                                                                  | Example                                                                                                                                                |
-| -------------- | ---------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `primary_key`  | list       |        | List of names of columns. Defines the modifications table primary key; should contain `pre_date`, `post_date`, Voter ID column, and `change_type`.                                           | `- pre_date`<br>`- post_date`<br>`- Voter ID`<br>`- change_type`                                                                                       |
-| `base_columns` | dictionary |        | Dictionary that maps column names to data types for the modifications table; should contain `pre_date`, `post_date`, Voter ID column, and `change_type`, `pre_value`, `post_value`, `state`. | `pre_date: timestamp`<br>`post_date: timestamp`<br>`Voter ID: text`<br>`change_type: text`<br>`pre_value: text`<br>`post_value: text`<br>`state: text` |
-
-## Summary configs
-
-### Setup
-
-| Field             | Type | Values | Description                                                                                                                                                                                                                                                                                             | Example                                                                                                                                                                     |
-| ----------------- | ---- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `summary_columns` | list |        | List of names of columns. Defines the summary table columns and should contain `totals`, `date`, `state`, `locale`, age columns (`ages_18_34`, `ages_35_49`, `ages_50_64`, and `ages_65_130`), gender columns if available in data (`male`, `female`), and then any party codes as defined in the data. | `- totals`<br>`- date`<br>`- state`<br>`- locale`<br>`- ages_18_34`<br>`- ages_35_49`<br>`- ages_50_64`<br>`- ages_65_130`<br>`- democratic`<br>`- republican`<br>`- green` |
-| `summary_types`   | list |        | List that matches `summary_columns` to data types, where it could be `text`, `timestamp`, `date`, or `int`.                                                                                                                                                                                             | `- int`<br>`- timestamp`<br>`- text`<br>`- text`<br>`- int`<br>`- int`<br>`- int`<br>`- int`<br>`- int`<br>`- int`<br>`- int`                                               |
 
 ## Voter history configs
 
