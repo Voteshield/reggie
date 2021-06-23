@@ -45,9 +45,11 @@ class PreprocessVermont(Preprocessor):
             )
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
-        # self.file_check(len(new_files))
+        self.file_check(len(new_files))
         voter_file = [
-            n for n in new_files if "voter file" or "Statewidevoters" in n["name"].lower()
+            n
+            for n in new_files
+            if "voter file" or "Statewidevoters" in n["name"].lower()
         ][0]
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
@@ -60,6 +62,8 @@ class PreprocessVermont(Preprocessor):
         cols_to_check = [x for x in vdf.columns if x not in election_columns]
         self.column_check(cols_to_check)
 
+        # strip the word "participation" and replace spaces with underscores
+        # for consistency
         rename_dict = {
             col: col.replace(" Participation", "").replace(" ", "_")
             for col in election_columns
@@ -67,15 +71,20 @@ class PreprocessVermont(Preprocessor):
 
         vdf.rename(columns=rename_dict, inplace=True)
 
-        # Just need to sort once
-        election_columns = sorted(list(rename_dict.values()))
-        # Replacing the boolean values in the cells with the election name for processing
+        election_columns = list(rename_dict.values())
+        # Replacing the boolean values in the cells with the election name for
+        # processing
         for c in list(rename_dict.values()):
             vdf.loc[:, c] = vdf.loc[:, c].map(
                 {"T": c.replace(" ", "_"), "F": np.nan}
             )
 
-        election_counts = vdf[election_columns].count()
+        # election_counts is a pandas series containing the general elections
+        # as an index how many people voted in each general election
+        election_counts = vdf[election_columns].count().sort_index()
+
+        # Iterates through the election series, and extracts the information
+        # necessary to create metadata, the index is
         sorted_codes_dict = {
             election_counts.index[i]: {
                 "index": i,
@@ -88,8 +97,7 @@ class PreprocessVermont(Preprocessor):
             }
             for i, k in enumerate(election_counts)
         }
-        sorted_elections = list(sorted_codes_dict.keys())
-
+        sorted_elections = sorted(list(sorted_codes_dict.keys()))
         vdf["all_history"] = hist_map(vdf[election_columns], election_columns)
 
         def insert_code_bin(arr):

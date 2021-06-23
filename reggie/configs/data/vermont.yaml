@@ -15,7 +15,6 @@ expected_number_of_files: 1
 primary_locale_identifier: County
 county_identifier: County
 numeric_primary_locale: FALSE
-# Vermont doesn't have parties
 birthday_identifier: Year of Birth
 voter_id: VoterID
 voter_status: Status
@@ -26,24 +25,13 @@ voter_status_waitlist: N18
 democratic_party: None
 republican_party: None
 no_party_affiliation: npa
-# Placeholder
+# Placeholder for party since vermont doesn't have parties
 party_identifier: party_identifier
-# Todo: Remove/cleanup
-format:
-  separate_hist: FALSE
-  separate_counties_voter_file: FALSE
-  separate_counties_hist_file: FALSE
-  hist_election_rows: FALSE
-  columnar_elections: TRUE
-  separate_district_lookup_file: TRUE
-  vote_history_type: 'Serial'
-
 name_fields:
   - Last Name
   - First Name
   - Middle Name
   - Suffix
-
 address_fields:
   - Legal Address Line 1
   - Legal Address Line 2
