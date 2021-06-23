@@ -414,7 +414,7 @@ class Preprocessor:
         all_files = []
 
         def filter_unnecessary_files(files):
-            unnecessary = [".png", "MACOS", "DS_Store", ".pdf", ".mdb"]
+            unnecessary = [".png", "MACOS", "DS_Store", ".pdf", ".mdb", ".xml", ".rels"]
             for item in unnecessary:
                 files = [n for n in files if item not in n["name"]]
             return files
