@@ -191,23 +191,6 @@ ordered_columns:
   - Precinct_Number
   - POLL_NAME
 
-# Modifications table
-##############################
-primary_key:
-  - pre_date
-  - post_date
-  - ID_VOTER
-  - change_type
-
-base_columns:
-  pre_date: timestamp
-  post_date: timestamp
-  ID_VOTER: text
-  change_type: text
-  pre_value: text
-  post_value: text
-  state: text
-
 # Voter history
 ##############################
 
