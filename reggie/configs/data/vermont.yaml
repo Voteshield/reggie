@@ -26,6 +26,7 @@ voter_status_waitlist: N18
 democratic_party: None
 republican_party: None
 no_party_affiliation: npa
+missing_required_fields: True
 # Placeholder
 party_identifier: party_identifier
 # Todo: Remove/cleanup
@@ -37,13 +38,15 @@ format:
   columnar_elections: TRUE
   separate_district_lookup_file: TRUE
   vote_history_type: 'Serial'
-
 name_fields:
   - Last Name
   - First Name
   - Middle Name
   - Suffix
-
+match_fields:
+  - First Name
+  - Last Name
+  - Year of Birth
 address_fields:
   - Legal Address Line 1
   - Legal Address Line 2
