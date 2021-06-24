@@ -99,7 +99,8 @@ column_names:
   - LAST NAME
   - Suffix
   - DATE OF BIRTH
-  - SEX
+# Note that we change SEX to gender, as this is expected in VS
+  - gender
   - HOUSE NO
   - STREET
   - STREET2
@@ -133,7 +134,7 @@ columns:
   LAST NAME: text
   Suffix: text
   DATE OF BIRTH: date
-  SEX: text
+  gender: text
   HOUSE NO: text
   STREET: text
   STREET2: text
@@ -160,13 +161,15 @@ columns:
 
 ordered_columns:
   - ID_VOTER
+  - Status
+  - County_ID
   - County_Name
   - FIRST NAME
   - Mid
   - LAST NAME
   - Suffix
   - DATE OF BIRTH
-  - SEX
+  - gender
   - HOUSE NO
   - STREET
   - STREET2
@@ -183,7 +186,6 @@ ordered_columns:
   - MAIL ZIP
   - REGISTRATION DATE
   - PartyAffiliation
-  - Status
   - Congressional District
   - Senatorial District
   - Delegate District

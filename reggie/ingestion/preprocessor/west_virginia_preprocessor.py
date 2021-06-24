@@ -103,13 +103,16 @@ class PreprocessWestVirginia(Preprocessor):
             self.config_lookup_to_valid_list(config["locales_counties"]),
         )
 
-        # Gender clean
+        # Gender rename and clean
         gender_dict = self.config_lookup_to_dict(self.config["gender_codes"])
-        df_voters.loc[:, "SEX"] = df_voters.loc[:, "SEX"].map(gender_dict)
+        df_voters.rename(columns={"SEX": "gender"}, inplace=True)
+        df_voters.loc[:, "gender"] = df_voters.loc[:, "gender"].map(gender_dict)
 
         # Gender check
         self.check_column_has_valid_values(
-            df_voters, "SEX", self.config_lookup_to_valid_list(config["gender_codes"])
+            df_voters,
+            "gender",
+            self.config_lookup_to_valid_list(config["gender_codes"]),
         )
 
         # Party clean
@@ -190,16 +193,6 @@ class PreprocessWestVirginia(Preprocessor):
             # NOTE: Assuming empty is not challenged i.e. False
             df_history.fl_challenged = df_history.fl_challenged == "Y"
 
-            # Group history by voter id, then attach relevant group data to
-            # voter dataframe
-            logging.info(f'[{config["state"]}] Grouping history by voter.')
-            df_history_grouped = df_history.groupby("id_voter")
-            df_voters["all_history"] = df_history_grouped["id_election"].apply(list)
-            df_voters["votetype_history"] = df_history_grouped["votetype"].apply(list)
-            df_voters["challenged_history"] = df_history_grouped["fl_challenged"].apply(
-                list
-            )
-
             # Create dataframe of valid elections
             logging.info(f'[{config["state"]}] Grouping history by election.')
             election_columns = ["id_election", "dt_election", "Election_Name"]
@@ -221,11 +214,11 @@ class PreprocessWestVirginia(Preprocessor):
             # Sort by ascending date
             df_elections = df_elections.sort_values(by=["dt_election"]).reset_index()
 
-            # Create dict for encoding
+            # Create dict of elections keyed by election id
             logging.info(
                 f'[{config["state"]}] Creating dictionary from {df_elections.size} elections for history encoding.'
             )
-            array_encoding = {}
+            elections_by_id = {}
             for k, row in df_elections.iterrows():
                 try:
                     # This should be MM/DD/YYYY
@@ -234,18 +227,33 @@ class PreprocessWestVirginia(Preprocessor):
                 except ValueError:
                     election_date = ""
 
-                array_encoding[row["id_election"]] = {
+                elections_by_id[row["id_election"]] = {
                     "index": k,
                     "count": row["count"],
                     "date": election_date
                     # "name": row["Election_Name"]
                 }
 
+            # Group history by voter id, then attach relevant group data to
+            # voter dataframe
+            logging.info(f'[{config["state"]}] Grouping history by voter.')
+            df_history_grouped = df_history.groupby("id_voter")
+            df_voters["all_history"] = df_history_grouped["id_election"].apply(list)
+            df_voters["votetype_history"] = df_history_grouped["votetype"].apply(list)
+            df_voters["challenged_history"] = df_history_grouped["fl_challenged"].apply(
+                list
+            )
+            df_voters["sparse_history"] = df_voters["all_history"].map(
+                lambda x: [elections_by_id[id]["index"] for id in x]
+                if type(x) is list
+                else []
+            )
+
             # Create meta data
             logging.info(f'[{config["state"]}] Compiling meta output.')
             self.meta = {
                 "message": "{}_{}".format(config["state"], datetime.now().isoformat()),
-                "array_encoding": json.dumps(array_encoding),
+                "array_encoding": json.dumps(elections_by_id),
                 "array_decoding": json.dumps(list(df_elections["id_election"])),
             }
 

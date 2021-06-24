@@ -42,7 +42,7 @@ def test_wv_preprocessor():
         "LAST NAME",
         "Suffix",
         "DATE OF BIRTH",
-        "SEX",
+        "gender",
         "HOUSE NO",
         "STREET",
         "STREET2",
@@ -69,6 +69,7 @@ def test_wv_preprocessor():
         "all_history",
         "votetype_history",
         "challenged_history",
+        "sparse_history",
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
@@ -155,6 +156,16 @@ def test_wv_preprocessor():
             "10005",
             "33333",
         ],
+    ]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check history sparse index
+    actual_list = list(df_processed["sparse_history"])
+    expected_list = [
+        [2, 1, 0, 3, 4, 7, 8, 10, 16, 18, 20, 21, 19, 22],
+        [2, 1, 0, 4, 7, 8, 10, 18, 21],
+        [2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 20, 21, 22, 23],
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
