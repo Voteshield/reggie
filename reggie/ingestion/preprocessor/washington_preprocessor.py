@@ -166,6 +166,18 @@ class PreprocessWashington(Preprocessor):
         # since WA doesn't have party info
         df_voter.loc[:, self.config["party_identifier"]] = NO_PARTY_PLACEHOLDER
 
+        # Need to remap status codes because the original data are messy
+        df_voter["StatusCodeOrig"] = df_voter["StatusCode"]
+        df_voter["StatusCode"] = df_voter["StatusCodeOrig"].map(
+            self.config["status_codes_remap"]
+        )
+        if df_voter["StatusCode"].isnull().any():
+            missing = df_voter[
+                df_voter["StatusCode"].isnull()
+            ]["StatusCodeOrig"].to_list()
+            logging.warning("Status codes missing from status_codes_remap")
+            logging.warning(missing)
+
         # Check for missing columns; catch error because we're fixing them
         # below
         try:
