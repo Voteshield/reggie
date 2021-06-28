@@ -52,11 +52,11 @@ birthday_identifier: DATE OF BIRTH
 party_identifier: PartyAffiliation
 # lots of whitespace in PartyAffiliation column before cleaning
 # also looks like write-in parties are allowed (lots of mispellings)
-democratic_party: Democrat
-republican_party: Republican
-libertarian_party: Libertarian
+democratic_party: democrat
+republican_party: republican
+libertarian_party: libertarian
 # Could be No Party Affiliation or Unaffiliated
-no_party_affiliation: No Party Affiliation
+no_party_affiliation: unaffiliated
 
 # Name fields
 name_fields:

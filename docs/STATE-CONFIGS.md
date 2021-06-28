@@ -93,10 +93,10 @@ Configuration around political parties.
 | Field                  | Type   | Values | Description                                                                                                                                                                    | Example             |
 | ---------------------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | `party_identifier`     | string |        | The name of the column that defines the registered party of the voters. Note that if it doesn't exist, create a dummy column in the `columns` and `column_names` and use that. | `party_affiliation` |
-| `democratic_party`     | string |        | The name of the value(s) that defines the Democratic party.                                                                                                                    | `DFL`               |
-| `republican_party`     | string |        | The name of the value(s) that defines the Democratic party.                                                                                                                    | `GOP`               |
-| `libertarian_party`    | string |        | The name of the value(s) that defines the Libertarian party.                                                                                                                   | `lib`               |
-| `no_party_affiliation` | string |        | The name of the value(s) that defines the Democratic party.                                                                                                                    | `Unaffiliated`      |
+| `democratic_party`     | string |        | The name of the value as transformed by the preprocessor that defines the Democratic party in the party field.                                                                 | `democrat`          |
+| `republican_party`     | string |        | The name of the value as transformed by the preprocessor that defines the Republican party in the party field.                                                                 | `republican`        |
+| `libertarian_party`    | string |        | The name of the value as transformed by the preprocessor that defines the Libertarian party in the party field.                                                                | `libertarian`       |
+| `no_party_affiliation` | string |        | The name of the value as transformed by the preprocessor that defines the No Party or Unaffiliated in the party field.                                                         | `unaffiliated`      |
 
 ### Demographics
 
