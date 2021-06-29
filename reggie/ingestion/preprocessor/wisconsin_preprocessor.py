@@ -48,12 +48,12 @@ class PreprocessWisconsin(Preprocessor):
         # Wisconsin comes in two slightly different formats
         try:
             main_df = self.read_csv_count_error_lines(
-                main_file["obj"], sep="\t", error_bad_lines=False
+                main_file["obj"], sep="\t", dtype=str, error_bad_lines=False
             )
         except UnicodeDecodeError:
             main_file["obj"].seek(0)
             main_df = self.read_csv_count_error_lines(
-                main_file["obj"], sep=",", encoding="latin-1",
+                main_file["obj"], sep=",", encoding="latin-1", dtype=str,
                 error_bad_lines=False
             )
 
@@ -68,6 +68,10 @@ class PreprocessWisconsin(Preprocessor):
         )
         # drop rows with nan values for voterid and county
         main_df.dropna(subset=["Voter Reg Number", "County"], inplace=True)
+
+        # remove the non digit voterid's to account for corrupted data (ie dates or names that wound up in the voter
+        # id column
+        main_df = main_df[main_df['Voter Reg Number'].astype(str).str.isdigit()]
         gc.collect()
         # dummy columns for party and birthday
         main_df[self.config["party_identifier"]] = np.nan
