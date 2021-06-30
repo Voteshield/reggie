@@ -155,12 +155,6 @@ These are necessary if there is voter history information.
 | `generated_columns`         | dictionary |        | Dictionary that maps new columns generatored from Reggie (preprocess) to their data types.                                  | `all_history: text[]`<br>`- sparse_history: int[]`<br>... |
 | `ordered_generated_columns` | list       |        | List of the name of new columns generatored from Reggie (preprocess) in the order they will be added to the database table. | `- all_history`<br>`- sparse_history`<br>...              |
 
-## Ballot or voting config
-
-| Field                  | Type   | Values | Description                               | Example    |
-| ---------------------- | ------ | ------ | ----------------------------------------- | ---------- |
-| `absentee_ballot_code` | string |        | The code used to define an absentee vote. | `absentee` |
-
 ## Customized config
 
 You can also add custom config that may be used in Reggie or VoteShield's processing. Make sure to document what it does and why.

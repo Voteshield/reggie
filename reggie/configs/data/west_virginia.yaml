@@ -319,8 +319,3 @@ locales_counties:
   wirt: Wirt
   wood: Wood
   wyoming: Wyoming
-
-# Ballot information
-##############################
-
-absentee_ballot_code: absentee
