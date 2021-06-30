@@ -18,7 +18,7 @@ class Config(object):
         else:
             config_file = file_name
 
-        self.data = self.load_data(config_file, self.infer_locale_file(
+        self.data = self.load_data(config_file, self.infer_locale_files(
             config_file))
 
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
@@ -30,12 +30,12 @@ class Config(object):
         return "{}{}.yaml".format(CONFIG_DIR, state)
 
     @classmethod
-    def infer_locale_file(cls, config_file):
+    def infer_locale_files(cls, config_file):
         """
-        If it exists in the expected location, load json with mapping from
-        primary locale database values to primary locale display names.
+        If one or more human-readable locale name files exists in the
+        expected location for this state, return list of all files.
         :param config_file: state's yaml file
-        :return: presumed location of locale file
+        :return: list of locale name files
         """
         state = config_file.split('/')[-1].split('.')[0]
         return "{}/{}.json".format(LOCALE_DIR, state)
