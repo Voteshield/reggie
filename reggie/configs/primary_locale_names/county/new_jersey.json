@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Atlantic",
+    "id": "ATLANTIC"
+  },
+  {
+    "name": "Bergen",
+    "id": "BERGEN"
+  },
+  {
+    "name": "Burlington",
+    "id": "BURLINGTON"
+  },
+  {
+    "name": "Camden",
+    "id": "CAMDEN"
+  },
+  {
+    "name": "Cape May",
+    "id": "CAPE MAY"
+  },
+  {
+    "name": "Cumberland",
+    "id": "CUMBERLAND"
+  },
+  {
+    "name": "Essex",
+    "id": "ESSEX"
+  },
+  {
+    "name": "Gloucester",
+    "id": "GLOUCESTER"
+  },
+  {
+    "name": "Hudson",
+    "id": "HUDSON"
+  },
+  {
+    "name": "Hunterdon",
+    "id": "HUNTERDON"
+  },
+  {
+    "name": "Mercer",
+    "id": "MERCER"
+  },
+  {
+    "name": "Middlesex",
+    "id": "MIDDLESEX"
+  },
+  {
+    "name": "Monmouth",
+    "id": "MONMOUTH"
+  },
+  {
+    "name": "Morris",
+    "id": "MORRIS"
+  },
+  {
+    "name": "Ocean",
+    "id": "OCEAN"
+  },
+  {
+    "name": "Passaic",
+    "id": "PASSAIC"
+  },
+  {
+    "name": "Salem",
+    "id": "SALEM"
+  },
+  {
+    "name": "Somerset",
+    "id": "SOMERSET"
+  },
+  {
+    "name": "Sussex",
+    "id": "SUSSEX"
+  },
+  {
+    "name": "Union",
+    "id": "UNION"
+  },
+  {
+    "name": "Warren",
+    "id": "WARREN"
+  }
+]

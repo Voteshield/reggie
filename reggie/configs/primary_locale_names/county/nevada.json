@@ -1,0 +1,19 @@
+[
+  { "name": "Carson City", "id": "carson city" },
+  { "name": "Churchill", "id": "churchill" },
+  { "name": "Clark", "id": "clark" },
+  { "name": "Douglas", "id": "douglas" },
+  { "name": "Elko", "id": "elko" },
+  { "name": "Esmeralda", "id": "esmeralda" },
+  { "name": "Eureka", "id": "eureka" },
+  { "name": "Humboldt", "id": "humboldt" },
+  { "name": "Lander", "id": "lander" },
+  { "name": "Lincoln", "id": "lincoln" },
+  { "name": "Lyon", "id": "lyon" },
+  { "name": "Mineral", "id": "mineral" },
+  { "name": "Nye", "id": "nye" },
+  { "name": "Pershing", "id": "pershing" },
+  { "name": "Storey", "id": "storey" },
+  { "name": "Washoe", "id": "washoe" },
+  { "name": "White Pine", "id": "white pine" }
+]
