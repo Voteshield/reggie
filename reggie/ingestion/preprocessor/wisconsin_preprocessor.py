@@ -72,6 +72,10 @@ class PreprocessWisconsin(Preprocessor):
         # remove the non digit voterid's to account for corrupted data (ie dates or names that wound up in the voter
         # id column
         main_df = main_df[main_df['Voter Reg Number'].astype(str).str.isdigit()]
+
+        # standardize La Crosse County and rename it to La Crosse County
+        # Todo: Check for other places/spellings might need regex
+        main_df.loc[main_df['County'].str.lower() == "lacrosse county", "County"] = "La Crosse County"
         gc.collect()
         # dummy columns for party and birthday
         main_df[self.config["party_identifier"]] = np.nan
