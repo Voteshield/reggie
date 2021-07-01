@@ -80,10 +80,10 @@ Fields that define voter status information in the file.
 | Field                    | Type            | Values | Description                                                                                                                                                     | Example     |
 | ------------------------ | --------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `voter_status`           | string          |        | The name of the column that defines the voter status. Note that if it doesn't exist, create a dummy column in the `columns` and `column_names` and use that.    | `Status`    |
-| `voter_status_active`    | string          |        | The values in the file that defines when a voter is Active.                                                                                                     | `Active`    |
-| `voter_status_inactive`  | string          |        | The values in the file that defines when a voter is Inactive.                                                                                                   | `Inactive`  |
-| `voter_status_pending`   | string          |        | If the state supports "pending" voters, the values in the file that defines when a voter is Inactive.                                                           | `Pending`   |
-| `voter_status_cancelled` | string          |        | If the state supports "cancelled" voters, the values in the file that defines when a voter is Inactive.                                                         | `Cancelled` |
+| `voter_status_active`    | string          |        | The preprocessed value that defines when a voter is Active.                                                                                                     | `Active`    |
+| `voter_status_inactive`  | string          |        | The preprocessed value that defines when a voter is Inactive.                                                                                                   | `Inactive`  |
+| `voter_status_pending`   | string          |        | If the state supports "pending" voters, the preprocessed value that defines when a voter is Inactive.                                                           | `Pending`   |
+| `voter_status_cancelled` | string          |        | If the state supports "cancelled" voters, rhe preprocessed value that defines when a voter is Inactive.                                                         | `Cancelled` |
 | `cancel_data_fields`     | list of strings |        | If the state supports "cancelled" voters, and you want to preserve any of the data in those cancelled records such as reason codes, list of those column names. | `Cancelled` |
 
 ### Political parties

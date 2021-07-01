@@ -42,8 +42,8 @@ precinct_identifier: Precinct_Number
 
 # Voter status fields.  Only Active or Inactive
 voter_status: Status
-voter_status_active: Active
-voter_status_inactive: Inactive
+voter_status_active: active
+voter_status_inactive: inactive
 
 # Demographic fields
 birthday_identifier: DATE OF BIRTH
