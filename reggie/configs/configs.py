@@ -53,6 +53,7 @@ class Config(object):
                 config = yaml.load(f, Loader=yaml.FullLoader)
 
                 # add primary locale dicts to config object
+                config[PRIMARY_LOCALE_NAMES] = {}
                 for f in locale_files:
                     locale_type = f.split("/")[-2]
                     try:
