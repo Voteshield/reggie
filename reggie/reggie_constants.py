@@ -12,7 +12,6 @@ setup_reggie()
 
 
 PRIMARY_LOCALE_ALIAS = "primary_locale_identifier"
-LOCALE_TYPE = "locale_type"
 PRIMARY_LOCALE_TYPE = "primary_locale_type"
 PRIMARY_LOCALE_NAMES = "primary_locale_names"
 

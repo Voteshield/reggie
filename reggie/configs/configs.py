@@ -1,5 +1,5 @@
 from reggie.reggie_constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, \
-    LOCALE_TYPE, PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
+    PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
 import json
@@ -224,46 +224,5 @@ class Config(object):
                 df[field] = utf_decoded.str.decode('utf-8')
         return df
 
-    def get_locale_field(self, locale_type):
-        """
-        Return field name (e.g. "county_code") for a standardized locale type.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: actual field name for this locale_type in yaml / db
-        """
-        if locale_type is None:
-            locale_type = self.primary_locale_type
-        locale_field = self.data['{}_identifier'.format(locale_type)]
-        return locale_field
-
-    def locale_type_is_numeric(self, locale_type):
-        """
-        Return whether locale type is numeric.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: True if the DB column for this locale type is numeric, False otherwise
-        """
-        # This case fixes Ohio, because county is numeric but db field is text
-        if (locale_type == self.primary_locale_type) and \
-          self.data['numeric_primary_locale']:
-            return True
-
-        locale_field = self.get_locale_field(locale_type)
-        field_type = self.data['columns'][locale_field]
-        if ("int" in field_type) or (field_type == "float") or \
-          (field_type == "double"):
-            return True
-        else:
-            return False
-
     def to_json(self):
         return json.dumps(self.data)
-
-    def is_primary_locale_type(self, locale_type):
-        """
-        Return whether a locale type is the primary one for this state.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: True if locale_type is the state's primary one, False otherwise
-        """
-        if locale_type is not None:
-            if self.primary_locale_type == locale_type:
-                return True
-        return False
