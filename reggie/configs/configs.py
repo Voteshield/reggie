@@ -3,6 +3,7 @@ from reggie.reggie_constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, \
 import yaml
 import pandas as pd
 import json
+import glob
 from datetime import datetime
 
 config_cache = {}
@@ -33,15 +34,15 @@ class Config(object):
     def infer_locale_files(cls, config_file):
         """
         If one or more human-readable locale name files exists in the
-        expected location for this state, return list of all files.
+        expected locations for this state, return list of all files.
         :param config_file: state's yaml file
         :return: list of locale name files
         """
-        state = config_file.split('/')[-1].split('.')[0]
-        return "{}/{}.json".format(LOCALE_DIR, state)
+        state = config_file.split("/")[-1].split(".")[0]
+        return glob.glob(f"{LOCALE_DIR}*/{state}.json")
 
     @classmethod
-    def load_data(cls, config_file, locale_file):
+    def load_data(cls, config_file, locale_files):
 
         global config_cache
         if config_file in config_cache:
@@ -51,16 +52,18 @@ class Config(object):
                 # quiet the warnings and also be safe but ensure compatibility
                 config = yaml.load(f, Loader=yaml.FullLoader)
 
-                # add primary locale dict to config object
-                try:
-                    with open(locale_file) as f:
-                        locale_data = json.load(f)
-                    locale_dict = {}
-                    for locale in locale_data:
-                        locale_dict[locale['id']] = locale['name']
-                except:
-                    locale_dict = None
-                config[PRIMARY_LOCALE_NAMES] = locale_dict
+                # add primary locale dicts to config object
+                for f in locale_files:
+                    locale_type = f.split("/")[-2]
+                    try:
+                        with open(f) as fp:
+                            locale_data = json.load(fp)
+                        locale_dict = {}
+                        for locale in locale_data:
+                            locale_dict[locale["id"]] = locale["name"]
+                    except:
+                        locale_dict = None
+                    config[PRIMARY_LOCALE_NAMES][locale_type] = locale_dict
 
                 config_cache[config_file] = config
         return config
