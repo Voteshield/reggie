@@ -6,6 +6,13 @@
 venv
 venv3
 .vscode
+working-data
+*.tmp
+
+# Output from the cli doesn't allow to determine location
+/*.csv
+/*.json
+*.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
