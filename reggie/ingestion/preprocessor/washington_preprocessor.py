@@ -101,7 +101,7 @@ class PreprocessWashington(Preprocessor):
 
         def convert_date(k):
             try:
-                k.strftime("%m/%d/%Y")
+                return k.strftime("%m/%d/%Y")
             except ValueError:
                 return "unknown"
 

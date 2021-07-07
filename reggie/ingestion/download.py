@@ -1,11 +1,27 @@
-import uuid
-from datetime import datetime
-from subprocess import Popen, PIPE
-import pandas as pd
-from pandas.errors import ParserError
-from dateutil import parser
 import json
-from reggie.reggie_constants import *
+import os
+import shutil
+import sys
+import uuid
+import xml.etree.ElementTree
+
+from bz2 import BZ2File
+from datetime import datetime
+from dateutil import parser
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from subprocess import Popen, PIPE
+from urllib.request import urlopen
+from xlrd.book import XLRDError
+from zipfile import ZipFile, BadZipfile
+from gzip import GzipFile
+
+import bs4
+import numpy as np
+import pandas as pd
+import requests
+
+from pandas.errors import ParserError
+
 from reggie.configs.configs import Config
 from reggie.ingestion.utils import (
     date_from_str,
@@ -16,20 +32,13 @@ from reggie.ingestion.utils import (
     MissingColumnsError,
     MissingFilesError,
 )
-from xlrd.book import XLRDError
-
-import shutil
-import numpy as np
-from zipfile import ZipFile, BadZipfile
-from gzip import GzipFile
-from bz2 import BZ2File
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import bs4
-import requests
-from urllib.request import urlopen
-import xml.etree.ElementTree
-import os
-import sys
+from reggie.reggie_constants import (
+    CONFIG_CHUNK_URLS,
+    MAX_MALFORMED_LINES_ALLOWED,
+    META_FILE_PREFIX,
+    PROCESSED_FILE_PREFIX,
+    RAW_FILE_PREFIX,
+)
 
 
 def ohio_get_last_updated():
