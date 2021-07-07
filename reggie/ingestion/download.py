@@ -9,7 +9,7 @@ from reggie.configs.configs import Config
 from reggie.ingestion.utils import date_from_str, generate_s3_key, normalize_columns, \
     s3, TooManyMalformedLines, MissingColumnsError, MissingFilesError
 from xlrd.book import XLRDError
-from pandas.io.parsers import ParserError
+from pandas.errors import ParserError
 import shutil
 import numpy as np
 from zipfile import ZipFile, BadZipfile
