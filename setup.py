@@ -22,6 +22,7 @@ setuptools.setup(
         "xlrd>=1.2.0",
         "bs4>=0.0.1",
         "pytest>=6.0.0",
+        "python-slugify>=4.0.1",
         "detect_delimiter>=0.1.1",
         "openpyxl>=3.0.5",
         "chardet>=4.0.0",

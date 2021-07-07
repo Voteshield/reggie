@@ -1,35 +1,48 @@
+"""
+Main Reggie file that provides the method to convert voter files.
+"""
+
 from reggie.configs.configs import Config
 from reggie.ingestion.preprocessor.state_router import state_router
 import datetime
-import click
 
 
-def convert_voter_file(state=None, local_file=None,
-                       file_date=None, write_file=False):
+def convert_voter_file(state=None, local_file=None, file_date=None, write_file=False):
+    """Main Reggie function; processes a voter file, which is often more than one file, so will likely be a compressed file such as a .zip file.
+
+    Parameters
+    ----------
+    state : string, optional
+        State identifier which is the lower case version of the state name with underscores replacing spaces, by default None
+    local_file : string, optional
+        Path to file to process, by default None
+    file_date : string, optional
+        The snapshot date in format "YYYY-MM-DD", by default None
+    write_file : bool, optional
+        Whether to write the file out into a CSV file, which will be automatically named and write to the local directory, by default False
+
+    Returns
+    -------
+    tuple
+        If `write_file` is falsey, this function will return a tuple with the following objects:
+            - The processed voter file as a CSV string
+            - The meta data object
+            - The preprocessor object
+    """
     config_file = Config.config_file_from_state(state)
-    file_date = str(datetime.datetime.strptime(file_date, '%Y-%m-%d').date())
-    preprocessor = state_router(None, raw_s3_file=None,
-                     config_file=config_file,
-                     force_file=local_file,
-                     force_date=file_date)
+    file_date = str(datetime.datetime.strptime(file_date, "%Y-%m-%d").date())
+    preprocessor = state_router(
+        state,
+        raw_s3_file=None,
+        config_file=config_file,
+        force_file=local_file,
+        force_date=file_date,
+    )
     preprocessor.execute()
     if not write_file:
-        return(preprocessor.output_dataframe(preprocessor.processed_file),
-               preprocessor.meta)
+        return (
+            preprocessor.output_dataframe(preprocessor.processed_file),
+            preprocessor.meta,
+            preprocessor,
+        )
     preprocessor.local_dump(preprocessor.processed_file)
-
-
-@click.command(help="convert a non-standard voter file")
-@click.option("--state", required=True, default=None,
-              help="U.S. state name: e.g. florida")
-@click.option("--local_file", required=True, default=None,
-              help="location and name of file: e.g. 'FL_2019-01-01.zip'")
-@click.option("--file_date", required=True,
-              default=None,
-              help="date of voter file in format 'YYYY-MM-DD'")
-@click.option("--write_file", required=False, default=True, is_flag=True)
-def convert_cli(state, local_file, file_date, write_file):
-    if file_date is None:
-        file_date = datetime.datetime.today().date().isoformat()
-    convert_voter_file(state=state, local_file=local_file,
-                       file_date=file_date, write_file=write_file)
