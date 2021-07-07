@@ -1,57 +1,73 @@
-import uuid
-from datetime import datetime
-from subprocess import Popen, PIPE
-import pandas as pd
-from dateutil import parser
 import json
-from reggie.reggie_constants import *
-from reggie.configs.configs import Config
-from reggie.ingestion.utils import date_from_str, generate_s3_key, normalize_columns, \
-    s3, TooManyMalformedLines, MissingColumnsError, MissingFilesError
-from xlrd.book import XLRDError
-from pandas.errors import ParserError
+import os
 import shutil
-import numpy as np
+import sys
+import uuid
+import xml.etree.ElementTree
+
+from bz2 import BZ2File
+from datetime import datetime
+from dateutil import parser
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from subprocess import Popen, PIPE
+from urllib.request import urlopen
+from xlrd.book import XLRDError
 from zipfile import ZipFile, BadZipfile
 from gzip import GzipFile
-from bz2 import BZ2File
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+
 import bs4
+import numpy as np
+import pandas as pd
 import requests
-from urllib.request import urlopen
-import xml.etree.ElementTree
-import os
-import sys
+
+from pandas.errors import ParserError
+
+from reggie.configs.configs import Config
+from reggie.ingestion.utils import (
+    date_from_str,
+    generate_s3_key,
+    normalize_columns,
+    s3,
+    TooManyMalformedLines,
+    MissingColumnsError,
+    MissingFilesError,
+)
+from reggie.reggie_constants import (
+    CONFIG_CHUNK_URLS,
+    MAX_MALFORMED_LINES_ALLOWED,
+    META_FILE_PREFIX,
+    PROCESSED_FILE_PREFIX,
+    RAW_FILE_PREFIX,
+)
 
 
 def ohio_get_last_updated():
-    html = requests.get("https://www6.ohiosos.gov/ords/f?p=VOTERFTP:STWD",
-                        verify=False).text
+    html = requests.get(
+        "https://www6.ohiosos.gov/ords/f?p=VOTERFTP:STWD", verify=False
+    ).text
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
     return max(parser.parse(a.text) for a in results)
 
 
 def nc_date_grab():
-    nc_file = urlopen(
-        'https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/')
+    nc_file = urlopen("https://s3.amazonaws.com/dl.ncsbe.gov?delimiter=/&prefix=data/")
     data = nc_file.read()
     nc_file.close()
-    root = xml.etree.ElementTree.fromstring(data.decode('utf-8'))
+    root = xml.etree.ElementTree.fromstring(data.decode("utf-8"))
 
     def nc_parse_xml(file_name):
         z = 0
         for child in root.itertext():
-                if z == 1:
-                    return child
-                if file_name in child:
-                    z += 1
+            if z == 1:
+                return child
+            if file_name in child:
+                z += 1
 
     file_date_vf = nc_parse_xml(file_name="data/ncvoter_Statewide.zip")
     file_date_his = nc_parse_xml(file_name="data/ncvhis_Statewide.zip")
     if file_date_his[0:10] != file_date_vf[0:10]:
-        logging.info(
-            "Different dates between files, reverting to voter file date")
+        logging.info("Different dates between files, reverting to voter file date")
     file_date_vf = parser.parse(file_date_vf).isoformat()[0:10]
     return file_date_vf
 
@@ -82,14 +98,15 @@ class ErrorLog(object):
     Allow us to catch and count number of error lines skipped during read_csv,
     by redirecting stderr to this error log object.
     """
+
     def __init__(self):
-        self.error_string = ''
+        self.error_string = ""
 
     def write(self, data):
         self.error_string += data
 
     def count_skipped_lines(self):
-        return self.error_string.count('Skipping')
+        return self.error_string.count("Skipping")
 
     def print_log_string(self):
         logging.info(self.error_string)
@@ -102,9 +119,11 @@ class FileItem(object):
 
     def __init__(self, name, key=None, filename=None, io_obj=None, s3_bucket=""):
         if not any([key, filename, io_obj]):
-            raise ValueError("must supply at least one key,"
-                             " filename, or io_obj but "
-                             "all are none")
+            raise ValueError(
+                "must supply at least one key,"
+                " filename, or io_obj but "
+                "all are none"
+            )
         if key is not None:
             self.obj = get_object_mem(key, s3_bucket)
         elif filename is not None:
@@ -113,7 +132,7 @@ class FileItem(object):
                     s = f.read()
                     self.obj = StringIO(s)
             except UnicodeDecodeError:
-                with open(filename, 'rb') as f:
+                with open(filename, "rb") as f:
                     s = f.read()
                     self.obj = BytesIO(s)
         else:
@@ -125,8 +144,7 @@ class FileItem(object):
             s = len(self.obj.getvalue())
         else:
             s = "unknown"
-        return "FileItem: name={}, obj={}, size={}" \
-            .format(self.name, self.obj, s)
+        return "FileItem: name={}, obj={}, size={}".format(self.name, self.obj, s)
 
 
 class Preprocessor:
@@ -167,14 +185,25 @@ class Preprocessor:
         a list containing the temp files inside a voter file, will eventually be combined
 
     """
-    def __init__(self, raw_s3_file, config_file, force_date=None, force_file=None,
-                 testing=False, ignore_checks=False, s3_bucket="", **kwargs):
+
+    def __init__(
+        self,
+        raw_s3_file,
+        config_file,
+        force_date=None,
+        force_file=None,
+        testing=False,
+        ignore_checks=False,
+        s3_bucket="",
+        **kwargs
+    ):
 
         # Init change begin (adding loader object)
         self.config_file_path = config_file
         self.config = Config(file_name=config_file)
-        self.chunk_urls = self.config[
-            CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in self.config else []
+        self.chunk_urls = (
+            self.config[CONFIG_CHUNK_URLS] if CONFIG_CHUNK_URLS in self.config else []
+        )
         if "tmp" not in os.listdir("/"):
             os.system("mkdir /tmp")
         self.file_type = self.config["file_type"]
@@ -195,9 +224,8 @@ class Preprocessor:
             logging.info("copying {} to {}".format(force_file, working_file))
             shutil.copy2(force_file, working_file)
             self.main_file = FileItem(
-                "loader_force_file",
-                filename=working_file,
-                s3_bucket=self.s3_bucket)
+                "loader_force_file", filename=working_file, s3_bucket=self.s3_bucket
+            )
         else:
             self.main_file = "/tmp/voteshield_{}.tmp".format(uuid.uuid4())
 
@@ -224,8 +252,7 @@ class Preprocessor:
         """
         if not self.is_compressed:
             logging.info("compressing")
-            p = Popen(["gzip", "-c"], stdout=PIPE,
-                      stderr=PIPE, stdin=PIPE)
+            p = Popen(["gzip", "-c"], stdout=PIPE, stderr=PIPE, stdin=PIPE)
             op, err = p.communicate(self.main_file.obj.read().encode())
             self.main_file.obj.seek(0)
             self.is_compressed = True
@@ -240,12 +267,10 @@ class Preprocessor:
         """
         zip_file = ZipFile(file_name)
         file_names = zip_file.namelist()
-        logging.info("decompressing unzip {} into {}".format(file_name,
-                                                             file_names))
+        logging.info("decompressing unzip {} into {}".format(file_name, file_names))
         file_objs = []
         for name in file_names:
-            file_objs.append({"name": name,
-                              "obj": BytesIO(zip_file.read(name))})
+            file_objs.append({"name": name, "obj": BytesIO(zip_file.read(name))})
 
         return file_objs
 
@@ -260,8 +285,9 @@ class Preprocessor:
         """
         gzip_file = GzipFile(fileobj=file_obj)
         try:
-            return [{"name": file_name + "decompressed",
-                     "obj": BytesIO(gzip_file.read())}]
+            return [
+                {"name": file_name + "decompressed", "obj": BytesIO(gzip_file.read())}
+            ]
         except OSError:
             return None
 
@@ -274,10 +300,11 @@ class Preprocessor:
         successful, and a reference to the subprocess object which ran the
         decompression)
         """
-        logging.info("decompressing {} {} to {}"
-                     .format("bunzip2",
-                             file_name,
-                             os.path.dirname(file_name)))
+        logging.info(
+            "decompressing {} {} to {}".format(
+                "bunzip2", file_name, os.path.dirname(file_name)
+            )
+        )
         bz2_file = BZ2File(file_name)
         return [{"name": "decompressed_file", "obj": bz2_file}]
 
@@ -297,10 +324,8 @@ class Preprocessor:
         else:
             compression_type = None
         if compression_type is None:
-            logging.info(
-                "could not infer the file type of {}".format(file_name))
-        logging.info("compression type of {} is {}".format(
-            file_name, compression_type))
+            logging.info("could not infer the file type of {}".format(file_name))
+        logging.info("compression type of {} is {}".format(file_name, compression_type))
         return compression_type
 
     def decompress(self, s3_file_obj, compression_type="gunzip"):
@@ -322,15 +347,18 @@ class Preprocessor:
             if inferred_compression is not None:
                 compression_type = inferred_compression
             else:
-                compression_type = 'unzip'
-        logging.info("decompressing {} using {}".format(s3_file_obj["name"],
-                                                        compression_type))
+                compression_type = "unzip"
+        logging.info(
+            "decompressing {} using {}".format(s3_file_obj["name"], compression_type)
+        )
 
-        if (s3_file_obj["name"].split(".")[-1].lower() == "xlsx") or \
-                (s3_file_obj["name"].split(".")[-1].lower() == "txt") or \
-                (s3_file_obj["name"].split(".")[-1].lower() == "pdf") or \
-                (s3_file_obj["name"].split(".")[-1].lower() == "png") or \
-                ("MACOS" in s3_file_obj["name"]):
+        if (
+            (s3_file_obj["name"].split(".")[-1].lower() == "xlsx")
+            or (s3_file_obj["name"].split(".")[-1].lower() == "txt")
+            or (s3_file_obj["name"].split(".")[-1].lower() == "pdf")
+            or (s3_file_obj["name"].split(".")[-1].lower() == "png")
+            or ("MACOS" in s3_file_obj["name"])
+        ):
             logging.info("did not decompress {}".format(s3_file_obj["name"]))
             raise BadZipfile
         else:
@@ -344,8 +372,7 @@ class Preprocessor:
             elif compression_type == "bunzip2":
                 new_files = self.bunzip2_decompress(bytes_obj)
             else:
-                new_files = self.gunzip_decompress(bytes_obj,
-                                                   s3_file_obj["name"])
+                new_files = self.gunzip_decompress(bytes_obj, s3_file_obj["name"])
 
             if compression_type is not None and new_files is not None:
                 logging.info("decompression done: {}".format(s3_file_obj))
@@ -356,33 +383,37 @@ class Preprocessor:
         return new_files
 
     def generate_key(self, file_class=PROCESSED_FILE_PREFIX):
-        if "native_file_extension" in self.config and \
-                file_class != "voter_file":
-            k = generate_s3_key(file_class, self.state,
-                                self.source, self.download_date,
-                                self.config["native_file_extension"])
+        if "native_file_extension" in self.config and file_class != "voter_file":
+            k = generate_s3_key(
+                file_class,
+                self.state,
+                self.source,
+                self.download_date,
+                self.config["native_file_extension"],
+            )
         else:
-            k = generate_s3_key(file_class, self.state, self.source,
-                                self.download_date, "csv", "gz")
+            k = generate_s3_key(
+                file_class, self.state, self.source, self.download_date, "csv", "gz"
+            )
         return "testing/" + k if self.testing else k
 
     def s3_dump(self, file_item, file_class=PROCESSED_FILE_PREFIX):
         if not isinstance(file_item, FileItem):
             raise ValueError("'file_item' must be of type 'FileItem'")
         if file_class != PROCESSED_FILE_PREFIX:
-            if self.config["state"] == 'ohio':
-                self.download_date = str(
-                    ohio_get_last_updated().isoformat())[0:10]
+            if self.config["state"] == "ohio":
+                self.download_date = str(ohio_get_last_updated().isoformat())[0:10]
             elif self.config["state"] == "north_carolina":
                 self.download_date = str(nc_date_grab())
         meta = self.meta if self.meta is not None else {}
         meta["last_updated"] = self.download_date
         s3.Object(self.s3_bucket, self.generate_key(file_class=file_class)).put(
-            Body=file_item.obj, ServerSideEncryption='AES256')
+            Body=file_item.obj, ServerSideEncryption="AES256"
+        )
         if file_class != RAW_FILE_PREFIX:
-            s3.Object(self.s3_bucket, self.generate_key(
-                file_class=META_FILE_PREFIX) + ".json").put(
-                Body=json.dumps(meta), ServerSideEncryption='AES256')
+            s3.Object(
+                self.s3_bucket, self.generate_key(file_class=META_FILE_PREFIX) + ".json"
+            ).put(Body=json.dumps(meta), ServerSideEncryption="AES256")
 
     def generate_local_key(self, meta=False):
         if meta:
@@ -397,18 +428,15 @@ class Preprocessor:
 
     def local_dump(self, file_item):
         df = self.output_dataframe(file_item)
-        df.to_csv(self.generate_local_key(), compression='gzip')
-        with open(self.generate_local_key(meta=True), 'w') as fp:
+        df.to_csv(self.generate_local_key(), compression="gzip")
+        with open(self.generate_local_key(meta=True), "w") as fp:
             json.dump(self.meta, fp)
 
-# End old loader functions
+    # End old loader functions
 
     def s3_download(self):
-        name = "/tmp/voteshield_{}" \
-            .format(self.raw_s3_file.split("/")[-1])
-        return FileItem(key=self.raw_s3_file,
-                        name=name,
-                        s3_bucket=self.s3_bucket)
+        name = "/tmp/voteshield_{}".format(self.raw_s3_file.split("/")[-1])
+        return FileItem(key=self.raw_s3_file, name=name, s3_bucket=self.s3_bucket)
 
     def unpack_files(self, file_obj, compression="unzip"):
         all_files = []
@@ -424,27 +452,29 @@ class Preprocessor:
                 if f["name"][-1] != "/":
                     try:
                         decompressed_result = self.decompress(
-                            f, compression_type=compression)
+                            f, compression_type=compression
+                        )
                         if decompressed_result is not None:
-                            print('decompression ok for {}'.format(f))
+                            print("decompression ok for {}".format(f))
                             expand_recurse(decompressed_result)
                         else:
-                            print('decomp returned none for {}'.format(f))
+                            print("decomp returned none for {}".format(f))
                     except BadZipfile as e:
-                        print('decompression failed for {}'.format(f))
+                        print("decompression failed for {}".format(f))
                         all_files.append(f)
 
         if type(self.main_file) == str:
-            expand_recurse([{"name": self.main_file,
-                             "obj": open(self.main_file)}])
+            expand_recurse([{"name": self.main_file, "obj": open(self.main_file)}])
         else:
-            expand_recurse([{"name": self.main_file.name,
-                             "obj": self.main_file.obj}])
+            expand_recurse([{"name": self.main_file.name, "obj": self.main_file.obj}])
         if "format" in self.config and "ignore_files" in self.config["format"]:
-            all_files = [n for n in all_files if list(n.keys())[0] not in
-                         self.config["format"]["ignore_files"] and
-                         os.path.basename(list(n.keys())[0]) not in
-                         self.config["format"]["ignore_files"]]
+            all_files = [
+                n
+                for n in all_files
+                if list(n.keys())[0] not in self.config["format"]["ignore_files"]
+                and os.path.basename(list(n.keys())[0])
+                not in self.config["format"]["ignore_files"]
+            ]
 
         all_files = filter_unnecessary_files(all_files)
 
@@ -481,28 +511,32 @@ class Preprocessor:
             lengths[f["name"]] = f["obj"].seek(SEEK_END)
             f["obj"].seek(SEEK_SET)
 
-        file_names = sorted(file_names, key=lambda x: lengths[x["name"]],
-                            reverse=True)
+        file_names = sorted(file_names, key=lambda x: lengths[x["name"]], reverse=True)
         outfile = StringIO()
         for f in file_names:
             try:
-                if self.config["file_type"] == 'xlsx':
+                if self.config["file_type"] == "xlsx":
                     df = pd.read_excel(f["obj"])
                 else:
                     df = pd.read_csv(f["obj"])
             except (XLRDError, ParserError):
-                logging.info("Skipping {} ... Unsupported format, or corrupt "
-                             "file".format(f["name"]))
+                logging.info(
+                    "Skipping {} ... Unsupported format, or corrupt "
+                    "file".format(f["name"])
+                )
                 continue
             if not first_success:
                 last_headers = sorted(df.columns)
             df, _ = normalize_columns(df, last_headers)
             if list_compare(last_headers, sorted(df.columns)):
                 mismatched_headers = list_compare(last_headers, df.columns)
-                raise ValueError("file chunks contained different or "
-                                 "misaligned headers: {} != {} at index {}"
-                                 .format(*mismatched_headers))
-            s = df.to_csv(header=not first_success, encoding='utf-8')
+                raise ValueError(
+                    "file chunks contained different or "
+                    "misaligned headers: {} != {} at index {}".format(
+                        *mismatched_headers
+                    )
+                )
+            s = df.to_csv(header=not first_success, encoding="utf-8")
             first_success = True
             outfile.write(s)
 
@@ -527,7 +561,7 @@ class Preprocessor:
             sys.stderr = ErrorLog()
             df = pd.read_csv(file_obj, **kwargs)
             num_skipped = sys.stderr.count_skipped_lines()
-            sys.stderr.print_log_string()   # still print original warning output
+            sys.stderr.print_log_string()  # still print original warning output
             sys.stderr = original_stderr
         except UnicodeDecodeError:
             sys.stderr = original_stderr
@@ -538,17 +572,20 @@ class Preprocessor:
 
         if num_skipped > 0:
             logging.info(
-                "WARNING: pandas.read_csv() skipped a total of {} lines, " \
-                "which had an unexpected number of fields.""".format(
-                    num_skipped))
+                "WARNING: pandas.read_csv() skipped a total of {} lines, "
+                "which had an unexpected number of fields."
+                "".format(num_skipped)
+            )
 
         if num_skipped > MAX_MALFORMED_LINES_ALLOWED:
 
             raise TooManyMalformedLines(
-                "ERROR: Because pandas.read_csv() skipped more than {} lines, " \
-                "aborting file preprocess. Please manually examine the file " \
+                "ERROR: Because pandas.read_csv() skipped more than {} lines, "
+                "aborting file preprocess. Please manually examine the file "
                 "to see if the formatting is as expected.".format(
-                    MAX_MALFORMED_LINES_ALLOWED))
+                    MAX_MALFORMED_LINES_ALLOWED
+                )
+            )
 
         return df
 
@@ -562,19 +599,30 @@ class Preprocessor:
                 df.drop(columns=[c], inplace=True)
         return df
 
-    def file_check(self,  voter_files, hist_files=None):
+    def file_check(self, voter_files, hist_files=None):
         expected_voter = self.config["expected_number_of_files"]
         if hist_files:
             expected_hist = self.config["expected_number_of_hist_files"]
             if expected_hist != hist_files:
-                raise MissingFilesError("{} state is missing history files".format(self.state), self.state,
-                                          expected_hist, hist_files)
+                raise MissingFilesError(
+                    "{} state is missing history files".format(self.state),
+                    self.state,
+                    expected_hist,
+                    hist_files,
+                )
 
         if expected_voter != voter_files:
-            logging.info("Incorrect number of voter files found, expected {}, found {}".format(expected_voter,
-                                                                                               voter_files))
-            raise MissingFilesError("{} state is missing voter files".format(self.state), self.state,
-                                      expected_voter, voter_files)
+            logging.info(
+                "Incorrect number of voter files found, expected {}, found {}".format(
+                    expected_voter, voter_files
+                )
+            )
+            raise MissingFilesError(
+                "{} state is missing voter files".format(self.state),
+                self.state,
+                expected_voter,
+                voter_files,
+            )
 
     def column_check(self, current_columns, expected_columns=None):
 
@@ -588,19 +636,30 @@ class Preprocessor:
         if set(current_columns) > set(expected_columns):
             # This is the case if there are more columns than expected, this won't cause the system to break but
             # might be worth looking in to
-            logging.info("more columns than expected detected, the current columns contain the expected "
-                         "columns along with these extra columns {}".format(unexpected_columns))
+            logging.info(
+                "more columns than expected detected, the current columns contain the expected "
+                "columns along with these extra columns {}".format(unexpected_columns)
+            )
             return unexpected_columns
         elif set(current_columns) != set(expected_columns):
-            logging.info("columns expected not found in current columns: {}".format(missing_columns))
-            raise MissingColumnsError("{} state is missing columns".format(self.state), self.state,
-                                      expected_columns, missing_columns, unexpected_columns,
-                                      current_columns)
+            logging.info(
+                "columns expected not found in current columns: {}".format(
+                    missing_columns
+                )
+            )
+            raise MissingColumnsError(
+                "{} state is missing columns".format(self.state),
+                self.state,
+                expected_columns,
+                missing_columns,
+                unexpected_columns,
+                current_columns,
+            )
 
         return extra_cols
 
     # Preprocessors begin here
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(ohio_get_last_updated())
