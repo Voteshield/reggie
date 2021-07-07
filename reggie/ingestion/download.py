@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from subprocess import Popen, PIPE
 import pandas as pd
+from pandas.errors import ParserError
 from dateutil import parser
 import json
 from reggie.reggie_constants import *
@@ -29,12 +30,6 @@ from urllib.request import urlopen
 import xml.etree.ElementTree
 import os
 import sys
-
-# Pandas changed where this was
-try:
-    from pandas.io.parsers import ParserError
-except ImportError:
-    from pandas.errors import ParserError
 
 
 def ohio_get_last_updated():
