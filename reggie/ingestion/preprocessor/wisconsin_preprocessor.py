@@ -59,9 +59,11 @@ class PreprocessWisconsin(Preprocessor):
 
         logging.info(
             "dataframe memory usage: {}".format(
-                main_df.memory_usage(deep=True).sum()
+                main_df.memory_usage(deep=True).sum()//1024**3
             )
         )
+
+        # converting to categories?
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
@@ -79,7 +81,7 @@ class PreprocessWisconsin(Preprocessor):
         gc.collect()
         # dummy columns for party and birthday
         main_df[self.config["party_identifier"]] = np.nan
-        main_df[self.config["birthday_identifier"]] = 0
+        main_df[self.config["birthday_identifier"]] = np.datetime64("NaT")
 
         def parse_histcols(col_name):
             try:
