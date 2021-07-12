@@ -45,25 +45,68 @@ class PreprocessWisconsin(Preprocessor):
         else:
             main_file = new_files[0]
 
+        wi_columns = pd.read_csv(
+            main_file["obj"], sep="\t", nrows=0
+        ).columns.tolist()
+        main_file["obj"].seek(0)
+        # Todo: add to yaml instead of here,
+        cat_columns = [
+            "Suffix",
+            "UnitType",
+            "Congressional",
+            "State Senate",
+            "Court of Appeals",
+            "Jurisdiction",
+            "High School",
+            "Technical College",
+            "Representational School",
+            "State",
+            "First Class School",
+            "Incorporation",
+            "voter_status",
+            "Voter Status Reason",
+            "Voter Type",
+            "IsPermanentAbsentee",
+        ]
+
+        def parse_histcols(col_name):
+            try:
+                parser.parse(col_name)
+                return True
+            except ValueError:
+                return False
+
+        # iterate through the dataframe, each column election column for wisconsin
+        # has a monthname and year
+        valid_elections = []
+        for column in wi_columns:
+            if parse_histcols(column):
+                valid_elections.append(column)
+
+        cat_columns.extend(valid_elections)
+        dtype_dict = {
+            col: ("str" if col not in cat_columns else "category")
+            for col in wi_columns
+        }
+
         # Wisconsin comes in two slightly different formats
         try:
             main_df = self.read_csv_count_error_lines(
-                main_file["obj"], sep="\t", dtype=str, error_bad_lines=False
+                main_file["obj"],
+                sep="\t",
+                dtype=dtype_dict,
+                error_bad_lines=False,
             )
         except UnicodeDecodeError:
             main_file["obj"].seek(0)
             main_df = self.read_csv_count_error_lines(
-                main_file["obj"], sep=",", encoding="latin-1", dtype=str,
-                error_bad_lines=False
+                main_file["obj"],
+                sep=",",
+                encoding="latin-1",
+                dtype=dtype_dict,
+                error_bad_lines=False,
             )
 
-        logging.info(
-            "dataframe memory usage: {}".format(
-                main_df.memory_usage(deep=True).sum()//1024**3
-            )
-        )
-
-        # converting to categories?
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
@@ -73,30 +116,27 @@ class PreprocessWisconsin(Preprocessor):
 
         # remove the non digit voterid's to account for corrupted data (ie dates or names that wound up in the voter
         # id column
-        main_df = main_df[main_df['Voter Reg Number'].astype(str).str.isdigit()]
+        main_df = main_df[
+            main_df["Voter Reg Number"].astype(str).str.isdigit()
+        ]
 
         # standardize La Crosse County and rename it to La Crosse County
         # Todo: Check for other places/spellings might need regex
-        main_df.loc[main_df['County'].str.lower() == "lacrosse county", "County"] = "La Crosse County"
+        main_df.loc[
+            main_df["County"].str.lower() == "lacrosse county", "County"
+        ] = "La Crosse County"
         gc.collect()
         # dummy columns for party and birthday
         main_df[self.config["party_identifier"]] = np.nan
         main_df[self.config["birthday_identifier"]] = np.datetime64("NaT")
 
-        def parse_histcols(col_name):
-            try:
-                parser.parse(col_name)
-                return True
-            except ValueError:
-                return False
+        logging.info(
+            "dataframe memory usage: {}".format(
+                main_df.memory_usage(deep=True).sum() // 1024 ** 3
+            )
+        )
 
-        # iterate through thethe dataframe, each column election column for wisconsin
-        # has a monthname and year
-        valid_elections = []
-        for column in main_df:
-            if parse_histcols(column):
-                valid_elections.append(column)
-        self.column_check(list(set(main_df.columns) - set(valid_elections)))
+        # self.column_check(list(set(main_df.columns) - set(valid_elections)))
         # sort from oldest election available to newest
         valid_elections = sorted(
             valid_elections, key=lambda date: parser.parse(date)
@@ -123,38 +163,23 @@ class PreprocessWisconsin(Preprocessor):
 
         sorted_codes = list(election_counts.index)
 
-        def get_all_history(row):
-            hist = []
-            for i, k in row.iteritems():
-                if pd.notnull(k):
-                    hist.append(i)
-            return hist
-
-        def get_type_history(row):
-            type_hist = []
-            for i, k in row.iteritems():
-                if pd.notnull(k):
-                    hist = k.replace(" ", "")
-                    type_hist.append(hist)
-            return type_hist
-
-        def insert_code_bin(row):
+        def insert_codes_bin(row):
             sparse_hist = []
+            votetype_hist = []
+            all_hist = []
             for i, k in row.iteritems():
                 if pd.notnull(k):
                     sparse_hist.append(sorted_codes_dict[i]["index"])
-            return sparse_hist
+                    type_hist = k.replace(" ", "")
+                    votetype_hist.append(type_hist)
+                    all_hist.append(i)
+            return sparse_hist, votetype_hist, all_hist
 
-        main_df["sparse_history"] = main_df[valid_elections].apply(
-            insert_code_bin, axis=1
+        main_df[
+            ["sparse_history", "votetype_history", "all_history"]
+        ] = main_df[valid_elections].apply(
+            insert_codes_bin, axis=1, result_type="expand"
         )
-        main_df["all_history"] = main_df[valid_elections].apply(
-            get_all_history, axis=1
-        )
-        main_df["votetype_history"] = main_df[valid_elections].apply(
-            get_type_history, axis=1
-        )
-
         main_df.drop(columns=valid_elections, inplace=True)
         gc.collect()
 
