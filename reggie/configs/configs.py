@@ -1,8 +1,9 @@
 from reggie.reggie_constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, \
-    LOCALE_TYPE, PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
+    PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
 import json
+import glob
 from datetime import datetime
 
 config_cache = {}
@@ -18,7 +19,7 @@ class Config(object):
         else:
             config_file = file_name
 
-        self.data = self.load_data(config_file, self.infer_locale_file(
+        self.data = self.load_data(config_file, self.infer_locale_files(
             config_file))
 
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
@@ -30,18 +31,18 @@ class Config(object):
         return "{}{}.yaml".format(CONFIG_DIR, state)
 
     @classmethod
-    def infer_locale_file(cls, config_file):
+    def infer_locale_files(cls, config_file):
         """
-        If it exists in the expected location, load json with mapping from
-        primary locale database values to primary locale display names.
+        If one or more human-readable locale name files exists in the
+        expected locations for this state, return list of all files.
         :param config_file: state's yaml file
-        :return: presumed location of locale file
+        :return: list of locale name files
         """
-        state = config_file.split('/')[-1].split('.')[0]
-        return "{}/{}.json".format(LOCALE_DIR, state)
+        state = config_file.split("/")[-1].split(".")[0]
+        return glob.glob(f"{LOCALE_DIR}*/{state}.json")
 
     @classmethod
-    def load_data(cls, config_file, locale_file):
+    def load_data(cls, config_file, locale_files):
 
         global config_cache
         if config_file in config_cache:
@@ -51,16 +52,19 @@ class Config(object):
                 # quiet the warnings and also be safe but ensure compatibility
                 config = yaml.load(f, Loader=yaml.FullLoader)
 
-                # add primary locale dict to config object
-                try:
-                    with open(locale_file) as f:
-                        locale_data = json.load(f)
-                    locale_dict = {}
-                    for locale in locale_data:
-                        locale_dict[locale['id']] = locale['name']
-                except:
-                    locale_dict = None
-                config[PRIMARY_LOCALE_NAMES] = locale_dict
+                # add primary locale dicts to config object
+                config[PRIMARY_LOCALE_NAMES] = {}
+                for f in locale_files:
+                    locale_type = f.split("/")[-2]
+                    try:
+                        with open(f) as fp:
+                            locale_data = json.load(fp)
+                        locale_dict = {}
+                        for locale in locale_data:
+                            locale_dict[locale["id"]] = locale["name"]
+                    except:
+                        locale_dict = None
+                    config[PRIMARY_LOCALE_NAMES][locale_type] = locale_dict
 
                 config_cache[config_file] = config
         return config
@@ -220,46 +224,5 @@ class Config(object):
                 df[field] = utf_decoded.str.decode('utf-8')
         return df
 
-    def get_locale_field(self, locale_type):
-        """
-        Return field name (e.g. "county_code") for a standardized locale type.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: actual field name for this locale_type in yaml / db
-        """
-        if locale_type is None:
-            locale_type = self.primary_locale_type
-        locale_field = self.data['{}_identifier'.format(locale_type)]
-        return locale_field
-
-    def locale_type_is_numeric(self, locale_type):
-        """
-        Return whether locale type is numeric.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: True if the DB column for this locale type is numeric, False otherwise
-        """
-        # This case fixes Ohio, because county is numeric but db field is text
-        if (locale_type == self.primary_locale_type) and \
-          self.data['numeric_primary_locale']:
-            return True
-
-        locale_field = self.get_locale_field(locale_type)
-        field_type = self.data['columns'][locale_field]
-        if ("int" in field_type) or (field_type == "float") or \
-          (field_type == "double"):
-            return True
-        else:
-            return False
-
     def to_json(self):
         return json.dumps(self.data)
-
-    def is_primary_locale_type(self, locale_type):
-        """
-        Return whether a locale type is the primary one for this state.
-        :param locale_type: one of standardized set {"county", "jurisdiction", etc.}
-        :return: True if locale_type is the state's primary one, False otherwise
-        """
-        if locale_type is not None:
-            if self.primary_locale_type == locale_type:
-                return True
-        return False
