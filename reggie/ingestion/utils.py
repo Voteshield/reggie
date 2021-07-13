@@ -58,6 +58,20 @@ class TooManyMalformedLines(Exception):
     pass
 
 
+class UnexpectedNumberOfFilesError(Exception):
+    """
+    For when an import does not have the expected number of files.
+    """
+    pass
+
+
+class InvalidDataError(Exception):
+    """
+    For when data is not valid.
+    """
+    pass
+
+
 def generate_s3_key(file_class, state, source, download_date, file_type,
                     compression=None, testing=False):
     return "{}/{}/{}/{}.{}{}".format(file_class, state,

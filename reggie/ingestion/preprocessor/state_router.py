@@ -23,6 +23,7 @@ from .texas_preprocessor import PreprocessTexas
 from .vermont_preprocessor import PreprocessVermont
 from .virginia_preprocessor import PreprocessVirginia
 from .washington_preprocessor import PreprocessWashington
+from .west_virginia_preprocessor import PreprocessWestVirginia
 from .wisconsin_preprocessor import PreprocessWisconsin
 
 
@@ -61,6 +62,7 @@ def state_router(
         "vermont": PreprocessVermont,
         "virginia": PreprocessVirginia,
         "washington": PreprocessWashington,
+        "west_virginia": PreprocessWestVirginia,
         "wisconsin": PreprocessWisconsin,
     }
     if state in routes:
