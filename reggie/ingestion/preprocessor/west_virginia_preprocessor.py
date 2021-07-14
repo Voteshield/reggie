@@ -249,6 +249,17 @@ class PreprocessWestVirginia(Preprocessor):
                 else []
             )
 
+            # Fill any nan values in history
+            df_voters["all_history"] = df_voters["all_history"].apply(
+                lambda x: x if type(x) is list else []
+            )
+            df_voters["votetype_history"] = df_voters["votetype_history"].apply(
+                lambda x: x if type(x) is list else []
+            )
+            df_voters["challenged_history"] = df_voters["challenged_history"].apply(
+                lambda x: x if type(x) is list else []
+            )
+
             # Create meta data
             logging.info(f'[{config["state"]}] Compiling meta output.')
             self.meta = {
