@@ -45,6 +45,8 @@ class PreprocessWisconsin(Preprocessor):
         else:
             main_file = new_files[0]
 
+        logging.info("buffer size: {}".format(main_file["obj"].__sizeof__()))
+        main_file["obj"].seek(0)
         wi_columns = pd.read_csv(
             main_file["obj"], sep="\t", nrows=0
         ).columns.tolist()
@@ -107,7 +109,7 @@ class PreprocessWisconsin(Preprocessor):
                 error_bad_lines=False,
             )
         main_file["obj"].close()
-
+        logging.info("buffer size after close?: {}".format(main_file["obj"].__sizeof__()))
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
