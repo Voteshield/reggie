@@ -48,7 +48,9 @@ class PreprocessWisconsin(Preprocessor):
         wi_columns = pd.read_csv(
             main_file["obj"], sep="\t", nrows=0
         ).columns.tolist()
+        wi_columns = pd.read_csv(main_file["obj"], sep="\t", nrows=0).columns.tolist()
         main_file["obj"].seek(0)
+
         # Todo: add to yaml instead of here,
         cat_columns = [
             "Suffix",
@@ -107,6 +109,7 @@ class PreprocessWisconsin(Preprocessor):
                 error_bad_lines=False,
             )
 
+        main_file["obj"].close()
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
