@@ -76,43 +76,43 @@ def test_wv_preprocessor():
 
     # Check voter ids
     actual_list = df_processed.index.values.tolist()
-    expected_list = ["000000001", "000000002", "000000003"]
+    expected_list = ["000000001", "000000002", "000000003", "000000004"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check county ids
     actual_list = list(df_processed["County_ID"])
-    expected_list = ["barbour", "barbour", "berkeley"]
+    expected_list = ["barbour", "barbour", "berkeley", "jackson"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check raw county names
     actual_list = list(df_processed["County_Name"])
-    expected_list = ["BARBOUR", "BARBOUR", "BERKELEY"]
+    expected_list = ["BARBOUR", "BARBOUR", "BERKELEY", "JACKSON"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check first names
     actual_list = list(df_processed["FIRST NAME"])
-    expected_list = ["first01", "first02", "first03"]
+    expected_list = ["first01", "first02", "first03", "no history"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check party
     actual_list = list(df_processed["PartyAffiliation"])
-    expected_list = ["independent", "unaffiliated", "republican"]
+    expected_list = ["independent", "unaffiliated", "republican", "unknown"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check status
     actual_list = list(df_processed["Status"])
-    expected_list = ["active", "active", "inactive"]
+    expected_list = ["active", "active", "inactive", "active"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check congressional districts
     actual_list = list(df_processed["Congressional District"])
-    expected_list = ["1", "1", "1"]
+    expected_list = ["1", "1", "1", "2"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
@@ -156,6 +156,7 @@ def test_wv_preprocessor():
             "10005",
             "33333",
         ],
+        [],
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
@@ -166,6 +167,7 @@ def test_wv_preprocessor():
         [2, 1, 0, 3, 4, 7, 8, 10, 16, 18, 20, 21, 19, 22],
         [2, 1, 0, 4, 7, 8, 10, 18, 21],
         [2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 17, 20, 21, 22, 23],
+        [],
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
@@ -220,6 +222,7 @@ def test_wv_preprocessor():
             "absentee",
             "absentee",
         ],
+        [],
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
@@ -274,6 +277,7 @@ def test_wv_preprocessor():
             False,
             False,
         ],
+        [],
     ]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
@@ -290,8 +294,8 @@ def test_wv_preprocessor():
         "1": {"index": 2, "count": 3, "date": "03/18/2000"},
         "1001": {"index": 3, "count": 2, "date": "05/09/2000"},
         "1002": {"index": 4, "count": 3, "date": "11/07/2000"},
-        "1009": {"index": 5, "count": 1, "date": "05/14/2002"},
-        "1010": {"index": 6, "count": 1, "date": "11/05/2002"},
+        "1009": {"index": 5, "count": 2, "date": "05/14/2002"},
+        "1010": {"index": 6, "count": 2, "date": "11/05/2002"},
         "1003": {"index": 7, "count": 3, "date": "05/11/2004"},
         "1004": {"index": 8, "count": 3, "date": "11/02/2004"},
         "20000": {"index": 9, "count": 1, "date": "06/14/2005"},
