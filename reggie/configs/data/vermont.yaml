@@ -5,6 +5,7 @@
 file_type: .txt
 delimiter: '|'
 state: vermont
+abbreviation: vt
 source: boe
 file_class: voter_file
 has_headers: TRUE
