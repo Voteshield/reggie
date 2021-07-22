@@ -11,7 +11,7 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import gc
-import tracemalloc
+# import tracemalloc
 
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -29,7 +29,7 @@ class PreprocessWisconsin(Preprocessor):
         self.processed_file = None
 
     def execute(self):
-        tracemalloc.start()
+        # tracemalloc.start()
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
@@ -201,11 +201,13 @@ class PreprocessWisconsin(Preprocessor):
         # need to tell it it's not compressed for test files otherwise it creates a malformed object
         # self.is_compressed = False
         logging.info("Wisconsin: writing out")
-        snapshot = tracemalloc.take_snapshot()
-        for stat in snapshot.statistics("lineno"):
-            logging.info(stat)
+        # snapshot = tracemalloc.take_snapshot()
+        # for stat in snapshot.statistics("lineno"):
+        #     logging.info(stat)
+        df_csv = main_df.to_csv(encoding="utf-8", index=False)
+        del main_df
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(df_csv),
             s3_bucket=self.s3_bucket,
         )
