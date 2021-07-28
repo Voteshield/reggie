@@ -44,7 +44,7 @@ from reggie.reggie_constants import (
 
 def ohio_get_last_updated():
     html = requests.get(
-        "https://www6.ohiosos.gov/ords/f?p=VOTERFTP:STWD", verify=False
+        "https://www6.ohiosos.gov/ords/f?p=VOTERFTP:STWD", verify=False, headers = {'User-Agent': 'VoteShield-Reggie/0.0.1'},
     ).text
     soup = bs4.BeautifulSoup(html, "html.parser")
     results = soup.find_all("td", {"headers": "DATE_MODIFIED"})
