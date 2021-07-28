@@ -57,8 +57,9 @@ class PreprocessNewYork(Preprocessor):
                 main_df.memory_usage(deep=True).sum()
             )
         )
-
+        del self.main_file, self.temp_files, new_files
         gc.collect()
+
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
         all_codes = (
@@ -115,10 +116,14 @@ class PreprocessNewYork(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+        csv_obj = main_df.to_csv(encoding="utf-8", index=False)
+        del main_df
         gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
+        del csv_obj
+        gc.collect()
