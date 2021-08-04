@@ -8,6 +8,48 @@ import pandas as pd
 
 # Dependencies to test
 from reggie import convert_voter_file
+from reggie.ingestion.preprocessor.west_virginia_preprocessor import (
+    VOTER_FILE_REGEX,
+    VOTER_HISTORY_REGEX,
+)
+
+
+@pytest.mark.parametrize(
+    "str_to_test, expected",
+    [
+        ("WV PStatewide_VH.txt", None),
+        ("Statewide_VRTEST.txt", True),
+        ("WV 2019-03-14.txt", True),
+    ],
+)
+def test_wv_preprocessor_voter_regex(str_to_test, expected):
+    """
+    Tests that the West Virginia regexes for finding voter
+    files works as expected.
+    """
+    if expected == True:
+        assert VOTER_FILE_REGEX.match(str_to_test) is not None
+    else:
+        VOTER_FILE_REGEX.match(str_to_test) == expected
+
+
+@pytest.mark.parametrize(
+    "str_to_test, expected",
+    [
+        ("WV PStatewide_VH.txt", True),
+        ("Statewide_VRTEST.txt", None),
+        ("WV 2019-03-14.txt", None),
+    ],
+)
+def test_wv_preprocessor_history_regex(str_to_test, expected):
+    """
+    Tests that the West Virginia regexes for finding voter
+    files works as expected.
+    """
+    if expected == True:
+        assert VOTER_HISTORY_REGEX.match(str_to_test) is not None
+    else:
+        VOTER_HISTORY_REGEX.match(str_to_test) == expected
 
 
 def test_wv_preprocessor():

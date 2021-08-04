@@ -29,6 +29,13 @@ from slugify import slugify
 import pandas as pd
 import numpy as np
 
+# Constants
+VOTER_FILE_REGEX = re.compile(
+    "(.*statewide.*vr|wv [0-9]+-[0-9]+-[0-9]+.txt|protect.*democracy[0-9]+)",
+    flags=re.I,
+)
+VOTER_HISTORY_REGEX = re.compile(".*statewide.*vh", flags=re.I)
+
 
 class PreprocessWestVirginia(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -64,10 +71,7 @@ class PreprocessWestVirginia(Preprocessor):
         new_files = [n for n in self.unpack_files(self.main_file, compression="unzip")]
 
         # Should only be one voter file
-        voter_file_regex = re.compile(".*statewide.*vr")
-        voter_files = [
-            n for n in new_files if voter_file_regex.match(n["name"].lower())
-        ]
+        voter_files = [n for n in new_files if VOTER_FILE_REGEX.match(n["name"])]
         if len(voter_files) > 1:
             raise UnexpectedNumberOfFilesError(
                 f"{config['state']} has too many voter files."
@@ -150,10 +154,7 @@ class PreprocessWestVirginia(Preprocessor):
         self.column_check(df_voters.columns)
 
         # Get voter history file
-        voter_history_regex = re.compile(".*statewide.*vh")
-        voter_histories = [
-            n for n in new_files if voter_history_regex.match(n["name"].lower())
-        ]
+        voter_histories = [n for n in new_files if VOTER_HISTORY_REGEX.match(n["name"])]
         if len(voter_histories) > 1:
             raise UnexpectedNumberOfFilesError(
                 f"[{config['state']}] Too many voter history files."
