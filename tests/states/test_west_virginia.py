@@ -19,6 +19,8 @@ from reggie.ingestion.preprocessor.west_virginia_preprocessor import (
     [
         ("WV PStatewide_VH.txt", None),
         ("Statewide_VRTEST.txt", True),
+        (".Statewide_VRTEST.txt", None),
+        ("._Statewide_VRTEST.txt", None),
         ("WV 2019-03-14.txt", True),
     ],
 )
@@ -37,6 +39,9 @@ def test_wv_preprocessor_voter_regex(str_to_test, expected):
     "str_to_test, expected",
     [
         ("WV PStatewide_VH.txt", True),
+        ("WV StatewideVH030121.txt", True),
+        (".Statewide_VH.txt", None),
+        ("._WV Statewide_VH.txt", None),
         ("Statewide_VRTEST.txt", None),
         ("WV 2019-03-14.txt", None),
     ],
