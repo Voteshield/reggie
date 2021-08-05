@@ -108,10 +108,15 @@ class PreprocessWestVirginia(Preprocessor):
             self.config_lookup_to_valid_list(config["locales_counties"]),
         )
 
-        # Gender rename and clean
-        gender_dict = self.config_lookup_to_dict(self.config["gender_codes"])
-        df_voters.rename(columns={"SEX": "gender"}, inplace=True)
-        df_voters.loc[:, "gender"] = df_voters.loc[:, "gender"].map(gender_dict)
+        # Gender rename and clean.  There are some historical files that
+        # dont have this column so make blank.
+        if "SEX" in df_voters.columns:
+            gender_dict = self.config_lookup_to_dict(self.config["gender_codes"])
+            df_voters.rename(columns={"SEX": "gender"}, inplace=True)
+            df_voters.loc[:, "gender"] = df_voters.loc[:, "gender"].map(gender_dict)
+        else:
+            birth_index = df_voters.columns.get_loc("DATE OF BIRTH")
+            df_voters.insert(birth_index + 1, "gender", "unknown")
 
         # Gender check
         self.check_column_has_valid_values(
@@ -160,8 +165,14 @@ class PreprocessWestVirginia(Preprocessor):
             raise UnexpectedNumberOfFilesError(
                 f"[{config['state']}] Too many voter history files."
             )
-        if len(voter_files) < 1:
+        if len(voter_histories) < 1:
             logging.info(f"[{config['state']}] Unable to find a history file.")
+
+            # Create empty rows
+            df_voters["all_history"] = None
+            df_voters["votetype_history"] = None
+            df_voters["challenged_history"] = None
+            df_voters["sparse_history"] = None
 
             # Create meta data
             self.meta = {
