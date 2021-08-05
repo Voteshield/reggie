@@ -114,6 +114,7 @@ class PreprocessWestVirginia(Preprocessor):
             gender_dict = self.config_lookup_to_dict(self.config["gender_codes"])
             df_voters.rename(columns={"SEX": "gender"}, inplace=True)
             df_voters.loc[:, "gender"] = df_voters.loc[:, "gender"].map(gender_dict)
+            df_voters["gender"] = df_voters["gender"].fillna("unknown")
         else:
             birth_index = df_voters.columns.get_loc("DATE OF BIRTH")
             df_voters.insert(birth_index + 1, "gender", "unknown")
