@@ -464,8 +464,6 @@ def test_wv_preprocessor_no_gender():
         "sparse_history",
     ]
     assert len(actual_list) == len(expected_list)
-    print(actual_list)
-    print(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
     # Check gender

@@ -72,7 +72,6 @@ class PreprocessWestVirginia(Preprocessor):
 
         # Should only be one voter file
         voter_files = [n for n in new_files if VOTER_FILE_REGEX.match(n["name"])]
-        print(voter_files)
         if len(voter_files) > 1:
             raise UnexpectedNumberOfFilesError(
                 f"{config['state']} has too many voter files."
