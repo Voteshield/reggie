@@ -11,7 +11,7 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import gc
-# import tracemalloc
+
 
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -29,7 +29,6 @@ class PreprocessWisconsin(Preprocessor):
         self.processed_file = None
 
     def execute(self):
-        # tracemalloc.start()
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
@@ -109,8 +108,9 @@ class PreprocessWisconsin(Preprocessor):
                 dtype=dtype_dict,
                 error_bad_lines=False,
             )
-        main_file["obj"].close()
-        logging.info("buffer size after close?: {}".format(main_file["obj"].__sizeof__()))
+        del self.main_file, self.temp_files, new_files
+        gc.collect()
+
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
@@ -206,8 +206,12 @@ class PreprocessWisconsin(Preprocessor):
         #     logging.info(stat)
         df_csv = main_df.to_csv(encoding="utf-8", index=False)
         del main_df
+        gc.collect()
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(df_csv),
             s3_bucket=self.s3_bucket,
         )
+        del df_csv
+        gc.collect()
