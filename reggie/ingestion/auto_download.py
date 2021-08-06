@@ -50,7 +50,7 @@ def state_download(state, s3_bucket):
             logging.info("downloading {} file".format(url))
             target_path = "/tmp/" + state + "_" + file_names[i] + ".txt.gz"
             zipped_files.append(target_path)
-            response = requests.get(url, stream=True, verify=False)
+            response = requests.get(url, stream=True, verify=False, headers={'User-Agent': 'VoteShield-Reggie/0.0.1'},)
             handle = open(target_path, "wb")
             for chunk in response.iter_content(chunk_size=512):
                 if chunk:
