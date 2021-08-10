@@ -11,7 +11,7 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import gc
-
+import chardet
 
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -45,11 +45,24 @@ class PreprocessWisconsin(Preprocessor):
         else:
             main_file = new_files[0]
 
-        logging.info("buffer size: {}".format(main_file["obj"].__sizeof__()))
+        # logging.info("buffer size: {}".format(main_file["obj"].__sizeof__()))
+        rawdata = main_file["obj"].read(100000)
+        result = chardet.detect(rawdata)
+        encoding_result = result['encoding']
         main_file["obj"].seek(0)
-        wi_columns = pd.read_csv(
-            main_file["obj"], sep="\t", nrows=0
-        ).columns.tolist()
+        # todo: add the other format here
+        try:
+            wi_columns = pd.read_csv(
+                main_file["obj"], sep="\t", nrows=0
+            ).columns.tolist()
+        except UnicodeDecodeError:
+            main_file["obj"].seek(0)
+            wi_columns = pd.read_csv(
+                main_file["obj"], sep=",", encoding=encoding_result, nrows=0
+            ).columns.tolist()
+        # wi_columns = pd.read_csv(
+        #     main_file["obj"], sep="\t", nrows=0
+        # ).columns.tolist()
         main_file["obj"].seek(0)
         # Todo: add to yaml instead of here,
         cat_columns = [
@@ -104,7 +117,7 @@ class PreprocessWisconsin(Preprocessor):
             main_df = self.read_csv_count_error_lines(
                 main_file["obj"],
                 sep=",",
-                encoding="latin-1",
+                encoding=encoding_result,
                 dtype=dtype_dict,
                 error_bad_lines=False,
             )
