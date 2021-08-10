@@ -49,6 +49,11 @@ class PreprocessWisconsin(Preprocessor):
         rawdata = main_file["obj"].read(100000)
         result = chardet.detect(rawdata)
         encoding_result = result['encoding']
+
+        if encoding_result == 'ascii':
+            # I have no idea why I keep needing to do this?
+            encoding_result = 'latin-1'
+        logging.info("encoding: {}".format(encoding_result))
         main_file["obj"].seek(0)
         # todo: add the other format here
         try:
