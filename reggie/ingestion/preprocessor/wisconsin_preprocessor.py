@@ -56,15 +56,15 @@ class PreprocessWisconsin(Preprocessor):
         logging.info("encoding: {}".format(encoding_result))
         main_file["obj"].seek(0)
         # todo: add the other format here
-        if encoding_result != 'latin-1':
-            wi_columns = pd.read_csv(
-                main_file["obj"], sep="\t", nrows=0
-            ).columns.tolist()
-        else:
-            main_file["obj"].seek(0)
-            wi_columns = pd.read_csv(
-                main_file["obj"], sep=",", encoding=encoding_result, nrows=0
-            ).columns.tolist()
+        # if encoding_result != 'latin-1':
+        #     wi_columns = pd.read_csv(
+        #         main_file["obj"], sep="\t", nrows=0
+        #     ).columns.tolist()
+        # else:
+        #   main_file["obj"].seek(0)
+        wi_columns = pd.read_csv(
+            main_file["obj"], sep=",", encoding=encoding_result, nrows=0
+        ).columns.tolist()
         # wi_columns = pd.read_csv(
         #     main_file["obj"], sep="\t", nrows=0
         # ).columns.tolist()
