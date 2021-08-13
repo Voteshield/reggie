@@ -63,7 +63,7 @@ class PreprocessWisconsin(Preprocessor):
         else:
             main_file["obj"].seek(0)
             wi_columns = pd.read_csv(
-                main_file["obj"], sep=",", nrows=0
+                main_file["obj"], sep=",", encoding='latin-1', nrows=0
             ).columns.tolist()
             if len(wi_columns) == 1:
                 main_file["obj"].seek(0)
