@@ -58,9 +58,16 @@ class PreprocessWisconsin(Preprocessor):
         # todo: add the other format here
         # todo: try and except this because there are so many encodings
         if encoding_result != 'latin-1':
-            wi_columns = pd.read_csv(
-                main_file["obj"], sep="\t", nrows=0
-            ).columns.tolist()
+            try:
+                wi_columns = pd.read_csv(
+                    main_file["obj"], sep="\t", nrows=0
+                ).columns.tolist()
+            except UnicodeDecodeError:
+                logging.info('unicode error in the latin-1?')
+                main_file["obj"].seek(0)
+                wi_columns = pd.read_csv(
+                    main_file["obj"], sep="\t", nrows=0, encoding='latin-1'
+                ).columns.tolist()
         else:
             main_file["obj"].seek(0)
             try:
