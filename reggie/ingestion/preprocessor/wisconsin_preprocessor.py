@@ -56,19 +56,28 @@ class PreprocessWisconsin(Preprocessor):
         logging.info("encoding: {}".format(encoding_result))
         main_file["obj"].seek(0)
         # todo: add the other format here
+        # todo: try and except this because there are so many encodings
         if encoding_result != 'latin-1':
             wi_columns = pd.read_csv(
                 main_file["obj"], sep="\t", nrows=0
             ).columns.tolist()
         else:
             main_file["obj"].seek(0)
-            wi_columns = pd.read_csv(
-                main_file["obj"], sep=",", encoding='latin-1', nrows=0
-            ).columns.tolist()
-            if len(wi_columns) == 1:
+            try:
+                wi_columns = pd.read_csv(
+                    main_file["obj"], sep=",", encoding='latin-1', nrows=0
+                ).columns.tolist()
+            except UnicodeDecodeError:
+                logging.info('in the exception')
                 main_file["obj"].seek(0)
                 wi_columns = pd.read_csv(
                     main_file["obj"], sep="\t", nrows=0
+                ).columns.tolist()
+            if len(wi_columns) == 1:
+                logging.info('incorrect separator, but which encoding?')
+                main_file["obj"].seek(0)
+                wi_columns = pd.read_csv(
+                    main_file["obj"], sep="\t", nrows=0, encoding='latin-1'
                 ).columns.tolist()
         # wi_columns = pd.read_csv(
         #     main_file["obj"], sep="\t", nrows=0
