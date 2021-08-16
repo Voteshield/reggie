@@ -66,7 +66,7 @@ class PreprocessWisconsin(Preprocessor):
                 logging.info('unicode error in the latin-1?')
                 main_file["obj"].seek(0)
                 wi_columns = pd.read_csv(
-                    main_file["obj"], sep="\t", nrows=0, encoding='latin-1'
+                    main_file["obj"], sep=",", nrows=0, encoding='latin-1'
                 ).columns.tolist()
         else:
             main_file["obj"].seek(0)
