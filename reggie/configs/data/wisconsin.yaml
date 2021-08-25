@@ -238,3 +238,20 @@ county_names:
   - Waushara
   - Winnebago
   - Wood
+categorical_columns:
+  - Suffix
+  - UnitType
+  - Congressional
+  - State Senate
+  - Court of Appeals
+  - Jurisdiction
+  - High School
+  - Technical College
+  - Representational School
+  - State
+  - First Class School
+  - Incorporation
+  - voter_status
+  - Voter Status Reason
+  - Voter Type
+  - IsPermanentAbsentee
