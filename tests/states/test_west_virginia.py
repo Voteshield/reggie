@@ -8,9 +8,56 @@ import pandas as pd
 
 # Dependencies to test
 from reggie import convert_voter_file
+from reggie.ingestion.preprocessor.west_virginia_preprocessor import (
+    VOTER_FILE_REGEX,
+    VOTER_HISTORY_REGEX,
+)
 
 
-def test_wv_preprocessor():
+@pytest.mark.parametrize(
+    "str_to_test, expected",
+    [
+        ("WV PStatewide_VH.txt", None),
+        ("Statewide_VRTEST.txt", True),
+        (".Statewide_VRTEST.txt", None),
+        ("._Statewide_VRTEST.txt", None),
+        ("WV 2019-03-14.txt", True),
+    ],
+)
+def test_wv_preprocessor_voter_regex(str_to_test, expected):
+    """
+    Tests that the West Virginia regexes for finding voter
+    files works as expected.
+    """
+    if expected == True:
+        assert VOTER_FILE_REGEX.match(str_to_test) is not None
+    else:
+        VOTER_FILE_REGEX.match(str_to_test) == expected
+
+
+@pytest.mark.parametrize(
+    "str_to_test, expected",
+    [
+        ("WV PStatewide_VH.txt", True),
+        ("WV StatewideVH030121.txt", True),
+        (".Statewide_VH.txt", None),
+        ("._WV Statewide_VH.txt", None),
+        ("Statewide_VRTEST.txt", None),
+        ("WV 2019-03-14.txt", None),
+    ],
+)
+def test_wv_preprocessor_history_regex(str_to_test, expected):
+    """
+    Tests that the West Virginia regexes for finding voter
+    files works as expected.
+    """
+    if expected == True:
+        assert VOTER_HISTORY_REGEX.match(str_to_test) is not None
+    else:
+        VOTER_HISTORY_REGEX.match(str_to_test) == expected
+
+
+def test_wv_preprocessor_basic():
     """
     Tests that the West Virginia preprocessor produces the data
     as expected.
@@ -20,6 +67,7 @@ def test_wv_preprocessor():
         "..",
         "data",
         "west_virginia",
+        "basic",
         "WV-TEST.zip",
     )
 
@@ -95,6 +143,12 @@ def test_wv_preprocessor():
     # Check first names
     actual_list = list(df_processed["FIRST NAME"])
     expected_list = ["first01", "first02", "first03", "no history"]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check gender
+    actual_list = list(df_processed["gender"])
+    expected_list = ["male", "female", "female", "male"]
     assert len(actual_list) == len(expected_list)
     assert all([a == b for a, b in zip(actual_list, expected_list)])
 
@@ -345,3 +399,75 @@ def test_wv_preprocessor():
     ]
     actual_list = preprocessor.meta["array_decoding"]
     assert actual_list == json.dumps(expected_list)
+
+
+def test_wv_preprocessor_no_gender():
+    """
+    Tests that the West Virginia preprocessor produces the data
+    as expected.
+    """
+    test_data_directory = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)),
+        "..",
+        "data",
+        "west_virginia",
+        "no_gender",
+        "WV-TEST-no-gender.zip",
+    )
+
+    _, _, preprocessor = convert_voter_file(
+        state="west_virginia",
+        local_file=test_data_directory,
+        file_date="2020-01-01",
+        write_file=False,
+    )
+    df_processed = preprocessor.processed_df
+
+    # Check column names
+    actual_list = df_processed.columns.values.tolist()
+    expected_list = [
+        "ID_VOTER",
+        "County_ID",
+        "County_Name",
+        "FIRST NAME",
+        "Mid",
+        "LAST NAME",
+        "Suffix",
+        "DATE OF BIRTH",
+        "gender",
+        "HOUSE NO",
+        "STREET",
+        "STREET2",
+        "UNIT",
+        "CITY",
+        "STATE",
+        "ZIP",
+        "MAIL HOUSE NO",
+        "MAIL STREET",
+        "MAIL STREET2",
+        "MAIL UNIT",
+        "MAIL CITY",
+        "MAIL STATE",
+        "MAIL ZIP",
+        "REGISTRATION DATE",
+        "PartyAffiliation",
+        "Status",
+        "Congressional District",
+        "Senatorial District",
+        "Delegate District",
+        "Magisterial District",
+        "Precinct_Number",
+        "POLL_NAME",
+        "all_history",
+        "votetype_history",
+        "challenged_history",
+        "sparse_history",
+    ]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
+
+    # Check gender
+    actual_list = list(df_processed["gender"])
+    expected_list = ["unknown", "unknown", "unknown", "unknown"]
+    assert len(actual_list) == len(expected_list)
+    assert all([a == b for a, b in zip(actual_list, expected_list)])
