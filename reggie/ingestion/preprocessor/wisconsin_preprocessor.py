@@ -116,22 +116,14 @@ class PreprocessWisconsin(Preprocessor):
         }
 
         # Wisconsin comes in two slightly different formats
-        try:
-            main_df = self.read_csv_count_error_lines(
-                main_file["obj"],
-                sep="\t",
-                dtype=dtype_dict,
-                error_bad_lines=False,
-            )
-        except UnicodeDecodeError:
-            main_file["obj"].seek(0)
-            main_df = self.read_csv_count_error_lines(
-                main_file["obj"],
-                sep=",",
-                encoding=encoding_result,
-                dtype=dtype_dict,
-                error_bad_lines=False,
-            )
+        main_df = self.read_csv_count_error_lines(
+            main_file["obj"],
+            sep=file_sep,
+            encoding=encoding_result,
+            dtype=dtype_dict,
+            error_bad_lines=False,
+        )
+
         del self.main_file, self.temp_files, new_files
         gc.collect()
 
