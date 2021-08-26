@@ -13,6 +13,7 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import json
+import re
 
 
 class PreprocessNevada(Preprocessor):
@@ -114,22 +115,38 @@ class PreprocessNevada(Preprocessor):
         )
         df_voters = self.config.coerce_strings(df_voters)
 
-        # standardize congressional district data (changed at some point)
-        congressional_mapping = {
-            "1": "cd1",
-            "2": "cd2",
-            "3": "cd3",
-            "4": "cd4",
-            "cd1": "cd1",
-            "cd2": "cd2",
-            "cd3": "cd3",
-            "cd4": "cd4",
-        }
+        # standardize district data - over time these have varied from:
+        #   "1" vs. "district 1" vs "cd1"/"sd1"/"ad1"
+        digits = re.compile("\d+")
+        def get_district_code(x, code):
+            try:
+                s = digits.search(x)
+            except TypeError:
+                return None
+            if s is not None:
+                return code + s.group()
+            else:
+                return None
+
         df_voters["Congressional_District"] = (
             df_voters["Congressional_District"].map(ensure_int_string)
         )
+        df_voters["Senate_District"] = (
+            df_voters["Senate_District"].map(ensure_int_string)
+        )
+        df_voters["Assembly_District"] = (
+            df_voters["Assembly_District"].map(ensure_int_string)
+        )
         df_voters["Congressional_District"] = (
-            df_voters["Congressional_District"].map(congressional_mapping)
+            df_voters["Congressional_District"].map(
+                lambda x: get_district_code(x, "cd")
+            )
+        )
+        df_voters["Senate_District"] = df_voters["Senate_District"].map(
+                lambda x: get_district_code(x, "sd")
+        )
+        df_voters["Assembly_District"] = df_voters["Assembly_District"].map(
+                lambda x: get_district_code(x, "ad")
         )
 
         self.meta = {

@@ -112,9 +112,15 @@ class PreprocessNewJersey2(Preprocessor):
             ],
         )
 
-        # ensure congressional district field is e.g. "1" not "1.0"
+        # ensure district fields are e.g. "1" not "1.0"
         voter_df["congressional"] = (
             voter_df["congressional"].map(ensure_int_string)
+        )
+        voter_df["legislative"] = (
+            voter_df["legislative"].map(ensure_int_string)
+        )
+        voter_df["district"] = (
+            voter_df["district"].map(ensure_int_string)
         )
 
         # multiple active / inactive statuses are incompatible with our data
