@@ -3,7 +3,10 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingNumColumnsError
+from reggie.ingestion.utils import (
+    ensure_int_string,
+    MissingNumColumnsError,
+)
 import logging
 import datetime
 from io import StringIO
@@ -110,6 +113,24 @@ class PreprocessNevada(Preprocessor):
             ],
         )
         df_voters = self.config.coerce_strings(df_voters)
+
+        # standardize congressional district data (changed at some point)
+        congressional_mapping = {
+            "1": "cd1",
+            "2": "cd2",
+            "3": "cd3",
+            "4": "cd4",
+            "cd1": "cd1",
+            "cd2": "cd2",
+            "cd3": "cd3",
+            "cd4": "cd4",
+        }
+        df_voters["Congressional_District"] = (
+            df_voters["Congressional_District"].map(ensure_int_string)
+        )
+        df_voters["Congressional_District"] = (
+            df_voters["Congressional_District"].map(congressional_mapping)
+        )
 
         self.meta = {
             "message": "nevada_{}".format(datetime.now().isoformat()),

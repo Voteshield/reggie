@@ -3,6 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
+from reggie.ingestion.utils import ensure_int_string
 import logging
 import pandas as pd
 import datetime
@@ -109,6 +110,11 @@ class PreprocessNewJersey2(Preprocessor):
                 "school",
                 "fire",
             ],
+        )
+
+        # ensure congressional district field is e.g. "1" not "1.0"
+        voter_df["congressional"] = (
+            voter_df["congressional"].map(ensure_int_string)
         )
 
         # multiple active / inactive statuses are incompatible with our data
