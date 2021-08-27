@@ -66,7 +66,7 @@ format:
   hist_election_rows: false
   columnar_elections: true
 columns:
-  Voter Reg Number: int
+  Voter Reg Number: text
   LastName: text
   FirstName: text
   MiddleName: text
@@ -111,8 +111,9 @@ columns:
   ApplicationSource: text
   IsPermanentAbsentee: text
   Voter Type: text
+  # Dummy columns for processing, WI does not provide this information
   PARTY_AFFILIATION: text
-  DATE_OF_BIRTH: int
+  DATE_OF_BIRTH: date
 ordered_columns:
   - Voter Reg Number
   - LastName
@@ -165,7 +166,6 @@ has_headers: YES
 county_names:
   - Adams
   - Ashland
-  - At Polls
   - Barron
   - Bayfield
   - Brown
@@ -238,3 +238,20 @@ county_names:
   - Waushara
   - Winnebago
   - Wood
+categorical_columns:
+  - Suffix
+  - UnitType
+  - Congressional
+  - State Senate
+  - Court of Appeals
+  - Jurisdiction
+  - High School
+  - Technical College
+  - Representational School
+  - State
+  - First Class School
+  - Incorporation
+  - voter_status
+  - Voter Status Reason
+  - Voter Type
+  - IsPermanentAbsentee

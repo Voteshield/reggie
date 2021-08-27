@@ -3,13 +3,17 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingNumColumnsError
+from reggie.ingestion.utils import (
+    ensure_int_string,
+    MissingNumColumnsError,
+)
 import logging
 import datetime
 from io import StringIO
 import numpy as np
 from datetime import datetime
 import json
+import re
 import gc
 
 
@@ -116,6 +120,38 @@ class PreprocessNevada(Preprocessor):
             ],
         )
         df_voters = self.config.coerce_strings(df_voters)
+
+        # standardize district data - over time these have varied from:
+        #   "1" vs. "district 1" vs "cd1"/"sd1"/"ad1"
+        digits = re.compile("\d+")
+        def get_district_number_str(x):
+            try:
+                s = digits.search(x)
+            except TypeError:
+                return None
+            if s is not None:
+                return s.group()
+            else:
+                return None
+
+        df_voters["Congressional_District"] = (
+            df_voters["Congressional_District"].map(ensure_int_string)
+        )
+        df_voters["Senate_District"] = (
+            df_voters["Senate_District"].map(ensure_int_string)
+        )
+        df_voters["Assembly_District"] = (
+            df_voters["Assembly_District"].map(ensure_int_string)
+        )
+        df_voters["Congressional_District"] = (
+            df_voters["Congressional_District"].map(get_district_number_str)
+        )
+        df_voters["Senate_District"] = (
+            df_voters["Senate_District"].map(get_district_number_str)
+        )
+        df_voters["Assembly_District"] = (
+            df_voters["Assembly_District"].map(get_district_number_str)
+        )
 
         self.meta = {
             "message": "nevada_{}".format(datetime.now().isoformat()),
