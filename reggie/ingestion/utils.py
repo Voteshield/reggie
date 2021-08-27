@@ -270,3 +270,12 @@ def normalize_columns(df, cols, types=None):
     df = df[common_cols]
     return df, common_cols
 
+
+def ensure_int_string(x):
+    """
+    Guarantee a string column contains e.g. "1" and not "1.0"
+    """
+    try:
+        return str(int(float(x)))
+    except (TypeError, ValueError):
+        return x
