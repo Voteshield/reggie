@@ -15,6 +15,7 @@ import datetime
 from io import StringIO
 import numpy as np
 from datetime import datetime
+import gc
 
 
 class PreprocessMichigan(Preprocessor):
@@ -38,6 +39,9 @@ class PreprocessMichigan(Preprocessor):
 
         # config = Config('michigan')
         new_files = self.unpack_files(file_obj=self.main_file)
+        del self.main_file, self.temp_files
+        gc.collect()
+
         if not self.ignore_checks:
             self.file_check(len(new_files))
         voter_file = (
@@ -120,6 +124,8 @@ class PreprocessMichigan(Preprocessor):
             vdf.rename(columns={"STATE": "STATE_ADDR"}, inplace=True)
         else:
             raise NotImplementedError("File format not implemented")
+        del voter_file
+        gc.collect()
 
         def column_is_empty(col):
             total_size = col.shape[0]
@@ -173,6 +179,8 @@ class PreprocessMichigan(Preprocessor):
                 )
         else:
             raise NotImplementedError("File format not implemented")
+        del hist_file
+        gc.collect()
 
         # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
         # then we don't need to do election code lookups
@@ -275,6 +283,8 @@ class PreprocessMichigan(Preprocessor):
         vdf["schooldistrict_history"] = hdf_id_groups[
             "SCHOOL_DISTRICT_CODE"
         ].apply(list)
+        del hdf, hdf_id_groups
+        gc.collect()
 
         def insert_code_bin(arr):
             if isinstance(arr, list):
@@ -310,8 +320,15 @@ class PreprocessMichigan(Preprocessor):
             "array_decoding": sorted_codes,
             "elec_code_dict": elec_code_dict,
         }
+
+        csv_obj = vdf.to_csv(encoding="utf-8", index=False)
+        del vdf
+        gc.collect()
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
+        del csv_obj
+        gc.collect()
