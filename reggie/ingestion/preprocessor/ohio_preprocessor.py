@@ -3,6 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
+from reggie.ingestion.utils import ensure_int_string
 import logging
 import pandas as pd
 import datetime
@@ -73,6 +74,36 @@ class PreprocessOhio(Preprocessor):
             }
             for i, k in enumerate(voting_history_cols)
         }
+
+        # ensure district and other numeric fields are e.g. "1" not "1.0"
+        df["CONGRESSIONAL_DISTRICT"] = (
+            df["CONGRESSIONAL_DISTRICT"].map(ensure_int_string)
+        )
+        df["STATE_REPRESENTATIVE_DISTRICT"] = (
+            df["STATE_REPRESENTATIVE_DISTRICT"].map(ensure_int_string)
+        )
+        df["STATE_SENATE_DISTRICT"] = (
+            df["STATE_SENATE_DISTRICT"].map(ensure_int_string)
+        )
+        df["COURT_OF_APPEALS"] = (
+            df["COURT_OF_APPEALS"].map(ensure_int_string)
+        )
+        df["STATE_BOARD_OF_EDUCATION"] = (
+            df["STATE_BOARD_OF_EDUCATION"].map(ensure_int_string)
+        )
+        df["RESIDENTIAL_ZIP"] = (
+            df["RESIDENTIAL_ZIP"].map(ensure_int_string)
+        )
+        df["RESIDENTIAL_ZIP_PLUS4"] = (
+            df["RESIDENTIAL_ZIP_PLUS4"].map(ensure_int_string)
+        )
+        df["MAILING_ZIP"] = (
+            df["MAILING_ZIP"].map(ensure_int_string)
+        )
+        df["MAILING_ZIP_PLUS4"] = (
+            df["MAILING_ZIP_PLUS4"].map(ensure_int_string)
+        )
+
         self.meta = {
             "message": "ohio_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
