@@ -3,6 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
+from reggie.ingestion.utils import ensure_int_string
 import logging
 import pandas as pd
 import datetime
@@ -73,6 +74,18 @@ class PreprocessOhio(Preprocessor):
             }
             for i, k in enumerate(voting_history_cols)
         }
+
+        # ensure district fields are e.g. "1" not "1.0"
+        df["CONGRESSIONAL_DISTRICT"] = (
+            df["CONGRESSIONAL_DISTRICT"].map(ensure_int_string)
+        )
+        df["STATE_REPRESENTATIVE_DISTRICT"] = (
+            df["STATE_REPRESENTATIVE_DISTRICT"].map(ensure_int_string)
+        )
+        df["STATE_SENATE_DISTRICT"] = (
+            df["STATE_SENATE_DISTRICT"].map(ensure_int_string)
+        )
+
         self.meta = {
             "message": "ohio_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
