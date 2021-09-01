@@ -74,16 +74,20 @@ class PreprocessNewYork(Preprocessor):
             main_df.voterhistory, delim=";"
         )
         unique_codes, counts = np.unique(all_codes, return_counts=True)
+        del all_codes, null_hists
         gc.collect()
 
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
         sorted_codes = unique_codes.tolist()
+        del unique_codes, count_order
+        gc.collect()
         sorted_codes_dict = {
             k: {"index": i, "count": int(counts[i])}
             for i, k in enumerate(sorted_codes)
         }
+        del counts
         gc.collect()
 
         def insert_code_bin(arr):
@@ -93,6 +97,7 @@ class PreprocessNewYork(Preprocessor):
         # stored
         logging.info("Mapping history codes")
         main_df.all_history = main_df.all_history.map(insert_code_bin)
+
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(
@@ -116,6 +121,9 @@ class PreprocessNewYork(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+        del sorted_codes, sorted_codes_dict
+        gc.collect()
+
         csv_obj = main_df.to_csv(encoding="utf-8", index=False)
         del main_df
         gc.collect()
