@@ -1,0 +1,251 @@
+# California has a .txt file for the voter registration data 'vrd', a file for the voter history 'vph' and a districts
+# file.
+
+file_type: txt
+state: california
+abbreviation: ca
+source: boe
+file_class: voter_file
+expected_number_of_files: 3
+voter_id: RegistrantID
+county_identifier: CountyCode
+#
+primary_locale_identifier: CountyCode
+numeric_primary_locale: true
+birthday_identifier: DOB
+voter_status: Status
+# CA only supplies us with voters who have the active status
+voter_status_active: ACTIVE
+reason_code: VoterStatusReasonCodeDesc
+democratic_party: DEM
+republican_party: REP
+# CA has...a bunch of parties
+green_party: GRE
+no_party_affiliation: NPP
+# Todo: Check date format
+date_format: '%Y%m%d'
+party_identifier: enrollment
+gender_identifier: gender
+match_fields:
+  - FirstName
+  - LastName
+  - DOB
+name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
+  - Suffix
+standard_name_fields:
+  - FirstName
+  - MiddleName
+  - LastName
+address_fields:
+  - AddressNumber
+  - HouseFractionNumber
+  - AddressNumberSuffix
+  - StreetDirPrefix
+  - StreetName
+  - StreetType
+  - StreetDirSuffix
+  - UnitType
+  - UnitNumber
+  - City
+  - State
+  - Zip
+format:
+  separate_hist: true
+  segmented_files: false
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+has_headers: true
+columns:
+  CountyCode: int
+  RegistrantID: text
+  ExtractDate: date
+  LastName: text
+  FirstName: text
+  MiddleName: text
+  Suffix: text
+  AddressNumber: text
+  HouseFractionNumber: text
+  AddressNumberSuffix: text
+  StreetDirPrefix: text
+  StreetName: text
+  StreetType: text
+  StreetDirSuffix: text
+  UnitType: text
+  UnitNumber: text
+  City: text
+  State: text
+  Zip: text # mix of regular zips and zip+4, most are +4
+  # I guess people had 4 phone numbers in CA?
+  Phone1Area: text
+  Phone1Exchange: text
+  Phone1NumberPart: text
+  Phone2Area: text
+  Phone2Exchange: text
+  Phone2NumberPart: text
+  Phone3Area: text
+  Phone3Exchange: text
+  Phone3NumberPart: text
+  Phone4Area: text
+  Phone4Exchange: text
+  Phone4NumberPart: text
+  Email: text
+  MailingAddressLine1: text
+  MailingAddressLine2: text
+  MailingAddressLine3: text
+  MailingCity: text
+  MailingState: text
+  MailingZip5: text
+  MailingCountry: text
+  Language: text
+  DOB: date
+  Gender: text
+  PartyCode: text
+  Status: text
+  RegistrationDate: date
+  Precinct: text
+  # These are an actual mess
+  PrecinctNumber: text
+  RegistrationMethodCode: text
+  PlaceOfBirth: text
+  NamePrefix: text
+  NonStandardAddress: text
+  VoterStatusReasonCodeDesc: text
+  AssistanceRequestFlag: text
+  VbmVoterType: text
+  EmsVoterId: text
+  # All ints, sometimes have nans most standard precinct fieldp
+  PrecinctId: int
+ordered_columns:
+  - CountyCode
+  - RegistrantID
+  - ExtractDate
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - AddressNumber
+  - HouseFractionNumber
+  - AddressNumberSuffix
+  - StreetDirPrefix
+  - StreetName
+  - StreetType
+  - StreetDirSuffix
+  - UnitType
+  - UnitNumber
+  - City
+  - State
+  - Zip
+  - Phone1Area
+  - Phone1Exchange
+  - Phone1NumberPart
+  - Phone2Area
+  - Phone2Exchange
+  - Phone2NumberPart
+  - Phone3Area
+  - Phone3Exchange
+  - Phone3NumberPart
+  - Phone4Area
+  - Phone4Exchange
+  - Phone4NumberPart
+  - Email
+  - MailingAddressLine1
+  - MailingAddressLine2
+  - MailingAddressLine3
+  - MailingCity
+  - MailingState
+  - MailingZip5
+  - MailingCountry
+  - Language
+  - DOB
+  - Gender
+  - PartyCode
+  - Status
+  - RegistrationDate
+  - Precinct
+  - PrecinctNumber
+  - RegistrationMethodCode
+  - PlaceOfBirth
+  - NamePrefix
+  - NonStandardAddress
+  - VoterStatusReasonCodeDesc
+  - AssistanceRequestFlag
+  - VbmVoterType
+  - EmsVoterId
+  - PrecinctId
+hist_columns:
+  - CountyCode
+  - RegistrantID
+  - ExtractDate
+  - ElectionType
+  - ElectionTypeDesc
+  - ElectionDate
+  - ElectionName
+  - Method
+county_names:
+  Alameda: 01
+  Orange: 30
+  Alpine: 02
+  Placer: 31
+  Amador: 03
+  Plumas: 32
+  Butte: 04
+  Riverside: 33
+  Calaveras: 05
+  Sacramento: 34
+  Colusa: 06
+  San Benito: 35
+  Contra Costa: 07
+  San Bernardino: 36
+  Del Norte: 08
+  San Diego: 37
+  El Dorado: 09
+  San Francisco: 38
+  Fresno: 10
+  San Joaquin: 39
+  Glenn: 11
+  San Luis Obispo: 40
+  Humboldt: 12
+  San Mateo: 41
+  Imperial: 13
+  Santa Barbara: 42
+  Inyo: 14
+  Santa Clara: 43
+  Kern: 15
+  Santa Cruz: 44
+  Kings: 16
+  Shasta: 45
+  Lake: 17
+  Sierra: 46
+  Lassen: 18
+  Siskiyou: 47
+  Los Angeles: 19
+  Solano: 48
+  Madera: 20
+  Sonoma: 49
+  Marin: 21
+  Stanislaus: 50
+  Mariposa: 22
+  Sutter: 51
+  Mendocino: 23
+  Tehama: 52
+  Merced: 24
+  Trinity: 53
+  Modoc: 25
+  Tulare: 54
+  Mono: 26
+  Tuolumne: 55
+  Monterey: 27
+  Ventura: 56
+  Napa: 28
+  Yolo: 57
+  Nevada: 29
+  Yuba: 58
