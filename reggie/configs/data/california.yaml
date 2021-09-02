@@ -9,13 +9,12 @@ file_class: voter_file
 expected_number_of_files: 3
 voter_id: RegistrantID
 county_identifier: CountyCode
-#
 primary_locale_identifier: CountyCode
 numeric_primary_locale: true
 birthday_identifier: DOB
 voter_status: Status
 # CA only supplies us with voters who have the active status
-voter_status_active: ACTIVE
+voter_status_active: A
 reason_code: VoterStatusReasonCodeDesc
 democratic_party: DEM
 republican_party: REP
