@@ -21,6 +21,8 @@ Big todo:
 Create hist stuff first, then del from memory to free room to
 Join district info in
 
+
+Use ensure int string where necessary otherwise you have fun float string problems
 """
 
 
@@ -50,3 +52,15 @@ class PreprocessCalifornia(Preprocessor):
         district_file = [f for f in new_files if "pd" in f["name"]][0]
         history_file = [f for f in new_files if "vph" in f["name"]][0]
 
+        # Diagnostic
+        voter_size = voter_file["obj"].__sizeof__()
+        history_size = history_file["obj"].__sizeof__()
+        district_size = district_file["obj"].__sizeof__()
+        logging.info(
+            "Reading In files: voter_size {}\n history_size {} \n district_size{} \n total: {}".format(
+                voter_size,
+                history_size,
+                district_size,
+                voter_size + history_size + district_size,
+            )
+        )
