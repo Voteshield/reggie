@@ -48,9 +48,10 @@ class PreprocessCalifornia(Preprocessor):
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
-        voter_file = [f for f in new_files if "vrd" in f["name"]][0]
-        district_file = [f for f in new_files if "pd" in f["name"]][0]
-        history_file = [f for f in new_files if "vph" in f["name"]][0]
+        # Have to use longer whole string not just suffix because hist will match to voter file
+        voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
+        district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
+        history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
 
         # Diagnostic
         voter_size = voter_file["obj"].__sizeof__()
