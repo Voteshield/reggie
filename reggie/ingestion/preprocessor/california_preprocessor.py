@@ -50,15 +50,16 @@ class PreprocessCalifornia(Preprocessor):
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
+        del self.main_file, self.temp_files
         # Have to use longer whole string not just suffix because hist will match to voter file
-        self.main_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
+        voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
         district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
 
         # chunksize
         chunk_size = 1000000
         # Diagnostic
-        voter_size = self.main_file["obj"].__sizeof__()
+        voter_size = voter_file["obj"].__sizeof__()
         history_size = history_file["obj"].__sizeof__()
         district_size = district_file["obj"].__sizeof__()
         logging.info(
@@ -70,7 +71,7 @@ class PreprocessCalifornia(Preprocessor):
             )
         )
         temp_voter_id_df = pd.read_csv(
-            self.main_file["obj"],
+            voter_file["obj"],
             sep="\t",
             encoding="latin-1",
             usecols=["RegistrantID"],
