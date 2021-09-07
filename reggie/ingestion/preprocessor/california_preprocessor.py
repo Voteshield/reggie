@@ -116,7 +116,7 @@ class PreprocessCalifornia(Preprocessor):
                 except KeyError:
                     continue
 
-            return history_dict, election_dict
+            # return history_dict, election_dict
 
         history_chunks = pd.read_csv(
             history_file["obj"],
@@ -134,9 +134,9 @@ class PreprocessCalifornia(Preprocessor):
         )
         for chunk in history_chunks:
             start_t = time.time()
-            hist_dict = dict_cols(chunk, hist_dict, elect_dict)
+            dict_cols(chunk, hist_dict, elect_dict)
             end_time = time.time()
-            print("time_elapsed: ", end_time - start_t)
+            logging.info("time_elapsed: {}".format(end_time - start_t))
 
         del history_file
         logging.info("test_dict complete")
