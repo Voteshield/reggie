@@ -137,4 +137,5 @@ class PreprocessCalifornia(Preprocessor):
             end_time = time.time()
             print("time_elapsed: ", end_time - start_t)
 
+        del history_file
         logging.info("test_dict complete")
