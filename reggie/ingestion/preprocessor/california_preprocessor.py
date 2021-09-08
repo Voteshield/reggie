@@ -57,7 +57,7 @@ class PreprocessCalifornia(Preprocessor):
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
 
         # chunksize
-        chunk_size = 1000000
+        chunk_size = 3000000
         # Diagnostic
         voter_size = voter_file["obj"].__sizeof__()
         history_size = history_file["obj"].__sizeof__()
