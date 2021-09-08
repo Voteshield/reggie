@@ -16,6 +16,7 @@ import json
 import time
 from collections import defaultdict
 import dask.dataframe as dd
+# import dask
 
 """
 The california File Comes in 3 files
@@ -165,7 +166,8 @@ class PreprocessCalifornia(Preprocessor):
             )
             return chunk
 
-        df = dd.read_csv(
+        logging.info('testing')
+        df = pd.read_csv(
             history_file["obj"],
             sep="\t",
             blocksize=chunk_size,
@@ -180,7 +182,14 @@ class PreprocessCalifornia(Preprocessor):
             dtype=str,
         )
 
-        result = dask_test(df)
+        logging.info(
+            "dataframe memory usage: {}".format(
+                df.memory_usage(deep=True).sum() // 1024 ** 3
+            )
+        )
+
+        dask_df = dd.from_pandas(df, chunksize=1000000)
+        result = dask_test(dask_df)
         start_t = time.time()
         logging.info("starting")
         result = result.compute(num_workers=4)
