@@ -186,7 +186,7 @@ class PreprocessCalifornia(Preprocessor):
                 df.memory_usage(deep=True).sum() // 1024 ** 3
             )
         )
-
+        del history_file
         dask_df = dd.from_pandas(df, chunksize=1000000)
         result = dask_test(dask_df)
         start_t = time.time()
