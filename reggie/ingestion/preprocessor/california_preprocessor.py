@@ -166,7 +166,7 @@ class PreprocessCalifornia(Preprocessor):
             return chunk
 
         df = dd.read_csv(
-            "/home/tommi/Downloads/CA 2020-12-23/quarterhist.txt",
+            history_file["obj"],
             sep="\t",
             blocksize=chunk_size,
             usecols=[
