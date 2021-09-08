@@ -170,7 +170,6 @@ class PreprocessCalifornia(Preprocessor):
         df = pd.read_csv(
             history_file["obj"],
             sep="\t",
-            blocksize=chunk_size,
             usecols=[
                 "RegistrantID",
                 "CountyCode",
