@@ -15,9 +15,6 @@ from collections import defaultdict
 import json
 import time
 from collections import defaultdict
-import dask.dataframe as dd
-
-# import dask
 
 """
 The california File Comes in 3 files
