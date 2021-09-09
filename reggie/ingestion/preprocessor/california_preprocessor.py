@@ -59,8 +59,11 @@ class PreprocessCalifornia(Preprocessor):
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
 
         # chunksize
-        # chunk_size = 3000000
-        chunk_size = 36 * 1024 * 1024  # for dask in mb
+        chunk_size = 3000000
+        # chunk_size = 36 * 1024 * 1024  # for dask in mb
+        # Todo: Remove, diagnostic only accurate for only one file
+        rows = 213637309
+        num_chunks = rows // chunk_size + 2
 
         # Diagnostic
         voter_size = voter_file["obj"].__sizeof__()
@@ -74,75 +77,20 @@ class PreprocessCalifornia(Preprocessor):
                 voter_size + history_size + district_size,
             )
         )
-        # temp_voter_id_df = pd.read_csv(
-        #     voter_file["obj"],
-        #     sep="\t",
-        #     encoding="latin-1",
-        #     usecols=["RegistrantID"],
-        #     dtype=str,
-        # )
-        # voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
-        # del temp_voter_id_df
-        # hist_dict = {i: [] for i in voter_ids}
-        # del voter_ids
-        # elect_dict = defaultdict(int)
-        #
-        # def dict_cols(chunk, history_dict=None, election_dict=None):
-        #     chunk["combined_col"] = (
-        #         chunk["ElectionType"].replace(" ", "")
-        #         + "_"
-        #         + chunk["ElectionDate"]
-        #         + "_"
-        #         + chunk["Method"]
-        #     )
-        #     chunk["election"] = (
-        #         chunk["ElectionType"].replace(" ", "")
-        #         + "_"
-        #         + chunk["ElectionDate"]
-        #     )
-        #     chunk.drop(
-        #         columns=[
-        #             "ElectionType",
-        #             "ElectionName",
-        #             "ElectionDate",
-        #             "CountyCode",
-        #             "Method",
-        #         ],
-        #         inplace=True,
-        #     )
-        #     for index, row in chunk.iterrows():
-        #         try:
-        #             current_li = hist_dict[row["RegistrantID"]]
-        #             combined_row = row["combined_col"]
-        #             current_li.append(combined_row)
-        #             history_dict[row["RegistrantID"]] = current_li
-        #             election_dict[row["election"]] += 1
-        #         except KeyError:
-        #             continue
-        #
-        #     # return history_dict, election_dict
-        #
-        # history_chunks = pd.read_csv(
-        #     history_file["obj"],
-        #     sep="\t",
-        #     usecols=[
-        #         "RegistrantID",
-        #         "CountyCode",
-        #         "ElectionDate",
-        #         "ElectionName",
-        #         "ElectionType",
-        #         "Method",
-        #     ],
-        #     dtype=str,
-        #     chunksize=chunk_size,
-        # )
-        # for chunk in history_chunks:
-        #     start_t = time.time()
-        #     dict_cols(chunk, hist_dict, elect_dict)
-        #     end_time = time.time()
-        #     logging.info("time_elapsed: {}".format(end_time - start_t))
-        #
-        def dask_test(chunk):
+        temp_voter_id_df = pd.read_csv(
+            voter_file["obj"],
+            sep="\t",
+            encoding="latin-1",
+            usecols=["RegistrantID"],
+            dtype=str,
+        )
+        voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
+        del temp_voter_id_df
+        hist_dict = {i: [] for i in voter_ids}
+        del voter_ids
+        elect_dict = defaultdict(int)
+
+        def dict_cols(chunk, history_dict=None, election_dict=None):
             chunk["combined_col"] = (
                 chunk["ElectionType"].replace(" ", "")
                 + "_"
@@ -155,19 +103,29 @@ class PreprocessCalifornia(Preprocessor):
                 + "_"
                 + chunk["ElectionDate"]
             )
-            chunk = chunk.drop(
+            chunk.drop(
                 columns=[
                     "ElectionType",
                     "ElectionName",
                     "ElectionDate",
                     "CountyCode",
                     "Method",
-                ]
+                ],
+                inplace=True,
             )
-            return chunk
+            for index, row in chunk.iterrows():
+                try:
+                    current_li = hist_dict[row["RegistrantID"]]
+                    combined_row = row["combined_col"]
+                    current_li.append(combined_row)
+                    history_dict[row["RegistrantID"]] = current_li
+                    election_dict[row["election"]] += 1
+                except KeyError:
+                    continue
 
-        logging.info('testing')
-        df = pd.read_csv(
+            # return history_dict, election_dict
+
+        history_chunks = pd.read_csv(
             history_file["obj"],
             sep="\t",
             usecols=[
@@ -179,13 +137,64 @@ class PreprocessCalifornia(Preprocessor):
                 "Method",
             ],
             dtype=str,
+            chunksize=chunk_size,
         )
+        progress_tracker = 0
+        for chunk in history_chunks:
+            progress_tracker += 1
+            logging.info("Chunk {}/{}".format(progress_tracker, num_chunks))
+            start_t = time.time()
+            dict_cols(chunk, hist_dict, elect_dict)
+            end_time = time.time()
+            logging.info("time_elapsed: {}".format(end_time - start_t))
+            time_remaining = round(((end_time - start_t) * (num_chunks - progress_tracker) // 60), 2)
+            logging.info("time more or less remaining {}".format(time_remaining))
 
-        logging.info(
-            "dataframe memory usage: {}".format(
-                df.memory_usage(deep=True).sum() // 1024 ** 3
-            )
-        )
+        ### Not supported?
+        # def dask_test(chunk):
+        #     chunk["combined_col"] = (
+        #         chunk["ElectionType"].replace(" ", "")
+        #         + "_"
+        #         + chunk["ElectionDate"]
+        #         + "_"
+        #         + chunk["Method"]
+        #     )
+        #     chunk["election"] = (
+        #         chunk["ElectionType"].replace(" ", "")
+        #         + "_"
+        #         + chunk["ElectionDate"]
+        #     )
+        #     chunk = chunk.drop(
+        #         columns=[
+        #             "ElectionType",
+        #             "ElectionName",
+        #             "ElectionDate",
+        #             "CountyCode",
+        #             "Method",
+        #         ]
+        #     )
+        #     return chunk
+        #
+        # logging.info('testing')
+        # df = pd.read_csv(
+        #     history_file["obj"],
+        #     sep="\t",
+        #     usecols=[
+        #         "RegistrantID",
+        #         "CountyCode",
+        #         "ElectionDate",
+        #         "ElectionName",
+        #         "ElectionType",
+        #         "Method",
+        #     ],
+        #     dtype=str,
+        # )
+
+        # logging.info(
+        #     "dataframe memory usage: {}".format(
+        #         df.memory_usage(deep=True).sum() // 1024 ** 3
+        #     )
+        # )
         del history_file
         dask_df = dd.from_pandas(df, chunksize=1000000)
         result = dask_test(dask_df)
