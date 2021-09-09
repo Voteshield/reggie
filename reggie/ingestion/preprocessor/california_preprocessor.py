@@ -195,18 +195,22 @@ class PreprocessCalifornia(Preprocessor):
         #         df.memory_usage(deep=True).sum() // 1024 ** 3
         #     )
         # )
+        # del history_file
+        # dask_df = dd.from_pandas(df, chunksize=1000000)
+        # result = dask_test(dask_df)
+        # start_t = time.time()
+        # logging.info("starting")
+        # result = result.compute(num_workers=4)
+        # end_time = time.time()
+        # print("time_elapsed: ", end_time - start_t)
         del history_file
-        dask_df = dd.from_pandas(df, chunksize=1000000)
-        result = dask_test(dask_df)
-        start_t = time.time()
-        logging.info("starting")
-        result = result.compute(num_workers=4)
-        end_time = time.time()
-        print("time_elapsed: ", end_time - start_t)
-        del history_file
-        csv_hist = result.to_csv(encoding="utf-8", index=False)
-        # logging.info("test_dict complete")
-        del result
+        # csv_hist = result.to_csv(encoding="utf-8", index=False)
+        # # logging.info("test_dict complete")
+        # del result
+        hist_df = pd.DataFrame.from_dict(hist_dict)
+        del hist_dict
+        csv_hist = hist_df.to_csv(encoding="utf-8", index=False)
+        del hist_df
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_hist),
