@@ -16,6 +16,7 @@ import json
 import time
 from collections import defaultdict
 import dask.dataframe as dd
+
 # import dask
 
 """
@@ -115,11 +116,19 @@ class PreprocessCalifornia(Preprocessor):
             )
             for index, row in chunk.iterrows():
                 try:
-                    current_li = hist_dict[row["RegistrantID"]]
-                    combined_row = row["combined_col"]
-                    current_li.append(combined_row)
-                    history_dict[row["RegistrantID"]] = current_li
+                    current_li = hist_dict[
+                        row["RegistrantID"]
+                    ]  # throws key error for entries not in voter file
                     election_dict[row["election"]] += 1
+                    combined_row = row["combined_col"]
+                    if isinstance(current_li, list):
+                        current_li.append(combined_row)
+                        history_dict[row["RegistrantID"]] = current_li
+                    else:
+                        # test_dict[row['RegistrantID']][0]
+                        history_dict[row["RegistrantID"]] = [
+                            combined_row
+                        ]  # Create list of elections even if len 1
                 except KeyError:
                     continue
 
@@ -146,9 +155,16 @@ class PreprocessCalifornia(Preprocessor):
             start_t = time.time()
             dict_cols(chunk, hist_dict, elect_dict)
             end_time = time.time()
-            logging.info("time_elapsed: {}".format(end_time - start_t))
-            time_remaining = round(((end_time - start_t) * (num_chunks - progress_tracker) // 60), 2)
-            logging.info("time more or less remaining {}".format(time_remaining))
+            logging.info(
+                "time_elapsed: {}".format(round((end_time - start_t), 2))
+            )
+            time_remaining = round(
+                ((end_time - start_t) * (num_chunks - progress_tracker) / 60),
+                2,
+            )
+            logging.info(
+                "time more or less remaining {}".format(time_remaining)
+            )
 
         ### Not supported?
         # def dask_test(chunk):
@@ -207,7 +223,9 @@ class PreprocessCalifornia(Preprocessor):
         # csv_hist = result.to_csv(encoding="utf-8", index=False)
         # # logging.info("test_dict complete")
         # del result
-        hist_df = pd.DataFrame.from_dict(hist_dict)
+
+        # index will be voterids
+        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         del hist_dict
         csv_hist = hist_df.to_csv(encoding="utf-8", index=False)
         del hist_df
