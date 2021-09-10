@@ -1,4 +1,5 @@
 import boto3
+import gc
 import json
 import re
 import logging
@@ -279,3 +280,14 @@ def ensure_int_string(x):
         return str(int(float(x)))
     except (TypeError, ValueError):
         return x
+
+
+def collect_garbage(vars):
+    """
+    Delete vars and ensure garbage collection
+    :param vars: list of variables to delete
+    :return: None
+    """
+    for v in vars:
+        del v
+    gc.collect()
