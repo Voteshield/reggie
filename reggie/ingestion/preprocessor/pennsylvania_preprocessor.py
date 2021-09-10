@@ -3,7 +3,10 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import format_column_name
+from reggie.ingestion.utils import (
+    collect_garbage,
+    format_column_name,
+)
 from reggie.configs.configs import Config
 import logging
 import pandas as pd
@@ -49,10 +52,13 @@ class PreprocessPennsylvania(Preprocessor):
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
+        collect_garbage([self.main_file, self.temp_files])
+
         voter_files = [f for f in new_files if "FVE" in f["name"]]
         election_maps = [f for f in new_files if "Election Map" in f["name"]]
         zone_codes = [f for f in new_files if "Codes" in f["name"]]
         zone_types = [f for f in new_files if "Types" in f["name"]]
+        collect_garbage([new_files])
 
         if not self.ignore_checks:
             # election maps need to line up to voter files?
@@ -234,12 +240,16 @@ class PreprocessPennsylvania(Preprocessor):
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
+
+        collect_garbage([voter_files, election_maps, zone_codes, zone_types])
+
         sorted_keys = sorted(
             sorted_code_dict.items(), key=lambda x: parser.parse(x[1]["date"])
         )
         for index, key in enumerate(sorted_keys):
             sorted_code_dict[key[0]]["index"] = index
             sorted_codes.append(key[0])
+        collect_garbage([sorted_keys])
 
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
@@ -265,8 +275,13 @@ class PreprocessPennsylvania(Preprocessor):
             "array_encoding": json.dumps(sorted_code_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+
+        csv_obj = main_df.to_csv(encoding="utf-8", index=False)
+        collect_garbage([main_df])
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
+        collect_garbage([csv_obj])

@@ -216,12 +216,17 @@ class Config(object):
             and (field != self.data["voter_status"]) \
             and (field != self.data["party_identifier"]) \
             and (field not in exclude):
-                string_copy = df[field].astype(str)
-                stripped_copy = string_copy.str.strip()
-                stripped_copy = stripped_copy.str.split().str.join(" ")
-                lower_copy = stripped_copy.str.lower()
-                utf_decoded = lower_copy.str.encode('utf-8', errors='ignore')
-                df[field] = utf_decoded.str.decode('utf-8')
+                df[field] = (
+                    df[field]
+                    .astype(str)
+                    .str.strip()
+                    .str.split()
+                    .str.join(" ")
+                    .str.lower()
+                )
+                df[field] = (
+                    df[field].str.encode("utf-8", errors="ignore").str.decode("utf-8")
+                )
         return df
 
     def to_json(self):
