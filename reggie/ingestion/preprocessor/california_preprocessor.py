@@ -69,10 +69,10 @@ class PreprocessCalifornia(Preprocessor):
         district_size = district_file["obj"].__sizeof__()
         logging.info(
             "Reading In files: voter_size {}\n history_size {} \n district_size{} \n total: {}".format(
-                voter_size,
-                history_size,
-                district_size,
-                voter_size + history_size + district_size,
+                voter_size // 1023 ** 3,
+                history_size // 1023 ** 3,
+                district_size // 1023 ** 3,
+                (voter_size + history_size + district_size) // 1023 ** 3,
             )
         )
         temp_voter_id_df = pd.read_csv(
@@ -165,7 +165,8 @@ class PreprocessCalifornia(Preprocessor):
         del history_file
 
         # index will be voterids
-        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
+        logging.info("df creation")
+        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index", columns=['all_history'])
         # logging.info(
         #     "dataframe memory usage: {}".format(
         #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
