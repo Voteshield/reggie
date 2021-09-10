@@ -162,67 +162,15 @@ class PreprocessCalifornia(Preprocessor):
             logging.info(
                 "time more or less remaining {}".format(time_remaining)
             )
-
-        ### Not supported?
-        # def dask_test(chunk):
-        #     chunk["combined_col"] = (
-        #         chunk["ElectionType"].replace(" ", "")
-        #         + "_"
-        #         + chunk["ElectionDate"]
-        #         + "_"
-        #         + chunk["Method"]
-        #     )
-        #     chunk["election"] = (
-        #         chunk["ElectionType"].replace(" ", "")
-        #         + "_"
-        #         + chunk["ElectionDate"]
-        #     )
-        #     chunk = chunk.drop(
-        #         columns=[
-        #             "ElectionType",
-        #             "ElectionName",
-        #             "ElectionDate",
-        #             "CountyCode",
-        #             "Method",
-        #         ]
-        #     )
-        #     return chunk
-        #
-        # logging.info('testing')
-        # df = pd.read_csv(
-        #     history_file["obj"],
-        #     sep="\t",
-        #     usecols=[
-        #         "RegistrantID",
-        #         "CountyCode",
-        #         "ElectionDate",
-        #         "ElectionName",
-        #         "ElectionType",
-        #         "Method",
-        #     ],
-        #     dtype=str,
-        # )
-
-        # logging.info(
-        #     "dataframe memory usage: {}".format(
-        #         df.memory_usage(deep=True).sum() // 1024 ** 3
-        #     )
-        # )
-        # del history_file
-        # dask_df = dd.from_pandas(df, chunksize=1000000)
-        # result = dask_test(dask_df)
-        # start_t = time.time()
-        # logging.info("starting")
-        # result = result.compute(num_workers=4)
-        # end_time = time.time()
-        # print("time_elapsed: ", end_time - start_t)
         del history_file
-        # csv_hist = result.to_csv(encoding="utf-8", index=False)
-        # # logging.info("test_dict complete")
-        # del result
 
         # index will be voterids
         hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
+        # logging.info(
+        #     "dataframe memory usage: {}".format(
+        #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
+        #     )
+        # )
         del hist_dict
         csv_hist = hist_df.to_csv(encoding="utf-8", index=False)
         del hist_df
