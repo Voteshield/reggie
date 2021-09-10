@@ -4,7 +4,10 @@ from reggie.ingestion.download import (
     FileItem,
     concat_and_delete,
 )
-from reggie.ingestion.utils import MissingNumColumnsError
+from reggie.ingestion.utils import (
+    collect_garbage,
+    MissingNumColumnsError,
+)
 import logging
 import pandas as pd
 import datetime
@@ -12,7 +15,6 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import json
-import gc
 
 
 class PreprocessGeorgia(Preprocessor):
@@ -39,8 +41,7 @@ class PreprocessGeorgia(Preprocessor):
         new_files = self.unpack_files(
             compression="unzip", file_obj=self.main_file
         )
-        del self.main_file, self.temp_files
-        gc.collect()
+        collect_garbage([self.main_file, self.temp_files])
 
         voter_files = []
         vh_files = []
@@ -51,8 +52,7 @@ class PreprocessGeorgia(Preprocessor):
             elif "txt" in i["name"].lower():
                 vh_files.append(i)
         logging.info("Detected {} history files".format(len(vh_files)))
-        del new_files
-        gc.collect()
+        collect_garbage([new_files])
 
         if not self.ignore_checks:
             self.file_check(len(voter_files))
@@ -64,8 +64,7 @@ class PreprocessGeorgia(Preprocessor):
             quoting=3,
             error_bad_lines=False,
         )
-        del voter_files
-        gc.collect()
+        collect_garbage([voter_files])
 
         try:
             df_voters.columns = self.config["ordered_columns"]
@@ -82,8 +81,7 @@ class PreprocessGeorgia(Preprocessor):
         )
 
         concat_history_file = concat_and_delete(vh_files)
-        del vh_files
-        gc.collect()
+        collect_garbage([vh_files])
 
         logging.info("Performing GA history manipulation")
 
@@ -93,8 +91,7 @@ class PreprocessGeorgia(Preprocessor):
             names=["Concat_str", "Other"],
             error_bad_lines=False,
         )
-        del concat_history_file
-        gc.collect()
+        collect_garbage([concat_history_file])
 
         history["County_Number"] = history["Concat_str"].str[0:3]
         history["Registration_Number"] = history["Concat_str"].str[3:11]
@@ -181,8 +178,7 @@ class PreprocessGeorgia(Preprocessor):
         df_voters["party_identifier"] = "npa"
         df_voters["all_history"] = all_history
         df_voters["sparse_history"] = all_history_indices
-        del history, voter_groups, all_history, all_history_indices
-        gc.collect()
+        collect_garbage([history, voter_groups, all_history, all_history_indices])
 
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(
@@ -217,13 +213,11 @@ class PreprocessGeorgia(Preprocessor):
         }
 
         csv_obj = df_voters.to_csv(encoding="utf-8")
-        del df_voters
-        gc.collect()
+        collect_garbage([df_voters])
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        del csv_obj
-        gc.collect()
+        collect_garbage([csv_obj])

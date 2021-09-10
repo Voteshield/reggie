@@ -6,7 +6,7 @@ from reggie.ingestion.download import (
 )
 from reggie.ingestion.utils import (
     collect_garbage,
-    MissingNumColumnsError
+    MissingNumColumnsError,
 )
 import logging
 import pandas as pd

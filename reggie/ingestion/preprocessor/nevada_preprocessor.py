@@ -4,6 +4,7 @@ from reggie.ingestion.download import (
     FileItem,
 )
 from reggie.ingestion.utils import (
+    collect_garbage,
     ensure_int_string,
     MissingNumColumnsError,
 )
@@ -14,7 +15,6 @@ import numpy as np
 from datetime import datetime
 import json
 import re
-import gc
 
 
 class PreprocessNevada(Preprocessor):
@@ -54,8 +54,7 @@ class PreprocessNevada(Preprocessor):
         df_voters = self.read_csv_count_error_lines(
             voter_file["obj"], header=None, error_bad_lines=False
         )
-        del self.main_file, self.temp_files, voter_file, hist_file, new_files
-        gc.collect()
+        collect_garbage([self.main_file, self.temp_files, voter_file, hist_file, new_files])
 
         try:
             df_voters.columns = self.config["ordered_columns"]
@@ -92,8 +91,7 @@ class PreprocessNevada(Preprocessor):
         df_voters["votetype_history"] = voter_id_groups["vote_code"].apply(
             list
         )
-        del df_hist, voter_id_groups
-        gc.collect()
+        collect_garbage([df_hist, voter_id_groups])
 
         df_voters["sparse_history"] = df_voters["all_history"].map(
             insert_code_bin
@@ -160,13 +158,11 @@ class PreprocessNevada(Preprocessor):
         }
 
         csv_obj = df_voters.to_csv(encoding="utf-8", index=False)
-        del df_voters
-        gc.collect()
+        collect_garbage([df_voters])
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        del csv_obj
-        gc.collect()
+        collect_garbage([csv_obj])
