@@ -52,7 +52,8 @@ class PreprocessNewHampshire(Preprocessor):
                     hist_df.drop_duplicates(inplace=True)
 
                 elif ("checklist" in f["name"].lower()) or (
-                    "voters" in f["name"].lower()
+                      "voters" in f["name"].lower()) or (
+                      "voter file" in f["name"].lower()
                 ):
                     logging.info("Found voter file: {}".format(f["name"]))
                     if ".xlsx" in f["name"]:
