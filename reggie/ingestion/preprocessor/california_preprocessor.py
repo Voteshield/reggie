@@ -166,15 +166,18 @@ class PreprocessCalifornia(Preprocessor):
 
         # index will be voterids
         logging.info("df creation")
-        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
+        # There is a bug in from_dict when the values are a list
+        # see: https://github.com/pandas-dev/pandas/issues/29213
+        # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
+        hist_series = pd.Series(hist_dict)
         # logging.info(
         #     "dataframe memory usage: {}".format(
         #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
         #     )
         # )
         del hist_dict
-        csv_hist = hist_df.to_csv(encoding="utf-8", index=False)
-        del hist_df
+        csv_hist = hist_series.to_csv(encoding="utf-8", index=False)
+        del hist_series
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_hist),
