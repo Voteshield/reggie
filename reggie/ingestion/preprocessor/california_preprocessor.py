@@ -7,6 +7,7 @@ from reggie.ingestion.utils import format_column_name
 from reggie.configs.configs import Config
 import logging
 import pandas as pd
+import numpy as np
 import datetime
 from io import StringIO
 from datetime import datetime
@@ -84,7 +85,7 @@ class PreprocessCalifornia(Preprocessor):
         )
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
         del temp_voter_id_df
-        hist_dict = {i: [] for i in voter_ids}
+        hist_dict = {i: np.nan for i in voter_ids}
         del voter_ids
         elect_dict = defaultdict(int)
 
