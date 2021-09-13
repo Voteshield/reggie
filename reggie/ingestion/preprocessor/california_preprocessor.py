@@ -165,7 +165,7 @@ class PreprocessCalifornia(Preprocessor):
 
         # index will be voterids
         logging.info("df creation")
-        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index", columns=['all_history'])
+        hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         # logging.info(
         #     "dataframe memory usage: {}".format(
         #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
