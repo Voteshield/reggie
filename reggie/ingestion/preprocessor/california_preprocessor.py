@@ -111,19 +111,18 @@ class PreprocessCalifornia(Preprocessor):
                 ],
                 inplace=True,
             )
-            for index, row in chunk.iterrows():
+            for row in chunk.itertuples():
                 try:
-                    current_li = hist_dict[
-                        row["RegistrantID"]
-                    ]  # throws key error for entries not in voter file
-                    election_dict[row["election"]] += 1
-                    combined_row = row["combined_col"]
+                    current_li = hist_dict[row.RegistrantID]
+                    # throws key error for entries not in voter file
+                    election_dict[row.election] += 1
+                    combined_row = row.combined_col
                     if isinstance(current_li, list):
                         current_li.append(combined_row)
-                        history_dict[row["RegistrantID"]] = current_li
+                        history_dict[row.RegistrantID] = current_li
                     else:
                         # test_dict[row['RegistrantID']][0]
-                        history_dict[row["RegistrantID"]] = [
+                        history_dict[row.RegistrantID] = [
                             combined_row
                         ]  # Create list of elections even if len 1
                 except KeyError:
