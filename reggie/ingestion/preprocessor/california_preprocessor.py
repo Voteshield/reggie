@@ -178,7 +178,7 @@ class PreprocessCalifornia(Preprocessor):
         #     )
         # )
         del hist_dict
-        csv_hist = hist_series.to_csv(encoding="utf-8", index=False)
+        csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         del hist_series
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
