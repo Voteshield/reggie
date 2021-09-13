@@ -1,3 +1,5 @@
+import sys
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
@@ -163,7 +165,7 @@ class PreprocessCalifornia(Preprocessor):
                 "time more or less remaining {}".format(time_remaining)
             )
         del history_file
-
+        logging.info("the size of the hist dictionary is {} megabytes".format(sys.getsizeof(hist_dict) // 1024 ** 2))
         # index will be voterids
         logging.info("df creation")
         # There is a bug in from_dict when the values are a list
