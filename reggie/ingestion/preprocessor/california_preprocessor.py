@@ -193,12 +193,14 @@ class PreprocessCalifornia(Preprocessor):
         voter_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
-            dtype="string[pyarrow]"
+            dtype="string[pyarrow]",
+            encoding='latin-1',
+            on_bad_lines='warn'
         )
         logging.info("read in voter df")
         logging.info(
             "dataframe memory usage: {}".format(
-                voter_df.memory_usage(deep=True).sum() // 1024 ** 3
+                round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
             )
         )
 
