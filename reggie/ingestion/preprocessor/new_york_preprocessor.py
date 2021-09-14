@@ -3,10 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import (
-    collect_garbage,
-    strcol_to_array,
-)
+from reggie.ingestion.utils import strcol_to_array
 import datetime
 from io import StringIO
 import numpy as np
@@ -60,7 +57,8 @@ class PreprocessNewYork(Preprocessor):
                 main_df.memory_usage(deep=True).sum()
             )
         )
-        collect_garbage([self.main_file, self.temp_files, new_files])
+        del self.main_file, self.temp_files, new_files
+        gc.collect()
 
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
@@ -76,19 +74,22 @@ class PreprocessNewYork(Preprocessor):
             main_df.voterhistory, delim=";"
         )
         unique_codes, counts = np.unique(all_codes, return_counts=True)
-        collect_garbage([all_codes, null_hists])
+        del all_codes, null_hists
+        gc.collect()
 
         count_order = counts.argsort()
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
         sorted_codes = unique_codes.tolist()
-        collect_garbage([unique_codes, count_order])
+        del unique_codes, count_order
+        gc.collect()
 
         sorted_codes_dict = {
             k: {"index": i, "count": int(counts[i])}
             for i, k in enumerate(sorted_codes)
         }
-        collect_garbage([counts])
+        del counts
+        gc.collect()
 
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
@@ -121,14 +122,17 @@ class PreprocessNewYork(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        collect_garbage([sorted_codes, sorted_codes_dict])
+        del sorted_codes, sorted_codes_dict
+        gc.collect()
 
         csv_obj = main_df.to_csv(encoding="utf-8", index=False)
-        collect_garbage([main_df])
+        del main_df
+        gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        collect_garbage([csv_obj])
+        del csv_obj
+        gc.collect()

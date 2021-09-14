@@ -5,11 +5,11 @@ from reggie.ingestion.download import (
 )
 from dateutil import parser
 from reggie.ingestion.utils import (
-    collect_garbage,
     get_surrounding_dates,
     get_metadata_for_key,
     MissingElectionCodesError,
 )
+import gc
 import logging
 import pandas as pd
 import datetime
@@ -39,7 +39,8 @@ class PreprocessMichigan(Preprocessor):
 
         # config = Config('michigan')
         new_files = self.unpack_files(file_obj=self.main_file)
-        collect_garbage([self.main_file, self.temp_files])
+        del self.main_file, self.temp_files
+        gc.collect()
 
         if not self.ignore_checks:
             self.file_check(len(new_files))
@@ -123,7 +124,8 @@ class PreprocessMichigan(Preprocessor):
             vdf.rename(columns={"STATE": "STATE_ADDR"}, inplace=True)
         else:
             raise NotImplementedError("File format not implemented")
-        collect_garbage([voter_file])
+        del voter_file
+        gc.collect()
 
         def column_is_empty(col):
             total_size = col.shape[0]
@@ -177,7 +179,8 @@ class PreprocessMichigan(Preprocessor):
                 )
         else:
             raise NotImplementedError("File format not implemented")
-        collect_garbage([hist_file])
+        del hist_file
+        gc.collect()
 
         # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
         # then we don't need to do election code lookups
@@ -280,7 +283,8 @@ class PreprocessMichigan(Preprocessor):
         vdf["schooldistrict_history"] = hdf_id_groups[
             "SCHOOL_DISTRICT_CODE"
         ].apply(list)
-        collect_garbage([hdf, hdf_id_groups])
+        del hdf, hdf_id_groups
+        gc.collect()
 
         def insert_code_bin(arr):
             if isinstance(arr, list):
@@ -318,11 +322,13 @@ class PreprocessMichigan(Preprocessor):
         }
 
         csv_obj = vdf.to_csv(encoding="utf-8", index=False)
-        collect_garbage([vdf])
+        del vdf
+        gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        collect_garbage([csv_obj])
+        del csv_obj
+        gc.collect()

@@ -3,7 +3,6 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import collect_garbage
 from dateutil import parser
 import logging
 import pandas as pd
@@ -124,7 +123,8 @@ class PreprocessWisconsin(Preprocessor):
             dtype=dtype_dict,
             error_bad_lines=False,
         )
-        collect_garbage([self.main_file, self.temp_files, new_files])
+        del self.main_file, self.temp_files, new_files
+        gc.collect()
 
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
@@ -215,11 +215,13 @@ class PreprocessWisconsin(Preprocessor):
 
         logging.info("Wisconsin: writing out")
         df_csv = main_df.to_csv(encoding="utf-8", index=False)
-        collect_garbage([main_df])
+        del main_df
+        gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(df_csv),
             s3_bucket=self.s3_bucket,
         )
-        collect_garbage([df_csv])
+        del df_csv
+        gc.collect()
