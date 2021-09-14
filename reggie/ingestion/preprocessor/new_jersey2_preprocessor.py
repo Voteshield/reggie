@@ -3,10 +3,8 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import (
-    collect_garbage,
-    ensure_int_string,
-)
+from reggie.ingestion.utils import ensure_int_string
+import gc
 import logging
 import pandas as pd
 import datetime
@@ -84,13 +82,15 @@ class PreprocessNewJersey2(Preprocessor):
         )
         voter_files = [n for n in new_files if "vlist" in n["name"].lower()]
         hist_files = [n for n in new_files if "ehist" in n["name"].lower()]
-        collect_garbage([self.main_file, self.temp_files])
+        del self.main_file, self.temp_files
+        gc.collect()
 
         if not self.ignore_checks:
             self.file_check(len(voter_files), len(hist_files))
         voter_df = combine_dfs(voter_files)
         hist_df = combine_dfs(hist_files)
-        collect_garbage([voter_files, hist_files, new_files])
+        del voter_files, hist_files, new_files
+        gc.collect()
 
         voter_df = self.config.coerce_strings(voter_df)
 
@@ -192,7 +192,8 @@ class PreprocessNewJersey2(Preprocessor):
         )
         voter_df["party_history"] = voter_groups["voter_party"].apply(list)
         voter_df["votetype_history"] = voter_groups["ballot_type"].apply(list)
-        collect_garbage([hist_df, voter_groups])
+        del hist_df, voter_groups
+        gc.collect()
 
         expected_cols = (
             self.config["ordered_columns"]
@@ -208,11 +209,13 @@ class PreprocessNewJersey2(Preprocessor):
         }
 
         csv_obj = voter_df.to_csv(encoding="utf-8", index=False)
-        collect_garbage([voter_df])
+        del voter_df
+        gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        collect_garbage([csv_obj])
+        del csv_obj
+        gc.collect()
