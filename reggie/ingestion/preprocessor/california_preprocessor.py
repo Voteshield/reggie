@@ -88,6 +88,7 @@ class PreprocessCalifornia(Preprocessor):
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
         del temp_voter_id_df
         hist_dict = {i: np.nan for i in voter_ids}
+        votetype_dict = {i: np.nan for i in voter_ids}
         del voter_ids
         elect_dict = defaultdict(int)
 
@@ -96,8 +97,8 @@ class PreprocessCalifornia(Preprocessor):
                 chunk["ElectionType"].replace(" ", "")
                 + "_"
                 + chunk["ElectionDate"]
-                + "_"
-                + chunk["Method"]
+                # + "_"
+                # + chunk["Method"]
             )
             chunk["election"] = (
                 chunk["ElectionType"].replace(" ", "")
@@ -110,24 +111,28 @@ class PreprocessCalifornia(Preprocessor):
                     "ElectionName",
                     "ElectionDate",
                     "CountyCode",
-                    "Method",
+                    # "Method",
                 ],
                 inplace=True,
             )
             for row in chunk.itertuples():
                 try:
                     current_li = hist_dict[row.RegistrantID]
+                    votetype_hist = votetype_dict[row.RegistrantID]
                     # throws key error for entries not in voter file
                     election_dict[row.election] += 1
                     combined_row = row.combined_col
                     if isinstance(current_li, list):
                         current_li.append(combined_row)
+                        votetype_hist.append(row.Method)
                         history_dict[row.RegistrantID] = current_li
+                        votetype_dict[row.RegistrantID] = votetype_hist
                     else:
                         # test_dict[row['RegistrantID']][0]
                         history_dict[row.RegistrantID] = [
                             combined_row
                         ]  # Create list of elections even if len 1
+                        votetype_dict[row.RegistrantID] = [row.Method]
                 except KeyError:
                     continue
 
@@ -172,16 +177,21 @@ class PreprocessCalifornia(Preprocessor):
         # see: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict)
+        votetype_series = pd.Series(votetype_dict)
         # logging.info(
         #     "dataframe memory usage: {}".format(
         #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
         #     )
         # )
         del hist_dict
-        csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
-        del hist_series
+
+        # be careful of int indexes?
+        # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
+        csv_votetype = votetype_series.to_csv(encoding="utf-8", index=True)
+        # del hist_series
+        del votetype_series
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(csv_hist),
+            io_obj=StringIO(csv_votetype),
             s3_bucket=self.s3_bucket,
         )
