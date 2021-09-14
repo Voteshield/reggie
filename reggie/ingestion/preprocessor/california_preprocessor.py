@@ -19,6 +19,7 @@ from collections import defaultdict
 import json
 import time
 from collections import defaultdict
+import os
 
 """
 The california File Comes in 3 files
@@ -88,7 +89,7 @@ class PreprocessCalifornia(Preprocessor):
             usecols=["RegistrantID"],
             dtype=str,
         )
-        #rewind
+        # rewind
         voter_file["obj"].seek(0)
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
         del temp_voter_id_df
@@ -175,7 +176,11 @@ class PreprocessCalifornia(Preprocessor):
                 "time more or less remaining {}".format(time_remaining)
             )
         del history_file
-        logging.info("the size of the hist dictionary is {} megabytes".format(sys.getsizeof(hist_dict) // 1024 ** 2))
+        logging.info(
+            "the size of the hist dictionary is {} megabytes".format(
+                sys.getsizeof(hist_dict) // 1024 ** 2
+            )
+        )
         # index will be voterids
         logging.info("df creation")
         # There is a bug in from_dict when the values are a list
@@ -190,6 +195,21 @@ class PreprocessCalifornia(Preprocessor):
         # )
         del hist_dict
         gc.collect()
+
+        # Getting all memory using os.popen()
+        total_memory, used_memory, free_memory = map(
+            int, os.popen("free -t -m").readlines()[-1].split()[1:]
+        )
+
+        # Memory usage
+
+        logging.info(
+            "used memory: {} \ntotal memory: {} \nmemory % used: {}".format(
+                used_memory,
+                total_memory,
+                round((used_memory / total_memory) * 100, 2),
+            )
+        )
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
@@ -197,8 +217,8 @@ class PreprocessCalifornia(Preprocessor):
             voter_file["obj"],
             sep="\t",
             dtype="string[pyarrow]",
-            encoding='latin-1',
-            on_bad_lines='warn'
+            encoding="latin-1",
+            on_bad_lines="warn",
         )
         logging.info("read in voter df")
         logging.info(
