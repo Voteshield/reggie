@@ -3,10 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import (
-    collect_garbage,
-    MissingNumColumnsError,
-)
+from reggie.ingestion.utils import MissingNumColumnsError
 from reggie.configs.configs import Config
 import logging
 import datetime
@@ -14,6 +11,7 @@ from io import StringIO
 import numpy as np
 from datetime import datetime
 import json
+import gc
 
 
 class PreprocessNorthCarolina(Preprocessor):
@@ -39,7 +37,8 @@ class PreprocessNorthCarolina(Preprocessor):
         new_files = self.unpack_files(
             file_obj=self.main_file
         )  # array of dicts
-        collect_garbage([self.main_file, self.temp_files])
+        del self.main_file, self.temp_files
+        gc.collect()
 
         if not self.ignore_checks:
             self.file_check(len(new_files))
@@ -56,7 +55,8 @@ class PreprocessNorthCarolina(Preprocessor):
             encoding="latin-1",
             error_bad_lines=False,
         )
-        collect_garbage([voter_file])
+        del voter_file
+        gc.collect()
 
         vote_hist = self.read_csv_count_error_lines(
             vote_hist_file["obj"],
@@ -64,7 +64,8 @@ class PreprocessNorthCarolina(Preprocessor):
             quotechar='"',
             error_bad_lines=False,
         )
-        collect_garbage([vote_hist_file, new_files])
+        del vote_hist_file, new_files
+        gc.collect()
 
         try:
             voter_df.columns = self.config["ordered_columns"]
@@ -101,7 +102,8 @@ class PreprocessNorthCarolina(Preprocessor):
         vote_hist["array_position"] = vote_hist["election_desc"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
-        collect_garbage([valid_elections, counts, count_order])
+        del valid_elections, counts, count_order
+        gc.collect()
 
         voter_groups = vote_hist.groupby(self.config["voter_id"])
         all_history = voter_groups["array_position"].apply(list)
@@ -111,7 +113,8 @@ class PreprocessNorthCarolina(Preprocessor):
 
         voter_df["all_history"] = all_history
         voter_df["vote_type"] = vote_type
-        collect_garbage([voter_groups, vote_hist, all_history, vote_type])
+        del voter_groups, vote_hist, all_history, vote_type
+        gc.collect()
 
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
@@ -144,11 +147,13 @@ class PreprocessNorthCarolina(Preprocessor):
         self.is_compressed = False
 
         csv_obj = voter_df.to_csv(encoding="utf-8", index=True)
-        collect_garbage([voter_df])
+        del voter_df
+        gc.collect()
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
-        collect_garbage([csv_obj])
+        del csv_obj
+        gc.collect()
