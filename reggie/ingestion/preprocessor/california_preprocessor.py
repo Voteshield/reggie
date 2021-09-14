@@ -80,6 +80,20 @@ class PreprocessCalifornia(Preprocessor):
                 (voter_size + history_size + district_size) // 1023 ** 3,
             )
         )
+        logging.info("reading in voter df")
+        voter_df = pd.read_csv(
+            voter_file["obj"],
+            sep="\t",
+            dtype="str",
+            encoding='latin-1',
+            on_bad_lines='warn'
+        )
+        logging.info("read in voter df")
+        logging.info(
+            "dataframe memory usage: {}".format(
+                round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
+            )
+        )
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
@@ -189,20 +203,7 @@ class PreprocessCalifornia(Preprocessor):
 
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
-        logging.info("reading in voter df")
-        voter_df = pd.read_csv(
-            voter_file["obj"],
-            sep="\t",
-            dtype="string[pyarrow]",
-            encoding='latin-1',
-            on_bad_lines='warn'
-        )
-        logging.info("read in voter df")
-        logging.info(
-            "dataframe memory usage: {}".format(
-                round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
-            )
-        )
+
 
         csv_votetype = votetype_series.to_csv(encoding="utf-8", index=True)
         # del hist_series
