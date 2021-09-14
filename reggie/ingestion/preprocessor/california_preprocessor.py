@@ -1,3 +1,4 @@
+import gc
 import sys
 
 from reggie.ingestion.download import (
@@ -188,7 +189,7 @@ class PreprocessCalifornia(Preprocessor):
         #     )
         # )
         del hist_dict
-
+        gc.collect()
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
