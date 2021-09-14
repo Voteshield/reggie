@@ -66,10 +66,12 @@ class PreprocessCalifornia(Preprocessor):
         rows = 213637309
         num_chunks = rows // chunk_size + 2
 
+        # todo: remove
         # Diagnostic
         voter_size = voter_file["obj"].__sizeof__()
         history_size = history_file["obj"].__sizeof__()
         district_size = district_file["obj"].__sizeof__()
+
         logging.info(
             "Reading In files: voter_size {}\n history_size {} \n district_size{} \n total: {}".format(
                 voter_size // 1023 ** 3,
@@ -187,6 +189,19 @@ class PreprocessCalifornia(Preprocessor):
 
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
+        logging.info("reading in voter df")
+        voter_df = pd.read_csv(
+            voter_file["obj"],
+            sep="\t",
+            dtype="string[pyarrow]"
+        )
+        logging.info("read in voter df")
+        logging.info(
+            "dataframe memory usage: {}".format(
+                voter_df.memory_usage(deep=True).sum() // 1024 ** 3
+            )
+        )
+
         csv_votetype = votetype_series.to_csv(encoding="utf-8", index=True)
         # del hist_series
         del votetype_series
