@@ -99,7 +99,7 @@ class PreprocessCalifornia(Preprocessor):
         del voter_ids
         elect_dict = defaultdict(int)
 
-        def dict_cols(chunk, history_dict=None, election_dict=None):
+        def dict_cols(chunk, history_dict=None, votetype_dict=None, election_dict=None):
             chunk["combined_col"] = (
                 chunk["ElectionType"].replace(" ", "")
                 + "_"
@@ -164,7 +164,7 @@ class PreprocessCalifornia(Preprocessor):
             progress_tracker += 1
             logging.info("Chunk {}/{}".format(progress_tracker, num_chunks))
             start_t = time.time()
-            dict_cols(chunk, hist_dict, elect_dict)
+            dict_cols(chunk, hist_dict, votetype_dict, elect_dict)
             end_time = time.time()
             logging.info(
                 "time_elapsed: {}".format(round((end_time - start_t), 2))
