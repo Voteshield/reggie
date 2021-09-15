@@ -20,6 +20,7 @@ import json
 import time
 from collections import defaultdict
 import os
+import psutil
 
 """
 The california File Comes in 3 files
@@ -187,15 +188,22 @@ class PreprocessCalifornia(Preprocessor):
         # see: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict)
-        votetype_series = pd.Series(votetype_dict)
-        # logging.info(
-        #     "dataframe memory usage: {}".format(
-        #         hist_df.memory_usage(deep=True).sum() // 1024 ** 3
-        #     )
-        # )
         del hist_dict
-        gc.collect()
 
+        votetype_series = pd.Series(votetype_dict)
+        logging.info(
+            "series memory usage: {}".format(
+                votetype_series.memory_usage(deep=True).sum() / 1024 ** 3
+            )
+        )
+        del votetype_dict
+        gc.collect()
+        mem_stat = psutil.virtual_memory()
+        logging.info(
+            "memory % used: {} \nmemory free: {} \nmemory available: {} \nmemory used: {}".format(
+                mem_stat[2], mem_stat[4], mem_stat[1], mem_stat[3]
+            )
+        )
         # Getting all memory using os.popen()
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
