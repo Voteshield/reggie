@@ -193,7 +193,7 @@ class PreprocessCalifornia(Preprocessor):
         votetype_series = pd.Series(votetype_dict)
         logging.info(
             "series memory usage: {}".format(
-                votetype_series.memory_usage(deep=True).sum() / 1024 ** 3
+                votetype_series.memory_usage(deep=True) / 1024 ** 3
             )
         )
         del votetype_dict
