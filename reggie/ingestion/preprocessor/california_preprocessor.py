@@ -197,19 +197,6 @@ class PreprocessCalifornia(Preprocessor):
         gc.collect()
 
         # Getting all memory using os.popen()
-        total_memory, used_memory, free_memory = map(
-            int, os.popen("free -t -m").readlines()[-1].split()[1:]
-        )
-
-        # Memory usage
-
-        logging.info(
-            "used memory: {} \ntotal memory: {} \nmemory % used: {}".format(
-                used_memory,
-                total_memory,
-                round((used_memory / total_memory) * 100, 2),
-            )
-        )
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
