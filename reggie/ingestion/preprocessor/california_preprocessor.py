@@ -208,10 +208,18 @@ class PreprocessCalifornia(Preprocessor):
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
+        category_list = ['CountyCode', 'Suffix', 'StreetDirPrefix', 'AddressNumberSuffix', 'StreetType',
+                         'StreetDirSuffix', 'UnitType', 'City', 'State', 'Zip', 'Language', 'Gender', 'PartyCode',
+                         'Status', 'VoterStatusReasonCodeDesc', 'AssistanceRequestFlag', 'VbmVoterType', 'PrecinctId']
+        col_ifornia = pd.read_csv(voter_file["obj"],
+                                  sep='\t', nrows=0, encoding="latin-1"
+                                  ).columns.tolist()
+        voter_file["obj"].seek(0)
+        dtype_dict = {col: ("string[pyarrow]" if col not in category_list else "category") for col in col_ifornia}
         voter_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
-            dtype="string[pyarrow]",
+            dtype=dtype_dict,
             encoding="latin-1",
             on_bad_lines="warn",
         )
