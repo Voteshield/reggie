@@ -20,7 +20,6 @@ import json
 import time
 from collections import defaultdict
 import os
-import psutil
 
 """
 The california File Comes in 3 files
@@ -32,6 +31,8 @@ Join district info in
 
 Use ensure int string where necessary otherwise you have fun float string problems
 """
+import psutil
+from psutil._common import bytes2human
 
 
 class PreprocessCalifornia(Preprocessor):
@@ -62,6 +63,17 @@ class PreprocessCalifornia(Preprocessor):
         district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
 
+        def memprof(n):
+            x = psutil.Process().memory_full_info()
+            logging.info(
+                "{} Resident Set Size: {}, Unique Set Size: {}, Virtual: {}".format(
+                    n,
+                    bytes2human(x.rss),
+                    bytes2human(x.uss),
+                    bytes2human(x.vms)
+                )
+            )
+
         # chunksize
         chunk_size = 3000000
         # chunk_size = 36 * 1024 * 1024  # for dask in mb
@@ -83,6 +95,7 @@ class PreprocessCalifornia(Preprocessor):
                 (voter_size + history_size + district_size) // 1023 ** 3,
             )
         )
+        memprof(1)
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
@@ -162,6 +175,7 @@ class PreprocessCalifornia(Preprocessor):
         progress_tracker = 0
         for chunk in history_chunks:
             progress_tracker += 1
+            memprof(progress_tracker)
             logging.info("Chunk {}/{}".format(progress_tracker, num_chunks))
             start_t = time.time()
             dict_cols(chunk, hist_dict, votetype_dict, elect_dict)
@@ -176,7 +190,18 @@ class PreprocessCalifornia(Preprocessor):
             logging.info(
                 "time more or less remaining {}".format(time_remaining)
             )
+        logging.info("completed loop, before deletion")
+        progress_tracker += 1
+        memprof(progress_tracker)
+
         del history_file
+        logging.info('after hist deletion')
+        progress_tracker += 1
+        memprof(progress_tracker)
+        gc.collect()
+        logging.info('after collect')
+        progress_tracker += 1
+        memprof(progress_tracker)
         logging.info(
             "the size of the hist dictionary is {} megabytes".format(
                 sys.getsizeof(hist_dict) // 1024 ** 2
@@ -189,6 +214,13 @@ class PreprocessCalifornia(Preprocessor):
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict, name='all_history')
         del hist_dict
+        progress_tracker += 1
+        memprof(progress_tracker)
+        gc.collect()
+
+        logging.info('both series')
+        progress_tracker += 1
+        memprof(progress_tracker)
 
         votetype_series = pd.Series(votetype_dict, name='votetype_history')
         logging.info(
@@ -196,6 +228,8 @@ class PreprocessCalifornia(Preprocessor):
                 votetype_series.memory_usage(deep=True) / 1024 ** 3
             )
         )
+        progress_tracker += 1
+        memprof(progress_tracker)
         del votetype_dict
         gc.collect()
         # Getting all memory using os.popen()
@@ -218,6 +252,8 @@ class PreprocessCalifornia(Preprocessor):
             on_bad_lines="warn",
         )
         logging.info("read in voter df")
+        progress_tracker += 1
+        memprof(progress_tracker)
         logging.info(
             "dataframe memory usage: {}".format(
                 round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
@@ -225,13 +261,30 @@ class PreprocessCalifornia(Preprocessor):
         )
         del voter_file
         gc.collect()
+        progress_tracker += 1
+        memprof(progress_tracker)
         voter_df.set_index('RegistrantID', inplace=True)
         voter_df = voter_df.merge(hist_series, left_index=True, right_index=True)
+
+        logging.info('merged on id')
+        progress_tracker += 1
+        memprof(progress_tracker)
+
         del hist_series
+        logging.info('deleted hist series')
+        progress_tracker += 1
+        memprof(progress_tracker)
         gc.collect()
         voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
+        logging.info('wrote csv')
+        progress_tracker += 1
+        memprof(progress_tracker)
         del voter_df
         del votetype_series
+        gc.collect()
+        logging.info('cleaned dataframes')
+        progress_tracker += 1
+        memprof(progress_tracker)
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_csv),
