@@ -187,10 +187,10 @@ class PreprocessCalifornia(Preprocessor):
         # There is a bug in from_dict when the values are a list
         # see: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
-        hist_series = pd.Series(hist_dict)
+        hist_series = pd.Series(hist_dict, name='all_history')
         del hist_dict
 
-        votetype_series = pd.Series(votetype_dict)
+        votetype_series = pd.Series(votetype_dict, name='votetype_history')
         logging.info(
             "series memory usage: {}".format(
                 votetype_series.memory_usage(deep=True) / 1024 ** 3
@@ -198,12 +198,6 @@ class PreprocessCalifornia(Preprocessor):
         )
         del votetype_dict
         gc.collect()
-        mem_stat = psutil.virtual_memory()
-        logging.info(
-            "memory % used: {} \nmemory free: {} \nmemory available: {} \nmemory used: {}".format(
-                mem_stat[2], mem_stat[4], mem_stat[1], mem_stat[3]
-            )
-        )
         # Getting all memory using os.popen()
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
@@ -229,12 +223,17 @@ class PreprocessCalifornia(Preprocessor):
                 round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
             )
         )
-
-        csv_votetype = votetype_series.to_csv(encoding="utf-8", index=True)
-        # del hist_series
+        del voter_file
+        gc.collect()
+        voter_df.set_index('RegistrantID', inplace=True)
+        voter_df = voter_df.merge(hist_series, left_index=True, right_index=True)
+        del hist_series
+        gc.collect()
+        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
+        del voter_df
         del votetype_series
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(csv_votetype),
+            io_obj=StringIO(voter_csv),
             s3_bucket=self.s3_bucket,
         )
