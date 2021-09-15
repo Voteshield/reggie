@@ -222,7 +222,7 @@ class PreprocessCalifornia(Preprocessor):
         memprof(prof_num)
 
         # Todo: check this
-        history_size["obj"].close()
+        history_file["obj"].close()
         history_size = history_file["obj"].__sizeof__()
         logging.info("history size now: {} ".format(history_size))
 
