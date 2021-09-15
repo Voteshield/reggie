@@ -327,7 +327,7 @@ class PreprocessCalifornia(Preprocessor):
         prof_num += 1
         memprof(prof_num)
 
-        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
+        voter_csv = voter_df.to_csv(encoding="utf-8", index=True)
         logging.info('wrote csv')
 
         prof_num += 1
