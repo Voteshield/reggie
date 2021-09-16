@@ -15,7 +15,6 @@ import datetime
 from io import StringIO
 from datetime import datetime
 from dateutil import parser
-from collections import defaultdict
 import json
 import time
 from collections import defaultdict
@@ -25,9 +24,8 @@ import os
 The california File Comes in 3 files
 
 Big todo:
-Create hist stuff first, then del from memory to free room to
 Join district info in
-
+Coerce everythings
 
 Use ensure int string where necessary otherwise you have fun float string problems
 """
@@ -59,22 +57,23 @@ class PreprocessCalifornia(Preprocessor):
                     n,
                     bytes2human(x.rss),
                     bytes2human(x.uss),
-                    bytes2human(x.vms)
+                    bytes2human(x.vms),
                 )
             )
+
         prof_num = 0
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
-        logging.info('after read in')
+        logging.info("after read in")
         memprof(prof_num)
         del self.main_file, self.temp_files
         gc.collect()
 
         prof_num += 1
-        logging.info('after gc in')
+        logging.info("after gc in")
         memprof(prof_num)
         # Have to use longer whole string not just suffix because hist will match to voter file
         voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
@@ -104,7 +103,7 @@ class PreprocessCalifornia(Preprocessor):
         )
 
         prof_num += 1
-        logging.info('before temp id')
+        logging.info("before temp id")
         memprof(prof_num)
 
         temp_voter_id_df = pd.read_csv(
@@ -119,7 +118,7 @@ class PreprocessCalifornia(Preprocessor):
 
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
         prof_num += 1
-        logging.info('temp_ voter id')
+        logging.info("temp_ voter id")
         memprof(prof_num)
         del temp_voter_id_df
         gc.collect()
@@ -132,10 +131,12 @@ class PreprocessCalifornia(Preprocessor):
         elect_dict = defaultdict(int)
 
         prof_num += 1
-        logging.info('all the id dicts')
+        logging.info("all the id dicts")
         memprof(prof_num)
 
-        def dict_cols(chunk, history_dict=None, votetype_dict=None, election_dict=None):
+        def dict_cols(
+            chunk, history_dict=None, votetype_dict=None, election_dict=None
+        ):
             chunk["combined_col"] = (
                 chunk["ElectionType"].replace(" ", "")
                 + "_"
@@ -226,19 +227,19 @@ class PreprocessCalifornia(Preprocessor):
         history_size = history_file["obj"].__sizeof__()
         logging.info("history size now: {} ".format(history_size))
 
-        logging.info('after hist close?')
+        logging.info("after hist close?")
         prof_num += 1
         memprof(prof_num)
 
         del history_file
 
-        logging.info('after hist del')
+        logging.info("after hist del")
         prof_num += 1
         memprof(prof_num)
 
         gc.collect()
 
-        logging.info('after collect')
+        logging.info("after collect")
         prof_num += 1
         memprof(prof_num)
 
@@ -252,25 +253,25 @@ class PreprocessCalifornia(Preprocessor):
         # There is a bug in from_dict when the values are a list
         # see: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
-        hist_series = pd.Series(hist_dict, name='all_history')
+        hist_series = pd.Series(hist_dict, name="all_history")
         del hist_dict
 
         prof_num += 1
         memprof(prof_num)
         gc.collect()
 
-        logging.info('both series')
+        logging.info("both series")
         prof_num += 1
         memprof(prof_num)
 
-        votetype_series = pd.Series(votetype_dict, name='votetype_history')
+        votetype_series = pd.Series(votetype_dict, name="votetype_history")
         logging.info(
             "series memory usage: {}".format(
                 votetype_series.memory_usage(deep=True) / 1024 ** 3
             )
         )
 
-        logging.info('series read in')
+        logging.info("series read in")
         prof_num += 1
         memprof(prof_num)
 
@@ -281,14 +282,36 @@ class PreprocessCalifornia(Preprocessor):
         # be careful of int indexes?
         # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
-        category_list = ['CountyCode', 'Suffix', 'StreetDirPrefix', 'AddressNumberSuffix', 'StreetType',
-                         'StreetDirSuffix', 'UnitType', 'City', 'State', 'Zip', 'Language', 'Gender', 'PartyCode',
-                         'Status', 'VoterStatusReasonCodeDesc', 'AssistanceRequestFlag', 'VbmVoterType', 'PrecinctId']
-        col_ifornia = pd.read_csv(voter_file["obj"],
-                                  sep='\t', nrows=0, encoding="latin-1"
-                                  ).columns.tolist()
+        category_list = [
+            "CountyCode",
+            "Suffix",
+            "StreetDirPrefix",
+            "AddressNumberSuffix",
+            "StreetType",
+            "StreetDirSuffix",
+            "UnitType",
+            "City",
+            "State",
+            "Zip",
+            "Language",
+            "Gender",
+            "PartyCode",
+            "Status",
+            "VoterStatusReasonCodeDesc",
+            "AssistanceRequestFlag",
+            "VbmVoterType",
+            "PrecinctId",
+        ]
+        col_ifornia = pd.read_csv(
+            voter_file["obj"], sep="\t", nrows=0, encoding="latin-1"
+        ).columns.tolist()
         voter_file["obj"].seek(0)
-        dtype_dict = {col: ("string[pyarrow]" if col not in category_list else "category") for col in col_ifornia}
+        dtype_dict = {
+            col: (
+                "string[pyarrow]" if col not in category_list else "category"
+            )
+            for col in col_ifornia
+        }
         voter_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
@@ -306,38 +329,69 @@ class PreprocessCalifornia(Preprocessor):
                 round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
             )
         )
+
+        voter_file["obj"].close()
         del voter_file
         gc.collect()
 
-        logging.info('voter file deleted')
+        logging.info("voter file deleted after close")
         prof_num += 1
         memprof(prof_num)
 
-        voter_df.set_index('RegistrantID', inplace=True)
-        voter_df = voter_df.merge(hist_series, left_index=True, right_index=True)
+        voter_df.set_index("RegistrantID", inplace=True)
+        voter_df = voter_df.merge(
+            hist_series, left_index=True, right_index=True
+        )
 
-        logging.info('merged on id')
+        logging.info("merged hist on id")
         prof_num += 1
         memprof(prof_num)
 
         del hist_series
         gc.collect()
 
-        logging.info('deleted hist series')
+        logging.info("deleted hist series")
+        prof_num += 1
+        memprof(prof_num)
+
+        voter_df = voter_df.merge(
+            votetype_series, left_index=True, right_index=True
+        )
+
+        del votetype_series
+        gc.collect()
+
+        logging.info("deleted votetype_series")
+        prof_num += 1
+        memprof(prof_num)
+
+        #Begin Coerce
+
+        voter_df = self.config.coerce_strings(voter_df)
+        logging.info("coerced string")
+        prof_num += 1
+        memprof(prof_num)
+
+        voter_df = self.config.coerce_dates(voter_df)
+        logging.info("coerced dates")
+        prof_num += 1
+        memprof(prof_num)
+
+        voter_df = self.config.coerce_numeric(voter_df)
+        logging.info("coerced numeric")
         prof_num += 1
         memprof(prof_num)
 
         voter_csv = voter_df.to_csv(encoding="utf-8", index=True)
-        logging.info('wrote csv')
+        logging.info("wrote csv")
 
         prof_num += 1
         memprof(prof_num)
 
         del voter_df
-        del votetype_series
         gc.collect()
 
-        logging.info('cleaned dataframes')
+        logging.info("cleaned dataframes")
         prof_num += 1
         memprof(prof_num)
         self.processed_file = FileItem(
