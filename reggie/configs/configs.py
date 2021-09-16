@@ -12,7 +12,7 @@ import glob
 from datetime import datetime
 
 config_cache = {}
-
+import logging
 
 class Config(object):
     def __init__(self, state=None, file_name=None):
@@ -245,6 +245,7 @@ class Config(object):
                 if "use_pyarrow" not in self.data.keys():
                     string_copy = df[field].astype(str)
                 else:
+                    logging.info("keeping pyarrow for {}".format(field))
                     string_copy = df[field]
                 stripped_copy = string_copy.str.strip()
                 stripped_copy = stripped_copy.str.split().str.join(" ")
