@@ -432,7 +432,7 @@ class PreprocessCalifornia(Preprocessor):
             value[0]: {"index": i, "count": value[1]}
             for i, value in enumerate(sorted_keys)
         }
-
+        sorted_codes = [x[0] for x in sorted_keys]
         voter_df["sparse_history"] = voter_df.all_history.apply(
             lambda x: [sorted_codes_dict[y]["index"] for y in x]
         )
@@ -471,6 +471,12 @@ class PreprocessCalifornia(Preprocessor):
         logging.info("cleaned dataframes")
         prof_num += 1
         memprof(prof_num)
+        self.meta = {
+            "message": "california_{}".format(datetime.now().isoformat()),
+            "array_encoding": sorted_codes_dict,
+            "array_decoding": sorted_codes,
+        }
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_csv),
