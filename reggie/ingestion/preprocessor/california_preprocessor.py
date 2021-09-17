@@ -49,6 +49,55 @@ class PreprocessCalifornia(Preprocessor):
         self.processed_file = None
         self.config_file = config_file
 
+    @staticmethod
+    def coerce_cali_strings(
+        df, config, cat_columns, exclude=[""], extra_cols=None, col_list="columns"
+    ):
+        """
+        takes all columns with text or varchar labels in the config,
+        strips out whitespace and converts text to all lowercase, california
+        specific method keeps recasts to pyarrow or categorical dtype after complete
+        to save memory. Utilizing the .str accessors temporarily increases memory footprint for each column/series
+         but df returned should be the same size as initially read in
+         Assumes all dtypes for strings are pyarrow strings
+        NOTE: does not convert voter_status or party_identifier,
+              since those are typically defined as capitalized
+        :param df: dataframe to modify
+        :param config: config object
+        :param cat_columns: categorical columns to return
+        :param extra_cols: extra columns to add
+        :param exclude: columns to exclude
+        :param col_list: name of field in yaml to pull column types from
+        :return: modified dataframe
+        """
+        text_fields = [
+            c
+            for c, v in config[col_list].items()
+            if v == "text" or "char" in v
+        ]
+        if extra_cols is not None:
+            text_fields = text_fields + extra_cols
+        for field in text_fields:
+            if (
+                (field in df)
+                and (field != config["voter_status"])
+                and (field != config["party_identifier"])
+                and (field not in exclude)
+            ):
+                logging.info("internal pyarrow for {}".format(field))
+                string_copy = df[field]
+                string_copy = string_copy.str.strip()
+                string_copy = string_copy.str.split().str.join(" ")
+                string_copy = string_copy.str.lower()
+                string_copy = string_copy.str.encode("utf-8", errors="ignore")
+                df[field] = string_copy.str.decode("utf-8")
+                if field not in cat_columns:
+                    df[field] = df[field].astype('string[pyarrow]')
+                else:
+                    logging.info('categorical')
+                    df[field] = df[field].astype('category')
+        return df
+
     def execute(self):
         def memprof(n):
             x = psutil.Process().memory_full_info()
@@ -367,7 +416,10 @@ class PreprocessCalifornia(Preprocessor):
 
         #Begin Coerce
 
-        voter_df = self.config.coerce_strings(voter_df)
+        # Todo: create custom coerce function because it removes pyarrow and also
+        # categories to turn them in to strings
+        logging.info('coesrcing strings')
+        voter_df = self.coerce_cali_strings(voter_df, config, category_list)
         logging.info("coerced string")
         prof_num += 1
         memprof(prof_num)
@@ -383,8 +435,8 @@ class PreprocessCalifornia(Preprocessor):
         memprof(prof_num)
 
         voter_csv = voter_df.to_csv(encoding="utf-8", index=True)
+        
         logging.info("wrote csv")
-
         prof_num += 1
         memprof(prof_num)
 

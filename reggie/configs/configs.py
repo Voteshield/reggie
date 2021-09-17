@@ -1,10 +1,5 @@
-from reggie.reggie_constants import (
-    CONFIG_DIR,
-    PRIMARY_LOCALE_ALIAS,
-    PRIMARY_LOCALE_TYPE,
-    PRIMARY_LOCALE_NAMES,
-    LOCALE_DIR,
-)
+from reggie.reggie_constants import CONFIG_DIR, PRIMARY_LOCALE_ALIAS, \
+    PRIMARY_LOCALE_TYPE, PRIMARY_LOCALE_NAMES, LOCALE_DIR
 import yaml
 import pandas as pd
 import json
@@ -12,9 +7,10 @@ import glob
 from datetime import datetime
 
 config_cache = {}
-import logging
+
 
 class Config(object):
+
     def __init__(self, state=None, file_name=None):
         if state is None and file_name is None:
             raise ValueError("either state or config file must be passed")
@@ -23,9 +19,8 @@ class Config(object):
         else:
             config_file = file_name
 
-        self.data = self.load_data(
-            config_file, self.infer_locale_files(config_file)
-        )
+        self.data = self.load_data(config_file, self.infer_locale_files(
+            config_file))
 
         self.primary_locale_type = self.data.get(PRIMARY_LOCALE_TYPE, "county")
         self.primary_locale_names = self.data[PRIMARY_LOCALE_NAMES]
@@ -95,11 +90,8 @@ class Config(object):
         return self.data.items()
 
     def database_columns(self):
-        return [
-            c
-            for c in self.data["ordered_columns"]
-            if c not in self.data["blacklist_columns"]
-        ]
+        return [c for c in self.data["ordered_columns"] if c not in
+                self.data["blacklist_columns"]]
 
     def raw_file_columns(self):
         """
@@ -126,16 +118,15 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-
         def catch_floats(x):
-            if ".0" == x[-2:]:
+            if '.0' == x[-2:]:
                 return str(int(float(x)))
             else:
                 return x
 
         def disallow_future_dates(x, max_year):
             if (type(x) != str) and (x.year > max_year):
-                return pd.Timestamp(x.year - 100, x.month, x.day)
+                return pd.Timestamp(x.year-100, x.month, x.day)
             return x
 
         def disallow_past_dates(x, min_year=1910):
@@ -145,39 +136,32 @@ class Config(object):
 
         min_voter_age = 17
 
-        date_fields = [
-            c
-            for c, v in self.data[col_list].items()
-            if v == "date" or v == "timestamp"
-        ]
+        date_fields = [c for c, v in self.data[col_list].items() if
+                       v == "date" or v == "timestamp"]
         date_fields = [x for x in date_fields if x in df.columns]
         for field in date_fields:
             df[field] = df[field].apply(str)
             df[field] = df[field].str.strip()
             df[field] = df[field].map(catch_floats)
             if not isinstance(self.data["date_format"], list):
-                df[field] = pd.to_datetime(
-                    df[field], format=self.data["date_format"], errors="coerce"
-                ).fillna(pd.NaT)
+                df[field] = pd.to_datetime(df[field],
+                                           format=self.data["date_format"],
+                                           errors='coerce').fillna(pd.NaT)
             else:
                 for format_str in self.data["date_format"]:
-                    formatted = pd.to_datetime(
-                        df[field], format=format_str, errors="coerce"
-                    ).fillna(pd.NaT)
+                    formatted = pd.to_datetime(df[field],
+                                               format=format_str,
+                                               errors='coerce').fillna(pd.NaT)
                     if len(formatted.unique()) > 1:
                         df[field] = formatted
                         break
 
-            if field == self.data["birthday_identifier"]:
-                df[field] = df[field].map(
-                    lambda x: disallow_future_dates(
-                        x, datetime.now().year - min_voter_age
-                    )
-                )
+            if field == self.data['birthday_identifier']:
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year - min_voter_age))
             else:
-                df[field] = df[field].map(
-                    lambda x: disallow_future_dates(x, datetime.now().year)
-                )
+                df[field] = df[field].map(lambda x: disallow_future_dates(
+                    x, datetime.now().year))
 
             df[field] = df[field].map(disallow_past_dates)
         return df
@@ -193,29 +177,24 @@ class Config(object):
         :return: modified dataframe
         """
         extra_cols = [] if extra_cols is None else extra_cols
-        numeric_fields = [
-            c
-            for c, v in self.data[col_list].items()
-            if "int" in v or v == "float" or v == "double"
-        ]
-        int_fields = [c for c, v in self.data[col_list].items() if "int" in v]
+        numeric_fields = [c for c, v in self.data[col_list].items()
+                          if "int" in v or v == "float" or v == "double"]
+        int_fields = [c for c, v in self.data[col_list].items()
+                      if "int" in v]
         numeric_fields = [x for x in numeric_fields if x in df.columns]
         int_fields = [x for x in int_fields if x in df.columns]
         if extra_cols is not None:
             extra_cols = [x for x in extra_cols if x in df.columns]
         for field in numeric_fields:
-            df[field] = pd.to_numeric(df[field], errors="coerce")
+            df[field] = pd.to_numeric(df[field], errors='coerce')
         for field in int_fields:
-            df[field] = df[field].astype(int, errors="ignore")
+            df[field] = df[field].astype(int, errors='ignore')
         for field in extra_cols:
-            df[field] = pd.to_numeric(df[field], errors="coerce").fillna(
-                df[field]
-            )
+            df[field] = pd.to_numeric(df[field],
+                                      errors='coerce').fillna(df[field])
         return df
 
-    def coerce_strings(
-        self, df, extra_cols=None, exclude=[""], col_list="columns"
-    ):
+    def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
         """
         takes all columns with text or varchar labels in the config,
         strips out whitespace and converts text to all lowercase
@@ -227,37 +206,27 @@ class Config(object):
         :param col_list: name of field in yaml to pull column types from
         :return: modified dataframe
         """
-        text_fields = [
-            c
-            for c, v in self.data[col_list].items()
-            if v == "text" or "char" in v
-        ]
+        text_fields = [c for c, v in self.data[col_list].items()
+                       if v == "text" or "char" in v]
         if extra_cols is not None:
             text_fields = text_fields + extra_cols
-        print(text_fields)
+
         for field in text_fields:
-            if (
-                (field in df)
-                and (field != self.data["voter_status"])
-                and (field != self.data["party_identifier"])
-                and (field not in exclude)
-            ):
-                if "use_pyarrow" not in self.data.keys():
-                    string_copy = df[field].astype(str)
-                    stripped_copy = string_copy.str.strip()
-                    stripped_copy = stripped_copy.str.split().str.join(" ")
-                    lower_copy = stripped_copy.str.lower()
-                    utf_decoded = lower_copy.str.encode("utf-8", errors="ignore")
-                    df[field] = utf_decoded.str.decode("utf-8")
-                else:
-                    logging.info("keeping pyarrow for {}".format(field))
-                    string_copy = df[field]
-                    stripped_copy = string_copy.str.strip()
-                    stripped_copy = stripped_copy.str.split().str.join(" ")
-                    lower_copy = stripped_copy.str.lower()
-                    utf_decoded = lower_copy.str.encode("utf-8", errors="ignore")
-                    df[field] = utf_decoded.str.decode("utf-8")
-                    df[field] = df[field].astype('string[pyarrow]')
+            if (field in df) \
+            and (field != self.data["voter_status"]) \
+            and (field != self.data["party_identifier"]) \
+            and (field not in exclude):
+                df[field] = (
+                    df[field]
+                    .astype(str)
+                    .str.strip()
+                    .str.split()
+                    .str.join(" ")
+                    .str.lower()
+                )
+                df[field] = (
+                    df[field].str.encode("utf-8", errors="ignore").str.decode("utf-8")
+                )
         return df
 
     def to_json(self):
