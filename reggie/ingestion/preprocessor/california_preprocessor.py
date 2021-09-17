@@ -186,7 +186,7 @@ class PreprocessCalifornia(Preprocessor):
 
         # key election, values date and count, then sort.
         # gonna have to iterate over all_hist and map to sparse
-        elect_dict = defaultdict(dict)
+        elect_dict = defaultdict(int)
 
         prof_num += 1
         logging.info("all the id dicts")
