@@ -25,7 +25,8 @@ The california File Comes in 3 files
 
 Big todo:
 Join district info in
-Coerce everythings
+Follow up with password protected files
+Sorted Codes Dict/metadata in general
 
 Use ensure int string where necessary otherwise you have fun float string problems
 """
@@ -51,7 +52,12 @@ class PreprocessCalifornia(Preprocessor):
 
     @staticmethod
     def coerce_cali_strings(
-        df, config, cat_columns, exclude=[""], extra_cols=None, col_list="columns"
+        df,
+        config,
+        cat_columns,
+        exclude=[""],
+        extra_cols=None,
+        col_list="columns",
     ):
         """
         takes all columns with text or varchar labels in the config,
@@ -92,13 +98,14 @@ class PreprocessCalifornia(Preprocessor):
                 string_copy = string_copy.str.encode("utf-8", errors="ignore")
                 df[field] = string_copy.str.decode("utf-8")
                 if field not in cat_columns:
-                    df[field] = df[field].astype('string[pyarrow]')
+                    df[field] = df[field].astype("string[pyarrow]")
                 else:
-                    logging.info('categorical')
-                    df[field] = df[field].astype('category')
+                    logging.info("categorical")
+                    df[field] = df[field].astype("category")
         return df
 
     def execute(self):
+        # Todo: remove
         def memprof(n):
             x = psutil.Process().memory_full_info()
             logging.info(
@@ -177,7 +184,9 @@ class PreprocessCalifornia(Preprocessor):
         del voter_ids
         gc.collect()
 
-        elect_dict = defaultdict(int)
+        # key election, values date and count, then sort.
+        # gonna have to iterate over all_hist and map to sparse
+        elect_dict = defaultdict(dict)
 
         prof_num += 1
         logging.info("all the id dicts")
@@ -204,10 +213,10 @@ class PreprocessCalifornia(Preprocessor):
                     "ElectionName",
                     "ElectionDate",
                     "CountyCode",
-                    # "Method",
                 ],
                 inplace=True,
             )
+            # todo: turn election dict into what will be sorted codes
             for row in chunk.itertuples():
                 try:
                     current_li = hist_dict[row.RegistrantID]
@@ -298,6 +307,7 @@ class PreprocessCalifornia(Preprocessor):
             )
         )
         # index will be voterids
+        # todo: reset index
         logging.info("df creation")
         # There is a bug in from_dict when the values are a list
         # see: https://github.com/pandas-dev/pandas/issues/29213
@@ -414,11 +424,23 @@ class PreprocessCalifornia(Preprocessor):
         prof_num += 1
         memprof(prof_num)
 
-        #Begin Coerce
+        # create sparse history
+        sorted_keys = sorted(
+            elect_dict.items(), key=lambda x: x[0].split("_")[1]
+        )
+        sorted_codes_dict = {
+            value[0]: {"index": i, "count": value[1]}
+            for i, value in enumerate(sorted_keys)
+        }
+
+        voter_df["sparse_history"] = voter_df.all_history.apply(
+            lambda x: [sorted_codes_dict[y]["index"] for y in x]
+        )
+        # Begin Coerce
 
         # Todo: create custom coerce function because it removes pyarrow and also
         # categories to turn them in to strings
-        logging.info('coesrcing strings')
+        logging.info("coesrcing strings")
         voter_df = self.coerce_cali_strings(voter_df, config, category_list)
         logging.info("coerced string")
         prof_num += 1
@@ -434,8 +456,11 @@ class PreprocessCalifornia(Preprocessor):
         prof_num += 1
         memprof(prof_num)
 
-        voter_csv = voter_df.to_csv(encoding="utf-8", index=True)
-        
+        voter_df = voter_df.reset_index().rename(
+            columns={"index": "RegistrantID"}
+        )
+        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
+
         logging.info("wrote csv")
         prof_num += 1
         memprof(prof_num)
