@@ -434,7 +434,7 @@ class PreprocessCalifornia(Preprocessor):
         }
         sorted_codes = [x[0] for x in sorted_keys]
         voter_df["sparse_history"] = voter_df.all_history.apply(
-            lambda x: [sorted_codes_dict[y]["index"] for y in x]
+            lambda x: [sorted_codes_dict[y]["index"] for y in x] if x == x else np.nan
         )
         # Begin Coerce
 
