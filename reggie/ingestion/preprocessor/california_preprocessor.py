@@ -120,10 +120,16 @@ class PreprocessCalifornia(Preprocessor):
 
         def district_fun(df_dist, df_voter, dist_dict):
             for dist_code in dist_dict.keys():
-                temp_df = df_dist[df_dist['DistrictTypeCode'] == dist_code]
-                temp_df = temp_df.rename(columns={"DistrictName": dist_dict[dist_code]})
-                df_voter = pd.merge(df_voter, temp_df[["PrecinctId", dist_dict[dist_code]]], how='left',
-                                    on='PrecinctId')
+                temp_df = df_dist[df_dist["DistrictTypeCode"] == dist_code]
+                temp_df = temp_df.rename(
+                    columns={"DistrictName": dist_dict[dist_code]}
+                )
+                df_voter = pd.merge(
+                    df_voter,
+                    temp_df[["PrecinctId", dist_dict[dist_code]]],
+                    how="left",
+                    on="PrecinctId",
+                )
             df_voter.drop(columns=["PrecinctId"], inplace=True)
             return df_voter
 
@@ -294,7 +300,11 @@ class PreprocessCalifornia(Preprocessor):
         # Todo: check this
         history_file["obj"].close()
         history_size = history_file["obj"].__sizeof__()
-        logging.info("history size after buffer flush: {} ".format(round(history_size), 2))
+        logging.info(
+            "history size after buffer flush: {} ".format(
+                round(history_size), 2
+            )
+        )
 
         logging.info("after hist in memory close")
         prof_num += 1
@@ -408,15 +418,18 @@ class PreprocessCalifornia(Preprocessor):
         # NP nans for munisipality seem to be unincorperated areas?
 
         # Todo: Maybe move to yaml?
-        district_dict = {"CG": "US Congressional District", "SS": "State Senate", "SA": "State Assembly",
-                         "CI": "Municipality",
-                         "SU": " County Supervisoral"}
-        district_df = pd.read_csv(district_file["obj"], sep='\t')
+        district_dict = {
+            "CG": "US Congressional District",
+            "SS": "State Senate",
+            "SA": "State Assembly",
+            "CI": "Municipality",
+            "SU": " County Supervisoral",
+        }
+        district_df = pd.read_csv(district_file["obj"], sep="\t")
 
         logging.info("Read in District DF")
         prof_num += 1
         memprof(prof_num)
-
 
         district_file["obj"].close()
         del district_file
@@ -425,13 +438,19 @@ class PreprocessCalifornia(Preprocessor):
         prof_num += 1
         memprof(prof_num)
 
-        merged_districts = district_fun(district_df, voter_df[["RegistrantID", 'PrecinctId']], district_dict)
+        merged_districts = district_fun(
+            district_df,
+            voter_df[["RegistrantID", "PrecinctId"]],
+            district_dict,
+        )
 
         logging.info("created merged district df")
         prof_num += 1
         memprof(prof_num)
 
-        voter_df = voter_df.merge(merged_districts, left_on="RegistrantID", right_on="RegistrantID")
+        voter_df = voter_df.merge(
+            merged_districts, left_on="RegistrantID", right_on="RegistrantID"
+        )
 
         logging.info("merged into voter_df")
         prof_num += 1
@@ -482,7 +501,9 @@ class PreprocessCalifornia(Preprocessor):
         }
         sorted_codes = [x[0] for x in sorted_keys]
         voter_df["sparse_history"] = voter_df.all_history.apply(
-            lambda x: [sorted_codes_dict[y]["index"] for y in x] if x == x else np.nan
+            lambda x: [sorted_codes_dict[y]["index"] for y in x]
+            if x == x
+            else np.nan
         )
         # Begin Coerce
 
