@@ -25,8 +25,9 @@ The california File Comes in 3 files
 
 Big todo:
 Join district info in
-Follow up with password protected files
-Sorted Codes Dict/metadata in general
+Ask DAs what should be included
+Follow up with password protected files, unzip rezip
+
 
 Use ensure int string where necessary otherwise you have fun float string problems
 """
@@ -117,19 +118,28 @@ class PreprocessCalifornia(Preprocessor):
                 )
             )
 
+        def district_fun(df_dist, df_voter, dist_dict):
+            for dist_code in dist_dict.keys():
+                temp_df = df_dist[df_dist['DistrictTypeCode'] == dist_code]
+                temp_df = temp_df.rename(columns={"DistrictName": dist_dict[dist_code]})
+                df_voter = pd.merge(df_voter, temp_df[["PrecinctId", dist_dict[dist_code]]], how='left',
+                                    on='PrecinctId')
+            df_voter.drop(columns=["PrecinctId"], inplace=True)
+            return df_voter
+
         prof_num = 0
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
-        logging.info("after read in")
+        logging.info("after all files unpacked")
         memprof(prof_num)
         del self.main_file, self.temp_files
         gc.collect()
 
         prof_num += 1
-        logging.info("after gc in")
+        logging.info("after gc unpacked files")
         memprof(prof_num)
         # Have to use longer whole string not just suffix because hist will match to voter file
         voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
@@ -139,7 +149,7 @@ class PreprocessCalifornia(Preprocessor):
         # chunksize
         chunk_size = 3000000
         # chunk_size = 36 * 1024 * 1024  # for dask in mb
-        # Todo: Remove, diagnostic only accurate for only one file
+        # Todo: Remove, diagnostic only accurate for only one file, closeish on others though
         rows = 213637309
         num_chunks = rows // chunk_size + 2
 
@@ -159,7 +169,7 @@ class PreprocessCalifornia(Preprocessor):
         )
 
         prof_num += 1
-        logging.info("before temp id")
+        logging.info("before temp id dataframe")
         memprof(prof_num)
 
         temp_voter_id_df = pd.read_csv(
@@ -174,7 +184,8 @@ class PreprocessCalifornia(Preprocessor):
 
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
         prof_num += 1
-        logging.info("temp_ voter id")
+
+        logging.info("after id dataframe read, before deletion")
         memprof(prof_num)
         del temp_voter_id_df
         gc.collect()
@@ -189,7 +200,7 @@ class PreprocessCalifornia(Preprocessor):
         elect_dict = defaultdict(int)
 
         prof_num += 1
-        logging.info("all the id dicts")
+        logging.info("created all the id dicts")
         memprof(prof_num)
 
         def dict_cols(
@@ -276,71 +287,65 @@ class PreprocessCalifornia(Preprocessor):
                 "time more or less remaining {}".format(time_remaining)
             )
 
-        logging.info("completed loop, before deletion")
+        logging.info("completed chunk loop, before hist deletion")
         prof_num += 1
         memprof(prof_num)
 
         # Todo: check this
         history_file["obj"].close()
         history_size = history_file["obj"].__sizeof__()
-        logging.info("history size now: {} ".format(history_size))
+        logging.info("history size after buffer flush: {} ".format(round(history_size), 2))
 
-        logging.info("after hist close?")
+        logging.info("after hist in memory close")
         prof_num += 1
         memprof(prof_num)
 
         del history_file
 
-        logging.info("after hist del")
+        logging.info("after calling del on hist")
         prof_num += 1
         memprof(prof_num)
 
         gc.collect()
 
-        logging.info("after collect")
+        logging.info("after gc collect")
         prof_num += 1
         memprof(prof_num)
 
         logging.info(
             "the size of the hist dictionary is {} megabytes".format(
-                sys.getsizeof(hist_dict) // 1024 ** 2
+                round((sys.getsizeof(hist_dict) // 1024 ** 2), 2)
             )
         )
         # index will be voterids
-        # todo: reset index
-        logging.info("df creation")
         # There is a bug in from_dict when the values are a list
         # see: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict, name="all_history")
         del hist_dict
 
+        logging.info("deleted hist dict")
         prof_num += 1
         memprof(prof_num)
         gc.collect()
 
-        logging.info("both series")
-        prof_num += 1
-        memprof(prof_num)
-
         votetype_series = pd.Series(votetype_dict, name="votetype_history")
         logging.info(
-            "series memory usage: {}".format(
-                votetype_series.memory_usage(deep=True) / 1024 ** 3
+            "votetype series memory usage: {}".format(
+                round((votetype_series.memory_usage(deep=True) / 1024 ** 3), 2)
             )
         )
 
-        logging.info("series read in")
+        logging.info("both series created")
         prof_num += 1
         memprof(prof_num)
 
         del votetype_dict
         gc.collect()
 
-        # Getting all memory using os.popen()
-        # be careful of int indexes?
-        # csv_hist = hist_series.to_csv(encoding="utf-8", index=True)
         logging.info("reading in voter df")
+
+        # todo: move to yaml?
         category_list = [
             "CountyCode",
             "Suffix",
@@ -361,6 +366,7 @@ class PreprocessCalifornia(Preprocessor):
             "VbmVoterType",
             "PrecinctId",
         ]
+        # read in columns to set dtype as pyarrow
         col_ifornia = pd.read_csv(
             voter_file["obj"], sep="\t", nrows=0, encoding="latin-1"
         ).columns.tolist()
@@ -393,11 +399,53 @@ class PreprocessCalifornia(Preprocessor):
         del voter_file
         gc.collect()
 
-        logging.info("voter file deleted after close")
+        logging.info("cleared voter file object")
+        prof_num += 1
+        memprof(prof_num)
+
+        # Do district stuff here
+        # This will add these columns, so change the yamls to reflect that
+        # NP nans for munisipality seem to be unincorperated areas?
+
+        # Todo: Maybe move to yaml?
+        district_dict = {"CG": "US Congressional District", "SS": "State Senate", "SA": "State Assembly",
+                         "CI": "Municipality",
+                         "SU": " County Supervisoral"}
+        district_df = pd.read_csv(district_file["obj"], sep='\t')
+
+        logging.info("Read in District DF")
+        prof_num += 1
+        memprof(prof_num)
+
+
+        district_file["obj"].close()
+        del district_file
+
+        logging.info("cleared district file object")
+        prof_num += 1
+        memprof(prof_num)
+
+        merged_districts = district_fun(district_df, voter_df[["RegistrantID", 'PrecinctId']], district_dict)
+
+        logging.info("created merged district df")
+        prof_num += 1
+        memprof(prof_num)
+
+        voter_df = voter_df.merge(merged_districts, left_on="RegistrantID", right_on="RegistrantID")
+
+        logging.info("merged into voter_df")
+        prof_num += 1
+        memprof(prof_num)
+
+        del merged_districts
+        gc.collect()
+
+        logging.info("deleted merged district df")
         prof_num += 1
         memprof(prof_num)
 
         voter_df.set_index("RegistrantID", inplace=True)
+
         voter_df = voter_df.merge(
             hist_series, left_index=True, right_index=True
         )
