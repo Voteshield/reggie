@@ -373,8 +373,7 @@ class PreprocessCalifornia(Preprocessor):
             "Status",
             "VoterStatusReasonCodeDesc",
             "AssistanceRequestFlag",
-            "VbmVoterType",
-            "PrecinctId",
+            "VbmVoterType"
         ]
         # read in columns to set dtype as pyarrow
         col_ifornia = pd.read_csv(
@@ -425,7 +424,7 @@ class PreprocessCalifornia(Preprocessor):
             "CI": "Municipality",
             "SU": " County Supervisoral",
         }
-        district_df = pd.read_csv(district_file["obj"], sep="\t")
+        district_df = pd.read_csv(district_file["obj"], sep="\t", dtype=string[pyarrow])
 
         logging.info("Read in District DF")
         prof_num += 1
