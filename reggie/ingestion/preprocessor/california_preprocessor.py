@@ -424,7 +424,7 @@ class PreprocessCalifornia(Preprocessor):
             "CI": "Municipality",
             "SU": " County Supervisoral",
         }
-        district_df = pd.read_csv(district_file["obj"], sep="\t", dtype=string[pyarrow])
+        district_df = pd.read_csv(district_file["obj"], sep="\t", dtype="string[pyarrow]")
 
         logging.info("Read in District DF")
         prof_num += 1
