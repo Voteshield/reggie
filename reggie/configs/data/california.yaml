@@ -124,6 +124,12 @@ columns:
   EmsVoterId: text
   # All ints, sometimes have nans most standard precinct fieldp
   PrecinctId: int
+  # Adding districts
+  USCongressionalDistrict: text
+  StateSenate: text
+  StateAssembly: text
+  Municipality: text
+  CountySupervisoral: text
 ordered_columns:
   - CountyCode
   - RegistrantID
@@ -181,6 +187,10 @@ ordered_columns:
   - VbmVoterType
   - EmsVoterId
   - PrecinctId
+  - StateSenate
+  - StateAssembly
+  - Municipality # not what it's called in the file?
+  - CountySupervisoral
 hist_columns:
   - CountyCode
   - RegistrantID

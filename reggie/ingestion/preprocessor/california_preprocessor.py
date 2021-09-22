@@ -418,11 +418,11 @@ class PreprocessCalifornia(Preprocessor):
 
         # Todo: Maybe move to yaml?
         district_dict = {
-            "CG": "US Congressional District",
-            "SS": "State Senate",
-            "SA": "State Assembly",
+            "CG": "USCongressionalDistrict",
+            "SS": "StateSenate",
+            "SA": "StateAssembly",
             "CI": "Municipality",
-            "SU": " County Supervisoral",
+            "SU": " CountySupervisoral",
         }
         district_df = pd.read_csv(district_file["obj"], sep="\t", dtype="string[pyarrow]")
 
