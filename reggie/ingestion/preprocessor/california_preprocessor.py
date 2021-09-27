@@ -374,6 +374,7 @@ class PreprocessCalifornia(Preprocessor):
             "VoterStatusReasonCodeDesc",
             "AssistanceRequestFlag",
             "VbmVoterType",
+            "USCongressionalDistrict",
             "StateSenate",
             "StateAssembly",
             "Municipality",
