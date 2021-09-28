@@ -50,7 +50,7 @@ address_fields:
   - UnitType
   - UnitNumber
   - City
-  - State
+  - StateAddr
   - Zip
 format:
   separate_hist: true
@@ -82,7 +82,7 @@ columns:
   UnitType: text
   UnitNumber: text
   City: text
-  State: text
+  StateAddr: text #renamed due to conflicts
   Zip: text # mix of regular zips and zip+4, most are +4
   # I guess people had 4 phone numbers in CA?
   Phone1Area: text
@@ -148,7 +148,7 @@ ordered_columns:
   - UnitType
   - UnitNumber
   - City
-  - State
+  - StateAddr
   - Zip
   - Phone1Area
   - Phone1Exchange

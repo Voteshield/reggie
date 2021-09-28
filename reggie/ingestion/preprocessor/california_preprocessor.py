@@ -52,7 +52,7 @@ class PreprocessCalifornia(Preprocessor):
         self.config_file = config_file
 
     @staticmethod
-    def coerce_cali_strings(
+    def coerce_strings(
         df,
         config,
         cat_columns,
@@ -377,6 +377,7 @@ class PreprocessCalifornia(Preprocessor):
             "USCongressionalDistrict",
             "StateSenate",
             "Municipality",
+            "StateAddr"
         ]
         # read in columns to set dtype as pyarrow
         col_ifornia = pd.read_csv(
@@ -396,6 +397,7 @@ class PreprocessCalifornia(Preprocessor):
             encoding="latin-1",
             on_bad_lines="warn",
         )
+        voter_df.rename(columns={"State": "StateAddr"}, inplace=True)
 
         logging.info("read in voter df")
         prof_num += 1
@@ -512,7 +514,7 @@ class PreprocessCalifornia(Preprocessor):
         # Todo: create custom coerce function because it removes pyarrow and also
         # categories to turn them in to strings
         logging.info("coesrcing strings")
-        voter_df = self.coerce_cali_strings(voter_df, config, category_list)
+        voter_df = self.coerce_strings(voter_df, config, category_list)
         logging.info("coerced string")
         prof_num += 1
         memprof(prof_num)
