@@ -376,9 +376,7 @@ class PreprocessCalifornia(Preprocessor):
             "VbmVoterType",
             "USCongressionalDistrict",
             "StateSenate",
-            "StateAssembly",
             "Municipality",
-            "CountySupervisoral",
         ]
         # read in columns to set dtype as pyarrow
         col_ifornia = pd.read_csv(
