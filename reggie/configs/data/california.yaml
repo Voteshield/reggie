@@ -16,15 +16,15 @@ voter_status: Status
 # CA only supplies us with voters who have the active status
 voter_status_active: A
 reason_code: VoterStatusReasonCodeDesc
-democratic_party: DEM
-republican_party: REP
+democratic_party: dem
+republican_party: rep
 # CA has...a bunch of parties
-green_party: GRE
-no_party_affiliation: NPP
+green_party: grn
+no_party_affiliation: npp
 # Todo: Check date format
 date_format: '%Y%m%d'
-party_identifier: enrollment
-gender_identifier: gender
+party_identifier: PartyCode
+gender_identifier: Gender
 use_pyarrow: True
 match_fields:
   - FirstName
