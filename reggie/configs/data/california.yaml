@@ -57,12 +57,12 @@ format:
   segmented_files: false
 generated_columns:
   all_history: text[]
-  sparse_history: int[]
   votetype_history: text[]
+  sparse_history: int[]
 ordered_generated_columns:
   - all_history
-  - sparse_history
   - votetype_history
+  - sparse_history
 has_headers: true
 columns:
   CountyCode: int
@@ -187,9 +187,10 @@ ordered_columns:
   - VbmVoterType
   - EmsVoterId
   - PrecinctId
+  - USCongressionalDistrict
   - StateSenate
   - StateAssembly
-  - Municipality # not what it's called in the file?
+  - Municipality # not what it's called in the file
   - CountySupervisoral
 hist_columns:
   - CountyCode
