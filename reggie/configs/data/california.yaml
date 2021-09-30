@@ -202,23 +202,23 @@ hist_columns:
   - ElectionName
   - Method
 county_names:
-  Alameda: 01
+  Alameda: 1
   Orange: 30
-  Alpine: 02
+  Alpine: 2
   Placer: 31
-  Amador: 03
+  Amador: 3
   Plumas: 32
-  Butte: 04
+  Butte: 4
   Riverside: 33
-  Calaveras: 05
+  Calaveras: 5
   Sacramento: 34
-  Colusa: 06
+  Colusa: 6
   San Benito: 35
-  Contra Costa: 07
+  Contra Costa: 7
   San Bernardino: 36
-  Del Norte: 08
+  Del Norte: 8
   San Diego: 37
-  El Dorado: 09
+  El Dorado: 9
   San Francisco: 38
   Fresno: 10
   San Joaquin: 39
