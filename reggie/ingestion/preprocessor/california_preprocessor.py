@@ -133,20 +133,15 @@ class PreprocessCalifornia(Preprocessor):
             df_voter.drop(columns=["PrecinctId"], inplace=True)
             return df_voter
 
-        prof_num = 0
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
-        logging.info("after all files unpacked")
-        memprof(prof_num)
+
         del self.main_file, self.temp_files
         gc.collect()
 
-        prof_num += 1
-        logging.info("after gc unpacked files")
-        memprof(prof_num)
         # Have to use longer whole string not just suffix because hist will match to voter file
         voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
         district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
@@ -174,10 +169,6 @@ class PreprocessCalifornia(Preprocessor):
             )
         )
 
-        prof_num += 1
-        logging.info("before temp id dataframe")
-        memprof(prof_num)
-
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
@@ -189,10 +180,7 @@ class PreprocessCalifornia(Preprocessor):
         voter_file["obj"].seek(0)
 
         voter_ids = temp_voter_id_df["RegistrantID"].unique().tolist()
-        prof_num += 1
 
-        logging.info("after id dataframe read, before deletion")
-        memprof(prof_num)
         del temp_voter_id_df
         gc.collect()
 
@@ -204,10 +192,6 @@ class PreprocessCalifornia(Preprocessor):
         # key election, values date and count, then sort.
         # gonna have to iterate over all_hist and map to sparse
         elect_dict = defaultdict(int)
-
-        prof_num += 1
-        logging.info("created all the id dicts")
-        memprof(prof_num)
 
         def dict_cols(
             chunk, history_dict=None, votetype_dict=None, election_dict=None
@@ -275,9 +259,6 @@ class PreprocessCalifornia(Preprocessor):
         for chunk in history_chunks:
             progress_tracker += 1
 
-            prof_num += 1
-            memprof(prof_num)
-
             logging.info("Chunk {}/{}".format(progress_tracker, num_chunks))
             start_t = time.time()
             dict_cols(chunk, hist_dict, votetype_dict, elect_dict)
@@ -293,34 +274,12 @@ class PreprocessCalifornia(Preprocessor):
                 "time more or less remaining {}".format(time_remaining)
             )
 
-        logging.info("completed chunk loop, before hist deletion")
-        prof_num += 1
-        memprof(prof_num)
-
         # Todo: check this
         history_file["obj"].close()
-        history_size = history_file["obj"].__sizeof__()
-        logging.info(
-            "history size after buffer flush: {} ".format(
-                round(history_size), 2
-            )
-        )
 
-        logging.info("after hist in memory close")
-        prof_num += 1
-        memprof(prof_num)
-
+        # this probably doesn't do anything
         del history_file
-
-        logging.info("after calling del on hist")
-        prof_num += 1
-        memprof(prof_num)
-
         gc.collect()
-
-        logging.info("after gc collect")
-        prof_num += 1
-        memprof(prof_num)
 
         logging.info(
             "the size of the hist dictionary is {} megabytes".format(
@@ -328,27 +287,15 @@ class PreprocessCalifornia(Preprocessor):
             )
         )
         # index will be voterids
-        # There is a bug in from_dict when the values are a list
-        # see: https://github.com/pandas-dev/pandas/issues/29213
+        # There is a bug/"feature" in from_dict when the values are a list
+        # dataframe doesn't work: https://github.com/pandas-dev/pandas/issues/29213
         # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict, name="all_history")
         del hist_dict
 
-        logging.info("deleted hist dict")
-        prof_num += 1
-        memprof(prof_num)
         gc.collect()
 
         votetype_series = pd.Series(votetype_dict, name="votetype_history")
-        logging.info(
-            "votetype series memory usage: {}".format(
-                round((votetype_series.memory_usage(deep=True) / 1024 ** 3), 2)
-            )
-        )
-
-        logging.info("both series created")
-        prof_num += 1
-        memprof(prof_num)
 
         del votetype_dict
         gc.collect()
@@ -383,6 +330,7 @@ class PreprocessCalifornia(Preprocessor):
         col_ifornia = pd.read_csv(
             voter_file["obj"], sep="\t", nrows=0, encoding="latin-1"
         ).columns.tolist()
+
         voter_file["obj"].seek(0)
         dtype_dict = {
             col: (
@@ -399,10 +347,6 @@ class PreprocessCalifornia(Preprocessor):
         )
         voter_df.rename(columns={"State": "StateAddr"}, inplace=True)
 
-        logging.info("read in voter df")
-        prof_num += 1
-        memprof(prof_num)
-
         logging.info(
             "dataframe memory usage: {}".format(
                 round((voter_df.memory_usage(deep=True).sum() / 1024 ** 2), 2)
@@ -413,14 +357,7 @@ class PreprocessCalifornia(Preprocessor):
         del voter_file
         gc.collect()
 
-        logging.info("cleared voter file object")
-        prof_num += 1
-        memprof(prof_num)
-
         # Do district stuff here
-        # This will add these columns, so change the yamls to reflect that
-        # NP nans for munisipality seem to be unincorperated areas?
-
         # Todo: Maybe move to yaml?
         district_dict = {
             "CG": "USCongressionalDistrict",
@@ -431,16 +368,8 @@ class PreprocessCalifornia(Preprocessor):
         }
         district_df = pd.read_csv(district_file["obj"], sep="\t", dtype="string[pyarrow]")
 
-        logging.info("Read in District DF")
-        prof_num += 1
-        memprof(prof_num)
-
         district_file["obj"].close()
         del district_file
-
-        logging.info("cleared district file object")
-        prof_num += 1
-        memprof(prof_num)
 
         merged_districts = district_fun(
             district_df,
@@ -448,24 +377,12 @@ class PreprocessCalifornia(Preprocessor):
             district_dict,
         )
 
-        logging.info("created merged district df")
-        prof_num += 1
-        memprof(prof_num)
-
         voter_df = voter_df.merge(
             merged_districts, left_on="RegistrantID", right_on="RegistrantID"
         )
 
-        logging.info("merged into voter_df")
-        prof_num += 1
-        memprof(prof_num)
-
         del merged_districts
         gc.collect()
-
-        logging.info("deleted merged district df")
-        prof_num += 1
-        memprof(prof_num)
 
         voter_df.set_index("RegistrantID", inplace=True)
 
@@ -473,16 +390,8 @@ class PreprocessCalifornia(Preprocessor):
             hist_series, left_index=True, right_index=True
         )
 
-        logging.info("merged hist on id")
-        prof_num += 1
-        memprof(prof_num)
-
         del hist_series
         gc.collect()
-
-        logging.info("deleted hist series")
-        prof_num += 1
-        memprof(prof_num)
 
         voter_df = voter_df.merge(
             votetype_series, left_index=True, right_index=True
@@ -490,10 +399,6 @@ class PreprocessCalifornia(Preprocessor):
 
         del votetype_series
         gc.collect()
-
-        logging.info("deleted votetype_series")
-        prof_num += 1
-        memprof(prof_num)
 
         # create sparse history
         sorted_keys = sorted(
@@ -513,37 +418,23 @@ class PreprocessCalifornia(Preprocessor):
 
         # Todo: create custom coerce function because it removes pyarrow and also
         # categories to turn them in to strings
-        logging.info("coesrcing strings")
+        logging.info("coecrcing strings")
         voter_df = self.coerce_strings(voter_df, config, category_list)
-        logging.info("coerced string")
-        prof_num += 1
-        memprof(prof_num)
 
         voter_df = self.config.coerce_dates(voter_df)
-        logging.info("coerced dates")
-        prof_num += 1
-        memprof(prof_num)
 
         voter_df = self.config.coerce_numeric(voter_df)
-        logging.info("coerced numeric")
-        prof_num += 1
-        memprof(prof_num)
 
         voter_df = voter_df.reset_index().rename(
             columns={"index": "RegistrantID"}
         )
-        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
 
-        logging.info("wrote csv")
-        prof_num += 1
-        memprof(prof_num)
+        # largest memory usage here
+        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
 
         del voter_df
         gc.collect()
 
-        logging.info("cleaned dataframes")
-        prof_num += 1
-        memprof(prof_num)
         self.meta = {
             "message": "california_{}".format(datetime.now().isoformat()),
             "array_encoding": sorted_codes_dict,
