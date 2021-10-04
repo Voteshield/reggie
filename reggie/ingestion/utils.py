@@ -263,11 +263,17 @@ def format_column_name(c):
 def normalize_columns(df, cols, types=None):
     missing_cols = [c for c in cols if c not in df.columns.values.tolist()]
     wanted_cols = [c for c in df.columns.values.tolist() if c in cols]
+    logging.info("1a/4 in normalize, missing columns\n{}\nwanted columns\n{}".format(
+        missing_cols, wanted_cols))
+
     df = df[wanted_cols]
+    logging.info("2a/4 after df with just wanted")
     for c in missing_cols:
         df[c] = None
     common_cols = [c for c in cols if c in df.columns.values.tolist()]
+    logging.info("3a/4 common cols\n{}".format(common_cols))
     df = df[common_cols]
+    logging.info("4a/4returning")
     return df, common_cols
 
 
