@@ -5,10 +5,11 @@ source: boe
 file_class: voter_file
 expected_number_of_files: 2
 voter_id: VOTER_IDENTIFICATION_NUMBER
+county_identifier: COUNTY_CODE
 jurisdiction_identifier: JURISDICTION_CODE
-primary_locale_identifier: JURISDICTION_CODE
+primary_locale_identifier: COUNTY_CODE
 numeric_primary_locale: true
-primary_locale_type: jurisdiction
+primary_locale_type: county
 precinct_identifier: PRECINCT
 birthday_identifier: YEAR_OF_BIRTH
 early_voter_identifier: IS_PERMANENT_ABSENTEE_VOTER
