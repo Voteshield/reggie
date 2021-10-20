@@ -24,8 +24,8 @@ republican_party: REP
 green_party: GRN
 # https://elections.cdn.sos.ca.gov/ccrov/pdf/2018/may/18109cik.pdf
 no_party_affiliation: NPP
-absentee_ballot_code: vbm
-provisional_ballot_code: cvr
+absentee_ballot_code: "'VBM'"
+provisional_ballot_code: "'VCR'"
 # Todo: Check date format
 date_format: '%Y-%m-%d'
 party_identifier: PartyCode
