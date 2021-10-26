@@ -23,7 +23,6 @@ CONFIG_CHUNK_URLS = "data_chunk_links"
 
 RAW_FILE_PREFIX = "raw_voter_file"
 PROCESSED_FILE_PREFIX = "voter_file"
-MODIFICATION_FILE_PREFIX = "modification_file"
 
 META_FILE_PREFIX = "meta"
 NULL_CHAR = "n"
