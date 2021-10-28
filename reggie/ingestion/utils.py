@@ -8,22 +8,7 @@ from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
 from reggie.reggie_constants import META_FILE_PREFIX, NULL_CHAR, \
-    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
-import psutil
-from psutil._common import bytes2human
-
-
-def memprof(n):
-    x = psutil.Process().memory_full_info()
-    logging.info(
-        "{} Resident Set Size: {}, Unique Set Size: {}, Virtual: {}".format(
-            n,
-            bytes2human(x.rss),
-            bytes2human(x.uss),
-            bytes2human(x.vms),
-        )
-    )
-
+    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX
 
 s3 = boto3.resource("s3")
 
@@ -152,7 +137,7 @@ def get_s3_uploads(state, file_class, source, s3_bucket, testing=False):
     :param testing:
     :return:
     """
-    assert(file_class in [PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX,
+    assert(file_class in [PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX,
                           META_FILE_PREFIX])
     if not testing:
         prefix = "{}/{}/{}".format(file_class, state, source)
@@ -275,23 +260,13 @@ def format_column_name(c):
 
 
 def normalize_columns(df, cols, types=None):
-    memprof(1)
     missing_cols = [c for c in cols if c not in df.columns.values.tolist()]
     wanted_cols = [c for c in df.columns.values.tolist() if c in cols]
-    logging.info("1a/4 in normalize, missing columns\n{}\nwanted columns\n{}".format(
-        missing_cols, wanted_cols))
-    memprof(11)
     df = df[wanted_cols]
-    logging.info("2a/4 after df with just wanted")
-    memprof(12)
     for c in missing_cols:
         df[c] = None
     common_cols = [c for c in cols if c in df.columns.values.tolist()]
-    logging.info("3a/4 common cols\n{}".format(common_cols))
-    memprof(13)
     df = df[common_cols]
-    logging.info("4a/4returning")
-    memprof(14)
     return df, common_cols
 
 
