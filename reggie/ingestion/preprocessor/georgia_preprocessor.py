@@ -45,7 +45,7 @@ class PreprocessGeorgia(Preprocessor):
         voter_files = []
         vh_files = []
         for i in new_files:
-            if "Georgia_Daily_VoterBase.txt".lower() in i["name"].lower():
+            if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
             elif "txt" in i["name"].lower():
