@@ -123,7 +123,6 @@ class PreprocessWisconsin(Preprocessor):
             dtype=dtype_dict,
             error_bad_lines=False,
         )
-
         del self.main_file, self.temp_files, new_files
         gc.collect()
 

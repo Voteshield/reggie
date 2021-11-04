@@ -5,6 +5,7 @@ from reggie.ingestion.download import (
 )
 from reggie.ingestion.utils import format_column_name
 from reggie.configs.configs import Config
+import gc
 import logging
 import pandas as pd
 import datetime
@@ -49,10 +50,15 @@ class PreprocessPennsylvania(Preprocessor):
 
         config = Config(file_name=self.config_file)
         new_files = self.unpack_files(file_obj=self.main_file)
+        del self.main_file, self.temp_files
+        gc.collect()
+
         voter_files = [f for f in new_files if "FVE" in f["name"]]
         election_maps = [f for f in new_files if "Election Map" in f["name"]]
         zone_codes = [f for f in new_files if "Codes" in f["name"]]
         zone_types = [f for f in new_files if "Types" in f["name"]]
+        del new_files
+        gc.collect()
 
         if not self.ignore_checks:
             # election maps need to line up to voter files?
@@ -234,12 +240,18 @@ class PreprocessPennsylvania(Preprocessor):
                 main_df = df
             else:
                 main_df = pd.concat([main_df, df], ignore_index=True)
+
+        del voter_files, election_maps, zone_codes, zone_types
+        gc.collect()
+
         sorted_keys = sorted(
             sorted_code_dict.items(), key=lambda x: parser.parse(x[1]["date"])
         )
         for index, key in enumerate(sorted_keys):
             sorted_code_dict[key[0]]["index"] = index
             sorted_codes.append(key[0])
+        del sorted_keys
+        gc.collect()
 
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
@@ -265,8 +277,15 @@ class PreprocessPennsylvania(Preprocessor):
             "array_encoding": json.dumps(sorted_code_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+
+        csv_obj = main_df.to_csv(encoding="utf-8", index=False)
+        del main_df
+        gc.collect()
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(main_df.to_csv(encoding="utf-8", index=False)),
+            io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
+        del csv_obj
+        gc.collect()

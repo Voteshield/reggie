@@ -5,13 +5,13 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from reggie.ingestion.utils import MissingNumColumnsError
+import gc
 import logging
 import pandas as pd
 import datetime
 from io import StringIO
 import numpy as np
 from datetime import datetime
-import gc
 
 
 class PreprocessFlorida(Preprocessor):
@@ -38,6 +38,8 @@ class PreprocessFlorida(Preprocessor):
         new_files = self.unpack_files(
             compression="unzip", file_obj=self.main_file
         )
+        del self.main_file, self.temp_files
+        gc.collect()
 
         vote_history_files = []
         voter_files = []
@@ -51,6 +53,7 @@ class PreprocessFlorida(Preprocessor):
             self.file_check(len(voter_files))
         concat_voter_file = concat_and_delete(voter_files)
         concat_history_file = concat_and_delete(vote_history_files)
+        del new_files, vote_history_files, voter_files
         gc.collect()
 
         logging.info("FLORIDA: loading voter history file")
@@ -65,6 +68,7 @@ class PreprocessFlorida(Preprocessor):
                 len(self.config["hist_columns"]),
                 len(df_hist.columns),
             )
+        del concat_history_file
         gc.collect()
 
         df_hist = df_hist[df_hist["date"].map(lambda x: len(x)) > 5]
@@ -93,17 +97,22 @@ class PreprocessFlorida(Preprocessor):
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
+        del valid_elections, counts, date_order
+        gc.collect()
 
         logging.info("FLORIDA: history apply")
         voter_groups = df_hist.groupby("VoterID")
         all_history = voter_groups["array_position"].apply(list)
         vote_type = voter_groups["vote_type"].apply(list)
+        del voter_groups, df_hist
         gc.collect()
 
         logging.info("FLORIDA: loading main voter file")
         df_voters = self.read_csv_count_error_lines(
             concat_voter_file, header=None, sep="\t", error_bad_lines=False
         )
+        del concat_voter_file
+        gc.collect()
 
         try:
             df_voters.columns = self.config["ordered_columns"]
@@ -119,6 +128,7 @@ class PreprocessFlorida(Preprocessor):
 
         df_voters["all_history"] = all_history
         df_voters["vote_type"] = vote_type
+        del all_history, vote_type
         gc.collect()
 
         df_voters = self.config.coerce_strings(df_voters)
@@ -149,10 +159,15 @@ class PreprocessFlorida(Preprocessor):
             "array_decoding": sorted_codes,
         }
 
+        csv_obj = df_voters.to_csv(encoding="utf-8")
+        del df_voters
         gc.collect()
+
         logging.info("FLORIDA: writing out")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
-            io_obj=StringIO(df_voters.to_csv(encoding="utf-8")),
+            io_obj=StringIO(csv_obj),
             s3_bucket=self.s3_bucket,
         )
+        del csv_obj
+        gc.collect()
