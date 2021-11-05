@@ -6,7 +6,6 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import format_column_name
 from reggie.configs.configs import Config
 import logging
 import pandas as pd
@@ -14,25 +13,15 @@ import numpy as np
 import datetime
 from io import StringIO
 from datetime import datetime
-from dateutil import parser
-import json
 import time
 from collections import defaultdict
-import os
 
 """
 The california File Comes in 3 files
 
-Big todo:
-Join district info in
-Ask DAs what should be included
-Follow up with password protected files, unzip rezip
-
 
 Use ensure int string where necessary otherwise you have fun float string problems
 """
-import psutil
-from psutil._common import bytes2human
 
 
 class PreprocessCalifornia(Preprocessor):
@@ -106,18 +95,6 @@ class PreprocessCalifornia(Preprocessor):
         return df
 
     def execute(self):
-        # Todo: remove
-        def memprof(n):
-            x = psutil.Process().memory_full_info()
-            logging.info(
-                "{} Resident Set Size: {}, Unique Set Size: {}, Virtual: {}".format(
-                    n,
-                    bytes2human(x.rss),
-                    bytes2human(x.uss),
-                    bytes2human(x.vms),
-                )
-            )
-
         def district_fun(df_dist, df_voter, dist_dict):
             for dist_code in dist_dict.keys():
                 temp_df = df_dist[df_dist["DistrictTypeCode"] == dist_code]
@@ -146,28 +123,6 @@ class PreprocessCalifornia(Preprocessor):
         voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
         district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
-
-        # chunksize
-        chunk_size = 3000000
-        # chunk_size = 36 * 1024 * 1024  # for dask in mb
-        # Todo: Remove, diagnostic only accurate for only one file, closeish on others though
-        rows = 213637309
-        num_chunks = rows // chunk_size + 2
-
-        # todo: remove
-        # Diagnostic
-        voter_size = voter_file["obj"].__sizeof__()
-        history_size = history_file["obj"].__sizeof__()
-        district_size = district_file["obj"].__sizeof__()
-
-        logging.info(
-            "Reading In files: voter_size {}\n history_size {} \n district_size{} \n total: {}".format(
-                voter_size // 1023 ** 3,
-                history_size // 1023 ** 3,
-                district_size // 1023 ** 3,
-                (voter_size + history_size + district_size) // 1023 ** 3,
-            )
-        )
 
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
@@ -217,7 +172,6 @@ class PreprocessCalifornia(Preprocessor):
                 ],
                 inplace=True,
             )
-            # todo: turn election dict into what will be sorted codes
             for row in chunk.itertuples():
                 try:
                     current_li = hist_dict[row.RegistrantID]
@@ -239,7 +193,8 @@ class PreprocessCalifornia(Preprocessor):
                 except KeyError:
                     continue
 
-            # return history_dict, election_dict
+        # Chunk size, over ~3 mil of so leads to slowdown
+        chunk_size = 3000000
 
         history_chunks = pd.read_csv(
             history_file["obj"],
@@ -255,44 +210,16 @@ class PreprocessCalifornia(Preprocessor):
             dtype=str,
             chunksize=chunk_size,
         )
-        progress_tracker = 0
         for chunk in history_chunks:
-            progress_tracker += 1
-
-            logging.info("Chunk {}/{}".format(progress_tracker, num_chunks))
-            start_t = time.time()
             dict_cols(chunk, hist_dict, votetype_dict, elect_dict)
-            end_time = time.time()
-            logging.info(
-                "time_elapsed: {}".format(round((end_time - start_t), 2))
-            )
-            time_remaining = round(
-                ((end_time - start_t) * (num_chunks - progress_tracker) / 60),
-                2,
-            )
-            logging.info(
-                "time more or less remaining {}".format(time_remaining)
-            )
 
-        # Todo: check this
         history_file["obj"].close()
-
-        # this probably doesn't do anything
         del history_file
         gc.collect()
 
-        logging.info(
-            "the size of the hist dictionary is {} megabytes".format(
-                round((sys.getsizeof(hist_dict) // 1024 ** 2), 2)
-            )
-        )
-        # index will be voterids
-        # There is a bug/"feature" in from_dict when the values are a list
-        # dataframe doesn't work: https://github.com/pandas-dev/pandas/issues/29213
-        # hist_df = pd.DataFrame.from_dict(hist_dict, orient="index")
         hist_series = pd.Series(hist_dict, name="all_history")
-        del hist_dict
 
+        del hist_dict
         gc.collect()
 
         votetype_series = pd.Series(votetype_dict, name="votetype_history")
@@ -300,9 +227,8 @@ class PreprocessCalifornia(Preprocessor):
         del votetype_dict
         gc.collect()
 
-        logging.info("reading in voter df")
+        logging.info("reading in CA voter df")
 
-        # todo: move to yaml?
         category_list = [
             "CountyCode",
             "Suffix",
@@ -324,7 +250,7 @@ class PreprocessCalifornia(Preprocessor):
             "USCongressionalDistrict",
             "StateSenate",
             "Municipality",
-            "StateAddr"
+            "StateAddr",
         ]
         # read in columns to set dtype as pyarrow
         col_ifornia = pd.read_csv(
@@ -345,6 +271,8 @@ class PreprocessCalifornia(Preprocessor):
             encoding="latin-1",
             on_bad_lines="warn",
         )
+
+        # Replaces the state column name in the address fields with StateAddr to avoid duplicate column names
         voter_df.rename(columns={"State": "StateAddr"}, inplace=True)
 
         logging.info(
@@ -357,8 +285,6 @@ class PreprocessCalifornia(Preprocessor):
         del voter_file
         gc.collect()
 
-        # Do district stuff here
-        # Todo: Maybe move to yaml?
         district_dict = {
             "CG": "USCongressionalDistrict",
             "SS": "StateSenate",
@@ -366,7 +292,9 @@ class PreprocessCalifornia(Preprocessor):
             "CI": "Municipality",
             "SU": "CountySupervisoral",
         }
-        district_df = pd.read_csv(district_file["obj"], sep="\t", dtype="string[pyarrow]")
+        district_df = pd.read_csv(
+            district_file["obj"], sep="\t", dtype="string[pyarrow]"
+        )
 
         district_file["obj"].close()
         del district_file
@@ -416,20 +344,20 @@ class PreprocessCalifornia(Preprocessor):
         )
         # Begin Coerce
 
-        # Todo: create custom coerce function because it removes pyarrow and also
         # categories to turn them in to strings
         logging.info("coecrcing strings")
         voter_df = self.coerce_strings(voter_df, config, category_list)
 
+        logging.info("coecrcing dates")
         voter_df = self.config.coerce_dates(voter_df)
 
+        logging.info("coecrcing numeric")
         voter_df = self.config.coerce_numeric(voter_df)
 
         voter_df = voter_df.reset_index().rename(
             columns={"index": "RegistrantID"}
         )
 
-        # largest memory usage here
         voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
 
         del voter_df
