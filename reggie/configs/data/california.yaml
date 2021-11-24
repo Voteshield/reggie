@@ -207,61 +207,61 @@ hist_columns:
   - ElectionName
   - Method
 county_names:
-  Alameda: 1
-  Orange: 30
-  Alpine: 2
-  Placer: 31
-  Amador: 3
-  Plumas: 32
-  Butte: 4
-  Riverside: 33
-  Calaveras: 5
-  Sacramento: 34
-  Colusa: 6
-  San Benito: 35
-  Contra Costa: 7
-  San Bernardino: 36
-  Del Norte: 8
-  San Diego: 37
-  El Dorado: 9
-  San Francisco: 38
-  Fresno: 10
-  San Joaquin: 39
-  Glenn: 11
-  San Luis Obispo: 40
-  Humboldt: 12
-  San Mateo: 41
-  Imperial: 13
-  Santa Barbara: 42
-  Inyo: 14
-  Santa Clara: 43
-  Kern: 15
-  Santa Cruz: 44
-  Kings: 16
-  Shasta: 45
-  Lake: 17
-  Sierra: 46
-  Lassen: 18
-  Siskiyou: 47
-  Los Angeles: 19
-  Solano: 48
-  Madera: 20
-  Sonoma: 49
-  Marin: 21
-  Stanislaus: 50
-  Mariposa: 22
-  Sutter: 51
-  Mendocino: 23
-  Tehama: 52
-  Merced: 24
-  Trinity: 53
-  Modoc: 25
-  Tulare: 54
-  Mono: 26
-  Tuolumne: 55
-  Monterey: 27
-  Ventura: 56
-  Napa: 28
-  Yolo: 57
-  Nevada: 29
+  Alameda: 1,
+  Alpine: 2,
+  Amador: 3,
+  Butte: 4,
+  Calaveras: 5,
+  Colusa: 6,
+  Contra Costa: 7,
+  Del Norte: 8,
+  El Dorado: 9,
+  Fresno: 10,
+  Glenn: 11,
+  Humboldt: 12,
+  Imperial: 13,
+  Inyo: 14,
+  Kern: 15,
+  Kings: 16,
+  Lake: 17,
+  Lassen: 18,
+  Los Angeles: 19,
+  Madera: 20,
+  Marin: 21,
+  Mariposa: 22,
+  Mendocino: 23,
+  Merced: 24,
+  Modoc: 25,
+  Mono: 26,
+  Monterey: 27,
+  Napa: 28,
+  Nevada: 29,
+  Orange: 30,
+  Placer: 31,
+  Plumas: 32,
+  Riverside: 33,
+  Sacramento: 34,
+  San Benito: 35,
+  San Bernardino: 36,
+  San Diego: 37,
+  San Francisco: 38,
+  San Joaquin: 39,
+  San Luis Obispo: 40,
+  San Mateo: 41,
+  Santa Barbara: 42,
+  Santa Clara: 43,
+  Santa Cruz: 44,
+  Shasta: 45,
+  Sierra: 46,
+  Siskiyou: 47,
+  Solano: 48,
+  Sonoma: 49,
+  Stanislaus: 50,
+  Sutter: 51,
+  Tehama: 52,
+  Trinity: 53,
+  Tulare: 54,
+  Tuolumne: 55,
+  Ventura: 56,
+  Yolo: 57,
   Yuba: 58
