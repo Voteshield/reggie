@@ -2,6 +2,7 @@ import logging
 from reggie.configs.configs import Config
 from .arizona_preprocessor import PreprocessArizona
 from .arizona2_preprocessor import PreprocessArizona2
+from .california_preprocessor import PreprocessCalifornia
 from .colorado_preprocessor import PreprocessColorado
 from .florida_preprocessor import PreprocessFlorida
 from .georgia_preprocessor import PreprocessGeorgia
@@ -41,6 +42,7 @@ def state_router(
     routes = {
         "arizona": PreprocessArizona,
         "arizona2": PreprocessArizona2,
+        "california": PreprocessCalifornia,
         "colorado": PreprocessColorado,
         "florida": PreprocessFlorida,
         "georgia": PreprocessGeorgia,

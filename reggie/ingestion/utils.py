@@ -8,8 +8,7 @@ from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
 from reggie.reggie_constants import META_FILE_PREFIX, NULL_CHAR, \
-    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX
-
+    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX
 
 s3 = boto3.resource("s3")
 
@@ -138,7 +137,7 @@ def get_s3_uploads(state, file_class, source, s3_bucket, testing=False):
     :param testing:
     :return:
     """
-    assert(file_class in [PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX,
+    assert(file_class in [PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX,
                           META_FILE_PREFIX])
     if not testing:
         prefix = "{}/{}/{}".format(file_class, state, source)
