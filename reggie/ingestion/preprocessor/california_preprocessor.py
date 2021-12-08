@@ -13,14 +13,12 @@ import numpy as np
 import datetime
 from io import StringIO
 from datetime import datetime
-import time
 from collections import defaultdict
 
 """
-The california File Comes in 3 files
+The california File Comes in 3 one history file, one voter file and one 
+district file.
 
-
-Use ensure int string where necessary otherwise you have fun float string problems
 """
 
 
@@ -119,7 +117,8 @@ class PreprocessCalifornia(Preprocessor):
         del self.main_file, self.temp_files
         gc.collect()
 
-        # Have to use longer whole string not just suffix because hist will match to voter file
+        # Have to use longer whole string not just suffix because hist will
+        # match to voter file
         voter_file = [f for f in new_files if "pvrdr-vrd" in f["name"]][0]
         district_file = [f for f in new_files if "pvrdr-pd" in f["name"]][0]
         history_file = [f for f in new_files if "pvrdr-vph" in f["name"]][0]
