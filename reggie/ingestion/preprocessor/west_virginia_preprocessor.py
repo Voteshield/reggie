@@ -92,6 +92,9 @@ class PreprocessWestVirginia(Preprocessor):
             header=0 if config["has_headers"] else None,
         )
 
+        # adds dummy column to wv to match format of older files
+        if "mail unit" not in df_voters.columns.str.lower():
+            df_voters["MAIL UNIT"] = np.nan
         # Add county id column
         df_voters.insert(
             1,
