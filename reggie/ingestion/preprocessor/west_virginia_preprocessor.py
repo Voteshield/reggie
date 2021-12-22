@@ -95,6 +95,7 @@ class PreprocessWestVirginia(Preprocessor):
         # adds dummy column to wv to match format of older files
         if "mail unit" not in df_voters.columns.str.lower():
             df_voters["MAIL UNIT"] = np.nan
+        df_voters.rename(columns={"COUNTY_NAME": "County_Name"}, inplace=True, errors="ignore")
         # Add county id column
         df_voters.insert(
             1,
