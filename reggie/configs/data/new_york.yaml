@@ -21,6 +21,16 @@ voter_status_active_military: AM
 voter_status_active_special_federal: AF
 voter_status_active_special_presidential: AP
 voter_status_uocava: AU
+# in Dec 2021, NY started using abbreviations only
+status_codes_remap:
+  A: ACTIVE
+  I: INACTIVE
+  P: PURGED
+  17: PREREG
+  AM: AM
+  AF: AF
+  AP: AP
+  AU: AU
 reason_code: reasoncode
 democratic_party: DEM
 republican_party: REP

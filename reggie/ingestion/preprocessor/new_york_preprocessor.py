@@ -43,15 +43,37 @@ class PreprocessNewYork(Preprocessor):
         # no longer include pdfs in file list anyway, can just assign main file
         self.main_file = new_files[0]
         gc.collect()
-        # When given the names, the pandas read_csv will always work. If given csv has too few column names it will
-        # assign the names to the columns to the end, skipping the beginning columns, if too many will add nan columnms
         main_df = self.read_csv_count_error_lines(
             self.main_file["obj"],
             header=None,
-            names=self.config["ordered_columns"],
             encoding="latin-1",
             error_bad_lines=False,
         )
+
+        # In Dec 2021, NY added 2 columns (RAPARTMENTTYPE, RADDRNONSTD),
+        # and rearranged the other address columns slightly.
+        # Since these columns are not very useful /
+        # affect only a small set of voters (140k),
+        # We are going to drop them for now to allow for
+        # easy compatibility with past data.
+        if len(main_df.columns) > len(self.config["ordered_columns"]):
+            main_df.drop(main_df.columns[11], axis=1, inplace=True)
+            main_df.drop(main_df.columns[9], axis=1, inplace=True)
+
+            # Rearrange columns slightly to fit pre-Dec 2021 data
+            ordered_cols = main_df.columns.to_list()
+            ordered_cols = ordered_cols[:6] + [ordered_cols[9]] + ordered_cols[6:9] + ordered_cols[10:]
+            main_df = main_df[ordered_cols]
+
+            # They also changed some of the status codes to abbreviations
+            # So this maps them back to what they used to be
+            main_df["StatusCode"] = main_df["StatusCodeOrig"].map(
+                self.config["status_codes_remap"]
+            )
+
+        # apply column names
+        main_df.columns = self.config["ordered_columns"]
+
         logging.info(
             "dataframe memory usage: {}".format(
                 main_df.memory_usage(deep=True).sum()
