@@ -67,7 +67,7 @@ class PreprocessNewYork(Preprocessor):
 
             # They also changed some of the status codes to abbreviations
             # So this maps them back to what they used to be
-            main_df["StatusCode"] = main_df["StatusCodeOrig"].map(
+            main_df[41] = main_df[41].map(
                 self.config["status_codes_remap"]
             )
 
