@@ -26,7 +26,7 @@ status_codes_remap:
   A: ACTIVE
   I: INACTIVE
   P: PURGED
-  17: PREREG
+  '17': PREREG
   AM: AM
   AF: AF
   AP: AP
