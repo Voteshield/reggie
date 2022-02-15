@@ -67,9 +67,28 @@ class PreprocessNorthCarolina(Preprocessor):
         del vote_hist_file, new_files
         gc.collect()
 
-        try:
-            voter_df.columns = self.config["ordered_columns"]
-        except ValueError:
+        # In February 2022, NC changed the name of 5 columns, dropped 4 columns,
+        # and rearranged the rest of the columns somewhat.
+        # Since none of the dropped columns are crucial to VoteShield,
+        # we just convert the file back to the old format.
+        if "age_at_year_end" in voter_df.columns:
+             voter_df.rename(columns={"age_at_year_end": "birth_age"}, inplace=True)
+        if "birth_state" in voter_df.columns:
+             voter_df.rename(columns={"birth_state": "birth_place"}, inplace=True)
+        if "middle_name" in voter_df.columns:
+             voter_df.rename(columns={"middle_name": "midl_name"}, inplace=True)
+        if "name_suffix_lbl" in voter_df.columns:
+             voter_df.rename(columns={"name_suffix_lbl": "name_sufx_cd"}, inplace=True)
+        if "confidential_ind" in voter_df.columns:
+             voter_df.rename(columns={"confidential_ind": "Confidential_ind"}, inplace=True)
+        for field in ["absent_ind", "dist_2_abbrv", "dist_2_desc", "name_prefx_cd"]:
+            if field not in voter_df.columns:
+                voter_df[field] = np.nan
+
+        if len(voter_df.columns) == len(self.config["ordered_columns"]):
+            # Rearrange into original order
+            voter_df = voter_df[self.config["ordered_columns"]]
+        else:
             logging.info(
                 "Incorrect number of columns found for the voter file in North Carolina"
             )
