@@ -612,7 +612,7 @@ class Preprocessor:
                     hist_files,
                 )
 
-        if expected_voter != voter_files:
+        if expected_voter > voter_files:
             logging.info(
                 "Incorrect number of voter files found, expected {}, found {}".format(
                     expected_voter, voter_files
