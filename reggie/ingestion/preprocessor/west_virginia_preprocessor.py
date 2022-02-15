@@ -96,6 +96,13 @@ class PreprocessWestVirginia(Preprocessor):
         if "mail unit" not in df_voters.columns.str.lower():
             df_voters["MAIL UNIT"] = np.nan
 
+        # Apparently during redistricting the relevant fields will be dropped entirely
+        # and then re-added to the file after updates.
+        if "Senatorial District" not in df_voters.columns:
+            df_voters["Senatorial District"] = np.nan
+        if "Delegate District" not in df_voters.columns:
+            df_voters["Delegate District"] = np.nan
+
         df_voters.rename(columns={"COUNTY_NAME": "County_Name", "STATUS": "Status", "SUFFIX": "Suffix"}, inplace=True, errors="ignore")
         # Add county id column
         df_voters.insert(
