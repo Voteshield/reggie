@@ -37,8 +37,12 @@ class PreprocessMinnesota(Preprocessor):
             compression="unzip", file_obj=self.main_file
         )
 
+        # Exclude "readme.txt" (added Feb 2022) from files - doesn't count in expected number of files
+        new_files = [f for f in new_files if "readme.txt" not in f["name"].lower()]
+
         if not self.ignore_checks:
             self.file_check(len(new_files))
+
         voter_reg_df = pd.DataFrame(columns=self.config["ordered_columns"])
         voter_hist_df = pd.DataFrame(columns=self.config["hist_columns"])
         for i in new_files:
