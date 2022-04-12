@@ -72,6 +72,8 @@ class PreprocessNewYork(Preprocessor):
             )
 
         # apply column names
+        if len(main_df.columns) == 47:
+            main_df.drop(columns=main_df.columns[-2:], inplace=True)
         main_df.columns = self.config["ordered_columns"]
 
         logging.info(
