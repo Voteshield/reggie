@@ -4,7 +4,7 @@ state: iowa
 abbreviation: ia
 source: boe
 file_class: voter_file
-expected_number_of_files: 13
+expected_number_of_files: 12
 has_headers: No
 voter_id: REGN_NUM
 county_identifier: COUNTY
