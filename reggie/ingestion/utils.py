@@ -53,6 +53,15 @@ class MissingNumColumnsError(Exception):
         return self.message
 
 
+class MissingLocaleError(Exception):
+    def __init__(self, message, missing_locales):
+        self.message = message
+        self.missing_locales = missing_locales
+
+    def __str__(self):
+        return self.message
+
+
 class TooManyMalformedLines(Exception):
     pass
 

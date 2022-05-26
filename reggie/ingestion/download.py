@@ -32,6 +32,7 @@ from reggie.ingestion.utils import (
     TooManyMalformedLines,
     MissingColumnsError,
     MissingFilesError,
+    MissingLocaleError,
 )
 from reggie.reggie_constants import (
     CONFIG_CHUNK_URLS,
@@ -658,6 +659,24 @@ class Preprocessor:
             )
 
         return extra_cols
+
+    def locale_check(self, locale_set):
+        # Get the list of primary locales from the config object and convert it
+        # into a set
+        expected_locales = (
+            set(
+                self.config.primary_locale_names[
+                    self.config.primary_locale_column.lower()
+                ].values()
+            )
+        )
+        locale_diff = expected_locales - locale_set
+        if locale_diff:
+            raise MissingLocaleError(
+                f"{state} is missing expected locales: "
+                f"{', '.join(locale_diff)}",
+                locale_diff
+            )
 
     # Preprocessors begin here
 
