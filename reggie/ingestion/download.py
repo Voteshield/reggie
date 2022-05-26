@@ -661,6 +661,11 @@ class Preprocessor:
         return extra_cols
 
     def locale_check(self, locale_set):
+        """
+        Raises an error if any locales are missing for the given state
+        :param locale_set: a set of locale names derived from the snapshot
+        :raises MissingLocaleError:
+        """
         # Get the list of primary locales from the config object and convert it
         # into a set
         expected_locales = (
