@@ -222,6 +222,11 @@ class PreprocessIowa(Preprocessor):
         # Drop the election columns because they are no longer needed
         df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(df_voters.to_csv(encoding="utf-8", index=False)),
