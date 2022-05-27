@@ -159,6 +159,11 @@ class PreprocessNevada(Preprocessor):
             "array_decoding": json.dumps(sorted_codes),
         }
 
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
+
         csv_obj = df_voters.to_csv(encoding="utf-8", index=False)
         del df_voters
         gc.collect()
