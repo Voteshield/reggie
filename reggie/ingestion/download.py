@@ -672,7 +672,7 @@ class Preprocessor:
             set(
                 self.config.primary_locale_names[
                     self.config.primary_locale_column.lower()
-                ].values()
+                ].keys()
             )
         )
         locale_diff = expected_locales - locale_set
