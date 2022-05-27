@@ -25,6 +25,10 @@ generated_columns:
   all_history: text[]
   vote_type: text[]
 missing_required_fields: true
+demographic_fields_available:
+  - age
+  - gender
+  - status
 has_headers: NO
 format:
   separate_hist: true

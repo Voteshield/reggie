@@ -39,6 +39,10 @@ party_aliases:
     libertarian: lbt
     green: grn
     liberal: lib
+demographic_fields_available:
+  - age
+  - party
+  - status
 absentee_ballot_code: "'a'"
 provisional_ballot_code: "'pv'"
 valid_voting_methods: ['e', 'a', 'p', 'pv']

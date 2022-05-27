@@ -44,6 +44,10 @@ libertarian: LIBERTARIAN
 green: GREEN
 liberal: LIBERAL
 reform: REFORM
+demographic_fields_available:
+  - age
+  - party
+  - status
 americans_elect: "AMERICANS ELECT"
 absentee_ballot_code: 'A'
 valid_voting_methods: ['E','I','Y','P','F','A','N']

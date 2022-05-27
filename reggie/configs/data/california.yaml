@@ -26,6 +26,10 @@ green_party: GRN
 no_party_affiliation: NPP
 absentee_ballot_code: "'VBM'"
 provisional_ballot_code: "'CVR'"
+demographic_fields_available:
+  - age
+  - gender
+  - party
 # Todo: Check date format
 date_format: '%Y-%m-%d'
 party_identifier: PartyCode

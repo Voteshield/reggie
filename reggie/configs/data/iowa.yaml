@@ -17,6 +17,11 @@ voter_status_active: Active
 voter_status_inactive: Inactive
 voter_status_pending: Pending
 voter_status_null:
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 absentee_ballot_code: 'A'
 democratic_party: DEM
 republican_party: REP

@@ -42,6 +42,11 @@ womens_equality_party: WEP
 working_families_party: WOR
 other_parties: OTH
 no_party_affiliation: BLK
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 date_format: '%Y%m%d'
 party_identifier: enrollment
 gender_identifier: gender
