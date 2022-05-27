@@ -29,6 +29,12 @@ independent_party: INT
 independence_party: IDP
 americas_independent_party: AIP
 party_identifier: Party_Affiliation
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - race
+  - status
 date_format: '%m/%d/%Y'
 generated_columns:
   all_history: int[]

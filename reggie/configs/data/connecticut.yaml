@@ -28,6 +28,11 @@ voter_status_inactive: I
 democratic_party: D
 republican_party: R
 no_party_affiliation: U
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 
 format:
   separate_hist: TRUE

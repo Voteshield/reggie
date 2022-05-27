@@ -19,6 +19,11 @@ democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: 'NULL'
 party_identifier: PARTY
+missing_required_fields: true
+demographic_fields_available:
+  - age
+  - gender
+  - status
 # In file these values are columns of bools
 absentee_ballot_code: absentee
 vote_in_person_ballot_code: inPerson

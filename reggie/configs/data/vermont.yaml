@@ -28,7 +28,11 @@ republican_party: None
 no_party_affiliation: npa
 # Placeholder for party since vermont doesn't have parties
 party_identifier: party_identifier
-missing_required_fields: True
+missing_required_fields: true
+demographic_fields_available:
+  - age
+  - gender
+  - status
 name_fields:
   - Last Name
   - First Name

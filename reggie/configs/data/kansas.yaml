@@ -16,6 +16,11 @@ democratic_party: Democratic
 republican_party: Republican
 libertarian_party: Libertarian
 no_party_affiliation: Unaffiliated
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 date_format: '%m/%d/%Y'
 party_identifier: desc_party
 has_headers: YES

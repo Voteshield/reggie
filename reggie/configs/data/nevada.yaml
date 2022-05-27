@@ -29,6 +29,10 @@ valid_voting_methods: ['PP','EV','FW','MB','PV']
 voting_method_column: 'all_history'
 date_format: '%m/%d/%Y'
 party_identifier: Party
+demographic_fields_available:
+  - age
+  - party
+  - status
 match_fields:
   - First_Name
   - Last_Name

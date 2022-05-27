@@ -18,6 +18,10 @@ republican_party: R
 no_party_affiliation: 'NULL'
 date_format: '%Y-%m-%d'
 party_identifier: PARTY_AFFILIATION
+demographic_fields_available:
+  - age
+  - party
+  - status
 match_fields:
   - FIRST_NAME
   - LAST_NAME

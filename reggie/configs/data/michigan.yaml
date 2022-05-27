@@ -25,6 +25,10 @@ republican_party: None
 no_party_affiliation: npa
 party_identifier: party_identifier
 missing_required_fields: true
+demographic_fields_available:
+  - age
+  - gender
+  - status
 reason_code: cancellation_reason
 match_fields:
   - FIRST_NAME

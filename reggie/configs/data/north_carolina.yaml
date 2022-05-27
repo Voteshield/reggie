@@ -25,6 +25,12 @@ libertarian_party: LIB
 no_party_affiliation: UNA
 absentee_ballot_code: ABSENTEE
 provisional_ballot_code: PROVISIONAL
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
+  - race
 date_format: '%Y'
 party_identifier: party_cd
 match_fields:
