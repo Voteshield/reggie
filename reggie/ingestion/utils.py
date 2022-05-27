@@ -54,8 +54,9 @@ class MissingNumColumnsError(Exception):
 
 
 class MissingLocaleError(Exception):
-    def __init__(self, message, missing_locales):
+    def __init__(self, message, state, missing_locales):
         self.message = message
+        self.state = state
         self.missing_locales = missing_locales
 
     def __str__(self):

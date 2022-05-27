@@ -678,8 +678,9 @@ class Preprocessor:
         locale_diff = expected_locales - locale_set
         if locale_diff:
             raise MissingLocaleError(
-                f"{state} is missing expected locales: "
+                f"{self.state} is missing expected locales: "
                 f"{', '.join(locale_diff)}",
+                self.state,
                 locale_diff
             )
 
