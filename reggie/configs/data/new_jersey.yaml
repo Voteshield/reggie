@@ -29,6 +29,11 @@ us_constitution_party: CON
 natural_law_party: NAT
 conservative_party: CNV
 socialist_party: SSP
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 match_fields:
   - first_name
   - last_name

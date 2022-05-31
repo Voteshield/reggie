@@ -34,6 +34,12 @@ match_fields:
   - LAST NAME
   - DATE OF BIRTH
 
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
+
 # Locale fields
 county_identifier: County_ID
 primary_locale_identifier: County_ID

@@ -27,7 +27,10 @@ republican_party: REP
 libertarian_party: LIB
 # Everyone in OK is registered to a party, and IND is used as NPA
 no_party_affiliation: IND
-
+demographic_fields_available:
+  - age
+  - party
+  - status
 #OK has pretty great absentee codes
 #IP = Voted in person at polling place
 #AI = Voted absentee in person

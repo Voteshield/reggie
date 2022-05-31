@@ -23,6 +23,11 @@ american_constitution_party: ACN
 unity_party: UNI
 socialist_party: APV
 party_identifier: PARTY
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 has_headers: YES
 date_format: 
   - '%m/%d/%Y'

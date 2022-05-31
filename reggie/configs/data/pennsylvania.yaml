@@ -21,6 +21,11 @@ democratic_party: D
 republican_party: R
 no_party_affiliation: NF
 birthday_identifier: dob
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
 date_format: '%m/%d/%Y'
 has_headers: False
 match_fields:
