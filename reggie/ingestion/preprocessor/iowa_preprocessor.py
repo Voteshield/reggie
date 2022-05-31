@@ -223,9 +223,14 @@ class PreprocessIowa(Preprocessor):
         df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
         # Check the file for all the proper locales
-        self.locale_check(
-            set(df_voters[self.config["primary_locale_identifier"]]),
-        )
+        try:
+            self.locale_check(
+                set(df_voters[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
