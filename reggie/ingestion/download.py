@@ -667,21 +667,18 @@ class Preprocessor:
         :raises MissingLocaleError:
         """
         # Make sure primary locale column is in the primary locale names
-        if self.config.primary_locale_column in self.config.primary_locale_names:
-            primary_locale_column = self.config.primary_locale_column
-        elif self.config.primary_locale_column.lower() in self.config.primary_locale_names:
-            primary_locale_column = self.config.primary_locale_column.lower()
+        if hasattr(self.config, "primary_locale_type"):
+            primary_locale_key = self.config.primary_locale_type
         else:
-            raise KeyError(
-                f"{self.config.primary_locale_column} not in primary locale "
-                f"names list ({self.config.primary_locale_names}) "
-                f"for {self.state}"
+            logging.info(
+                "No primary locale type defined, defaulting to \"county\""
             )
+            primary_locale_key = "county"
         # Get the list of primary locales from the config object and convert it
         # into a set
         expected_locales = (
             set(
-                self.config.primary_locale_names[primary_locale_column].keys()
+                self.config.primary_locale_names[primary_locale_key].keys()
             )
         )
         locale_diff = expected_locales - locale_set
