@@ -673,8 +673,9 @@ class Preprocessor:
             primary_locale_column = self.config.primary_locale_column.lower()
         else:
             raise KeyError(
-                f"{self.config.primary_locale_column} not in "
-                f"primary locale names list for {self.state}"
+                f"{self.config.primary_locale_column} not in primary locale 
+                f"names list ({self.config.primary_locale_names}) "
+                f"for {self.state}"
             )
         # Get the list of primary locales from the config object and convert it
         # into a set
