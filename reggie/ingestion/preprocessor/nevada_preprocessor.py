@@ -5,6 +5,7 @@ from reggie.ingestion.download import (
 )
 from reggie.ingestion.utils import (
     ensure_int_string,
+    MissingLocaleError,
     MissingNumColumnsError,
 )
 import gc
