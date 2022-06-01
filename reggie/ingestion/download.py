@@ -666,13 +666,21 @@ class Preprocessor:
         :param locale_set: a set of locale names derived from the snapshot
         :raises MissingLocaleError:
         """
+        # Make sure primary locale column is in the primary locale names
+        if self.config.primary_locale_column in self.config.primary_locale_names:
+            primary_locale_column = self.config.primary_locale_column
+        elif self.config.primary_locale_column.lower() in self.config.primary_locale_names:
+            primary_locale_column = self.config.primary_locale_column.lower()
+        else:
+            raise KeyError(
+                f"{self.config.primary_locale_column} not in "
+                f"primary locale names list for {self.state}"
+            )
         # Get the list of primary locales from the config object and convert it
         # into a set
         expected_locales = (
             set(
-                self.config.primary_locale_names[
-                    self.config.primary_locale_column.lower()
-                ].keys()
+                self.config.primary_locale_names[primary_locale_column].keys()
             )
         )
         locale_diff = expected_locales - locale_set
