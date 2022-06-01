@@ -1,17 +1,23 @@
+import datetime
+import gc
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
     concat_and_delete,
 )
-from reggie.ingestion.utils import MissingNumColumnsError
-import gc
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
+from reggie.ingestion.utils import (
+    MissingLocaleError,
+    MissingNumColumnsError,
+)
 
 
 class PreprocessFlorida(Preprocessor):
@@ -152,6 +158,16 @@ class PreprocessFlorida(Preprocessor):
                 "Residence_Address_Line_2",
             ],
         )
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(df_voters[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "florida_{}".format(datetime.now().isoformat()),

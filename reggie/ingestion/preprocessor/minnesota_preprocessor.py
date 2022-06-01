@@ -1,16 +1,20 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import gc
-import json
+from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessMinnesota(Preprocessor):
@@ -114,6 +118,16 @@ class PreprocessMinnesota(Preprocessor):
         voter_reg_df = self.config.coerce_strings(voter_reg_df)
         voter_reg_df = self.config.coerce_dates(voter_reg_df)
         voter_reg_df = self.config.coerce_numeric(voter_reg_df)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(voter_reg_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "minnesota_{}".format(datetime.now().isoformat()),

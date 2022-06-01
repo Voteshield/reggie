@@ -5,7 +5,12 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name, MissingFilesError
+from reggie.ingestion.utils import (
+    format_column_name,
+    MissingFilesError,
+    MissingLocaleError,
+    MissingNumColumnsError,
+)
 import logging
 import pandas as pd
 import datetime
@@ -108,7 +113,17 @@ class PreprocessOklahoma(Preprocessor):
         vdf["all_history"] = voter_groups["ElectionDate"].apply(list)
         vdf["sparse_history"] = voter_groups["array_position"].apply(list)
         vdf["votetype_history"] = voter_groups["VotingMethod"].apply(list)
-        
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(vdf[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
+
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),

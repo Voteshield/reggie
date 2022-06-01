@@ -1,18 +1,21 @@
+import datetime
+import gc
+import logging
+
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+
+import chardet
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-from dateutil import parser
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import gc
-import chardet
-
+from reggie.ingestion.utils import MissingLocaleError
 
 class PreprocessWisconsin(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -206,6 +209,16 @@ class PreprocessWisconsin(Preprocessor):
         )
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(main_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "wisconsin_{}".format(datetime.now().isoformat()),

@@ -1,13 +1,17 @@
+import datetime
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
+from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessMissouri(Preprocessor):
@@ -115,6 +119,16 @@ class PreprocessMissouri(Preprocessor):
                 "Precinct Name",
             ],
         )
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(main_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "missouri_{}".format(datetime.now().isoformat()),

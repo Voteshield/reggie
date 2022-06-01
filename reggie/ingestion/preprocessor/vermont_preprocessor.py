@@ -5,7 +5,11 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
+from reggie.ingestion.utils import (
+    format_column_name,
+    MissingLocaleError,
+    MissingNumColumnsError,
+)
 import logging
 import pandas as pd
 import datetime
@@ -115,6 +119,16 @@ class PreprocessVermont(Preprocessor):
         vdf = self.config.coerce_strings(vdf)
         vdf = self.config.coerce_numeric(vdf)
         vdf = self.config.coerce_dates(vdf)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(vdf[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "vermont_{}".format(datetime.now().isoformat()),

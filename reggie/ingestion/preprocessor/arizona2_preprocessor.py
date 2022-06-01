@@ -1,10 +1,18 @@
-import json
-from reggie.ingestion.download import Preprocessor, date_from_str, FileItem
-import pandas as pd
 import datetime
-from io import StringIO
-import numpy as np
+import json
+
 from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from reggie.ingestion.download import (
+    Preprocessor,
+    date_from_str,
+    FileItem,
+)
+from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessArizona2(Preprocessor):
@@ -159,6 +167,16 @@ class PreprocessArizona2(Preprocessor):
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         voter_df = voter_df[expected_cols]
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(voter_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "arizona2_{}".format(datetime.now().isoformat()),

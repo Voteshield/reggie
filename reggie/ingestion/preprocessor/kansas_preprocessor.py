@@ -1,15 +1,21 @@
+import logging
+
+from datetime import datetime, date
+from dateutil import parser
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
+    FileItem,
     Preprocessor,
     date_from_str,
-    FileItem,
 )
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError
-import logging
-import pandas as pd
-from io import StringIO
-import numpy as np
-from datetime import datetime, date
+from reggie.ingestion.utils import (
+    MissingLocaleError,
+    MissingNumColumnsError,
+)
 
 
 class PreprocessKansas(Preprocessor):
@@ -126,6 +132,17 @@ class PreprocessKansas(Preprocessor):
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
         df = self.config.coerce_dates(df)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
+
         self.meta = {
             "message": "kansas_{}".format(datetime.now().isoformat()),
             "array_encoding": sorted_codes_dict,

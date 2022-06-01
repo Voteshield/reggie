@@ -3,7 +3,10 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingNumColumnsError
+from reggie.ingestion.utils import (
+    MissingLocaleError,
+    MissingNumColumnsError,
+)
 import logging
 import pandas as pd
 import datetime
@@ -225,6 +228,17 @@ class PreprocessTexas(Preprocessor):
             ],
         )
         df_voter.drop(self.config["hist_columns"], axis=1, inplace=True)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(df_voter[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
+
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),

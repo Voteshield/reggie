@@ -1,19 +1,26 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from dateutil import parser
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
     concat_and_delete,
 )
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
-import logging
-import pandas as pd
-import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
-import json
+from reggie.ingestion.utils import (
+    MissingLocaleError,
+    MissingNumColumnsError,
+    format_column_name,
+)
 
 
 class PreprocessDelaware(Preprocessor):
@@ -92,6 +99,16 @@ class PreprocessDelaware(Preprocessor):
         df_voter = self.config.coerce_dates(df_voter)
 
         df_voter = df_voter.join(df_hist)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(df_voter[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "delaware_{}".format(datetime.now().isoformat()),

@@ -1,15 +1,21 @@
-from reggie.ingestion.download import (
-    Preprocessor,
-    date_from_str,
-    FileItem,
-)
-from reggie.ingestion.utils import strcol_to_array
 import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
 import gc
 import json
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    date_from_str,
+)
+from reggie.ingestion.utils import (
+    MissingLocaleError,
+    strcol_to_array,
+)
 from reggie.reggie_constants import *
 
 
@@ -141,6 +147,17 @@ class PreprocessNewYork(Preprocessor):
                 "prevcounty",
             ],
         )
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(main_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
+
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),

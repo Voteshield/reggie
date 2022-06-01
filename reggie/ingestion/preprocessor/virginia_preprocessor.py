@@ -1,16 +1,19 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import logging
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import gc
-import json
-
+from reggie.ingestion.utils import MissingLocaleError
 
 class PreprocessVirginia(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -133,6 +136,16 @@ class PreprocessVirginia(Preprocessor):
             "votetype_history"
         ].apply(list)
         gc.collect()
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(voters_df[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "virginia_{}".format(datetime.now().isoformat()),

@@ -1,11 +1,19 @@
-import json
-from reggie.ingestion.download import Preprocessor, date_from_str, FileItem
-import logging
-import pandas as pd
 import datetime
-from io import StringIO
-import numpy as np
+import json
+import logging
+
 from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    date_from_str,
+)
+from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessIowa(Preprocessor):

@@ -1,21 +1,24 @@
+import datetime
+import gc
+import json
+import logging
+import re
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
 from reggie.ingestion.download import (
+    FileItem,
     Preprocessor,
     date_from_str,
-    FileItem,
 )
 from reggie.ingestion.utils import (
-    ensure_int_string,
     MissingLocaleError,
     MissingNumColumnsError,
+    ensure_int_string,
 )
-import gc
-import logging
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
-import re
 
 
 class PreprocessNevada(Preprocessor):

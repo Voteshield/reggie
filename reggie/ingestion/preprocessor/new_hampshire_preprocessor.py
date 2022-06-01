@@ -1,15 +1,19 @@
+import datetime
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
+from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessNewHampshire(Preprocessor):
@@ -119,6 +123,16 @@ class PreprocessNewHampshire(Preprocessor):
             list
         )
         voters_df["town_history"] = voter_id_groups["town"].apply(list)
+
+        # Check the file for all the proper locales
+        try:
+            self.locale_check(
+                set(df_voters[self.config["primary_locale_identifier"]]),
+            )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_error = mle
+            logging.error(mle)
 
         self.meta = {
             "message": "new_hampshire_{}".format(datetime.now().isoformat()),
