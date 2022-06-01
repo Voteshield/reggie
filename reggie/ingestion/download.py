@@ -673,7 +673,7 @@ class Preprocessor:
             primary_locale_column = self.config.primary_locale_column.lower()
         else:
             raise KeyError(
-                f"{self.config.primary_locale_column} not in primary locale 
+                f"{self.config.primary_locale_column} not in primary locale "
                 f"names list ({self.config.primary_locale_names}) "
                 f"for {self.state}"
             )
