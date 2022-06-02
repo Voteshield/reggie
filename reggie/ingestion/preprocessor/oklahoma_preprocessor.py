@@ -1,24 +1,27 @@
+import datetime
+import gc
+import json
+import logging
+import re
+
+from datetime import datetime
+from dateutil import parser
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
     concat_and_delete,
 )
-from dateutil import parser
 from reggie.ingestion.utils import (
     format_column_name,
     MissingFilesError,
     MissingNumColumnsError,
 )
-import logging
-import pandas as pd
-import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
-import json
-import re
 
 
 class PreprocessOklahoma(Preprocessor):

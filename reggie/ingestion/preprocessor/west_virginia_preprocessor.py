@@ -2,15 +2,21 @@
 West Virginia preprocessor.
 """
 
-import re
-import logging
 import datetime
-from datetime import datetime
-from dateutil import parser
-from math import isnan
 import gc
 import json
+import logging
+import re
+
+from datetime import datetime
+from dateutil import parser
 from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from math import isnan
+
+import numpy as np
+import pandas as pd
+
+from slugify import slugify
 
 from reggie.ingestion.download import (
     Preprocessor,
@@ -25,9 +31,6 @@ from reggie.ingestion.utils import (
     format_column_name,
 )
 
-from slugify import slugify
-import pandas as pd
-import numpy as np
 
 # Constants
 VOTER_FILE_REGEX = re.compile(
