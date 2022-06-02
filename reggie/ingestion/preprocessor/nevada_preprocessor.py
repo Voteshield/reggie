@@ -15,7 +15,6 @@ from reggie.ingestion.download import (
     date_from_str,
 )
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     MissingNumColumnsError,
     ensure_int_string,
 )
@@ -164,14 +163,9 @@ class PreprocessNevada(Preprocessor):
         }
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voters[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         csv_obj = df_voters.to_csv(encoding="utf-8", index=False)
         del df_voters

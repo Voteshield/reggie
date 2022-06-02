@@ -20,7 +20,6 @@ from reggie.ingestion.download import (
 )
 from reggie.ingestion.utils import (
     InvalidDataError,
-    MissingLocaleError,
     MissingNumColumnsError,
     UnexpectedNumberOfFilesError,
     format_column_name,
@@ -311,14 +310,9 @@ class PreprocessWestVirginia(Preprocessor):
         self.processed_df = df_voters
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voters[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         # Create file from processed dataframe
         self.processed_file = FileItem(

@@ -13,7 +13,6 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessNewHampshire(Preprocessor):
@@ -125,14 +124,9 @@ class PreprocessNewHampshire(Preprocessor):
         voters_df["town_history"] = voter_id_groups["town"].apply(list)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voters[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "new_hampshire_{}".format(datetime.now().isoformat()),

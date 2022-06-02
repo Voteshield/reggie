@@ -15,7 +15,6 @@ from reggie.ingestion.download import (
     FileItem,
 )
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     ensure_int_string,
 )
 
@@ -209,14 +208,9 @@ class PreprocessNewJersey2(Preprocessor):
         voter_df = voter_df[expected_cols]
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(voter_df[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "new_jersey2_{}".format(datetime.now().isoformat()),

@@ -5,7 +5,6 @@ from reggie.ingestion.download import (
 )
 from reggie.ingestion.utils import (
     format_column_name,
-    MissingLocaleError,
 )
 from reggie.configs.configs import Config
 import gc
@@ -276,14 +275,9 @@ class PreprocessPennsylvania(Preprocessor):
         )
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(main_df[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(main_df[self.config["primary_locale_identifier"]]),
+        )
 
         logging.info("Writing CSV")
         self.meta = {

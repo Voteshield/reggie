@@ -6,7 +6,6 @@ from reggie.ingestion.download import (
 )
 from dateutil import parser
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     MissingNumColumnsError,
     format_column_name,
 )
@@ -179,14 +178,9 @@ class PreprocessWyoming(Preprocessor):
         df_voter = df_voter.join(df_hist)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voter[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "wyoming_{}".format(datetime.now().isoformat()),

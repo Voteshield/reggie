@@ -682,13 +682,18 @@ class Preprocessor:
             )
         )
         locale_diff = expected_locales - locale_set
-        if locale_diff:
-            raise MissingLocaleError(
-                f"{self.state} is missing expected locales: "
-                f"{', '.join(locale_diff)}",
-                self.state,
-                locale_diff
-            )
+        try:
+            if locale_diff:
+                raise MissingLocaleError(
+                    f"{self.state} is missing expected locales: "
+                    f"{', '.join(locale_diff)}",
+                    self.state,
+                    locale_diff
+                )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_errror = mle
+            logging.error(mle)
 
     # Preprocessors begin here
 

@@ -4,7 +4,6 @@ from reggie.ingestion.download import (
     FileItem,
 )
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     MissingNumColumnsError,
 )
 import logging
@@ -230,14 +229,9 @@ class PreprocessTexas(Preprocessor):
         df_voter.drop(self.config["hist_columns"], axis=1, inplace=True)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voter[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "texas_{}".format(datetime.now().isoformat()),

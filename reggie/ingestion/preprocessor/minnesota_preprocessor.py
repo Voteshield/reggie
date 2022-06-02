@@ -14,7 +14,6 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessMinnesota(Preprocessor):
@@ -120,14 +119,9 @@ class PreprocessMinnesota(Preprocessor):
         voter_reg_df = self.config.coerce_numeric(voter_reg_df)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(voter_reg_df[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(voter_reg_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "minnesota_{}".format(datetime.now().isoformat()),

@@ -8,7 +8,6 @@ from dateutil import parser
 from reggie.ingestion.utils import (
     format_column_name,
     MissingFilesError,
-    MissingLocaleError,
     MissingNumColumnsError,
 )
 import logging
@@ -115,14 +114,9 @@ class PreprocessOklahoma(Preprocessor):
         vdf["votetype_history"] = voter_groups["VotingMethod"].apply(list)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(vdf[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(vdf[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "oklahoma_{}".format(datetime.now().isoformat()),

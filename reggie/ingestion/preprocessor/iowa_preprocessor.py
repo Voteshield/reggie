@@ -13,7 +13,6 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
 )
-from reggie.ingestion.utils import MissingLocaleError
 
 
 class PreprocessIowa(Preprocessor):
@@ -231,14 +230,9 @@ class PreprocessIowa(Preprocessor):
         df_voters.drop(columns=self.config["election_columns"], inplace=True)
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voters[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),

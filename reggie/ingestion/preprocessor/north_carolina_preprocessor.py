@@ -3,7 +3,7 @@ from reggie.ingestion.download import (
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import MissingNumColumnsError, MissingLocaleError
+from reggie.ingestion.utils import MissingNumColumnsError
 from reggie.configs.configs import Config
 import logging
 import datetime
@@ -159,14 +159,9 @@ class PreprocessNorthCarolina(Preprocessor):
         )
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(voter_df[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "north_carolina_{}".format(datetime.now().isoformat()),

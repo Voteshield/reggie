@@ -13,7 +13,6 @@ from reggie.ingestion.download import (
     date_from_str,
 )
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     strcol_to_array,
 )
 from reggie.reggie_constants import *
@@ -149,14 +148,9 @@ class PreprocessNewYork(Preprocessor):
         )
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(main_df[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(main_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "new_york_{}".format(datetime.now().isoformat()),

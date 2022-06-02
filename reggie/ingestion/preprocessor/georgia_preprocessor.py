@@ -16,7 +16,6 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from reggie.ingestion.utils import (
-    MissingLocaleError,
     MissingNumColumnsError,
 )
 
@@ -214,14 +213,9 @@ class PreprocessGeorgia(Preprocessor):
         )
 
         # Check the file for all the proper locales
-        try:
-            self.locale_check(
-                set(df_voters[self.config["primary_locale_identifier"]]),
-            )
-        except MissingLocaleError as mle:
-            # Save the error for future reference
-            self.missing_locale_error = mle
-            logging.error(mle)
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "georgia_{}".format(datetime.now().isoformat()),
