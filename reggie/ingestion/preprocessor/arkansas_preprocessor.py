@@ -1,14 +1,17 @@
+import datetime
+import json
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
 
 
 class PreprocessArkansas(Preprocessor):
@@ -108,6 +111,11 @@ class PreprocessArkansas(Preprocessor):
         )
 
         df_voter = df_voter.set_index(self.config["voter_id"]).join(df_hist)
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "arkansas_{}".format(datetime.now().isoformat()),

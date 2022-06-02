@@ -1,17 +1,20 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
+from reggie.configs.configs import Config
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
 from reggie.ingestion.utils import MissingNumColumnsError
-from reggie.configs.configs import Config
-import logging
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
-import gc
 
 
 class PreprocessNorthCarolina(Preprocessor):
@@ -156,6 +159,11 @@ class PreprocessNorthCarolina(Preprocessor):
                 "vtd_desc",
                 "ward_abbrv",
             ],
+        )
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
         )
 
         self.meta = {

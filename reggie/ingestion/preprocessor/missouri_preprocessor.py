@@ -1,13 +1,16 @@
+import datetime
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
 
 
 class PreprocessMissouri(Preprocessor):
@@ -114,6 +117,11 @@ class PreprocessMissouri(Preprocessor):
                 "Ward",
                 "Precinct Name",
             ],
+        )
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(main_df[self.config["primary_locale_identifier"]]),
         )
 
         self.meta = {

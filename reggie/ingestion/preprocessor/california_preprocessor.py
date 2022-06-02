@@ -1,19 +1,21 @@
+import datetime
 import gc
+import logging
 import sys
 
+from io import StringIO
+from datetime import datetime
+from collections import defaultdict
+
+import pandas as pd
+import numpy as np
+
+from reggie.configs.configs import Config
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-from reggie.configs.configs import Config
-import logging
-import pandas as pd
-import numpy as np
-import datetime
-from io import StringIO
-from datetime import datetime
-from collections import defaultdict
 
 """
 The california File Comes in 3 one history file, one voter file and one 
@@ -361,6 +363,11 @@ class PreprocessCalifornia(Preprocessor):
 
         del voter_df
         gc.collect()
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "california_{}".format(datetime.now().isoformat()),

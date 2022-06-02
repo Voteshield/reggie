@@ -1,17 +1,22 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import ensure_int_string
-import gc
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
+from reggie.ingestion.utils import (
+    ensure_int_string,
+)
 
 
 class PreprocessNewJersey2(Preprocessor):
@@ -201,6 +206,11 @@ class PreprocessNewJersey2(Preprocessor):
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         voter_df = voter_df[expected_cols]
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "new_jersey2_{}".format(datetime.now().isoformat()),

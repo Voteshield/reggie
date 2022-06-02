@@ -1,19 +1,25 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from dateutil import parser
+from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
     concat_and_delete,
 )
-from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
-import logging
-import pandas as pd
-import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
-import json
+from reggie.ingestion.utils import (
+    format_column_name,
+    MissingNumColumnsError,
+)
 
 
 class PreprocessSouthDakota(Preprocessor):
@@ -87,6 +93,11 @@ class PreprocessSouthDakota(Preprocessor):
         df_voter = self.config.coerce_dates(df_voter)
 
         df_voter = df_voter.set_index(self.config["voter_id"]).join(df_hist)
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "south_dakota_{}".format(datetime.now().isoformat()),

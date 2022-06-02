@@ -2,15 +2,21 @@
 West Virginia preprocessor.
 """
 
-import re
-import logging
 import datetime
-from datetime import datetime
-from dateutil import parser
-from math import isnan
 import gc
 import json
+import logging
+import re
+
+from datetime import datetime
+from dateutil import parser
 from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from math import isnan
+
+import numpy as np
+import pandas as pd
+
+from slugify import slugify
 
 from reggie.ingestion.download import (
     Preprocessor,
@@ -19,15 +25,12 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from reggie.ingestion.utils import (
-    UnexpectedNumberOfFilesError,
-    MissingNumColumnsError,
     InvalidDataError,
+    MissingNumColumnsError,
+    UnexpectedNumberOfFilesError,
     format_column_name,
 )
 
-from slugify import slugify
-import pandas as pd
-import numpy as np
 
 # Constants
 VOTER_FILE_REGEX = re.compile(
@@ -308,6 +311,11 @@ class PreprocessWestVirginia(Preprocessor):
         # Attach for testing and more direct access
         # See: https://github.com/Voteshield/reggie/issues/50
         self.processed_df = df_voters
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         # Create file from processed dataframe
         self.processed_file = FileItem(

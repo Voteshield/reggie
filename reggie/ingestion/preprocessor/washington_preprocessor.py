@@ -196,6 +196,11 @@ class PreprocessWashington(Preprocessor):
         df_voter = self.reconcile_columns(df_voter, expected_cols)
         df_voter = df_voter[expected_cols]
 
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
+
         self.meta = {
             "message": f"washington_{datetime.now().isoformat()}",
             "array_encoding": json.dumps(sorted_elections_dict),

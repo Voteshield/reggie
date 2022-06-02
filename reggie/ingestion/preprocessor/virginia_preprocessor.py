@@ -1,15 +1,18 @@
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import logging
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import gc
-import json
 
 
 class PreprocessVirginia(Preprocessor):
@@ -133,6 +136,11 @@ class PreprocessVirginia(Preprocessor):
             "votetype_history"
         ].apply(list)
         gc.collect()
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(voters_df[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "virginia_{}".format(datetime.now().isoformat()),

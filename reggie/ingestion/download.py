@@ -32,6 +32,7 @@ from reggie.ingestion.utils import (
     TooManyMalformedLines,
     MissingColumnsError,
     MissingFilesError,
+    MissingLocaleError,
 )
 from reggie.reggie_constants import (
     CONFIG_CHUNK_URLS,
@@ -658,6 +659,41 @@ class Preprocessor:
             )
 
         return extra_cols
+
+    def locale_check(self, locale_set):
+        """
+        Raises an error if any locales are missing for the given state
+        :param locale_set: a set of locale names derived from the snapshot
+        :raises MissingLocaleError:
+        """
+        # Make sure primary locale column is in the primary locale names
+        if hasattr(self.config, "primary_locale_type"):
+            primary_locale_key = self.config.primary_locale_type
+        else:
+            logging.info(
+                "No primary locale type defined, defaulting to \"county\""
+            )
+            primary_locale_key = "county"
+        # Get the list of primary locales from the config object and convert it
+        # into a set
+        expected_locales = (
+            set(
+                self.config.primary_locale_names[primary_locale_key].keys()
+            )
+        )
+        locale_diff = expected_locales - locale_set
+        try:
+            if locale_diff:
+                raise MissingLocaleError(
+                    f"{self.state} is missing expected locales: "
+                    f"{', '.join(locale_diff)}",
+                    self.state,
+                    locale_diff
+                )
+        except MissingLocaleError as mle:
+            # Save the error for future reference
+            self.missing_locale_errror = mle
+            logging.error(mle)
 
     # Preprocessors begin here
 

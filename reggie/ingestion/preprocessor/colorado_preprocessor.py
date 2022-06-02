@@ -1,14 +1,24 @@
-import json
-from reggie.ingestion.download import Preprocessor, date_from_str, FileItem
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import gc
-from reggie.ingestion.utils import date_from_str, MissingNumColumnsError
 import chardet
+import datetime
+import gc
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    date_from_str,
+)
+from reggie.ingestion.utils import (
+    MissingNumColumnsError,
+    date_from_str,
+)
 
 
 class PreprocessColorado(Preprocessor):
@@ -229,6 +239,12 @@ class PreprocessColorado(Preprocessor):
         }
 
         gc.collect()
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
+
         logging.info("Colorado: writing out")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
