@@ -72,7 +72,7 @@ class PreprocessMissouri(Preprocessor):
             main_df.rename(
                 columns={"SENATE DISTRICT 20": "State Senate- New"}, inplace=True
             )
-        df.drop(
+        main_df.drop(
             columns=["Congressional- 10", "Legislative- 10", "State Senate- 10"],
             errors="ignore",
             inplace=True,
