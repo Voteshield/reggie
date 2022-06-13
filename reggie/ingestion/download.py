@@ -666,6 +666,11 @@ class Preprocessor:
         :param locale_set: a set of locale names derived from the snapshot
         :raises MissingLocaleError:
         """
+        # Convert locale_set items to strings
+        locale_set = {
+            str(item) if not isinstance(item, str) else item
+            for item in locale_set
+        }
         # Make sure primary locale column is in the primary locale names
         if hasattr(self.config, "primary_locale_type"):
             primary_locale_key = self.config.primary_locale_type
@@ -692,7 +697,7 @@ class Preprocessor:
                 )
         except MissingLocaleError as mle:
             # Save the error for future reference
-            self.missing_locale_errror = mle
+            self.missing_locale_error = mle
             logging.error(mle)
 
     # Preprocessors begin here
