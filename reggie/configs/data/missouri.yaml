@@ -19,7 +19,7 @@ democratic_party: Democrat
 republican_party: Republican
 no_party_affiliation: npa
 missing_required_fields: true
-demographic_features_available:
+demographic_fields_available:
   - age
 match_fields:
   - First Name
