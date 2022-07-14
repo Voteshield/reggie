@@ -125,7 +125,7 @@ class PreprocessNewHampshire(Preprocessor):
 
         # Check the file for all the proper locales
         self.locale_check(
-            set(df_voters[self.config["primary_locale_identifier"]]),
+            set(voters_df[self.config["primary_locale_identifier"]]),
         )
 
         self.meta = {
