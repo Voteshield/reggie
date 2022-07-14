@@ -58,6 +58,11 @@ class PreprocessVermont(Preprocessor):
             if "voter file" or "Statewidevoters" in n["name"].lower()
         ][0]
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
+
+        # Sometimes, instead of the | seperator it is a tab
+        if len(vdf.columns) == 1:
+            voter_file["obj"].seek(0)
+            vdf = pd.read_csv(voter_file["obj"], sep="\t", dtype=str)
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
         election_columns = [
@@ -132,7 +137,7 @@ class PreprocessVermont(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_elections),
         }
-
+        logging.info("Processed Vermont")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(vdf.to_csv(encoding="utf-8", index=True)),
