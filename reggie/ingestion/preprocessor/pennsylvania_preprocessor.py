@@ -1,19 +1,24 @@
+import datetime
+import gc
+import json
+import logging
+
+from collections import defaultdict
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+
+import pandas as pd
+
+from reggie.configs.configs import Config
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-from reggie.ingestion.utils import format_column_name
-from reggie.configs.configs import Config
-import gc
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-from datetime import datetime
-from dateutil import parser
-from collections import defaultdict
-import json
+from reggie.ingestion.utils import (
+    format_column_name,
+)
 
 """
 The Pennsylvania files come in sets, consisting of 4 files per county. The first is the voter file which contains
@@ -271,6 +276,12 @@ class PreprocessPennsylvania(Preprocessor):
                 "home_phone",
             ],
         )
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(main_df[self.config["primary_locale_identifier"]]),
+        )
+
         logging.info("Writing CSV")
         self.meta = {
             "message": "pennsylvania_{}".format(datetime.now().isoformat()),

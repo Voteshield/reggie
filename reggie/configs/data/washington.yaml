@@ -20,6 +20,11 @@ voter_id: StateVoterID
 voter_status: StatusCode
 voter_status_active: A
 voter_status_inactive: I
+missing_required_fields: true
+demographic_fields_available:
+  - age
+  - gender
+  - status
 democratic_party: null
 republican_party: null
 no_party_affiliation: null

@@ -1,11 +1,18 @@
-import json
-from reggie.ingestion.download import Preprocessor, date_from_str, FileItem
-import logging
-import pandas as pd
 import datetime
-from io import StringIO
-import numpy as np
+import json
+import logging
+
 from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
+from reggie.ingestion.download import (
+    FileItem,
+    Preprocessor,
+    date_from_str,
+)
 
 
 class PreprocessIowa(Preprocessor):
@@ -29,7 +36,7 @@ class PreprocessIowa(Preprocessor):
             self.main_file = self.s3_download()
 
         def is_first_file(fname):
-            if "CD1" in fname:
+            if ("CD1" in fname) or ("CD 1" in fname):
                 if ("Part1" in fname) or ("Part 1" in fname):
                     return True
             return False
@@ -221,6 +228,11 @@ class PreprocessIowa(Preprocessor):
 
         # Drop the election columns because they are no longer needed
         df_voters.drop(columns=self.config["election_columns"], inplace=True)
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),

@@ -1,13 +1,16 @@
+import datetime
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
 
 
 class PreprocessMissouri(Preprocessor):
@@ -55,6 +58,25 @@ class PreprocessMissouri(Preprocessor):
 
         # add empty column for party_identifier
         main_df[self.config["party_identifier"]] = np.nan
+
+        # handle multiple district columns during redistricting
+        if "CONGRESSIONAL DISTRICT 20" in main_df.columns:
+            main_df.rename(
+                columns={"CONGRESSIONAL DISTRICT 20": "Congressional- New"}, inplace=True
+            )
+        if "LEGISLATIVE DISTRICT 20" in main_df.columns:
+            main_df.rename(
+                columns={"LEGISLATIVE DISTRICT 20": "Legislative- New"}, inplace=True
+            )
+        if "SENATE DISTRICT 20" in main_df.columns:
+            main_df.rename(
+                columns={"SENATE DISTRICT 20": "State Senate- New"}, inplace=True
+            )
+        main_df.drop(
+            columns=["Congressional- 10", "Legislative- 10", "State Senate- 10"],
+            errors="ignore",
+            inplace=True,
+        )
 
         self.column_check(
             list(set(main_df.columns) - set(self.config["hist_columns"]))
@@ -114,6 +136,11 @@ class PreprocessMissouri(Preprocessor):
                 "Ward",
                 "Precinct Name",
             ],
+        )
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(main_df[self.config["primary_locale_identifier"]]),
         )
 
         self.meta = {

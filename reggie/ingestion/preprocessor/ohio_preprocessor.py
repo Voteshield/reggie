@@ -1,15 +1,18 @@
+import datetime
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
 from reggie.ingestion.utils import ensure_int_string
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-from datetime import datetime
-import json
 
 
 class PreprocessOhio(Preprocessor):
@@ -102,6 +105,11 @@ class PreprocessOhio(Preprocessor):
         )
         df["MAILING_ZIP_PLUS4"] = (
             df["MAILING_ZIP_PLUS4"].map(ensure_int_string)
+        )
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df[self.config["primary_locale_identifier"]]),
         )
 
         self.meta = {

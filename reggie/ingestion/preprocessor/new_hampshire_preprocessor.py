@@ -1,15 +1,18 @@
+import datetime
+import json
+import logging
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+import pandas as pd
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-import logging
-import pandas as pd
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
 
 
 class PreprocessNewHampshire(Preprocessor):
@@ -60,7 +63,7 @@ class PreprocessNewHampshire(Preprocessor):
                         voters_df = pd.read_excel(f["obj"])
                     else:
                         voters_df = self.read_csv_count_error_lines(
-                            f["obj"], error_bad_lines=False
+                            f["obj"], error_bad_lines=False, encoding="latin-1",
                         )
 
         # add dummy columns for birthday and voter_status
@@ -119,6 +122,11 @@ class PreprocessNewHampshire(Preprocessor):
             list
         )
         voters_df["town_history"] = voter_id_groups["town"].apply(list)
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "new_hampshire_{}".format(datetime.now().isoformat()),

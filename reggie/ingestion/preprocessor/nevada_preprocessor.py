@@ -1,20 +1,23 @@
+import datetime
+import gc
+import json
+import logging
+import re
+
+from datetime import datetime
+from io import StringIO
+
+import numpy as np
+
 from reggie.ingestion.download import (
+    FileItem,
     Preprocessor,
     date_from_str,
-    FileItem,
 )
 from reggie.ingestion.utils import (
-    ensure_int_string,
     MissingNumColumnsError,
+    ensure_int_string,
 )
-import gc
-import logging
-import datetime
-from io import StringIO
-import numpy as np
-from datetime import datetime
-import json
-import re
 
 
 class PreprocessNevada(Preprocessor):
@@ -158,6 +161,11 @@ class PreprocessNevada(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voters[self.config["primary_locale_identifier"]]),
+        )
 
         csv_obj = df_voters.to_csv(encoding="utf-8", index=False)
         del df_voters

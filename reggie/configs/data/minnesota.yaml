@@ -19,6 +19,8 @@ republican_party: Republican
 no_party_affiliation: npa
 absentee_ballot_code: "'A'"
 missing_required_fields: true
+demographic_fields_available:
+  - age
 date_format:
   - '%Y'
   - '%Y-%m-%d hh:mm:ss'

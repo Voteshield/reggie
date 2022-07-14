@@ -5,7 +5,10 @@ from reggie.ingestion.download import (
     concat_and_delete,
 )
 from dateutil import parser
-from reggie.ingestion.utils import MissingNumColumnsError, format_column_name
+from reggie.ingestion.utils import (
+    MissingNumColumnsError,
+    format_column_name,
+)
 import logging
 import pandas as pd
 import datetime
@@ -104,6 +107,11 @@ class PreprocessAlaska(Preprocessor):
         df_voter = self.config.coerce_dates(df_voter)
 
         df_voter = df_voter.join(df_hist)
+
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(df_voter[self.config["primary_locale_identifier"]]),
+        )
 
         self.meta = {
             "message": "alaska_{}".format(datetime.now().isoformat()),
