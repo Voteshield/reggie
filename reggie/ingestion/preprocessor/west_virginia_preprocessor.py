@@ -186,6 +186,9 @@ class PreprocessWestVirginia(Preprocessor):
         # Check columns with what is expected
         self.column_check(df_voters.columns)
 
+        # Make sure any unexpected columns are dropped
+        df_voters = self.reconcile_columns(df_voters, self.config["ordered_columns"])
+
         # Get voter history file
         voter_histories = [n for n in new_files if VOTER_HISTORY_REGEX.match(n["name"])]
         if len(voter_histories) > 1:
