@@ -34,7 +34,7 @@ from reggie.ingestion.utils import (
 
 # Constants
 VOTER_FILE_REGEX = re.compile(
-    "^[^.]*(statewide.*vr|wv [0-9]+-[0-9]+-[0-9]+.txt|protect.*democracy[0-9]+)",
+    "^[^.]*(statewide.*vr|wv [0-9]+-[0-9]+-[0-9]+.txt|protect.*democracy[0-9]+|voter_data_[0-9]+.txt)",
     flags=re.I,
 )
 VOTER_HISTORY_REGEX = re.compile("^[^.]*statewide.*vh", flags=re.I)
