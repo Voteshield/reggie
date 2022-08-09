@@ -18,7 +18,6 @@ republican_party: REP
 libertarian_party: LIB
 no_party_affiliation: UND
 demographic_fields_available:
-  - age
   - party
 absentee_ballot_code: "'Absentee'"
 date_format: '%m/%d/%Y'
