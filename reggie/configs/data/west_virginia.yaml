@@ -254,9 +254,15 @@ gender_codes:
   male:
     - M
     - m
+    - Male
+    - male
+    - MALE
   female:
     - F
     - f
+    - Female
+    - female
+    - FEMALE
   unknown:
     - N
     - n
