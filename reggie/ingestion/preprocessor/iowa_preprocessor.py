@@ -208,6 +208,7 @@ class PreprocessIowa(Preprocessor):
             )
 
         df_voters = self.config.coerce_dates(df_voters)
+        df_voters = self.config.coerce_strings(df_voters)
         df_voters = self.config.coerce_numeric(
             df_voters,
             extra_cols=[
@@ -220,6 +221,7 @@ class PreprocessIowa(Preprocessor):
                 "UNIT_NUM",
             ],
         )
+
         # force reg num to be integer
         df_voters["REGN_NUM"] = pd.to_numeric(
             df_voters["REGN_NUM"], errors="coerce"

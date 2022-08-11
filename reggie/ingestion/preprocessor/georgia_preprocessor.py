@@ -190,6 +190,7 @@ class PreprocessGeorgia(Preprocessor):
         gc.collect()
 
         df_voters = self.config.coerce_dates(df_voters)
+        df_voters = self.config.coerce_strings(df_voters)
         df_voters = self.config.coerce_numeric(
             df_voters,
             extra_cols=[

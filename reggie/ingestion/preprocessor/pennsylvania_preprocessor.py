@@ -260,6 +260,7 @@ class PreprocessPennsylvania(Preprocessor):
 
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
+        main_df = self.config.coerce_strings(main_df)
         main_df = config.coerce_numeric(
             main_df,
             extra_cols=[

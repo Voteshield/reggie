@@ -123,6 +123,7 @@ class PreprocessMissouri(Preprocessor):
         main_df.drop(self.config["hist_columns"], axis=1, inplace=True)
 
         main_df = self.config.coerce_dates(main_df)
+        main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(
             main_df,
             extra_cols=[
