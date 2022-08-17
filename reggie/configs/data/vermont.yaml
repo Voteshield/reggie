@@ -38,6 +38,10 @@ name_fields:
   - First Name
   - Middle Name
   - Suffix
+standard_name_fields:
+  - Last Name
+  - First Name
+  - Middle Name
 match_fields:
   - First Name
   - Last Name
