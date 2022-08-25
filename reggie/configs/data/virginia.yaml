@@ -89,7 +89,6 @@ address_fields:
   - MAILING_ADDRESS_LINE_3
   - MAILING_CITY
   - MAILING_STATE
-  - MAILING_STATE
 format:
   separate_hist: true
   separate_counties_voter_file: false
