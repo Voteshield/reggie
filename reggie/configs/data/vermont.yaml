@@ -31,7 +31,6 @@ party_identifier: party_identifier
 missing_required_fields: true
 demographic_fields_available:
   - age
-  - gender
   - status
 name_fields:
   - Last Name
