@@ -146,6 +146,14 @@ class PreprocessMichigan(Preprocessor):
                 df["STATUS_DATE"] = "1970-01-01 00:00:00"
             return df
 
+        # In September 2022, Michigan changed the name of the "reason"
+        # column from "CANCELLATION_REASON" to "STATUS_REASON"
+        if "STATUS_REASON" in vdf.columns:
+            vdf.rename(
+                columns={"STATUS_REASON": "CANCELLATION_REASON"},
+                inplace=True,
+            )
+
         vdf = self.reconcile_columns(vdf, self.config["columns"])
         vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=self.config["ordered_columns"])
