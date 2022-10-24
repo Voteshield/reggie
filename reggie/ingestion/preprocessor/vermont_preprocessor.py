@@ -63,6 +63,11 @@ class PreprocessVermont(Preprocessor):
         if len(vdf.columns) == 1:
             voter_file["obj"].seek(0)
             vdf = pd.read_csv(voter_file["obj"], sep="\t", dtype=str)
+        # And sometimes, it's a CSV
+        if len(vdf.columns) == 1:
+            voter_file["obj"].seek(0)
+            vdf = pd.read_csv(voter_file["obj"], sep=",", dtype=str)
+
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
         election_columns = [
