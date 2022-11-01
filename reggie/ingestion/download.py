@@ -261,10 +261,11 @@ class Preprocessor:
             self.main_file.obj = BytesIO(op)
 
     @staticmethod
-    def unzip_decompress(file_name):
+    def unzip_decompress(file_name, path_prefix):
         """
         handles decompression for .zip files
         :param file_name: .zip file
+        :param path_prefix: path of this file, to add to output name
         :return: dictionary of file-like objects with their names as keys
         """
         zip_file = ZipFile(file_name)
@@ -272,7 +273,7 @@ class Preprocessor:
         logging.info("decompressing unzip {} into {}".format(file_name, file_names))
         file_objs = []
         for name in file_names:
-            file_objs.append({"name": name, "obj": BytesIO(zip_file.read(name))})
+            file_objs.append({"name": path_prefix + "/" + name, "obj": BytesIO(zip_file.read(name))})
 
         return file_objs
 
@@ -370,7 +371,8 @@ class Preprocessor:
             else:
                 bytes_obj = s3_file_obj["obj"]
             if compression_type == "unzip":
-                new_files = self.unzip_decompress(bytes_obj)
+                path_prefix = "/".join(s3_file_obj["name"].split("/")[:-1])
+                new_files = self.unzip_decompress(bytes_obj, path_prefix)
             elif compression_type == "bunzip2":
                 new_files = self.bunzip2_decompress(bytes_obj)
             else:
