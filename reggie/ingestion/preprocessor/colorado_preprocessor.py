@@ -63,6 +63,8 @@ class PreprocessColorado(Preprocessor):
 
         reg_voter_files = [f for f in reg_voter_files if "Public" not in f["name"]]
         reg_voter_files = remove_files_with_previous_years_in_path(reg_voter_files)
+        levels_down = [f["name"].count("/") for f in reg_voter_files]
+        reg_voter_files = [f for f in reg_voter_files if f["name"].count("/") == min(levels_down)]
 
         new_files = reg_voter_files + other_files
 
