@@ -43,6 +43,31 @@ class PreprocessColorado(Preprocessor):
         new_files = self.unpack_files(
             compression="unzip", file_obj=self.main_file
         )
+
+        # Since Colorado gives us multiple sets of the
+        # "Registered_Voters_List" files, we first need to remove
+        # all of these except the most recent set.
+        # We can do this heuristically by removing sets with "Public"
+        # in their name, and sets with previous years in their file path.
+        # If there are still multiple sets left, we take the one
+        # that is highest in the path hierarchy.
+        reg_voter_files = [f for f in new_files if "Registered_Voters_List" in f["name"]]
+        other_files = [f for f in new_files if "Registered_Voters_List" not in f["name"]]
+
+        def remove_files_with_previous_years_in_path(file_list):
+            current_year = int(date_from_str(self.raw_s3_file).split("-")[0])
+            exclude_yrs = [str(current_year - i) for i in range(1,6)]
+            for y in exclude_yrs:
+                file_list = [f for f in file_list if y not in f["name"]]
+            return file_list
+
+        reg_voter_files = [f for f in reg_voter_files if "Public" not in f["name"]]
+        reg_voter_files = remove_files_with_previous_years_in_path(reg_voter_files)
+        levels_down = [f["name"].count("/") for f in reg_voter_files]
+        reg_voter_files = [f for f in reg_voter_files if f["name"].count("/") == min(levels_down)]
+
+        new_files = reg_voter_files + other_files
+
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
         df_hist = pd.DataFrame(columns=self.config["hist_columns"])
         df_master_voter = pd.DataFrame(
