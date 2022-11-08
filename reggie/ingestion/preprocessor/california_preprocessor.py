@@ -359,15 +359,15 @@ class PreprocessCalifornia(Preprocessor):
             columns={"index": "RegistrantID"}
         )
 
+        # Check the file for all the proper locales
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
+        )
+
         voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
 
         del voter_df
         gc.collect()
-
-        # Check the file for all the proper locales
-        self.locale_check(
-            set(df_voter[self.config["primary_locale_identifier"]]),
-        )
 
         self.meta = {
             "message": "california_{}".format(datetime.now().isoformat()),
