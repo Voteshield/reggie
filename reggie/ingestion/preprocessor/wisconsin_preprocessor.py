@@ -129,6 +129,13 @@ class PreprocessWisconsin(Preprocessor):
         del self.main_file, self.temp_files, new_files
         gc.collect()
 
+        # In 2022, it seems like they replaced
+        # "ApplicationDate" with "RegistrationDate"
+        if "RegistrationDate" in main_df.columns:
+            main_df.rename(
+                columns={"RegistrationDate": "ApplicationDate"}, inplace=True
+            )
+
         # convert "Voter Status" to "voter_status" for backward compatibility
         main_df.rename(
             columns={"Voter Status": self.config["voter_status"]}, inplace=True
