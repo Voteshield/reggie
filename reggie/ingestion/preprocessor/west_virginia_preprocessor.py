@@ -115,9 +115,25 @@ class PreprocessWestVirginia(Preprocessor):
         # Apparently during redistricting the relevant fields will be dropped entirely
         # and then re-added to the file after updates.
         if "Senatorial District" not in df_voters.columns:
-            df_voters["Senatorial District"] = np.nan
+            if "GIS Senatorial District" in df_voters.columns:
+                df_voters.rename(
+                    columns={
+                        "GIS Senatorial District": "Senatorial District"
+                    },
+                    inplace=True
+                )
+            else:
+                df_voters["Senatorial District"] = np.nan
         if "Delegate District" not in df_voters.columns:
-            df_voters["Delegate District"] = np.nan
+            if "GIS Delegate District" in df_voters.columns:
+                df_voters.rename(
+                    columns={
+                        "GIS Delegate District": "Delegate District"
+                    },
+                    inplace=True
+                )
+            else:
+                df_voters["Delegate District"] = np.nan
 
         # Add county id column
         df_voters.insert(
