@@ -359,12 +359,13 @@ class PreprocessCalifornia(Preprocessor):
             columns={"index": "RegistrantID"}
         )
 
-        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
-
         # Check the file for all the proper locales
         self.locale_check(
             set(voter_df[self.config["primary_locale_identifier"]]),
         )
+
+        voter_csv = voter_df.to_csv(encoding="utf-8", index=False)
+
         del voter_df
         gc.collect()
 
