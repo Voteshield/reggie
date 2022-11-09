@@ -240,17 +240,43 @@ class PreprocessWestVirginia(Preprocessor):
             # Starting transformations
             logging.info(f'[{config["state"]}] Starting history transformations.')
 
+            # As of Sept 2022, the history file changed its format
+            if "CD_ENTRY_TYPE" in df_history.columns:
+                history_2022_format = True
+                df_history.rename(
+                    columns={
+                        "ID_VOTER": "id_voter",
+                        "ID_ELECTION": "id_election",
+                        "DT_ELECTION": "dt_election",
+                        "NM_ELECTION": "Election_Name",
+                        "CD_ELECTION_TYPE": "cd_election_type",
+                        "CD_ELECTION_CAT": "cd_election_cat",
+                    },
+                    inplace=True,
+                    errors="ignore"
+                )
+            else:
+                history_2022_format = False
+
             # Create new column that aggregrates the type of vote
             # NOTE: This assumes that "Y" is always used for yes
             df_history["votetype"] = "unknown"
-            df_history.votetype[df_history.fl_absentee == "Y"] = "absentee"
-            df_history.votetype[df_history.fl_early_voting == "Y"] = "early"
-            df_history.votetype[df_history.fl_regular == "Y"] = "regular"
+            if history_2022_format:
+                df_history.votetype[df_history.CD_ENTRY_TYPE == "A"] = "absentee"
+                df_history.votetype[df_history.CD_ENTRY_TYPE == "E"] = "early"
+                df_history.votetype[df_history.CD_ENTRY_TYPE == "R"] = "regular"
+            else:
+                df_history.votetype[df_history.fl_absentee == "Y"] = "absentee"
+                df_history.votetype[df_history.fl_early_voting == "Y"] = "early"
+                df_history.votetype[df_history.fl_regular == "Y"] = "regular"
 
             # Clean the challenged flag, which looks to only be checked
             # if the voter voted absentee
             # NOTE: Assuming empty is not challenged i.e. False
-            df_history.fl_challenged = df_history.fl_challenged == "Y"
+            if history_2022_format:
+                df_history["fl_challenged"] = "unknown"
+            else:
+                df_history.fl_challenged = df_history.fl_challenged == "Y"
 
             # Create dataframe of valid elections
             logging.info(f'[{config["state"]}] Grouping history by election.')
