@@ -79,6 +79,11 @@ class PreprocessWashington(Preprocessor):
             temp = pd.read_csv(
                 hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
             )
+            # There's a weird corruption of the county column name
+            # in the 2021-2022 history file, so fix that:
+            for c in temp.columns:
+                if "CountyCode" in c:
+                    temp.rename(columns={c: "CountyCode"}, inplace=True)
             df_hist = pd.concat([df_hist, temp], ignore_index=True)
 
         # --- handling the voter history file --- #
