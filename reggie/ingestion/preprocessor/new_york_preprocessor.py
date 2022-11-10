@@ -52,7 +52,7 @@ class PreprocessNewYork(Preprocessor):
             self.main_file["obj"],
             header=None,
             encoding="latin-1",
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
 
         # In Dec 2021, NY added 2 columns (RAPARTMENTTYPE, RADDRNONSTD),

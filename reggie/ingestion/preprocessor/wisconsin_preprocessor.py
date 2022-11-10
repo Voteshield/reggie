@@ -124,7 +124,7 @@ class PreprocessWisconsin(Preprocessor):
             sep=file_sep,
             encoding=encoding_result,
             dtype=dtype_dict,
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
         del self.main_file, self.temp_files, new_files
         gc.collect()

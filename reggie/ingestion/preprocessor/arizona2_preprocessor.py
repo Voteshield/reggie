@@ -44,7 +44,7 @@ class PreprocessArizona2(Preprocessor):
             for f in file_list:
                 if f["name"].split(".")[-1] == "csv":
                     new_df = self.read_csv_count_error_lines(
-                        f["obj"], error_bad_lines=False
+                        f["obj"], on_bad_lines="warn"
                     )
                 else:
                     new_df = pd.read_excel(f["obj"])

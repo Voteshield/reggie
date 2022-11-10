@@ -121,7 +121,7 @@ class PreprocessMichigan(Preprocessor):
                 voter_file["obj"],
                 encoding="latin-1",
                 na_filter=False,
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
             # rename 'STATE' field to not conflict with our 'state' field
             vdf.rename(columns={"STATE": "STATE_ADDR"}, inplace=True)
@@ -177,7 +177,7 @@ class PreprocessMichigan(Preprocessor):
             )
         elif hist_file["name"][-3:] == "csv":
             hdf = self.read_csv_count_error_lines(
-                hist_file["obj"], na_filter=False, error_bad_lines=False
+                hist_file["obj"], na_filter=False, on_bad_lines="warn"
             )
             if ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
                 "IS_PERMANENT_ABSENTEE_VOTER" in hdf.columns
@@ -226,7 +226,7 @@ class PreprocessMichigan(Preprocessor):
                         elec_codes["obj"],
                         names=self.config["elec_code_columns"],
                         na_filter=False,
-                        error_bad_lines=False,
+                        on_bad_lines="warn",
                     )
                 else:
                     raise NotImplementedError("File format not implemented")

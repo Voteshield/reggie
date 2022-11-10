@@ -49,7 +49,7 @@ class PreprocessArizona(Preprocessor):
         combined_file = self.concat_file_segments(new_files)
 
         main_df = self.read_csv_count_error_lines(
-            combined_file, error_bad_lines=False
+            combined_file, on_bad_lines="warn"
         )
 
         voting_action_cols = list(

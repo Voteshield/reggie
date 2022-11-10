@@ -54,12 +54,12 @@ class PreprocessVirginia(Preprocessor):
             if "history" in f["name"].lower():
                 logging.info("vote history found")
                 hist_df = self.read_csv_count_error_lines(
-                    f["obj"], error_bad_lines=False, encoding="ISO-8859-1"
+                    f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
                 )
             elif "registered" in f["name"].lower():
                 logging.info("voter file found")
                 voters_df = self.read_csv_count_error_lines(
-                    f["obj"], error_bad_lines=False, encoding="ISO-8859-1"
+                    f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
                 )
         voters_df[self.config["party_identifier"]] = np.nan
         self.column_check(list(voters_df.columns))

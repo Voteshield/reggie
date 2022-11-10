@@ -96,7 +96,7 @@ class PreprocessIowa(Preprocessor):
             skiprows=1,
             header=None,
             names=headers_with_buffers,
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
 
         for i in remaining_files:
@@ -106,7 +106,7 @@ class PreprocessIowa(Preprocessor):
                 header=None,
                 skiprows=skiprows,
                 names=headers_with_buffers,
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
             df_voters = pd.concat([df_voters, new_df], axis=0)
 

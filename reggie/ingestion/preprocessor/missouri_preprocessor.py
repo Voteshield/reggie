@@ -48,7 +48,7 @@ class PreprocessMissouri(Preprocessor):
             main_file = new_files[0]
 
         main_df = self.read_csv_count_error_lines(
-            main_file["obj"], sep="\t", error_bad_lines=False
+            main_file["obj"], sep="\t", on_bad_lines="warn"
         )
 
         # convert "Voter Status" to "voter_status" for backward compatibility

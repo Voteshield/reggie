@@ -54,7 +54,7 @@ class PreprocessMinnesota(Preprocessor):
                     [
                         voter_hist_df,
                         self.read_csv_count_error_lines(
-                            i["obj"], error_bad_lines=False
+                            i["obj"], on_bad_lines="warn"
                         ),
                     ],
                     axis=0,
@@ -64,7 +64,7 @@ class PreprocessMinnesota(Preprocessor):
                     [
                         voter_reg_df,
                         self.read_csv_count_error_lines(
-                            i["obj"], encoding="latin-1", error_bad_lines=False
+                            i["obj"], encoding="latin-1", on_bad_lines="warn"
                         ),
                     ],
                     axis=0,

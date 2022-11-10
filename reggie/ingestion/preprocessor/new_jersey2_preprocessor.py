@@ -55,7 +55,7 @@ class PreprocessNewJersey2(Preprocessor):
             for f in filelist:
                 logging.info("Reading file: {}".format(f["name"]))
                 new_df = self.read_csv_count_error_lines(
-                    f["obj"], error_bad_lines=False
+                    f["obj"], on_bad_lines="warn"
                 )
                 if "vlist" in f["name"]:
                     new_df = format_birthdays_differently_per_county(new_df)
