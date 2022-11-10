@@ -51,11 +51,11 @@ class PreprocessNevada(Preprocessor):
         )
 
         df_hist = self.read_csv_count_error_lines(
-            hist_file["obj"], header=None, error_bad_lines=False
+            hist_file["obj"], header=None, on_bad_lines="warn"
         )
         df_hist.columns = self.config["hist_columns"]
         df_voters = self.read_csv_count_error_lines(
-            voter_file["obj"], header=None, error_bad_lines=False
+            voter_file["obj"], header=None, on_bad_lines="warn"
         )
         del self.main_file, self.temp_files, voter_file, hist_file, new_files
         gc.collect()

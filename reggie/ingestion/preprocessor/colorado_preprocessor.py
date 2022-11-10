@@ -123,7 +123,7 @@ class PreprocessColorado(Preprocessor):
                             self.read_csv_count_error_lines(
                                 i["obj"],
                                 encoding=encoding,
-                                error_bad_lines=False,
+                                on_bad_lines="warn",
                                 index_col=index_col,
                             ),
                         ],
@@ -136,14 +136,14 @@ class PreprocessColorado(Preprocessor):
                     if "Voter_Details" not in i["name"]:
                         logging.info("reading in {}".format(i["name"]))
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression="gzip", error_bad_lines=False
+                            i["obj"], compression="gzip", on_bad_lines="warn"
                         )
                         df_hist = pd.concat([df_hist, new_df], axis=0)
 
                     if "Voter_Details" in i["name"] and master_vf_version:
                         logging.info("reading in {}".format(i["name"]))
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression="gzip", error_bad_lines=False
+                            i["obj"], compression="gzip", on_bad_lines="warn"
                         )
                         if len(new_df.columns) < len(
                             self.config["master_voter_columns"]

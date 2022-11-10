@@ -56,7 +56,7 @@ class PreprocessNorthCarolina(Preprocessor):
             sep="\t",
             quotechar='"',
             encoding="latin-1",
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
         del voter_file
         gc.collect()
@@ -65,7 +65,7 @@ class PreprocessNorthCarolina(Preprocessor):
             vote_hist_file["obj"],
             sep="\t",
             quotechar='"',
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
         del vote_hist_file, new_files
         gc.collect()

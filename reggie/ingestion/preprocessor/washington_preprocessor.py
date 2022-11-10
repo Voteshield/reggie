@@ -68,7 +68,7 @@ class PreprocessWashington(Preprocessor):
             sep=delimiter,
             encoding="latin-1",
             dtype=str,
-            error_bad_lines=False
+            on_bad_lines="warn",
         )
 
         df_hist = pd.DataFrame()

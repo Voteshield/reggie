@@ -46,14 +46,14 @@ class PreprocessOhio(Preprocessor):
                     i["obj"],
                     encoding="latin-1",
                     compression="gzip",
-                    error_bad_lines=False,
+                    on_bad_lines="warn",
                 )
             elif ".txt" in i["name"]:
                 temp_df = self.read_csv_count_error_lines(
                     i["obj"],
                     encoding="latin-1",
                     compression="gzip",
-                    error_bad_lines=False,
+                    on_bad_lines="warn",
                 )
                 df = pd.concat([df, temp_df], axis=0)
 

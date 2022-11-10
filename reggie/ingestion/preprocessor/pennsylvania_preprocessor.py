@@ -120,14 +120,14 @@ class PreprocessPennsylvania(Preprocessor):
                 voter_file["obj"],
                 sep="\t",
                 names=dfcols,
-                error_bad_lines=False,
+                on_bad_lines="warn",
                 dtype=dtypes,
             )
             edf = self.read_csv_count_error_lines(
                 election_map["obj"],
                 sep="\t",
                 names=["county", "number", "title", "date"],
-                error_bad_lines=False,
+                on_bad_lines="warn",
                 dtype={
                     "county": str,
                     "number": str,
@@ -144,7 +144,7 @@ class PreprocessPennsylvania(Preprocessor):
                     "zone_code",
                     "zone_description",
                 ],
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
             tdf = self.read_csv_count_error_lines(
                 types["obj"],
@@ -155,7 +155,7 @@ class PreprocessPennsylvania(Preprocessor):
                     "zone_short_name",
                     "zone_long_name",
                 ],
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
 
             # Refactor note: format the election data into the format expected in the original all_history column

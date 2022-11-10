@@ -114,7 +114,7 @@ class PreprocessFlorida(Preprocessor):
 
         logging.info("FLORIDA: loading main voter file")
         df_voters = self.read_csv_count_error_lines(
-            concat_voter_file, header=None, sep="\t", error_bad_lines=False
+            concat_voter_file, header=None, sep="\t", on_bad_lines="warn"
         )
         del concat_voter_file
         gc.collect()

@@ -55,7 +55,7 @@ class PreprocessKansas(Preprocessor):
                     sep="\t",
                     index_col=False,
                     engine="c",
-                    error_bad_lines=False,
+                    on_bad_lines="warn",
                     encoding="latin-1",
                 )
         try:

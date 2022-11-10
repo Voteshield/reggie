@@ -73,7 +73,7 @@ class PreprocessGeorgia(Preprocessor):
             header=header_arg,
             quotechar='"',
             quoting=3,
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
         del voter_files
         gc.collect()
@@ -102,7 +102,7 @@ class PreprocessGeorgia(Preprocessor):
             concat_history_file,
             sep="  ",
             names=["Concat_str", "Other"],
-            error_bad_lines=False,
+            on_bad_lines="warn",
         )
         del concat_history_file
         gc.collect()

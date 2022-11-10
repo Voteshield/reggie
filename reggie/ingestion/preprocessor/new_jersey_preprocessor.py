@@ -55,7 +55,7 @@ class PreprocessNewJersey(Preprocessor):
                 sep="|",
                 names=config["ordered_columns"],
                 low_memory=False,
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
             new_df = self.config.coerce_dates(new_df)
             new_df = self.config.coerce_numeric(
@@ -70,7 +70,7 @@ class PreprocessNewJersey(Preprocessor):
                 names=config["hist_columns"],
                 index_col=False,
                 low_memory=False,
-                error_bad_lines=False,
+                on_bad_lines="warn",
             )
             new_df = self.config.coerce_numeric(
                 new_df, col_list="hist_columns_type"

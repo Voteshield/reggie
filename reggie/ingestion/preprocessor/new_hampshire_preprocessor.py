@@ -50,7 +50,7 @@ class PreprocessNewHampshire(Preprocessor):
                         hist_df = pd.read_excel(f["obj"])
                     else:
                         hist_df = self.read_csv_count_error_lines(
-                            f["obj"], error_bad_lines=False
+                            f["obj"], on_bad_lines="warn"
                         )
                     hist_df.drop_duplicates(inplace=True)
 
@@ -63,7 +63,7 @@ class PreprocessNewHampshire(Preprocessor):
                         voters_df = pd.read_excel(f["obj"])
                     else:
                         voters_df = self.read_csv_count_error_lines(
-                            f["obj"], error_bad_lines=False, encoding="latin-1",
+                            f["obj"], on_bad_lines="warn", encoding="latin-1",
                         )
 
         # add dummy columns for birthday and voter_status
