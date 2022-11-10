@@ -79,7 +79,7 @@ class PreprocessWashington(Preprocessor):
             temp = pd.read_csv(
                 hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
             )
-            df_hist = df_hist.append(temp, ignore_index=True)
+            df_hist = pd.concat([df_hist, temp], ignore_index=True)
 
         # --- handling the voter history file --- #
 
