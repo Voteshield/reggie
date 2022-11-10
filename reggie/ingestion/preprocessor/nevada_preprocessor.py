@@ -126,7 +126,7 @@ class PreprocessNevada(Preprocessor):
 
         # standardize district data - over time these have varied from:
         #   "1" vs. "district 1" vs "cd1"/"sd1"/"ad1"
-        digits = re.compile("\d+")
+        digits = re.compile(r"\d+")
         def get_district_number_str(x):
             try:
                 s = digits.search(x)
