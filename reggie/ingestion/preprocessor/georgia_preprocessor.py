@@ -84,6 +84,11 @@ class PreprocessGeorgia(Preprocessor):
         del voter_files
         gc.collect()
 
+        # Nov 2022 file contains an extra "County Name" col at the
+        # beginning, so remove this before applying header:
+        if len(df_voters.columns) == len(self.config["ordered_columns"]) + 1:
+             df_voters.drop(columns=["County Name"], inplace=True)
+
         try:
             df_voters.columns = self.config["ordered_columns"]
         except ValueError:
