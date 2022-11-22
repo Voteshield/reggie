@@ -44,16 +44,10 @@ class PreprocessOhio(Preprocessor):
                 return "gzip"
             return None
 
+        df = pd.DataFrame()
         for i in new_files:
             logging.info("Loading file {}".format(i))
-            if "_22" in i["name"]:
-                df = self.read_csv_count_error_lines(
-                    i["obj"],
-                    encoding="latin-1",
-                    compression=get_compression(i["name"]),
-                    on_bad_lines="warn",
-                )
-            elif ".txt" in i["name"]:
+            if ".txt" in i["name"]:
                 temp_df = self.read_csv_count_error_lines(
                     i["obj"],
                     encoding="latin-1",
@@ -61,6 +55,7 @@ class PreprocessOhio(Preprocessor):
                     on_bad_lines="warn",
                 )
                 df = pd.concat([df, temp_df], axis=0)
+        df.reset_index(drop=True, inplace=True)
 
         # create history meta data
         voting_history_cols = list(
