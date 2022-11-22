@@ -58,6 +58,10 @@ class PreprocessGeorgia(Preprocessor):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
                 header_arg = 0
+            elif "Statewide_Voter_List".lower() in i["name"].lower():
+                logging.info("Detected voter file: " + i["name"])
+                voter_files.append(i)
+                header_arg = 0
             elif "txt" in i["name"].lower():
                 vh_files.append(i)
         logging.info("Detected {} history files".format(len(vh_files)))
@@ -77,6 +81,11 @@ class PreprocessGeorgia(Preprocessor):
         )
         del voter_files
         gc.collect()
+
+        # Nov 2022 file contains an extra "County Name" col at the
+        # beginning, so remove this before applying header:
+        if len(df_voters.columns) == len(self.config["ordered_columns"]) + 1:
+             df_voters.drop(columns=["County Name"], inplace=True)
 
         try:
             df_voters.columns = self.config["ordered_columns"]
