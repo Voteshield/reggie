@@ -50,7 +50,6 @@ class PreprocessGeorgia(Preprocessor):
         voter_files = []
         vh_files = []
         header_arg = None
-        sep = "|"
         for i in new_files:
             if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
@@ -59,11 +58,10 @@ class PreprocessGeorgia(Preprocessor):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
                 header_arg = 0
-            elif "SWVL.csv".lower() in i["name"].lower():
+            elif "Statewide_Voter_List".lower() in i["name"].lower():
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
                 header_arg = 0
-                sep = ","
             elif "txt" in i["name"].lower():
                 vh_files.append(i)
         logging.info("Detected {} history files".format(len(vh_files)))
@@ -75,7 +73,7 @@ class PreprocessGeorgia(Preprocessor):
 
         df_voters = self.read_csv_count_error_lines(
             voter_files[0]["obj"],
-            sep=sep,
+            sep="|",
             header=header_arg,
             quotechar='"',
             quoting=3,
