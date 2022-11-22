@@ -39,23 +39,23 @@ class PreprocessOhio(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
+        def get_compression(filename):
+            if ".gz" in filename:
+                return "gzip"
+            return None
+
+        df = pd.DataFrame()
         for i in new_files:
             logging.info("Loading file {}".format(i))
-            if "_22" in i["name"]:
-                df = self.read_csv_count_error_lines(
-                    i["obj"],
-                    encoding="latin-1",
-                    compression="gzip",
-                    on_bad_lines="warn",
-                )
-            elif ".txt" in i["name"]:
+            if ".txt" in i["name"]:
                 temp_df = self.read_csv_count_error_lines(
                     i["obj"],
                     encoding="latin-1",
-                    compression="gzip",
+                    compression=get_compression(i["name"]),
                     on_bad_lines="warn",
                 )
                 df = pd.concat([df, temp_df], axis=0)
+        df.reset_index(drop=True, inplace=True)
 
         # create history meta data
         voting_history_cols = list(
