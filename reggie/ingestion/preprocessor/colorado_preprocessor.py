@@ -133,17 +133,23 @@ class PreprocessColorado(Preprocessor):
                 elif ("Voting_History" in i["name"]) or (
                     "Coordinated_Voter_Details" in i["name"]
                 ):
+                    if i["name"].split(".")[-1].lower() == "txt":
+                        compression = None
+                    else:
+                        compression = "gzip"
+
                     if "Voter_Details" not in i["name"]:
                         logging.info("reading in {}".format(i["name"]))
+
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression="gzip", on_bad_lines="warn"
+                            i["obj"], compression=compression, on_bad_lines="warn"
                         )
                         df_hist = pd.concat([df_hist, new_df], axis=0)
 
                     if "Voter_Details" in i["name"] and master_vf_version:
                         logging.info("reading in {}".format(i["name"]))
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression="gzip", on_bad_lines="warn"
+                            i["obj"], compression=compression, on_bad_lines="warn"
                         )
                         if len(new_df.columns) < len(
                             self.config["master_voter_columns"]
