@@ -49,18 +49,22 @@ class PreprocessGeorgia(Preprocessor):
 
         voter_files = []
         vh_files = []
+
+        # Georgia likes changing the name of its voter file
+        possible_voterfile_names = [
+            "georgia_daily_voterbase",
+            "statewidevoterlist",
+            "statewide_voter_list",
+            "gdvb"
+        ]
+
         for i in new_files:
-            if "Georgia_Daily_VoterBase".lower() in i["name"].lower():
-                logging.info("Detected voter file: " + i["name"])
-                voter_files.append(i)
-            elif "StatewideVoterList".lower() in i["name"].lower():
-                logging.info("Detected voter file: " + i["name"])
-                voter_files.append(i)
-            elif "Statewide_Voter_List".lower() in i["name"].lower():
+            if any(name in i["name"].lower() for name in possible_voterfile_names):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
             elif "txt" in i["name"].lower():
                 vh_files.append(i)
+
         logging.info("Detected {} history files".format(len(vh_files)))
         del new_files
         gc.collect()
