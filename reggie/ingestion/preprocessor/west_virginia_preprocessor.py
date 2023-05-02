@@ -102,11 +102,14 @@ class PreprocessWestVirginia(Preprocessor):
         df_voters.rename(
             columns={
                 "COUNTY_NAME": "County_Name",
+                "MID": "Mid",
                 "STATUS": "Status",
                 "SUFFIX": "Suffix",
                 "PARTYAFFILIATION": "PartyAffiliation",
                 "CONGRESSIONAL DISTRICT": "Congressional District",
+                "CONGRESSIONAL": "Congressional District",
                 "MAGISTERIAL DISTRICT": "Magisterial District",
+                "PRECINCT_NUMBER": "Precinct_Number",
             },
             inplace=True,
             errors="ignore"
