@@ -36,7 +36,7 @@ class PreprocessIowa(Preprocessor):
             self.main_file = self.s3_download()
 
         def is_first_file(fname):
-            if ("D1" in fname) or ("CD 1" in fname):
+            if ("D1" in fname) or ("CD 1" in fname) or ("Statewide District 1" in fname):
                 if ("Part1" in fname) or ("Part 1" in fname):
                     return True
             return False
