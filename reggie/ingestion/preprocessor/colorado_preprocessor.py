@@ -101,16 +101,19 @@ class PreprocessColorado(Preprocessor):
         # voter file with the name "Master_Voter_List" but it does
         # NOT have the same columns associated with the older
         # master voter files, so we need to differentiate this case.
-        if datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d") > datetime(2023, 5, 1):
+        if datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d") > datetime(
+            2023, 5, 1
+        ):
             new_master_vf_version = True
 
         for i in new_files:
             if "Public" not in i["name"]:
 
                 if (
-                    "Registered_Voters_List" in i["name"]
-                    and not master_vf_version
-                ) or ("EX-003_Master_Voter_List" in i["name"] and new_master_vf_version):
+                    "Registered_Voters_List" in i["name"] and not master_vf_version
+                ) or (
+                    "EX-003_Master_Voter_List" in i["name"] and new_master_vf_version
+                ):
                     logging.info("reading in {}".format(i["name"]))
                     # Colorado has a couple different encodings they send us, the format that is detected as ascii will
                     # error out if not read in as latin-1
