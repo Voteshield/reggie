@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
 
     steps:
       - name: Checkout code (and submodules)
@@ -21,18 +21,10 @@ jobs:
           submodules: "recursive"
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-
-      # Reference: https://github.com/actions/cache/blob/main/examples.md#python---pip
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('setup.py') }}-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-pip-${{ hashFiles('setup.py') }}-
-            ${{ runner.os }}-${{ matrix.python-version }}-pip-
+          cache: 'pip'
 
       - name: Install package (and dependencies)
         run: pip install -e .
