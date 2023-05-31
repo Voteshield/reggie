@@ -74,7 +74,11 @@ class PreprocessOklahoma(Preprocessor):
         # Read and merge the precincts file to the main df
         precinct_dtypes = {'PrecinctCode': 'string', 'CongressionalDistrict': 'int64', 'StateSenateDistrict': 'int64', 
                            'StateHouseDistrict': 'int64', 'CountyCommissioner': 'int64', 'PollSite': 'string'}
-        precincts = pd.read_csv(precincts_file["obj"], encoding='latin', dtype=precinct_dtypes)
+        precinct_ints = [k for k,v in precinct_dtypes.items() if v == "int64"]
+        precincts = pd.read_csv(precincts_file["obj"], encoding='latin')
+        precincts.dropna(subset=precinct_ints, inplace=True)
+        for k, v in precinct_dtypes.items():
+            precincts[k] = precincts[k].astype(v)
         precincts.rename(columns={"PrecinctCode": "Precinct"}, inplace=True)
         if precincts.empty:
             raise ValueError("Missing Precicnts file")
