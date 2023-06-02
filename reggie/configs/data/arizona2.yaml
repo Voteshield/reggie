@@ -170,6 +170,7 @@ column_aliases:
     DOB(Restricted): DOB
     NameSuffix: Suffix
     MailingAddressLine2: MailingAddress2
+    AEVL: PEVL
 generated_columns:
   all_history: text[]
   sparse_history: int[]
