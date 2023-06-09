@@ -384,6 +384,13 @@ race_options:
   AP: asian_or_pacific_islander
   OT: other
   AI: american_indian_or_alaskan_native
+  White: white
+  Black: black
+  Hispanic/Latino: hispanic_or_latino
+  Asian/Pacific Islander: asian_or_pacific_islander
+  American Indian: american_indian
+  Refused: refused
+  Multi-Racial: multi_racial
 
 # 2023 column header update
 # new column name: original column name
