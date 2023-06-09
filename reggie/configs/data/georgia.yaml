@@ -22,6 +22,7 @@ no_party_affiliation: npa
 date_format:
   - '%Y'
   - '%Y%m%d'
+  - '%m/%d/%Y'
 missing_required_fields: true
 demographic_fields_available:
   - age
@@ -383,3 +384,69 @@ race_options:
   AP: asian_or_pacific_islander
   OT: other
   AI: american_indian_or_alaskan_native
+
+# 2023 column header update
+# new column name: original column name
+# (several different interim formats)
+column_aliases:
+    County: County_code
+    Voter Registration: Registration_Number
+    Voter Registration Number: Registration_Number
+    Status: Voter_status
+    Last Name: Last_name
+    First Name: First_name
+    Middle Name: Middle_maiden_name
+    Suffix: Name_suffix
+    'Street #': Residence_house_number
+    Residence Street Number: Residence_house_number
+    Street Name: Residence_street_name
+    Residence Street Name: Residence_street_name
+    'Apt #': Residence_apt_unit_nbr
+    Residence Apt Unit Number: Residence_apt_unit_nbr
+    City: Residence_city
+    Residence City: Residence_city
+    Zip Code: Residence_zipcode
+    Residence Zipcode: Residence_zipcode
+    Birth Year: Year_of_Birth
+    Registration Date: Registration_date
+    Land Districts: Land_district
+    Land District: Land_district
+    Land Lot: Land_lot
+    Status Reason: Status_reason
+    County Precinct: County_precinct_id
+    Municipal Precinct: City_precinct_id
+    CNG: Congressional_district
+    Congressional District: Congressional_district
+    SEN: Senate_district
+    State Senate District: Senate_district
+    HSE: House_district
+    State House District: House_district
+    JUD: Judicial_district
+    Judicial District: Judicial_district
+    COM: Commission_district
+    County Commission District: Commission_district
+    SCH: School_district
+    County School Board District: School_district
+    Municipality: Municipal_name
+    MUNIB: City_school_district_name
+    Municipal School Board District: City_school_district_name
+    Last Voted Date: Date_last_voted
+    Last Vote Date: Date_last_voted
+    Last Party Voted: Party_last_voted
+    Voter Created Date: Date_added
+    Last Modified Date: Date_changed
+    Combo#: District_combo
+    Combo Number: District_combo
+    Date of Last Contact: Last_contact_date
+    'Mailing Street #': Mail_house_nbr
+    Mailing Street Number: Mail_house_nbr
+    Mailing Street Name 1/PO Box: Mail_street_name
+    Mailing Street Name: Mail_street_name
+    Mailing Apt#/Lot#/Unit#: Mail_apt_unit_nbr
+    Mailing Apt Unit Number: Mail_apt_unit_nbr
+    Mailing City: Mail_city
+    Mailing State/FPO/APO: Mail_state
+    Mailing State: Mail_state
+    Mailing Zip Code: Mail_zip_code
+    Mailing Zipcode: Mail_zip_code
+    Mailing Country: Mail_country
