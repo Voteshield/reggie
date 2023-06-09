@@ -57,13 +57,15 @@ class PreprocessGeorgia(Preprocessor):
             "statewide_voter_list",
             "gdvb",
             "georgia_state_wide_voter_file",
+            "georgia statewide voter file",
+            "statewide voter file export",
         ]
 
         for i in new_files:
             if any(name in i["name"].lower() for name in possible_voterfile_names):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
-            elif "txt" in i["name"].lower():
+            elif "txt" or "csv" in i["name"].lower():
                 vh_files.append(i)
 
         logging.info("Detected {} history files".format(len(vh_files)))
@@ -83,9 +85,18 @@ class PreprocessGeorgia(Preprocessor):
         else:
             header_arg = None
 
+        # Georgia fully overhauled its voter reg system in 2023, with
+        # several different interim formats coming through over several months
+        sep = "|"
+        file_date = datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d")
+        if file_date > datetime(2023, 2, 5):
+            header_arg = 0
+        if file_date > datetime(2023, 3, 13):
+            sep = ","
+
         df_voters = self.read_csv_count_error_lines(
             voter_files[0]["obj"],
-            sep="|",
+            sep=sep,
             header=header_arg,
             quotechar='"',
             quoting=3,
@@ -99,16 +110,37 @@ class PreprocessGeorgia(Preprocessor):
         if len(df_voters.columns) == len(self.config["ordered_columns"]) + 1:
              df_voters.drop(columns=["County Name"], inplace=True)
 
-        try:
-            df_voters.columns = self.config["ordered_columns"]
-        except ValueError:
-            logging.info("Incorrect number of columns found for Georgia")
-            raise MissingNumColumnsError(
-                "{} state is missing columns".format(self.state),
-                self.state,
-                len(self.config["ordered_columns"]),
-                len(df_voters.columns),
+        # Should only try to apply old headers to pre- 2023 overhaul files
+        if file_date <= datetime(2023, 2, 5):
+            try:
+                df_voters.columns = self.config["ordered_columns"]
+            except ValueError:
+                logging.info("Incorrect number of columns found for Georgia")
+                raise MissingNumColumnsError(
+                    "{} state is missing columns".format(self.state),
+                    self.state,
+                    len(self.config["ordered_columns"]),
+                    len(df_voters.columns),
+                )
+        else:
+            # New 2023 files need a lot of renaming of columns
+            df_voters.rename(
+                columns=self.config["column_aliases"],
+                inplace=True,
             )
+            df_voters = self.reconcile_columns(df_voters, self.config["columns"])
+            df_voters["Race_desc"] = df_voters["Race"]
+
+            # Convert county back to numbers to match existing system
+            county_dict = self.config.primary_locale_names[self.config.primary_locale_type]
+            county_dict = {v.lower().replace(" ",""): int(k) for k, v in county_dict.items()}
+            df_voters["County_code"] = df_voters["County_code"].str.lower().map(county_dict)
+
+            # Convert voter status to match existing system
+            df_voters["Voter_status"] = df_voters["Voter_status"].map(
+                {"Active": "A", "Inactive": "I"}
+            )
+
         df_voters["Registration_Number"] = (
             df_voters["Registration_Number"].astype(str).str.zfill(8)
         )
