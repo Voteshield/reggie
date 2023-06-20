@@ -48,7 +48,8 @@ class PreprocessGeorgia(Preprocessor):
         gc.collect()
 
         voter_files = []
-        vh_files = []
+        vh_files_old_style = []
+        vh_files_new_style = []
 
         # Georgia likes changing the name of its voter file
         possible_voterfile_names = [
@@ -65,10 +66,16 @@ class PreprocessGeorgia(Preprocessor):
             if any(name in i["name"].lower() for name in possible_voterfile_names):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
-            elif "txt" or "csv" in i["name"].lower():
-                vh_files.append(i)
+            elif "txt" in i["name"].lower():
+                vh_files_old_style.append(i)
+            # new-style history files are CSV's
+            elif "csv" in i["name"].lower():
+                vh_files_new_style.append(i)
 
-        logging.info("Detected {} history files".format(len(vh_files)))
+        logging.info(
+            f"Detected {len(vh_files_old_style)} old-style history files "
+            f"and {len(vh_files_new_style)} new-style history files"
+        )
         del new_files
         gc.collect()
 
@@ -145,19 +152,26 @@ class PreprocessGeorgia(Preprocessor):
             df_voters["Registration_Number"].astype(str).str.zfill(8)
         )
 
-        concat_history_file = concat_and_delete(vh_files)
-        del vh_files
+        # Need to read both old-style and new-style (w header) history files
+        concat_history_file_old = concat_and_delete(
+            vh_files_old_style, has_headers=False
+        )
+        concat_history_file_new = concat_and_delete(
+            vh_files_new_style, has_headers=True
+        )
+
+        del vh_files_old_style, vh_files_new_style
         gc.collect()
 
         logging.info("Performing GA history manipulation")
 
         history = self.read_csv_count_error_lines(
-            concat_history_file,
+            concat_history_file_old,
             sep="  ",
             names=["Concat_str", "Other"],
             on_bad_lines="warn",
         )
-        del concat_history_file
+        del concat_history_file_old
         gc.collect()
 
         history["County_Number"] = history["Concat_str"].str[0:3]
