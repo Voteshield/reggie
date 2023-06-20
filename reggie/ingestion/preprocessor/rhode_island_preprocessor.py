@@ -14,7 +14,6 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-    concat_and_delete,
 )
 from reggie.ingestion.utils import (
     format_column_name,
