@@ -86,6 +86,10 @@ def get_object_mem(key, s3_bucket):
 
 
 def concat_and_delete(in_list):
+    """
+    Note: this only work for
+    files with NO header
+    """
     outfile = StringIO()
 
     for f_obj in in_list:
