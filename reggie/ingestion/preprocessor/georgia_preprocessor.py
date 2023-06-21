@@ -95,18 +95,20 @@ class PreprocessGeorgia(Preprocessor):
         # Georgia fully overhauled its voter reg system in 2023, with
         # several different interim formats coming through over several months
         sep = "|"
+        quoting = 3
         file_date = datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d")
         if file_date > datetime(2023, 2, 5):
             header_arg = 0
         if file_date > datetime(2023, 3, 13):
             sep = ","
+            quoting = 0
 
         df_voters = self.read_csv_count_error_lines(
             voter_files[0]["obj"],
             sep=sep,
             header=header_arg,
             quotechar='"',
-            quoting=3,
+            quoting=quoting,
             on_bad_lines="warn",
         )
         del voter_files
