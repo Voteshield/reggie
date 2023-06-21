@@ -156,15 +156,13 @@ class PreprocessGeorgia(Preprocessor):
         concat_history_file_old = concat_and_delete(
             vh_files_old_style, has_headers=False
         )
-        concat_history_file_new = concat_and_delete(
-            vh_files_new_style, has_headers=True
-        )
-
-        del vh_files_old_style, vh_files_new_style
+        del vh_files_old_style
         gc.collect()
 
         logging.info("Performing GA history manipulation")
 
+        # Read old-style history files
+        logging.info("Reading old-style history files")
         history = self.read_csv_count_error_lines(
             concat_history_file_old,
             sep="  ",
@@ -181,7 +179,7 @@ class PreprocessGeorgia(Preprocessor):
         history["Party"] = history["Concat_str"].str[22:24]
         history["Absentee"] = history["Other"].str[0]
         history["Provisional"] = history["Other"].str[1]
-        history["Supplimental"] = history["Other"].str[2]
+        history["Supplemental"] = history["Other"].str[2]
         type_dict = {
             "001": "GEN_PRIMARY",
             "002": "GEN_PRIMARY_RUNOFF",
@@ -195,6 +193,41 @@ class PreprocessGeorgia(Preprocessor):
             "010": "PPP",
         }
         history = history.replace({"Election_Type": type_dict})
+
+        # If they exist, read new-style history files
+        if len(vh_files_new_style) > 0:
+            concat_history_file_new = concat_and_delete(
+                vh_files_new_style, has_headers=True
+            )
+            del vh_files_new_style
+            gc.collect()
+
+            logging.info("Reading new-style history files")
+            history_new = self.read_csv_count_error_lines(
+                concat_history_file_new,
+                sep=",",
+                header=0,
+            )
+            del concat_history_file_new
+            gc.collect()
+
+            # Convert to match old style
+            history_new["County_Number"] = history_new["County Name"].str.lower().map(
+                county_dict).astype(str).str.zfill(3)
+            history_new["Registration_Number"] = (
+                history_new["Voter Registration Number"].astype(str).str.zfill(8)
+            )
+            history_new["Election_Date"] = pd.to_datetime(
+                history_new["Election Date"]).map(lambda x: x.strftime("%Y%m%d")
+            )
+            history_new["Election_Type"] = history_new["Election Type"]
+
+            # Concat all old and new history together
+            history = pd.concat([history, history_new])
+
+        for c in ["Party", "Absentee", "Provisional", "Supplemental"]:
+            history[c] = history[c].fillna("N")
+
         history["Combo_history"] = history["Election_Date"].str.cat(
             others=history[
                 [
@@ -202,7 +235,7 @@ class PreprocessGeorgia(Preprocessor):
                     "Party",
                     "Absentee",
                     "Provisional",
-                    "Supplimental",
+                    "Supplemental",
                 ]
             ],
             sep="_",
@@ -216,11 +249,12 @@ class PreprocessGeorgia(Preprocessor):
                 "Party",
                 "Absentee",
                 "Provisional",
-                "Supplimental",
+                "Supplemental",
                 "Combo_history",
             ]
         )
         history = history.dropna()
+
 
         logging.info("Creating GA sparse history")
 
