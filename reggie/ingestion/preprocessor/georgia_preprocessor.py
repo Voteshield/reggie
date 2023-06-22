@@ -167,8 +167,7 @@ class PreprocessGeorgia(Preprocessor):
         logging.info("Reading old-style history files")
         history = self.read_csv_count_error_lines(
             concat_history_file_old,
-            sep="  ",
-            names=["Concat_str", "Other"],
+            names=["Concat_str"],
             on_bad_lines="warn",
         )
         del concat_history_file_old
@@ -179,9 +178,10 @@ class PreprocessGeorgia(Preprocessor):
         history["Election_Date"] = history["Concat_str"].str[11:19]
         history["Election_Type"] = history["Concat_str"].str[19:22]
         history["Party"] = history["Concat_str"].str[22:24]
-        history["Absentee"] = history["Other"].str[0]
-        history["Provisional"] = history["Other"].str[1]
-        history["Supplemental"] = history["Other"].str[2]
+
+        history["Absentee"] = history["Concat_str"].str[24]
+        history["Provisional"] = history["Concat_str"].str[25]
+        history["Supplemental"] = history["Concat_str"].str[26]
         type_dict = {
             "001": "GEN_PRIMARY",
             "002": "GEN_PRIMARY_RUNOFF",
@@ -195,6 +195,12 @@ class PreprocessGeorgia(Preprocessor):
             "010": "PPP",
         }
         history = history.replace({"Election_Type": type_dict})
+
+        # Year the date format switched from "%m%d%Y" to "%Y%m%d"
+        date_format_switch = "2013"
+        history["Election_Date"] = history["Election_Date"].map(
+            lambda x: x[4:8] + x[0:2] + x[2:4] if x[0:4] < date_format_switch else x
+        )
 
         # If they exist, read new-style history files
         if len(vh_files_new_style) > 0:
