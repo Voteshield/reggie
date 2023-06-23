@@ -260,12 +260,6 @@ class PreprocessGeorgia(Preprocessor):
         history = history.filter(
             items=[
                 "Registration_Number",
-                "Election_Date",
-                "Election_Type",
-                "Party",
-                "Absentee",
-                "Provisional",
-                "Supplemental",
                 "Combo_history",
             ]
         )
