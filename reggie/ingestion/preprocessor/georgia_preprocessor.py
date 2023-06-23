@@ -173,7 +173,9 @@ class PreprocessGeorgia(Preprocessor):
         del concat_history_file_old
         gc.collect()
 
-        history["County_Number"] = history["Concat_str"].str[0:3]
+        # this is never used
+        # history["County_Number"] = history["Concat_str"].str[0:3]
+
         history["Registration_Number"] = history["Concat_str"].str[3:11]
         history["Election_Date"] = history["Concat_str"].str[11:19]
         history["Election_Type"] = history["Concat_str"].str[19:22]
@@ -220,10 +222,9 @@ class PreprocessGeorgia(Preprocessor):
             gc.collect()
 
             # Convert to match old style
-            history_new["County_Number"] = history_new["County Name"].str.lower().map(
-                county_dict).astype(str).str.zfill(3)
+            history_new.dropna(subset=["Voter Registration Number"], inplace=True)
             history_new["Registration_Number"] = (
-                history_new["Voter Registration Number"].astype(str).str.zfill(8)
+                history_new["Voter Registration Number"].astype(int).astype(str).str.zfill(8)
             )
             history_new["Election_Date"] = pd.to_datetime(
                 history_new["Election Date"]).map(lambda x: x.strftime("%Y%m%d")
@@ -232,9 +233,14 @@ class PreprocessGeorgia(Preprocessor):
 
             # Concat all old and new history together
             history = pd.concat([history, history_new])
+            history.reset_index(drop=True, inplace=True)
 
         for c in ["Party", "Absentee", "Provisional", "Supplemental"]:
             history[c] = history[c].fillna("N")
+
+        history["Election_Type"] = history["Election_Type"].fillna("unknown")
+
+        history["Party"] = history["Party"].str.strip()
 
         history["Combo_history"] = history["Election_Date"].str.cat(
             others=history[
@@ -248,9 +254,11 @@ class PreprocessGeorgia(Preprocessor):
             ],
             sep="_",
         )
+        # Remove erroneous "'" single quote chars
+        history["Combo_history"] = history["Combo_history"].str.replace("'","")
+
         history = history.filter(
             items=[
-                "County_Number",
                 "Registration_Number",
                 "Election_Date",
                 "Election_Type",
