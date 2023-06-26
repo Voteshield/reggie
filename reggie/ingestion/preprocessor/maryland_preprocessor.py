@@ -13,7 +13,6 @@ import pandas as pd
 from reggie.ingestion.download import (
     FileItem,
     Preprocessor,
-    concat_and_delete,
     date_from_str,
 )
 from reggie.ingestion.utils import (

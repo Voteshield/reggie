@@ -15,7 +15,6 @@ from reggie.reggie_constants import NO_PARTY_PLACEHOLDER
 from reggie.ingestion.download import (
     FileItem,
     Preprocessor,
-    concat_and_delete,
     date_from_str,
 )
 from reggie.ingestion.utils import (

@@ -48,7 +48,8 @@ class PreprocessGeorgia(Preprocessor):
         gc.collect()
 
         voter_files = []
-        vh_files = []
+        vh_files_old_style = []
+        vh_files_new_style = []
 
         # Georgia likes changing the name of its voter file
         possible_voterfile_names = [
@@ -57,6 +58,8 @@ class PreprocessGeorgia(Preprocessor):
             "statewide_voter_list",
             "gdvb",
             "georgia_state_wide_voter_file",
+            "georgia statewide voter file",
+            "statewide voter file export",
         ]
 
         for i in new_files:
@@ -64,9 +67,15 @@ class PreprocessGeorgia(Preprocessor):
                 logging.info("Detected voter file: " + i["name"])
                 voter_files.append(i)
             elif "txt" in i["name"].lower():
-                vh_files.append(i)
+                vh_files_old_style.append(i)
+            # new-style history files are CSV's
+            elif "csv" in i["name"].lower():
+                vh_files_new_style.append(i)
 
-        logging.info("Detected {} history files".format(len(vh_files)))
+        logging.info(
+            f"Detected {len(vh_files_old_style)} old-style history files "
+            f"and {len(vh_files_new_style)} new-style history files"
+        )
         del new_files
         gc.collect()
 
@@ -83,12 +92,23 @@ class PreprocessGeorgia(Preprocessor):
         else:
             header_arg = None
 
+        # Georgia fully overhauled its voter reg system in 2023, with
+        # several different interim formats coming through over several months
+        sep = "|"
+        quoting = 3
+        file_date = datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d")
+        if file_date > datetime(2023, 2, 5):
+            header_arg = 0
+        if file_date > datetime(2023, 3, 13):
+            sep = ","
+            quoting = 0
+
         df_voters = self.read_csv_count_error_lines(
             voter_files[0]["obj"],
-            sep="|",
+            sep=sep,
             header=header_arg,
             quotechar='"',
-            quoting=3,
+            quoting=quoting,
             on_bad_lines="warn",
         )
         del voter_files
@@ -99,43 +119,71 @@ class PreprocessGeorgia(Preprocessor):
         if len(df_voters.columns) == len(self.config["ordered_columns"]) + 1:
              df_voters.drop(columns=["County Name"], inplace=True)
 
-        try:
-            df_voters.columns = self.config["ordered_columns"]
-        except ValueError:
-            logging.info("Incorrect number of columns found for Georgia")
-            raise MissingNumColumnsError(
-                "{} state is missing columns".format(self.state),
-                self.state,
-                len(self.config["ordered_columns"]),
-                len(df_voters.columns),
+        # Should only try to apply old headers to pre- 2023 overhaul files
+        if file_date <= datetime(2023, 2, 5):
+            try:
+                df_voters.columns = self.config["ordered_columns"]
+            except ValueError:
+                logging.info("Incorrect number of columns found for Georgia")
+                raise MissingNumColumnsError(
+                    "{} state is missing columns".format(self.state),
+                    self.state,
+                    len(self.config["ordered_columns"]),
+                    len(df_voters.columns),
+                )
+        else:
+            # New 2023 files need a lot of renaming of columns
+            df_voters.rename(
+                columns=self.config["column_aliases"],
+                inplace=True,
             )
+            df_voters = self.reconcile_columns(df_voters, self.config["columns"])
+            df_voters["Race_desc"] = df_voters["Race"]
+
+            # Convert county back to numbers to match existing system
+            county_dict = self.config.primary_locale_names[self.config.primary_locale_type]
+            county_dict = {v.lower().replace(" ",""): int(k) for k, v in county_dict.items()}
+            df_voters["County_code"] = df_voters["County_code"].str.lower().map(county_dict)
+
+            # Convert voter status to match existing system
+            df_voters["Voter_status"] = df_voters["Voter_status"].map(
+                {"Active": "A", "Inactive": "I"}
+            )
+
         df_voters["Registration_Number"] = (
             df_voters["Registration_Number"].astype(str).str.zfill(8)
         )
 
-        concat_history_file = concat_and_delete(vh_files)
-        del vh_files
+        # Need to read both old-style and new-style (w header) history files
+        concat_history_file_old = concat_and_delete(
+            vh_files_old_style, has_headers=False
+        )
+        del vh_files_old_style
         gc.collect()
 
         logging.info("Performing GA history manipulation")
 
+        # Read old-style history files
+        logging.info("Reading old-style history files")
         history = self.read_csv_count_error_lines(
-            concat_history_file,
-            sep="  ",
-            names=["Concat_str", "Other"],
+            concat_history_file_old,
+            names=["Concat_str"],
             on_bad_lines="warn",
         )
-        del concat_history_file
+        del concat_history_file_old
         gc.collect()
 
-        history["County_Number"] = history["Concat_str"].str[0:3]
+        # this is never used
+        # history["County_Number"] = history["Concat_str"].str[0:3]
+
         history["Registration_Number"] = history["Concat_str"].str[3:11]
         history["Election_Date"] = history["Concat_str"].str[11:19]
         history["Election_Type"] = history["Concat_str"].str[19:22]
         history["Party"] = history["Concat_str"].str[22:24]
-        history["Absentee"] = history["Other"].str[0]
-        history["Provisional"] = history["Other"].str[1]
-        history["Supplimental"] = history["Other"].str[2]
+
+        history["Absentee"] = history["Concat_str"].str[24]
+        history["Provisional"] = history["Concat_str"].str[25]
+        history["Supplemental"] = history["Concat_str"].str[26]
         type_dict = {
             "001": "GEN_PRIMARY",
             "002": "GEN_PRIMARY_RUNOFF",
@@ -149,6 +197,51 @@ class PreprocessGeorgia(Preprocessor):
             "010": "PPP",
         }
         history = history.replace({"Election_Type": type_dict})
+
+        # Year the date format switched from "%m%d%Y" to "%Y%m%d"
+        date_format_switch = "2013"
+        history["Election_Date"] = history["Election_Date"].map(
+            lambda x: x[4:8] + x[0:2] + x[2:4] if x[0:4] < date_format_switch else x
+        )
+
+        # If they exist, read new-style history files
+        if len(vh_files_new_style) > 0:
+            concat_history_file_new = concat_and_delete(
+                vh_files_new_style, has_headers=True
+            )
+            del vh_files_new_style
+            gc.collect()
+
+            logging.info("Reading new-style history files")
+            history_new = self.read_csv_count_error_lines(
+                concat_history_file_new,
+                sep=",",
+                header=0,
+            )
+            del concat_history_file_new
+            gc.collect()
+
+            # Convert to match old style
+            history_new.dropna(subset=["Voter Registration Number"], inplace=True)
+            history_new["Registration_Number"] = (
+                history_new["Voter Registration Number"].astype(int).astype(str).str.zfill(8)
+            )
+            history_new["Election_Date"] = pd.to_datetime(
+                history_new["Election Date"]).map(lambda x: x.strftime("%Y%m%d")
+            )
+            history_new["Election_Type"] = history_new["Election Type"]
+
+            # Concat all old and new history together
+            history = pd.concat([history, history_new])
+            history.reset_index(drop=True, inplace=True)
+
+        for c in ["Party", "Absentee", "Provisional", "Supplemental"]:
+            history[c] = history[c].fillna("N")
+
+        history["Election_Type"] = history["Election_Type"].fillna("unknown")
+
+        history["Party"] = history["Party"].str.strip()
+
         history["Combo_history"] = history["Election_Date"].str.cat(
             others=history[
                 [
@@ -156,25 +249,22 @@ class PreprocessGeorgia(Preprocessor):
                     "Party",
                     "Absentee",
                     "Provisional",
-                    "Supplimental",
+                    "Supplemental",
                 ]
             ],
             sep="_",
         )
+        # Remove erroneous "'" single quote chars
+        history["Combo_history"] = history["Combo_history"].str.replace("'","")
+
         history = history.filter(
             items=[
-                "County_Number",
                 "Registration_Number",
-                "Election_Date",
-                "Election_Type",
-                "Party",
-                "Absentee",
-                "Provisional",
-                "Supplimental",
                 "Combo_history",
             ]
         )
         history = history.dropna()
+
 
         logging.info("Creating GA sparse history")
 

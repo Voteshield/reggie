@@ -85,10 +85,30 @@ def get_object_mem(key, s3_bucket):
     return file_obj
 
 
-def concat_and_delete(in_list):
+def concat_and_delete(in_list, has_headers=False):
+    """
+    Take a list of FileItem objects,
+    and concat them into a single object
+    that can be read
+    :param in_list: list of file objects
+    :param has_headers: True if each file has a
+                        header, False otherwise
+    :return: combined file object
+    """
     outfile = StringIO()
 
+    if has_headers:
+        write_header = True
+
     for f_obj in in_list:
+
+        if has_headers:
+            h = f_obj["obj"].readline()
+            # Write header only once
+            if write_header:
+                outfile.write(h.decode())
+                write_header = False
+
         s = f_obj["obj"].read()
         outfile.write(s.decode())
     outfile.seek(0)
