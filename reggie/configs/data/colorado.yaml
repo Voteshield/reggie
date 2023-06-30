@@ -462,3 +462,14 @@ blacklist_columns:
   - 'SPL_ID'
   - 'STATUS_CODE'
   - 'VOTER_STATUS_ID'
+
+# at some point around/before 5-29-2023 a district file was being read in and concatinated with the voter file, this
+# caused the columns below to be added to the processed file (containing only nans). The below prevents the differencing
+# engine from failing on these columns
+no_diff_columns:
+  - 'COUNTY_NAME'
+  - 'PRECINCT_CODE'
+  - 'SPLIT_CODE'
+  - 'DISTRICT_CODE'
+  - 'DISTRICT_TYPE'
+  - 'DISTRICT_NAME'
