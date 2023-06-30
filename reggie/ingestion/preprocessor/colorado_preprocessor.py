@@ -113,11 +113,11 @@ class PreprocessColorado(Preprocessor):
                 ) or (
                     "EX-003_Master_Voter_List" in i["name"] and not master_vf_version
                 ):
-                    # Colorado sometimes sends us a split district file that they put in the same folder as the master
-                    # voting list, so the key looks like "EX-003_Master_Voter_List/EX-001_Split_District_Report_###.csv"
-                    # this gets read in here, and adds a few extra columns. Going forward with the automated code, this
-                    # file won't be included so the columns are excluded from the diff in the no_diff_columns part of the
-                    # yaml
+                    # Colorado sometimes includes us a split district file in the same folder as the master voting
+                    # list file, so the key looks like "EX-003_Master_Voter_List/EX-001_Split_District_Report_###.csv"
+                    # this gets read in here as a voter file, and adds a few extra columns to the dataframe.
+                    # Going forward with the automated code, this file won't be included so the columns are excluded
+                    # from the diff in the no_diff_columns part of the yaml
                     logging.info("reading in {}".format(i["name"]))
                     # Colorado has a couple different encodings they send us, the format that is detected as ascii will
                     # error out if not read in as latin-1
