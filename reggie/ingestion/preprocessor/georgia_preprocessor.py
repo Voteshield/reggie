@@ -190,7 +190,7 @@ class PreprocessGeorgia(Preprocessor):
                     "Residence Post Direction"
                 ]
                 df_voters["Residence Street Name"] = combine_street_name_fields(
-                    df_voters[street_name_fields], street_name_fields
+                    df_voters[street_name_fields].copy(), street_name_fields
                 )
 
             # New 2023 files need a lot of renaming of columns
