@@ -131,11 +131,74 @@ class PreprocessGeorgia(Preprocessor):
                     len(df_voters.columns),
                 )
         else:
+            def combine_street_name_fields(df, street_name_fields):
+                """Combine newly separated street name fields back to older format"""
+                def get_field_string(x):
+                    return str(x).lower().strip() if not pd.isnull(x) else ""
+                for c in street_name_fields:
+                    df[c] = df[c].map(get_field_string)
+
+                # add pre-direction, if not already included in street name field
+                df["street_name_combined"] = df.apply(
+                    lambda row:
+                    row["Residence Street Name"]
+                    if
+                    (len(row["Residence Street Name"].split()) > 0 and
+                    row["Residence Pre Direction"] == row["Residence Street Name"].split()[0])
+                    else
+                    row["Residence Pre Direction"] + " " + row["Residence Street Name"],
+                    axis=1,
+                )
+
+                # add street type, if not already included in street name field
+                df["street_name_combined"] = df.apply(
+                    lambda row:
+                    row["street_name_combined"]
+                    if
+                    (len(row["Residence Street Name"].split()) > 0 and
+                    row["Residence Street Type"] == row["Residence Street Name"].split()[-1])
+                    or
+                    (len(row["Residence Street Name"].split()) > 1 and
+                    row["Residence Street Type"] == row["Residence Street Name"].split()[-2])
+                    else
+                    row["street_name_combined"] + " " + row["Residence Street Type"],
+                    axis=1,
+                )
+
+                # add post-direction, if not already included in street name field
+                df["street_name_combined"] = df.apply(
+                    lambda row:
+                    row["street_name_combined"]
+                    if
+                    (len(row["Residence Street Name"].split()) > 0 and
+                    row["Residence Post Direction"] == row["Residence Street Name"].split()[-1])
+                    else
+                    row["street_name_combined"] + " " + row["Residence Post Direction"],
+                    axis=1,
+                )
+
+                df["street_name_combined"] = df["street_name_combined"].str.strip()
+                return df["street_name_combined"]
+
+            # For May and June 2023 (and presumably future) files, combine
+            # separated address fields back into a singular street name field
+            if file_date >= datetime(2023, 5, 8):
+                street_name_fields = [
+                    "Residence Street Name",
+                    "Residence Street Type",
+                    "Residence Pre Direction",
+                    "Residence Post Direction"
+                ]
+                df_voters["Residence Street Name"] = combine_street_name_fields(
+                    df_voters[street_name_fields], street_name_fields
+                )
+
             # New 2023 files need a lot of renaming of columns
             df_voters.rename(
                 columns=self.config["column_aliases"],
                 inplace=True,
             )
+
             df_voters = self.reconcile_columns(df_voters, self.config["columns"])
             df_voters["Race_desc"] = df_voters["Race"]
 
