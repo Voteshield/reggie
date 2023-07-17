@@ -198,7 +198,6 @@ class PreprocessGeorgia(Preprocessor):
                 columns=self.config["column_aliases"],
                 inplace=True,
             )
-
             df_voters = self.reconcile_columns(df_voters, self.config["columns"])
             df_voters["Race_desc"] = df_voters["Race"]
 
