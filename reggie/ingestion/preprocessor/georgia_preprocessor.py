@@ -54,11 +54,11 @@ class PreprocessGeorgia(Preprocessor):
         # Georgia likes changing the name of its voter file
         possible_voterfile_names = [
             "georgia_daily_voterbase",
-            "statewidevoterlist",
-            "statewide_voter_list",
             "gdvb",
-            "georgia_state_wide_voter_file",
-            "statewide voter file",
+            "statewidevoter",
+            "statewide_voter",
+            "statewide voter",
+            "state_wide_voter",
         ]
 
         for i in new_files:
