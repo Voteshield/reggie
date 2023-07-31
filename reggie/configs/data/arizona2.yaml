@@ -171,6 +171,7 @@ column_aliases:
     NameSuffix: Suffix
     MailingAddressLine2: MailingAddress2
     AEVL: PEVL
+    RegistrantCounty: County
 generated_columns:
   all_history: text[]
   sparse_history: int[]
