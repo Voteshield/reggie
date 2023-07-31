@@ -34,7 +34,7 @@ class PreprocessArizona2(Preprocessor):
             self.main_file = self.s3_download()
 
         def file_is_active(filename):
-            for word in ["Canceled", "Suspense", "Inactive"]:
+            for word in ["Canceled", "Suspense", "Inactive", "Cancelled", "NotReg"]:
                 if word in filename:
                     return False
             return True
