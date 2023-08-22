@@ -57,8 +57,10 @@ class PreprocessGeorgia(Preprocessor):
             "gdvb",
             "statewidevoter",
             "statewide_voter",
-            "statewide voter",
             "state_wide_voter",
+            "georgia_state_wide_voter_file",
+            "statewide voter file",
+            "ga_statewide_file"
         ]
 
         for i in new_files:
