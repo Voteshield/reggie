@@ -62,7 +62,7 @@ class PreprocessVirginia(Preprocessor):
                     f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
                 )
         voters_df[self.config["party_identifier"]] = np.nan
-        self.reconcile_columns(voters_df, self.config["columns"])
+        voters_df = self.reconcile_columns(voters_df, self.config["columns"])
         self.column_check(list(voters_df.columns))
         voters_df = self.config.coerce_strings(voters_df)
         voters_df = self.config.coerce_numeric(
