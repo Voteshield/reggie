@@ -617,9 +617,11 @@ class Preprocessor:
     def reconcile_columns(df, expected_cols):
         for c in expected_cols:
             if c not in df.columns:
+                logging.info(f"{c} not found in columns, reconciling by adding it")
                 df[c] = np.nan
         for c in df.columns:
             if c not in expected_cols:
+                logging.info(f"{c} unexpectedly found in columns, reconciling by dropping it")
                 df.drop(columns=[c], inplace=True)
         return df
 

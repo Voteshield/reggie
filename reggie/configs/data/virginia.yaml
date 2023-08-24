@@ -189,8 +189,8 @@ ordered_columns:
   - SUPERDIST_CODE_NAME
   - MAILING_ADDRESS_USE_RESIDENCE
   - STATUS
-  - VOTE_IN_PERSON
-  - PROTECTED
+  - VOTE_IN_PERSON # Removed from file as of August 2023
+  - PROTECTED # Removed from file as of August 2023
 #these are not counties, rather localities and locality codes
 county_names:
   ACCOMACK COUNTY: 1
