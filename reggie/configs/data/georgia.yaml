@@ -434,6 +434,7 @@ column_aliases:
     County Commission District: Commission_district
     SCH: School_district
     County School Board District: School_district
+    School Board District: School_district
     Municipality: Municipal_name
     MUNIB: City_school_district_name
     Municipal School Board District: City_school_district_name
@@ -444,6 +445,7 @@ column_aliases:
     Last Modified Date: Date_changed
     Combo#: District_combo
     Combo Number: District_combo
+    Combo: District_combo
     Date of Last Contact: Last_contact_date
     'Mailing Street #': Mail_house_nbr
     Mailing Street Number: Mail_house_nbr
