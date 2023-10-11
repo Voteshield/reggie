@@ -186,7 +186,7 @@ class PreprocessMichigan(Preprocessor):
             elif ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
                 "IS_PERMANENT_ABSENTEE_VOTER" not in hdf.columns
             ):
-                hdf["IS_ABSENTEE_VOTER"] = None
+                hdf["IS_ABSENTEE_VOTER"] = np.nan
         else:
             raise NotImplementedError("File format not implemented")
         del hist_file
