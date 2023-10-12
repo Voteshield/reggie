@@ -50,7 +50,8 @@ class PreprocessMichigan(Preprocessor):
             [
                 n
                 for n in new_files
-                if "entire_state_v" in n["name"] or "EntireStateVoters" in n["name"]
+                if "entire_state_v" in n["name"]
+                or "EntireStateVoters" in n["name"]
             ]
             + [None]
         )[0]
@@ -63,7 +64,9 @@ class PreprocessMichigan(Preprocessor):
             ]
             + [None]
         )[0]
-        elec_codes = ([n for n in new_files if "electionscd" in n["name"]] + [None])[0]
+        elec_codes = (
+            [n for n in new_files if "electionscd" in n["name"]] + [None]
+        )[0]
 
         logging.info("Loading voter file: " + voter_file["name"])
         if voter_file["name"][-3:] == "lst":
@@ -179,7 +182,9 @@ class PreprocessMichigan(Preprocessor):
                 "IS_PERMANENT_ABSENTEE_VOTER" in hdf.columns
             ):
                 hdf.rename(
-                    columns={"IS_PERMANENT_ABSENTEE_VOTER": "IS_ABSENTEE_VOTER"},
+                    columns={
+                        "IS_PERMANENT_ABSENTEE_VOTER": "IS_ABSENTEE_VOTER"
+                    },
                     inplace=True,
                 )
             # This is new
@@ -198,16 +203,18 @@ class PreprocessMichigan(Preprocessor):
         missing_history_dates = False
         if "ELECTION_DATE" in hdf.columns:
             try:
-                hdf["ELECTION_NAME"] = pd.to_datetime(hdf["ELECTION_DATE"]).map(
-                    lambda x: x.strftime("%Y-%m-%d")
-                )
+                hdf["ELECTION_NAME"] = pd.to_datetime(
+                    hdf["ELECTION_DATE"]
+                ).map(lambda x: x.strftime("%Y-%m-%d"))
             except ValueError:
                 missing_history_dates = True
                 hdf["ELECTION_NAME"] = hdf["ELECTION_DATE"]
         else:
             if elec_codes:
                 # If we have election codes in this file
-                logging.info("Loading election codes file: " + elec_codes["name"])
+                logging.info(
+                    "Loading election codes file: " + elec_codes["name"]
+                )
                 if elec_codes["name"][-3:] == "lst":
                     ecolspecs = [[0, 13], [13, 21], [21, 46]]
                     edf = pd.read_fwf(
@@ -241,12 +248,16 @@ class PreprocessMichigan(Preprocessor):
                     }
             else:
                 # Get election codes from most recent meta data
-                this_date = parser.parse(date_from_str(self.raw_s3_file)).date()
+                this_date = parser.parse(
+                    date_from_str(self.raw_s3_file)
+                ).date()
                 pre_date, post_date, pre_key, post_key = get_surrounding_dates(
                     this_date, self.state, self.s3_bucket, testing=self.testing
                 )
                 if pre_key is not None:
-                    nearest_meta = get_metadata_for_key(pre_key, self.s3_bucket)
+                    nearest_meta = get_metadata_for_key(
+                        pre_key, self.s3_bucket
+                    )
                     elec_code_dict = nearest_meta["elec_code_dict"]
                     if len(elec_code_dict) == 0:
                         raise MissingElectionCodesError(
@@ -277,19 +288,25 @@ class PreprocessMichigan(Preprocessor):
         vdf.set_index(self.config["voter_id"], drop=False, inplace=True)
         hdf_id_groups = hdf.groupby(self.config["voter_id"])
         vdf["all_history"] = hdf_id_groups["ELECTION_NAME"].apply(list)
-        vdf["votetype_history"] = hdf_id_groups["IS_ABSENTEE_VOTER"].apply(list)
-        vdf["county_history"] = hdf_id_groups["COUNTY_CODE"].apply(list)
-        vdf["jurisdiction_history"] = hdf_id_groups["JURISDICTION_CODE"].apply(list)
-        vdf["schooldistrict_history"] = hdf_id_groups["SCHOOL_DISTRICT_CODE"].apply(
+        vdf["votetype_history"] = hdf_id_groups["IS_ABSENTEE_VOTER"].apply(
             list
         )
+        vdf["county_history"] = hdf_id_groups["COUNTY_CODE"].apply(list)
+        vdf["jurisdiction_history"] = hdf_id_groups["JURISDICTION_CODE"].apply(
+            list
+        )
+        vdf["schooldistrict_history"] = hdf_id_groups[
+            "SCHOOL_DISTRICT_CODE"
+        ].apply(list)
         del hdf, hdf_id_groups
         gc.collect()
 
         def insert_code_bin(arr):
             if isinstance(arr, list):
                 return [
-                    sorted_codes_dict[k]["index"] for k in arr if k in sorted_codes_dict
+                    sorted_codes_dict[k]["index"]
+                    for k in arr
+                    if k in sorted_codes_dict
                 ]
             else:
                 return np.nan

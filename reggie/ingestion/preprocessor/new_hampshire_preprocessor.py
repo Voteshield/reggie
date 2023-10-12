@@ -33,7 +33,9 @@ class PreprocessNewHampshire(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        new_files = self.unpack_files(file_obj=self.main_file, compression="unzip")
+        new_files = self.unpack_files(
+            file_obj=self.main_file, compression="unzip"
+        )
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
@@ -84,7 +86,9 @@ class PreprocessNewHampshire(Preprocessor):
         )
 
         sorted_codes = hist_df["combined_name"].unique().tolist()
-        sorted_codes.sort(key=lambda x: datetime.strptime(x.split("_")[-1], "%m/%d/%Y"))
+        sorted_codes.sort(
+            key=lambda x: datetime.strptime(x.split("_")[-1], "%m/%d/%Y")
+        )
         counts = hist_df["combined_name"].value_counts()
         sorted_codes_dict = {
             k: {
@@ -104,15 +108,21 @@ class PreprocessNewHampshire(Preprocessor):
         voters_df = voters_df.set_index("id_voter", drop=False)
         voter_id_groups = hist_df.groupby("id_voter")
         voters_df["all_history"] = voter_id_groups["combined_name"].apply(list)
-        voters_df["sparse_history"] = voters_df["all_history"].map(insert_code_bin)
-        voters_df["election_type_history"] = voter_id_groups["election_type"].apply(
-            list
+        voters_df["sparse_history"] = voters_df["all_history"].map(
+            insert_code_bin
         )
+        voters_df["election_type_history"] = voter_id_groups[
+            "election_type"
+        ].apply(list)
         voters_df["election_category_history"] = voter_id_groups[
             "election_category"
         ].apply(list)
-        voters_df["votetype_history"] = voter_id_groups["ballot_type"].apply(list)
-        voters_df["party_history"] = voter_id_groups["cd_part_voted"].apply(list)
+        voters_df["votetype_history"] = voter_id_groups["ballot_type"].apply(
+            list
+        )
+        voters_df["party_history"] = voter_id_groups["cd_part_voted"].apply(
+            list
+        )
         voters_df["town_history"] = voter_id_groups["town"].apply(list)
 
         # Check the file for all the proper locales
