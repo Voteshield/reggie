@@ -23,7 +23,6 @@ from reggie.ingestion.utils import (
 
 class PreprocessMichigan(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -188,6 +187,11 @@ class PreprocessMichigan(Preprocessor):
                     },
                     inplace=True,
                 )
+            # This is new
+            elif ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
+                "IS_PERMANENT_ABSENTEE_VOTER" not in hdf.columns
+            ):
+                hdf["IS_ABSENTEE_VOTER"] = np.nan
         else:
             raise NotImplementedError("File format not implemented")
         del hist_file

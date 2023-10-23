@@ -17,7 +17,6 @@ from reggie.ingestion.download import (
 
 class PreprocessNewHampshire(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -42,8 +41,8 @@ class PreprocessNewHampshire(Preprocessor):
 
         for f in new_files:
             # ignore ".mdb" files
-            if (".xlsx" in f["name"]) or (".csv" in f["name"]):
-
+            file_type_list = [".xlsx", ".csv", ".txt"]
+            if any(x in f["name"] for x in file_type_list):
                 if "history" in f["name"].lower():
                     logging.info("Found history file: {}".format(f["name"]))
                     if ".xlsx" in f["name"]:
@@ -54,16 +53,19 @@ class PreprocessNewHampshire(Preprocessor):
                         )
                     hist_df.drop_duplicates(inplace=True)
 
-                elif ("checklist" in f["name"].lower()) or (
-                      "voters" in f["name"].lower()) or (
-                      "voter file" in f["name"].lower()
+                elif (
+                    ("checklist" in f["name"].lower())
+                    or ("voters" in f["name"].lower())
+                    or ("voter file" in f["name"].lower())
                 ):
                     logging.info("Found voter file: {}".format(f["name"]))
                     if ".xlsx" in f["name"]:
                         voters_df = pd.read_excel(f["obj"])
                     else:
                         voters_df = self.read_csv_count_error_lines(
-                            f["obj"], on_bad_lines="warn", encoding="latin-1",
+                            f["obj"],
+                            on_bad_lines="warn",
+                            encoding="latin-1",
                         )
 
         # add dummy columns for birthday and voter_status
