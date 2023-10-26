@@ -136,6 +136,11 @@ class PreprocessWashington(Preprocessor):
         )
 
         # --- handling the voter file --- #
+        # Aug 2023 - some columns have changed names slightly
+        df_voter.rename(
+            columns={"Birthyear": "Birthdate", "RegStUnitNum": "RegUnitNum"},
+            inplace=True,
+        )
         # some columns have become obsolete
         df_voter = df_voter.loc[
             :, df_voter.columns.isin(self.config["column_names"])
