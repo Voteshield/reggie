@@ -204,7 +204,8 @@ class PreprocessGeorgia(Preprocessor):
 
             # Convert county back to numbers to match existing system
             county_dict = self.config.primary_locale_names[self.config.primary_locale_type]
-            county_dict = {v.lower().replace(" ",""): str(int(k)) for k, v in county_dict.items()}
+            county_dict = {v.lower(): str(int(k)) for k, v in county_dict.items()}
+            county_dict["dekalb"] = "44"
             df_voters["County_code"] = df_voters["County_code"].str.lower().map(county_dict)
 
             # Convert voter status to match existing system
@@ -393,6 +394,7 @@ class PreprocessGeorgia(Preprocessor):
         )
 
         # Check the file for all the proper locales
+        df_voters["County_code"] = df_voters["County_code"].astype(str)
         self.locale_check(
             set(df_voters[self.config["primary_locale_identifier"]]),
         )
