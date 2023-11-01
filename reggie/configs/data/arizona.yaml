@@ -35,6 +35,10 @@ voter_status_suspense: 'S   '
 voter_status_cancelled: 'R   '
 voter_status_not_eligible: 'N   '
 voter_status_not_registered: 'NR  '
+not_registered_voter_status_set:
+  - 'R   '
+  - 'N   '
+  - 'NR  '
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
 no_party_affiliation: "PARTY NOT DESIGNATED"

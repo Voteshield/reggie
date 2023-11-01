@@ -16,6 +16,7 @@ provisional_ballot_code: P
 voter_status: voter_status
 voter_status_active: A
 voter_status_inactive: I
+# There is a very rarely used voter status: "D", is this denied?
 party_identifier: party_identifier
 democratic_party: D
 republican_party: R

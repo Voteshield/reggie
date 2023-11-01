@@ -14,6 +14,7 @@ date_format:
   - '%m/%d/%Y'
   - '%Y'
 voter_status: voter_status
+# Missouri used to provide voter status data, but doesn't any longer
 voter_status_active: Active
 voter_status_inactive: Inactive
 party_identifier: party_identifier

@@ -12,6 +12,8 @@ voter_status: Status_Code
 voter_status_active: V
 voter_status_inactive: S
 voter_status_cancelled: C
+not_registered_voter_status_set:
+  - C
 party_identifier: party_identifier
 expected_number_of_files: 510
 no_party_affiliation: npa
