@@ -33,6 +33,7 @@ status_codes_remap:
   AU: AU
 not_registered_voter_status_set:
   - PURGED
+max_duplicate_voters: 8.0
 reason_code: reasoncode
 democratic_party: DEM
 republican_party: REP
