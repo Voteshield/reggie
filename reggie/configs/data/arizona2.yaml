@@ -22,6 +22,12 @@ voter_status_active: active
 voter_status_inactive: inactive
 voter_status_suspense: suspense
 voter_status_cancelled: canceled
+voter_status_not_eligible: 'not eligible'
+voter_status_not_registered: 'not registered'
+not_registered_voter_status_set:
+  - canceled
+  - 'not eligible'
+  - 'not registered'
 party_identifier: Party
 democratic_party: dem
 republican_party: rep

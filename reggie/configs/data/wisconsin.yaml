@@ -23,6 +23,8 @@ voter_status: voter_status
 voter_status_active: Active
 voter_status_inactive: None
 voter_status_cancelled: Inactive
+not_registered_voter_status_set:
+  - Inactive
 reason_code: voter_status_reason
 democratic_party: None
 republican_party: None

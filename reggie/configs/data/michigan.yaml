@@ -17,8 +17,9 @@ voter_status: VOTER_STATUS_TYPE_CODE
 voter_status_active: A
 voter_status_inactive: V
 voter_status_cancelled: C
-voter_status_rejected: R
 voter_status_challenged: CH
+not_registered_voter_status_set:
+  - C
 absentee_ballot_code: "'Y'"
 democratic_party: None
 republican_party: None
