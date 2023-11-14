@@ -125,6 +125,27 @@ class PreprocessVermont(Preprocessor):
             insert_code_bin
         )
 
+        # In Nov 2022, Vermont started sometimes (but not always) dropping
+        # leading zeros that had always existed in their previous data:
+        # 1. voter IDs which had always been zero-padded to 9 digits
+        # 2. legal/mail address zip codes which had always been full 5 digits
+        # To avoid tracking spurious modifications, we zero-pad these back
+        # to their normal lengths.
+        def pad_zips(z):
+            """
+            Pad likely zip codes out to 5 digits,
+            while skipping NaNs and non-numeric values,
+            e.g. some mail zip codes look like "x1j4"
+            """
+            try:
+                return str(int(z)).rjust(5,"0")
+            except ValueError:
+                return z
+
+        vdf[self.config["voter_id"]] = vdf[self.config["voter_id"]].str.rjust(9,"0")
+        vdf["Legal Address Zip"] = vdf["Legal Address Zip"].map(pad_zips)
+        vdf["Mailing Address Zip"] = vdf["Mailing Address Zip"].map(pad_zips)
+
         vdf = vdf.set_index(self.config["voter_id"])
 
         vdf = self.config.coerce_strings(vdf)
