@@ -23,9 +23,9 @@ from reggie.ingestion.utils import (
     format_column_name,
 )
 
+
 class PreprocessWashington(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -33,7 +33,7 @@ class PreprocessWashington(Preprocessor):
             raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=force_date,
-            **kwargs
+            **kwargs,
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
@@ -81,7 +81,7 @@ class PreprocessWashington(Preprocessor):
             # There's a weird corruption of the county column name
             # in the 2021-2022 history file, so fix that:
             for c in temp.columns:
-                if "CountyCode" in c:
+                if "CountyCode" in c and "voting" not in c.lower():
                     temp.rename(columns={c: "CountyCode"}, inplace=True)
             df_hist = pd.concat([df_hist, temp], ignore_index=True)
 
@@ -90,10 +90,8 @@ class PreprocessWashington(Preprocessor):
         # Need to fix/combine the differently named VoterHistoryID
         # and VotingHistoryID columns
         if {"VotingHistoryID", "VoterHistoryID"}.issubset(df_hist.columns):
-            df_hist["VotingHistoryID"] = (
-                df_hist.pop("VoterHistoryID").fillna(
-                    df_hist.pop("VotingHistoryID")
-                )
+            df_hist["VotingHistoryID"] = df_hist.pop("VoterHistoryID").fillna(
+                df_hist.pop("VotingHistoryID")
             )
 
         # can't find voter history documentation in any yaml, hardcoding column name
@@ -131,9 +129,7 @@ class PreprocessWashington(Preprocessor):
         all_history = voter_groups["all_history"].apply(list)
         sparse_history = voter_groups["sparse_history"].apply(list)
         county_history = voter_groups["county_history"].apply(list)
-        df_hist = pd.concat(
-            [all_history, sparse_history, county_history], axis=1
-        )
+        df_hist = pd.concat([all_history, sparse_history, county_history], axis=1)
 
         # --- handling the voter file --- #
         # Aug 2023 - some columns have changed names slightly
@@ -142,21 +138,16 @@ class PreprocessWashington(Preprocessor):
             inplace=True,
         )
         # some columns have become obsolete
-        df_voter = df_voter.loc[
-            :, df_voter.columns.isin(self.config["column_names"])
-        ]
+        df_voter = df_voter.loc[:, df_voter.columns.isin(self.config["column_names"])]
         df_voter = df_voter.set_index(self.config["voter_id"])
 
         # pandas loads any numeric column with NaN values as floats
         # causing formatting trouble during execute() with a few columns
         # saw this solution in other states (arizona & texas)
         to_numeric = [
-            df_voter.loc[:, col].str.isnumeric().all()
-            for col in df_voter.columns
+            df_voter.loc[:, col].str.isnumeric().all() for col in df_voter.columns
         ]
-        df_voter.loc[:, to_numeric] = (
-            df_voter.loc[:, to_numeric].fillna(-1).astype(int)
-        )
+        df_voter.loc[:, to_numeric] = df_voter.loc[:, to_numeric].fillna(-1).astype(int)
 
         df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_strings(
@@ -171,7 +162,7 @@ class PreprocessWashington(Preprocessor):
         # add voter history
         df_voter = df_voter.join(df_hist)
 
-        # Add party_idenitfier dummy values, 
+        # Add party_idenitfier dummy values,
         # since WA doesn't have party info
         df_voter.loc[:, self.config["party_identifier"]] = NO_PARTY_PLACEHOLDER
 
@@ -181,9 +172,9 @@ class PreprocessWashington(Preprocessor):
             self.config["status_codes_remap"]
         )
         if df_voter["StatusCode"].isnull().any():
-            missing = df_voter[
-                df_voter["StatusCode"].isnull()
-            ]["StatusCodeOrig"].to_list()
+            missing = df_voter[df_voter["StatusCode"].isnull()][
+                "StatusCodeOrig"
+            ].to_list()
             logging.warning("Status codes missing from status_codes_remap")
             logging.warning(missing)
 
@@ -196,8 +187,7 @@ class PreprocessWashington(Preprocessor):
 
         # Make sure all columns are present
         expected_cols = (
-            self.config["ordered_columns"]
-            + self.config["ordered_generated_columns"]
+            self.config["ordered_columns"] + self.config["ordered_generated_columns"]
         )
         # Remove the index column to avoid duplication
         expected_cols.remove(self.config["voter_id"])
