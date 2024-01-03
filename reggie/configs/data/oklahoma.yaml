@@ -185,6 +185,7 @@ dtypes:
   Zip: string
   stringOfBirth: string
   OriginalRegistration: string
+  RegistrationDate: string
   MailStreet1: string
   MailStreet2: string
   MailCity: string
