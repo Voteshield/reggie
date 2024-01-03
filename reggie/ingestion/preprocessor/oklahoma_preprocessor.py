@@ -67,6 +67,14 @@ class PreprocessOklahoma(Preprocessor):
         for file in voter_files:
             if "vr.csv" in file["name"].lower():
                 temp_vdf = pd.read_csv(file["obj"], encoding='latin', dtype=dtypes)
+
+                # Registration date column name changed at some point
+                if "RegistrationDate" in temp_vdf.columns:
+                    temp_vdf.rename(
+                        columns={"RegistrationDate": "OriginalRegistration"},
+                        inplace=True,
+                    )
+
                 vdf = pd.concat([vdf, temp_vdf], ignore_index=True)
         vdf.drop_duplicates(inplace=True)
 
