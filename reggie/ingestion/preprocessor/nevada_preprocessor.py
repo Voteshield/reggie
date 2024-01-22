@@ -103,10 +103,17 @@ class PreprocessNevada(Preprocessor):
         )
 
         # create compound string for unique voter ID from county ID
+        def format_county_id(vid):
+            try:
+                vid = int(float(vid))
+            except ValueError:
+                pass
+            return str(vid)
+
         df_voters["County_Voter_ID"] = (
             df_voters["County"].str.replace(" ", "").str.lower()
             + "_"
-            + df_voters["County_Voter_ID"].astype(int).astype(str)
+            + df_voters["County_Voter_ID"].map(format_county_id)
         )
         df_voters = self.config.coerce_dates(df_voters)
         df_voters = self.config.coerce_numeric(
