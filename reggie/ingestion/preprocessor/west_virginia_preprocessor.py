@@ -109,6 +109,24 @@ class PreprocessWestVirginia(Preprocessor):
                 "CONGRESSIONAL": "Congressional District",
                 "MAGISTERIAL DISTRICT": "Magisterial District",
                 "PRECINCT_NUMBER": "Precinct_Number",
+                # New field names as of 2024-01-08
+                "VOTER_ID": "ID_VOTER",
+                "FIRST_NAME": "FIRST NAME",
+                "MIDDLE_NAME": "Mid",
+                "LAST_NAME": "LAST NAME",
+                "DATE_OF_BIRTH": "DATE OF BIRTH",
+                "HOUSE_NO": "HOUSE NO",
+                "MAIL_HOUSE_NO": "MAIL HOUSE NO",
+                "MAIL_STREET": "MAIL STREET",
+                "MAIL_STREET2": "MAIL STREET2",
+                "MAIL_UNIT": "MAIL UNIT",
+                "MAIL_CITY": "MAIL CITY",
+                "MAIL_STATE": "MAIL STATE",
+                "MAIL_ZIP": "MAIL ZIP",
+                "REGISTRATION_DATE": "REGISTRATION DATE",
+                "PARTY_AFFILIATION": "PartyAffiliation",
+                "MAGISTERIAL_DISTRICT": "Magisterial District",
+                "COUNTY_PRECINCT": "Precinct_Number",
             },
             inplace=True,
             errors="ignore"
@@ -154,9 +172,13 @@ class PreprocessWestVirginia(Preprocessor):
 
         # Gender rename and clean.  There are some historical files that
         # dont have this column so make blank.
-        if "SEX" in df_voters.columns:
+        if ("SEX" in df_voters.columns) or ("GENDER" in df_voters.columns):
+            df_voters.rename(
+                columns={"SEX": "gender", "GENDER": "gender"},
+                inplace=True,
+                errors="ignore",
+            )
             gender_dict = self.config_lookup_to_dict(self.config["gender_codes"])
-            df_voters.rename(columns={"SEX": "gender"}, inplace=True)
             df_voters.loc[:, "gender"] = df_voters.loc[:, "gender"].map(gender_dict)
             df_voters["gender"] = df_voters["gender"].fillna("unknown")
         else:
