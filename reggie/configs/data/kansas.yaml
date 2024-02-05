@@ -14,7 +14,7 @@ voter_status_active:
   - A
 voter_status_inactive:
   - I
-# an unknown voter status: S
+# There is an unknown voter status in the file: S
 democratic_party: Democratic
 republican_party: Republican
 libertarian_party: Libertarian
