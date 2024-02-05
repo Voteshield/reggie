@@ -20,8 +20,10 @@ primary_locale_type: jurisdiction
 birthday_identifier: DATE_OF_BIRTH
 early_voter_identifier: IsPermanentAbsentee
 voter_status: voter_status
-voter_status_active: Active
-voter_status_inactive: None
+voter_status_active:
+  - Active
+voter_status_inactive:
+  - None
 voter_status_cancelled: Inactive
 not_registered_voter_status_set:
   - Inactive

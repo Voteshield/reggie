@@ -29,16 +29,16 @@ numeric_primary_locale: false
 birthday_identifier: year_of_birth
 early_voter_identifier: perm_absentee_indicator
 voter_status: cde_registrant_status
-voter_status_active: 'A   '
-voter_status_inactive: 'I   '
-voter_status_suspense: 'S   '
+voter_status_active:
+  - 'A   '
+voter_status_inactive:
+  - 'I   '
+# voter_status_suspense: 'S   '
 voter_status_cancelled: 'R   '
-voter_status_not_eligible: 'N   '
-voter_status_not_registered: 'NR  '
 not_registered_voter_status_set:
-  - 'R   '
-  - 'N   '
-  - 'NR  '
+  - 'R   ' # cancelled
+  - 'N   ' # not eligible
+  - 'NR  ' # not registered
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
 no_party_affiliation: "PARTY NOT DESIGNATED"

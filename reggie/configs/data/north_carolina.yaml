@@ -13,10 +13,13 @@ precinct_identifier: precinct_abbrv
 birthday_identifier: birth_year
 early_voter_identifier: absent_ind
 voter_status: status_cd
-voter_status_active: A
-voter_status_inactive: I
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
+# voter_status_temporary: S ?
+# another unknown voter status: D ?
 voter_status_cancelled: R
-voter_status_temporary: S
 not_registered_voter_status_set:
   - R
 reason_code: voter_status_reason_desc

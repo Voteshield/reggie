@@ -20,8 +20,10 @@ party_identifier: PolitalAff
 birthday_identifier: DateOfBirth
 voter_id: VoterID
 voter_status: Status
-voter_status_active: A
-voter_status_inactive: I
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
 democratic_party: DEM
 republican_party: REP
 libertarian_party: LIB

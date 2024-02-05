@@ -10,8 +10,11 @@ primary_locale_identifier: db_logid
 numeric_primary_locale: false
 birthday_identifier: date_of_birth
 voter_status: cde_registrant_status
-voter_status_active: A
-voter_status_inactive: I
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
+# an unknown voter status: S
 democratic_party: Democratic
 republican_party: Republican
 libertarian_party: Libertarian

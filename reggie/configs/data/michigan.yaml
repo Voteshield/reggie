@@ -14,10 +14,12 @@ precinct_identifier: PRECINCT
 birthday_identifier: YEAR_OF_BIRTH
 early_voter_identifier: IS_PERMANENT_ABSENTEE_VOTER
 voter_status: VOTER_STATUS_TYPE_CODE
-voter_status_active: A
-voter_status_inactive: V
+voter_status_active:
+  - A
+voter_status_inactive:
+  - V   # inactive
+  - CH  # challenged
 voter_status_cancelled: C
-voter_status_challenged: CH
 not_registered_voter_status_set:
   - C
 absentee_ballot_code: "'Y'"

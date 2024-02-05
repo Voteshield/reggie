@@ -14,9 +14,11 @@ numeric_primary_locale: true
 birthday_identifier: DOB
 voter_status: Status
 # CA only supplies us with voters who have the active status
-voter_status_active: A
+voter_status_active:
+  - A
 # This does not exist in the files currently, if we get updated files this may need to be modified
-voter_status_inactive: I
+voter_status_inactive:
+  - I
 reason_code: VoterStatusReasonCodeDesc
 democratic_party: DEM
 republican_party: REP

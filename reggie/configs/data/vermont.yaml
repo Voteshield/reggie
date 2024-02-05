@@ -19,10 +19,12 @@ numeric_primary_locale: FALSE
 birthday_identifier: Year of Birth
 voter_id: VoterID
 voter_status: Status
-voter_status_active: ACTIVE
-voter_status_inactive: CHALLENGED
+voter_status_active:
+  - ACTIVE
+voter_status_inactive:
+  - CHALLENGED
 # Currently not used
-voter_status_waitlist: N18
+voter_status_preregistered: N18
 democratic_party: None
 republican_party: None
 no_party_affiliation: npa

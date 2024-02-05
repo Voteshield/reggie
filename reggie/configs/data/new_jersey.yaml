@@ -10,13 +10,16 @@ primary_locale_identifier: county
 numeric_primary_locale: false
 birthday_identifier: dob
 voter_status: status
-voter_status_active: Active
-voter_status_inactive: Inactive #ID combined with IF
-voter_status_active_need_id: Active Need ID #voters need to provide ID or SS after registering
-voter_status_active_federal_only: Active-Federal Election Only #very few, to avoid violating NVRA
-voter_status_pending: Pending #minors
-voter_status_inactive_need_id: Inactive Confirmation-Need ID #funneling this and IF into I
-voter_status_inactive_confirmation: Inactive Confirmation #havent voted in several elections
+voter_status_active:
+  - Active
+  - 'Active Need ID'  # voters need to provide ID or SS after registering
+  - 'Active-Federal Election Only' # very few, to avoid violating NVRA
+voter_status_inactive:
+  - Inactive #ID combined with IF
+voter_status_preregistered: Pending # minors
+# These 2 Inactive statuses are edited in the preprocessor and consolidated into "Inactive":
+# Inactive Confirmation-Need ID # funneling this and IF into I
+# Inactive Confirmation # havent voted in several elections
 date_format: "%m/%d/%Y"
 party_identifier: party_code
 democratic_party: DEM

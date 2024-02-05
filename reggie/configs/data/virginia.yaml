@@ -11,11 +11,12 @@ primary_locale_identifier: LOCALITYNAME
 numeric_primary_locale: false
 birthday_identifier: DOB
 voter_status: STATUS
-voter_status_active: Active
-voter_status_inactive: Inactive
-voter_status_incomplete: Incomplete
+voter_status_active:
+  - Active
+voter_status_inactive:
+  - Inactive
+# voter_status_incomplete: Incomplete ?
 voter_status_cancelled: Cancelled
-voter_status_denied: Denied
 not_registered_voter_status_set:
   - Cancelled
   - Denied
