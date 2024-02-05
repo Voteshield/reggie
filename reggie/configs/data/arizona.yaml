@@ -33,12 +33,16 @@ voter_status_active:
   - 'A   '
 voter_status_inactive:
   - 'I   '
-# voter_status_suspense: 'S   '
 voter_status_cancelled: 'R   '
 not_registered_voter_status_set:
   - 'R   ' # cancelled
   - 'N   ' # not eligible
   - 'NR  ' # not registered
+#  - 'S   ' # suspense
+# Clint: "It appears from media reports that 'suspense' in AZ is a 'not registered'.
+# They can't vote because the voter needs to provide more info to election officials."
+# But Clint thinks we should leave it in the file for now, until we find out more.
+
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
 no_party_affiliation: "PARTY NOT DESIGNATED"
