@@ -13,10 +13,11 @@ numeric_primary_locale: false
 precinct_identifier: PRECINCT
 birthday_identifier: BIRTHDATE
 voter_status: VOTERSTATUS
-voter_status_active: Active
-voter_status_inactive: Inactive
-voter_status_pending: Pending
-voter_status_null:
+voter_status_active:
+  - Active
+voter_status_inactive:
+  - Inactive
+voter_status_preregistered: Pending
 demographic_fields_available:
   - age
   - gender

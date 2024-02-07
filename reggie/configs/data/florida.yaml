@@ -12,8 +12,10 @@ numeric_primary_locale: false
 precinct_identifier: Precinct_Split
 birthday_identifier: Birth_Date
 voter_status: Voter_Status
-voter_status_active: ACT
-voter_status_inactive: INA
+voter_status_active:
+  - ACT
+voter_status_inactive:
+  - INA
 voter_status_preregistered: PRE
 absentee_ballot_code: "'A'"
 democratic_party: DEM

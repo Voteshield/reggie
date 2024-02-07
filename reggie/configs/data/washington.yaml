@@ -19,8 +19,10 @@ party_identifier: party_identifier
 birthday_identifier: Birthdate
 voter_id: StateVoterID
 voter_status: StatusCode
-voter_status_active: A
-voter_status_inactive: I
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
 missing_required_fields: true
 demographic_fields_available:
   - age

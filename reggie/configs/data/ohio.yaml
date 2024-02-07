@@ -11,8 +11,10 @@ primary_locale_identifier: COUNTY_NUMBER
 numeric_primary_locale: true
 birthday_identifier: DATE_OF_BIRTH
 voter_status: VOTER_STATUS
-voter_status_active: ACTIVE
-voter_status_inactive: CONFIRMATION
+voter_status_active:
+  - ACTIVE
+voter_status_inactive:
+  - CONFIRMATION
 democratic_party: D
 republican_party: R
 no_party_affiliation: 'NULL'

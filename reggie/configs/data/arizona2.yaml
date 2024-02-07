@@ -18,16 +18,20 @@ precinct_identifier: Precinct
 birthday_identifier: DOB
 early_voter_identifier: PEVL
 voter_status: Status
-voter_status_active: active
-voter_status_inactive: inactive
-voter_status_suspense: suspense
+voter_status_active:
+  - active
+voter_status_inactive:
+  - inactive
 voter_status_cancelled: canceled
-voter_status_not_eligible: 'not eligible'
-voter_status_not_registered: 'not registered'
 not_registered_voter_status_set:
   - canceled
   - 'not eligible'
   - 'not registered'
+#  - suspense
+# Clint: "It appears from media reports that 'suspense' in AZ is a 'not registered'.
+# They can't vote because the voter needs to provide more info to election officials."
+# But Clint thinks we should leave it in the file for now, until we find out more.
+
 party_identifier: Party
 democratic_party: dem
 republican_party: rep

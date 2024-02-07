@@ -12,8 +12,10 @@ numeric_primary_locale: true
 precinct_identifier: County_precinct_id
 birthday_identifier: Year_of_Birth
 voter_status: Voter_status
-voter_status_active: A
-voter_status_inactive: I
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
 reason_code: status_reason
 party_identifier: party_identifier
 democratic_party: None

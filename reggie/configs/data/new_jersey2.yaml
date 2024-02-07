@@ -19,9 +19,11 @@ date_format:
   - "%Y-%m-%d"
   - "%Y-%m-%d %H:%M:%S"
 voter_status: status
-voter_status_active: Active
-voter_status_inactive: Inactive
-voter_status_pending: Pending
+voter_status_active:
+  - Active
+voter_status_inactive:
+  - Inactive
+voter_status_preregistered: Pending
 party_identifier: party
 democratic_party: Democratic
 republican_party: Republican

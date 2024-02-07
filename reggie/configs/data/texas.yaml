@@ -9,8 +9,10 @@ primary_locale_identifier: County_Code
 numeric_primary_locale: true
 birthday_identifier: Date_of_Birth
 voter_status: Status_Code
-voter_status_active: V
-voter_status_inactive: S
+voter_status_active:
+  - V
+voter_status_inactive:
+  - S
 voter_status_cancelled: C
 not_registered_voter_status_set:
   - C

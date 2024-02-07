@@ -13,14 +13,18 @@ primary_locale_identifier: countycode
 numeric_primary_locale: true
 birthday_identifier: dob
 voter_status: status
-voter_status_active: ACTIVE
-voter_status_inactive: INACTIVE
+voter_status_active:
+  - ACTIVE
+  - AM  # active military
+  - AF  # active special federal
+  - AP  # active special presidential
+  - AU  # active uocava
+voter_status_inactive:
+  - INACTIVE
 voter_status_preregistered: PREREG
 voter_status_cancelled: PURGED
-voter_status_active_military: AM
-voter_status_active_special_federal: AF
-voter_status_active_special_presidential: AP
-voter_status_uocava: AU
+not_registered_voter_status_set:
+  - PURGED
 # in Dec 2021, NY started using abbreviations only
 status_codes_remap:
   A: ACTIVE
@@ -31,8 +35,6 @@ status_codes_remap:
   AF: AF
   AP: AP
   AU: AU
-not_registered_voter_status_set:
-  - PURGED
 max_duplicate_voters: 8.0
 reason_code: reasoncode
 democratic_party: DEM

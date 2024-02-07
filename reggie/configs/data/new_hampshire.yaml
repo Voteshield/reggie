@@ -11,8 +11,10 @@ numeric_primary_locale: false
 birthday_identifier: birth_date
 voter_status: voter_status
 # These are only placeholder values, there is no voter status data provided in NH
-voter_status_active: active
-voter_status_inactive: inactive
+voter_status_active:
+  - active
+voter_status_inactive:
+  - inactive
 party_identifier: cd_party
 democratic_party: DEM
 republican_party: REP
