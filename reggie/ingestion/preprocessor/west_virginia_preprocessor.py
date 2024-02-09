@@ -94,10 +94,6 @@ class PreprocessWestVirginia(Preprocessor):
             header=0 if config["has_headers"] else None,
         )
 
-        # adds dummy column to wv to match format of older files
-        if "mail unit" not in df_voters.columns.str.lower():
-            df_voters["MAIL UNIT"] = np.nan
-
         df_voters.rename(
             columns={
                 "COUNTY_NAME": "County_Name",
@@ -131,6 +127,10 @@ class PreprocessWestVirginia(Preprocessor):
             inplace=True,
             errors="ignore"
         )
+
+        # adds dummy column to wv to match format of older files
+        if "mail unit" not in df_voters.columns.str.lower():
+            df_voters["MAIL UNIT"] = np.nan
 
         # Apparently during redistricting the relevant fields will be dropped entirely
         # and then re-added to the file after updates.
