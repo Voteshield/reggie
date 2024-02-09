@@ -19,6 +19,7 @@ voter_status_active:
 voter_status_inactive:
   - I
 # There is a very rarely used voter status: "D", is this denied?
+voter_status_d: D
 party_identifier: party_identifier
 democratic_party: D
 republican_party: R
