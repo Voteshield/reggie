@@ -155,6 +155,7 @@ class PreprocessTexas(Preprocessor):
                         [df_hist, new_df], axis=0, ignore_index=True
                     )
             del i["obj"]
+            gc.collect()
         if df_hist.empty:
             logging.info("This file contains no voter history")
         df_voter["Effective_Date_of_Registration"] = (
