@@ -92,6 +92,7 @@ class PreprocessArizona2(Preprocessor):
                 "VRAZVoterID",
             ],
         )
+        # Starting in Feb 2024 occupation was removed from the columns they send us
         if "Occupation" not in main_df.columns:
             main_df["Occupation"] = np.nan
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
