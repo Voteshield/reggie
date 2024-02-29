@@ -16,7 +16,6 @@ from reggie.ingestion.download import (
 
 class PreprocessArizona2(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -58,9 +57,7 @@ class PreprocessArizona2(Preprocessor):
                             inplace=True,
                         )
                     else:
-                        new_df.rename(
-                            columns={c: c.replace(" ", "")}, inplace=True
-                        )
+                        new_df.rename(columns={c: c.replace(" ", "")}, inplace=True)
                 new_df.rename(columns={"YearofBirth": "DOB"}, inplace=True)
                 main_df = pd.concat([main_df, new_df], sort=False)
             return main_df
@@ -68,16 +65,17 @@ class PreprocessArizona2(Preprocessor):
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
 
-        new_files = self.unpack_files(
-            file_obj=self.main_file, compression="unzip"
-        )
+        new_files = self.unpack_files(file_obj=self.main_file, compression="unzip")
 
         active_files = [f for f in new_files if file_is_active(f["name"])]
+
+        # Starting from Feb 2024, the cancelled voters and active voters are all included in one big file
         other_files = [f for f in new_files if not file_is_active(f["name"])]
 
         main_df = pd.DataFrame()
         main_df = add_files_to_main_df(main_df, active_files)
-        main_df = add_files_to_main_df(main_df, other_files)
+        if other_files:
+            main_df = add_files_to_main_df(main_df, other_files)
         main_df.reset_index(drop=True, inplace=True)
 
         main_df = self.config.coerce_dates(main_df)
@@ -161,8 +159,7 @@ class PreprocessArizona2(Preprocessor):
         )
 
         expected_cols = (
-            self.config["ordered_columns"]
-            + self.config["ordered_generated_columns"]
+            self.config["ordered_columns"] + self.config["ordered_generated_columns"]
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         voter_df = voter_df[expected_cols]
