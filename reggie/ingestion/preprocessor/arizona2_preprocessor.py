@@ -41,7 +41,7 @@ class PreprocessArizona2(Preprocessor):
         def add_files_to_main_df(main_df, file_list):
             alias_dict = self.config["column_aliases"]
             for f in file_list:
-                if f["name"].split(".")[-1] == "csv":
+                if f["name"].split(".")[-1] in ["csv", "txt"]:
                     new_df = self.read_csv_count_error_lines(
                         f["obj"], on_bad_lines="warn"
                     )
