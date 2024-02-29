@@ -176,7 +176,6 @@ class PreprocessArizona2(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        print(df)
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=False)),
