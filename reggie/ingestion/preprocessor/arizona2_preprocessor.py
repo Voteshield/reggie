@@ -76,7 +76,7 @@ class PreprocessArizona2(Preprocessor):
         main_df = add_files_to_main_df(main_df, active_files)
         if other_files:
             main_df = add_files_to_main_df(main_df, other_files)
-        main_df.reset_index(drop=True, inplace=True)
+            main_df.reset_index(drop=True, inplace=True)
 
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
@@ -92,6 +92,8 @@ class PreprocessArizona2(Preprocessor):
                 "VRAZVoterID",
             ],
         )
+        if "Occupation" not in main_df.columns:
+            main_df["Occupation"] = np.nan
         voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
         history_columns = [c for c in main_df.columns if c[0].isdigit()]
 
@@ -174,6 +176,7 @@ class PreprocessArizona2(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+        print(df)
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=False)),
