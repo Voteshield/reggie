@@ -23,7 +23,6 @@ from reggie.ingestion.utils import (
 
 class PreprocessColorado(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -40,9 +39,7 @@ class PreprocessColorado(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
-        new_files = self.unpack_files(
-            compression="unzip", file_obj=self.main_file
-        )
+        new_files = self.unpack_files(compression="unzip", file_obj=self.main_file)
 
         # Since Colorado gives us multiple sets of the
         # "Registered_Voters_List" files, we first need to remove
@@ -51,12 +48,16 @@ class PreprocessColorado(Preprocessor):
         # in their name, and sets with previous years in their file path.
         # If there are still multiple sets left, we take the one
         # that is highest in the path hierarchy.
-        reg_voter_files = [f for f in new_files if "Registered_Voters_List" in f["name"]]
-        other_files = [f for f in new_files if "Registered_Voters_List" not in f["name"]]
+        reg_voter_files = [
+            f for f in new_files if "Registered_Voters_List" in f["name"]
+        ]
+        other_files = [
+            f for f in new_files if "Registered_Voters_List" not in f["name"]
+        ]
 
         def remove_files_with_previous_years_in_path(file_list):
             current_year = int(date_from_str(self.raw_s3_file).split("-")[0])
-            exclude_yrs = [str(current_year - i) for i in range(1,6)]
+            exclude_yrs = [str(current_year - i) for i in range(1, 6)]
             for y in exclude_yrs:
                 file_list = [f for f in file_list if y not in f["name"]]
             return file_list
@@ -64,15 +65,15 @@ class PreprocessColorado(Preprocessor):
         reg_voter_files = [f for f in reg_voter_files if "Public" not in f["name"]]
         reg_voter_files = remove_files_with_previous_years_in_path(reg_voter_files)
         levels_down = [f["name"].count("/") for f in reg_voter_files]
-        reg_voter_files = [f for f in reg_voter_files if f["name"].count("/") == min(levels_down)]
+        reg_voter_files = [
+            f for f in reg_voter_files if f["name"].count("/") == min(levels_down)
+        ]
 
         new_files = reg_voter_files + other_files
 
         df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
         df_hist = pd.DataFrame(columns=self.config["hist_columns"])
-        df_master_voter = pd.DataFrame(
-            columns=self.config["master_voter_columns"]
-        )
+        df_master_voter = pd.DataFrame(columns=self.config["master_voter_columns"])
         master_vf_version = True
 
         def master_to_reg_df(df):
@@ -80,15 +81,9 @@ class PreprocessColorado(Preprocessor):
             df["STATUS"] = df["VOTER_STATUS"]
             df["PRECINCT"] = df["PRECINCT_CODE"]
             df["VOTER_NAME"] = (
-                df["LAST_NAME"]
-                + ", "
-                + df["FIRST_NAME"]
-                + " "
-                + df["MIDDLE_NAME"]
+                df["LAST_NAME"] + ", " + df["FIRST_NAME"] + " " + df["MIDDLE_NAME"]
             )
-            df = pd.concat(
-                [df, pd.DataFrame(columns=self.config["blacklist_columns"])]
-            )
+            df = pd.concat([df, pd.DataFrame(columns=self.config["blacklist_columns"])])
             df = df[self.config.processed_file_columns()]
             return df
 
@@ -106,8 +101,8 @@ class PreprocessColorado(Preprocessor):
             master_vf_version = False
 
         for i in new_files:
+            print(i["name"])
             if "Public" not in i["name"]:
-
                 if (
                     "Registered_Voters_List" in i["name"] and not master_vf_version
                 ) or (
@@ -147,7 +142,9 @@ class PreprocessColorado(Preprocessor):
 
                 elif ("Voting_History" in i["name"]) or (
                     "Coordinated_Voter_Details" in i["name"]
+                    or "Coordinated_Voter_Details" in i["name"]
                 ):
+                    print("in history")
                     if i["name"].split(".")[-1].lower() == "txt":
                         compression = None
                     else:
@@ -171,9 +168,7 @@ class PreprocessColorado(Preprocessor):
                         ):
                             new_df.insert(10, "PHONE_NUM", np.nan)
                         try:
-                            new_df.columns = self.config[
-                                "master_voter_columns"
-                            ]
+                            new_df.columns = self.config["master_voter_columns"]
                         except ValueError:
                             logging.info(
                                 "Incorrect number of columns found for Colorado for file: {}".format(
@@ -181,16 +176,12 @@ class PreprocessColorado(Preprocessor):
                                 )
                             )
                             raise MissingNumColumnsError(
-                                "{} state is missing columns".format(
-                                    self.state
-                                ),
+                                "{} state is missing columns".format(self.state),
                                 self.state,
                                 len(self.config["master_voter_columns"]),
                                 len(new_df.columns),
                             )
-                        df_master_voter = pd.concat(
-                            [df_master_voter, new_df], axis=0
-                        )
+                        df_master_voter = pd.concat([df_master_voter, new_df], axis=0)
 
         if df_voter.empty:
             df_voter = master_to_reg_df(df_master_voter)
@@ -202,9 +193,7 @@ class PreprocessColorado(Preprocessor):
         )
         df_hist.dropna(subset=["ELECTION_DATE"], inplace=True)
         df_hist["election_name"] = (
-            df_hist["ELECTION_DATE"].astype(str)
-            + "_"
-            + df_hist["VOTING_METHOD"]
+            df_hist["ELECTION_DATE"].astype(str) + "_" + df_hist["VOTING_METHOD"]
         )
 
         valid_elections, counts = np.unique(
@@ -255,9 +244,7 @@ class PreprocessColorado(Preprocessor):
                         df_voter[f"MAILING_ADDRESS_{num}"],
                     )
                 else:
-                    df_voter[f"MAILING_ADDRESS_{num}"] = df_voter[
-                        f"MAIL_ADDR{num}"
-                    ]
+                    df_voter[f"MAILING_ADDRESS_{num}"] = df_voter[f"MAIL_ADDR{num}"]
                 df_voter.drop(columns=[f"MAIL_ADDR{num}"], inplace=True)
 
         df_voter = self.config.coerce_strings(df_voter)
