@@ -148,6 +148,18 @@ class PreprocessNewYork(Preprocessor):
         )
 
         # Check the file for all the proper locales
+        def locale_convert_str(x):
+            try:
+                if np.isnan(x):
+                    return x
+                else:
+                    return str(int(float(x)))
+            except:
+                return x
+
+        main_df[self.config["primary_locale_identifier"]] = main_df[
+            self.config["primary_locale_identifier"]
+        ].map(locale_convert_str)
         self.locale_check(
             set(main_df[self.config["primary_locale_identifier"]]),
         )
