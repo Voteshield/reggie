@@ -144,9 +144,10 @@ class PreprocessColorado(Preprocessor):
                     "Coordinated_Voter_Details" in i["name"]
                     or "Coordinated_Voter_Details" in i["name"]
                 ):
-                    print("in history")
                     if i["name"].split(".")[-1].lower() == "txt":
                         compression = None
+                    elif i["name"].split(".")[-1].lower() == "zip":
+                        compression = "zip"
                     else:
                         compression = "gzip"
 
