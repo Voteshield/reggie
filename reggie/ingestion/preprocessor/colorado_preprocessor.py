@@ -104,9 +104,9 @@ class PreprocessColorado(Preprocessor):
         for i in new_files:
             # The word Public used to indicate a file that had duplicate (older) voter information/files in it that
             # that could not be differentiated by name from the actual voter files, so it led to duplicates. The
-            # autodownloader automatically filters out the "archive" subdirectory that contained the dupicate voter
-            # information in the history directory, so this is less of an issue. In addition after March in 2024, they
-            # started adding the word public to actual history files eg.
+            # autodownloader automatically filters out the "archive" subdirectory that contained the duplicate voter
+            # information in the history directory, so this is less of an issue. In addition, after March in 2024, they
+            # started adding the word public to actual history files e.g.
             # "024_Presidential_Primary_EX-002_Congressional_District_8_Public_Voting_History_List_Part5.zip" so we
             # can no longer filter on the word public...but should not need to.
             if "Public" not in i["name"] or current_file_date > datetime(2024, 2, 1):
