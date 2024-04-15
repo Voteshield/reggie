@@ -23,7 +23,6 @@ from reggie.ingestion.utils import (
 
 class PreprocessColorado(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
-
         if force_date is None:
             force_date = date_from_str(raw_s3_file)
 
@@ -51,20 +50,32 @@ class PreprocessColorado(Preprocessor):
         # in their name, and sets with previous years in their file path.
         # If there are still multiple sets left, we take the one
         # that is highest in the path hierarchy.
-        reg_voter_files = [f for f in new_files if "Registered_Voters_List" in f["name"]]
-        other_files = [f for f in new_files if "Registered_Voters_List" not in f["name"]]
+        reg_voter_files = [
+            f for f in new_files if "Registered_Voters_List" in f["name"]
+        ]
+        other_files = [
+            f for f in new_files if "Registered_Voters_List" not in f["name"]
+        ]
 
         def remove_files_with_previous_years_in_path(file_list):
             current_year = int(date_from_str(self.raw_s3_file).split("-")[0])
-            exclude_yrs = [str(current_year - i) for i in range(1,6)]
+            exclude_yrs = [str(current_year - i) for i in range(1, 6)]
             for y in exclude_yrs:
                 file_list = [f for f in file_list if y not in f["name"]]
             return file_list
 
-        reg_voter_files = [f for f in reg_voter_files if "Public" not in f["name"]]
-        reg_voter_files = remove_files_with_previous_years_in_path(reg_voter_files)
+        reg_voter_files = [
+            f for f in reg_voter_files if "Public" not in f["name"]
+        ]
+        reg_voter_files = remove_files_with_previous_years_in_path(
+            reg_voter_files
+        )
         levels_down = [f["name"].count("/") for f in reg_voter_files]
-        reg_voter_files = [f for f in reg_voter_files if f["name"].count("/") == min(levels_down)]
+        reg_voter_files = [
+            f
+            for f in reg_voter_files
+            if f["name"].count("/") == min(levels_down)
+        ]
 
         new_files = reg_voter_files + other_files
 
@@ -100,18 +111,29 @@ class PreprocessColorado(Preprocessor):
         # voter file with the name "Master_Voter_List" but it does
         # NOT have the same columns associated with the older
         # master voter files, so we need to differentiate this case.
-        if datetime.strptime(date_from_str(self.raw_s3_file), "%Y-%m-%d") > datetime(
-            2023, 5, 1
-        ):
+        current_file_date = datetime.strptime(
+            date_from_str(self.raw_s3_file), "%Y-%m-%d"
+        )
+        if current_file_date > datetime(2023, 5, 1):
             master_vf_version = False
 
         for i in new_files:
-            if "Public" not in i["name"]:
-
+            # The word Public used to indicate a file that had duplicate (older) voter information/files in it that
+            # could not be differentiated by name from the actual voter files, so it led to duplicates. The
+            # autodownloader automatically filters out the "archive" subdirectory that contained the duplicate voter
+            # information in the history directory, so this is less of an issue. In addition, after March in 2024, they
+            # started adding the word public to actual history files e.g.
+            # "024_Presidential_Primary_EX-002_Congressional_District_8_Public_Voting_History_List_Part5.zip" so we
+            # can no longer filter on the word public...but should not need to.
+            if "Public" not in i["name"] or current_file_date > datetime(
+                2024, 2, 1
+            ):
                 if (
-                    "Registered_Voters_List" in i["name"] and not master_vf_version
+                    "Registered_Voters_List" in i["name"]
+                    and not master_vf_version
                 ) or (
-                    "EX-003_Master_Voter_List" in i["name"] and not master_vf_version
+                    "EX-003_Master_Voter_List" in i["name"]
+                    and not master_vf_version
                 ):
                     # Colorado sometimes includes us a split district file in the same folder as the master voting
                     # list file, so the key looks like "EX-003_Master_Voter_List/EX-001_Split_District_Report_###.csv"
@@ -150,6 +172,8 @@ class PreprocessColorado(Preprocessor):
                 ):
                     if i["name"].split(".")[-1].lower() == "txt":
                         compression = None
+                    elif i["name"].split(".")[-1].lower() == "zip":
+                        compression = "zip"
                     else:
                         compression = "gzip"
 
@@ -157,14 +181,18 @@ class PreprocessColorado(Preprocessor):
                         logging.info("reading in {}".format(i["name"]))
 
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression=compression, on_bad_lines="warn"
+                            i["obj"],
+                            compression=compression,
+                            on_bad_lines="warn",
                         )
                         df_hist = pd.concat([df_hist, new_df], axis=0)
 
                     if "Voter_Details" in i["name"] and master_vf_version:
                         logging.info("reading in {}".format(i["name"]))
                         new_df = self.read_csv_count_error_lines(
-                            i["obj"], compression=compression, on_bad_lines="warn"
+                            i["obj"],
+                            compression=compression,
+                            on_bad_lines="warn",
                         )
                         if len(new_df.columns) < len(
                             self.config["master_voter_columns"]
