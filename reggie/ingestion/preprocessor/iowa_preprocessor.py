@@ -54,7 +54,7 @@ class PreprocessIowa(Preprocessor):
         # named VoterDetails_ Part1 MM-DD-YY-###### where the #s are a seemingly random string of numbers
 
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
-        remaining_files = [f for f in new_files if not first_file]
+        remaining_files = [f for f in new_files if f is not first_file]
         if not self.ignore_checks:
             # add 1 for firs file
             valid_files = len(remaining_files) + 1
