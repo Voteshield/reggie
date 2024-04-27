@@ -35,21 +35,23 @@ class PreprocessIowa(Preprocessor):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
+        # 04-26-2024 Changed the naming of the files to "VoterDetails_ Part#" Yes, with the space
         def is_first_file(fname):
-            if ("D1" in fname) or ("CD 1" in fname) or ("Statewide District 1" in fname):
+            if (
+                ("D1" in fname)
+                or ("CD 1" in fname)
+                or ("Statewide District 1" in fname)
+                or ("VoterDetails_" in fname)
+            ):
                 if ("Part1" in fname) or ("Part 1" in fname):
                     return True
             return False
 
-        new_files = self.unpack_files(
-            file_obj=self.main_file, compression="unzip"
-        )
+        new_files = self.unpack_files(file_obj=self.main_file, compression="unzip")
         logging.info("IOWA: reading in voter file")
 
         first_file = [f for f in new_files if is_first_file(f["name"])][0]
-        remaining_files = [
-            f for f in new_files if not is_first_file(f["name"])
-        ]
+        remaining_files = [f for f in new_files if not is_first_file(f["name"])]
         if not self.ignore_checks:
             # add 1 for firs file
             valid_files = len(remaining_files) + 1
@@ -75,15 +77,12 @@ class PreprocessIowa(Preprocessor):
         # so that the columns in the header will fit what is expected
         column_rename_dict = self.config["rename_columns"]
         normalized_headers = [
-            x if x not in column_rename_dict else column_rename_dict[x]
-            for x in headers
+            x if x not in column_rename_dict else column_rename_dict[x] for x in headers
         ]
         normalized_headers = [x.replace(" ", "_") for x in normalized_headers]
 
         columns_to_check = [
-            x
-            for x in normalized_headers
-            if x not in self.config["election_columns"]
+            x for x in normalized_headers if x not in self.config["election_columns"]
         ]
         self.column_check(columns_to_check)
 
@@ -142,12 +141,8 @@ class PreprocessIowa(Preprocessor):
 
                 # so far so good but we need more columns in the event of a
                 # primary
-                org_col = c.replace(
-                    "PRIMARY_ELECTION_DATE", "POLITICAL_ORGANIZATION"
-                )
-                party_col = c.replace(
-                    "PRIMARY_ELECTION_DATE", "POLITICAL_PARTY"
-                )
+                org_col = c.replace("PRIMARY_ELECTION_DATE", "POLITICAL_ORGANIZATION")
+                party_col = c.replace("PRIMARY_ELECTION_DATE", "POLITICAL_PARTY")
                 df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
                 df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
                 party_info = (
