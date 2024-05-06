@@ -184,14 +184,19 @@ class PreprocessMichigan(Preprocessor):
             if self.file_date > datetime(2024, 4, 8).date():
 
                 header = hist_file["obj"].readline().decode().strip().replace('"',"")
-                hdf = self.read_csv_count_error_lines(
-                    hist_file["obj"], header=None, na_filter=False, on_bad_lines="warn"
-                )
                 header = header.split(",")
 
-                # Drop final (empty) column if dataframe is too long for header
-                if len(header) < hdf.shape[1]:
-                    hdf.drop(columns=[hdf.columns[-1]], inplace=True)
+                # Read extra column, in case there are inconsistent commas
+                hdf = self.read_csv_count_error_lines(
+                    hist_file["obj"],
+                    header=None,
+                    na_filter=False,
+                    on_bad_lines="warn",
+                    names=range(len(header) + 1)
+                )
+
+                # Drop final (empty) column
+                hdf.drop(columns=[hdf.columns[-1]], inplace=True)
 
                 # Apply header
                 hdf.columns = header
