@@ -138,6 +138,14 @@ class PreprocessNorthCarolina(Preprocessor):
         del voter_groups, vote_hist, all_history, vote_type
         gc.collect()
 
+        # In May 2024, NC started using "XX-XX-XXXX" for
+        # registration dates of some cancelled and
+        # inactive voters. Need to convert these to
+        # explicitly null for our system.
+        voter_df["registr_dt"] = voter_df["registr_dt"].map(
+            lambda x: x if x != "XX-XX-XXXX" else ""
+        )
+
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
         voter_df = self.config.coerce_numeric(
