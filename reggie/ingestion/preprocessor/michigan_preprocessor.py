@@ -34,6 +34,7 @@ class PreprocessMichigan(Preprocessor):
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
+        self.file_date = parser.parse(force_date).date()
 
     def execute(self):
         if self.raw_s3_file is not None:
@@ -175,9 +176,36 @@ class PreprocessMichigan(Preprocessor):
                 na_filter=False,
             )
         elif hist_file["name"][-3:] == "csv":
-            hdf = self.read_csv_count_error_lines(
-                hist_file["obj"], na_filter=False, on_bad_lines="warn"
-            )
+
+            # April 2024 history file has an empty column at end
+            # (since they dropped a column), but one too few headers.
+            # So need to read header separately to get it to read
+            # in correctly.
+            if self.file_date > datetime(2024, 4, 8).date():
+
+                header = hist_file["obj"].readline().decode().strip().replace('"',"")
+                header = header.split(",")
+
+                # Read extra column, in case there are inconsistent commas
+                hdf = self.read_csv_count_error_lines(
+                    hist_file["obj"],
+                    header=None,
+                    na_filter=False,
+                    on_bad_lines="warn",
+                    names=range(len(header) + 1)
+                )
+
+                # Drop final (empty) column
+                hdf.drop(columns=[hdf.columns[-1]], inplace=True)
+
+                # Apply header
+                hdf.columns = header
+
+            else:
+                hdf = self.read_csv_count_error_lines(
+                    hist_file["obj"], na_filter=False, on_bad_lines="warn"
+                )
+
             if ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
                 "IS_PERMANENT_ABSENTEE_VOTER" in hdf.columns
             ):
