@@ -75,9 +75,30 @@ class PreprocessWashington(Preprocessor):
             line = hist_file["obj"].readline().decode()
             delimiter = detect(line)
             hist_file["obj"].seek(0)
-            temp = pd.read_csv(
-                hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
-            )
+
+            # The newest history file from the 2024-06-03 file
+            # is missing a header, so account for that here.
+            if "CountyCode" in line:
+                temp = pd.read_csv(
+                    hist_file["obj"], sep=delimiter, encoding="latin-1", dtype=str
+                )
+            else:
+                # If no header in first line, set header=None
+                temp = pd.read_csv(
+                    hist_file["obj"],
+                    sep=delimiter,
+                    encoding="latin-1",
+                    dtype=str,
+                    header=None,
+                )
+                # And add header manually
+                temp.columns = [
+                    "VoterHistoryID",
+                    "CountyCode",
+                    "CountyCode_Voting",
+                    "StateVoterID",
+                    "ElectionDate",
+                ]
             # There's a weird corruption of the county column name
             # in the 2021-2022 history file, so fix that:
             for c in temp.columns:
