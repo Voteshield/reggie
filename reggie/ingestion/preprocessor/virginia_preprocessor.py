@@ -82,6 +82,11 @@ class PreprocessVirginia(Preprocessor):
             + hist_df["ELECTION_DATE"]
         )
 
+        # 2024-06-04 file removed VOTE_IN_PERSON and PROTECTED from history file
+        for col in ["VOTE_IN_PERSON", "PROTECTED"]:
+            if col not in hist_df.columns:
+                hist_df[col] = False
+
         # Gathers the votetype columns that are initially boolean and replaces them with the word version of their name
         # collect all the columns where the value is True, combine to one votetype history separated by underscores
         # parsing in features will pull out the appropriate string
