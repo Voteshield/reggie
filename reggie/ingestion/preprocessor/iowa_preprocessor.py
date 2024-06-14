@@ -41,7 +41,7 @@ class PreprocessIowa(Preprocessor):
                 ("D1" in fname)
                 or ("CD 1" in fname)
                 or ("District 1" in fname)
-                or ("VoterDetails_" in fname)
+                or ("Voter" in fname)
             ):
                 if ("Part1" in fname) or ("Part 1" in fname):
                     return True
