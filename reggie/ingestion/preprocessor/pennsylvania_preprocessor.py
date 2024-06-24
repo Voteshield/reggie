@@ -72,18 +72,17 @@ class PreprocessPennsylvania(Preprocessor):
         main_df = None
         # Preserving the order of the file sent, but concatinating the district and election columns which were
         # dropped in the legacy processed file
-        
+
         dfcols = (
             config["ordered_columns"][:-3]
             + config["district_columns"]
             + config["election_columns"]
             + config["ordered_columns"][-3:]
         )
-    
+
         # PA Added a new column for registration_method on June 18, 2024
         if date_from_str(self.raw_s3_file) > "2024-06-17":
-            dfcols.append(config["additional_columns"])
-            
+            dfcols.extend(config["additional_columns"])
 
         # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
         # consolidates the non nan values into one string that can be appended as a column later for the all_history and
@@ -266,7 +265,9 @@ class PreprocessPennsylvania(Preprocessor):
 
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
-        main_df = self.config.coerce_strings(main_df, exclude=["county", "gender"])
+        main_df = self.config.coerce_strings(
+            main_df, exclude=["county", "gender"]
+        )
         main_df = config.coerce_numeric(
             main_df,
             extra_cols=[
