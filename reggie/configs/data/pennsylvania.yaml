@@ -329,3 +329,7 @@ county_names:
   - Westmoreland
   - Wyoming
   - York
+
+# Columns added to the end of the file
+additional_columns:
+  - registration_method
