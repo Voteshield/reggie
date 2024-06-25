@@ -82,7 +82,7 @@ class PreprocessPennsylvania(Preprocessor):
 
         # PA Added a new column for registration_method on June 18, 2024
         if date_from_str(self.raw_s3_file) > "2024-06-17":
-            dfcols.extend(config["no_diff_columns"])
+            dfcols.extend(config["blacklist_columns"])
 
         # create a mapping that returns a series based on the values across rows (voters) of cells (election info).
         # consolidates the non nan values into one string that can be appended as a column later for the all_history and

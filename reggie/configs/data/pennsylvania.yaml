@@ -331,5 +331,5 @@ county_names:
   - York
 
 # Columns added to the end of the file
-no_diff_columns:
+blacklist_columns:
   - registration_method
