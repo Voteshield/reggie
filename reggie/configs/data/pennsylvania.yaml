@@ -332,4 +332,4 @@ county_names:
 
 # Columns added to the end of the file
 blacklist_columns:
-  - registration_method
+  - registration_method # Added June 17, 2024

@@ -93,10 +93,16 @@ class PreprocessPennsylvania(Preprocessor):
                     li = [x for x in li if x != "nan"]
                     return li
                 else:
-                    li = [zone_dict[x] for x in li if x != "nan" and x in zone_dict]
+                    li = [
+                        zone_dict[x]
+                        for x in li
+                        if x != "nan" and x in zone_dict
+                    ]
                     return li
 
-            return pd.Series(map(mapping, df_sub[columns].values.astype(str).tolist()))
+            return pd.Series(
+                map(mapping, df_sub[columns].values.astype(str).tolist())
+            )
 
         sorted_codes = []
         sorted_code_dict = defaultdict(defaultdict)
@@ -105,8 +111,12 @@ class PreprocessPennsylvania(Preprocessor):
             logging.info("Processing {} {}/{}".format(c, idx, len(counties)))
             c = format_column_name(c)
             try:
-                voter_file = next(f for f in voter_files if c in f["name"].lower())
-                election_map = next(f for f in election_maps if c in f["name"].lower())
+                voter_file = next(
+                    f for f in voter_files if c in f["name"].lower()
+                )
+                election_map = next(
+                    f for f in election_maps if c in f["name"].lower()
+                )
                 zones = next(f for f in zone_codes if c in f["name"].lower())
                 types = next(f for f in zone_types if c in f["name"].lower())
             except StopIteration:
@@ -180,7 +190,9 @@ class PreprocessPennsylvania(Preprocessor):
 
             # Gather the pairs of election columns to iterate over both at the same time to collect the information
             # contained in both of the columns per election
-            vote_column_list = list(zip(df.columns[70:150:2], df.columns[71:150:2]))
+            vote_column_list = list(
+                zip(df.columns[70:150:2], df.columns[71:150:2])
+            )
 
             # get the value from the eleciton map key for the election name,
             # then combine it with the value in the party and vote type cells for the full election information
@@ -189,7 +201,11 @@ class PreprocessPennsylvania(Preprocessor):
             # The columns are all named election_#_vote_type but the cells contain the relevant information
             vote_hist_df = pd.DataFrame(
                 {
-                    i: election_map[i.split("_")[1]] + " " + df[i] + " " + df[j]
+                    i: election_map[i.split("_")[1]]
+                    + " "
+                    + df[i]
+                    + " "
+                    + df[j]
                     for i, j in vote_column_list
                     if i.split("_")[1] in election_map
                 }
@@ -214,7 +230,9 @@ class PreprocessPennsylvania(Preprocessor):
                     sorted_code_dict[current_key] = new_dict_entry
             # converts the dataframe to a series that contains the list of elections participate in indexed on position
             vote_hist_df = list_map(vote_hist_df, vote_hist_df.columns)
-            districts = list_map(df[district_columns], district_columns, zone_dict)
+            districts = list_map(
+                df[district_columns], district_columns, zone_dict
+            )
 
             df["all_history"] = vote_hist_df
             df["districts"] = districts
@@ -247,7 +265,9 @@ class PreprocessPennsylvania(Preprocessor):
 
         logging.info("coercing")
         main_df = config.coerce_dates(main_df)
-        main_df = self.config.coerce_strings(main_df, exclude=["county", "gender"])
+        main_df = self.config.coerce_strings(
+            main_df, exclude=["county", "gender"]
+        )
         main_df = config.coerce_numeric(
             main_df,
             extra_cols=[
