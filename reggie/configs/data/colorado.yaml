@@ -475,3 +475,4 @@ no_diff_columns:
   - 'DISTRICT_CODE'
   - 'DISTRICT_TYPE'
   - 'DISTRICT_NAME'
+  - 'PREFERENCE'
