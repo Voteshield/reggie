@@ -195,7 +195,7 @@ class PreprocessWisconsin(Preprocessor):
             sparse_hist = []
             votetype_hist = []
             all_hist = []
-            for i, k in row.iteritems():
+            for i, k in row.items():
                 if pd.notnull(k):
                     sparse_hist.append(sorted_codes_dict[i]["index"])
                     type_hist = k.replace(" ", "")
