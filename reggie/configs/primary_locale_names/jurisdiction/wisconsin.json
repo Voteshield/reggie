@@ -6253,6 +6253,10 @@
   {
     "id": "village of fox crossing - winnebago county",
     "name": "Village of Fox Crossing (Winnebago County)"
+  },  
+  {
+    "id": "village of fox crossing - multiple counties",
+    "name": "Village of Fox Crossing (Multiple Counties)"
   },
   {
     "id": "village of fox point - milwaukee county",
@@ -6329,6 +6333,14 @@
   {
     "id": "village of greendale - milwaukee county",
     "name": "Village of Greendale (Milwaukee County)"
+  },  
+  {
+    "id": "village of greenleaf - brown county",
+    "name": "Village of Greenleaf (Brown County)"
+  },
+  {
+    "id": "village of greenville - outagamie county",
+    "name": "Village of Greenville (Outagamie County)"
   },
   {
     "id": "village of gresham - shawano county",
@@ -6501,6 +6513,10 @@
   {
     "id": "village of lake hallie - chippewa county",
     "name": "Village of Lake Hallie (Chippewa County)"
+  },  
+  {
+    "id": "village of lake hallie - multiple counties",
+    "name": "Village of Lake Hallie (Multiple Counties)"
   },
   {
     "id": "village of lake nebagamon - douglas county",
@@ -6525,6 +6541,10 @@
   {
     "id": "village of linden - iowa county",
     "name": "Village of Linden (Iowa County)"
+  },  
+  {
+    "id": "village of lisbon - waukesha county",
+    "name": "Village of Lisbon (Waukesha County)"
   },
   {
     "id": "village of little chute - outagamie county",
@@ -6933,6 +6953,10 @@
   {
     "id": "village of rib lake - taylor county",
     "name": "Village of Rib Lake (Taylor County)"
+  },  
+  {
+    "id": "village of rib mountain - marathon county",
+    "name": "Village of Rib Mountain (Marathon County)"
   },
   {
     "id": "village of richfield - washington county",
@@ -7195,6 +7219,10 @@
     "name": "Village of Valders (Manitowoc County)"
   },
   {
+    "id": "village of vernon - waukesha county",
+    "name": "Village of Vernon (Waukesha County)"
+  },
+  {
     "id": "village of vesper - wood county",
     "name": "Village of Vesper (Wood County)"
   },
@@ -7221,6 +7249,10 @@
   {
     "id": "village of waterford - racine county",
     "name": "Village of Waterford (Racine County)"
+  },
+  {
+    "id": "village of waukesha - waukesha county",
+    "name": "Village of Waukesha (Waukesha County)"
   },
   {
     "id": "village of waunakee - dane county",
