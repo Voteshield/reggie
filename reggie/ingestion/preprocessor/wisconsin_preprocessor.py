@@ -217,10 +217,6 @@ class PreprocessWisconsin(Preprocessor):
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
 
-        # Check the file for all the proper locales
-        self.locale_check(
-            set(main_df[self.config["primary_locale_identifier"]]),
-        )
 
         self.meta = {
             "message": "wisconsin_{}".format(datetime.now().isoformat()),
