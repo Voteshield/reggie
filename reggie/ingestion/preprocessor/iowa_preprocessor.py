@@ -75,6 +75,8 @@ class PreprocessIowa(Preprocessor):
 
         # Reads the headers in on the first file given
         headers = pd.read_csv(first_file["obj"], nrows=1).columns
+        # reset pointer for next read
+        first_file["obj"].seek(0)
 
         # Gather the columns for renaming in order to fit the original schema in the database and then rename
         # so that the columns in the header will fit what is expected
