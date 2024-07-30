@@ -33,7 +33,6 @@ republican_party: None
 no_party_affiliation: 'NULL'
 missing_required_fields: true
 demographic_fields_available:
-#  - status
 absentee_ballot_code: "'Absentee'"
 date_format: '%m/%d/%Y'
 generated_columns:
