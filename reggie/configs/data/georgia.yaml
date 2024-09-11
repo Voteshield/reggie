@@ -393,6 +393,14 @@ race_options:
   American Indian: american_indian
   Refused: refused
   Multi-Racial: multi_racial
+  WHITE: white
+  BLACK: black
+  HISPANIC/LATINO: hispanic_or_latino
+  ASIAN/PACIFIC ISLANDER: asian_or_pacific_islander
+  AMERICAN INDIAN: american_indian
+  ALASKAN NATIVE: alaskan_native
+  OTHER: other
+  UNKNOWN: unknown
 
 # 2023 column header update
 # new column name: original column name
