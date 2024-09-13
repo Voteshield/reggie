@@ -213,7 +213,12 @@ class PreprocessGeorgia(Preprocessor):
 
             # Convert voter status to match existing system
             df_voters["Voter_status"] = df_voters["Voter_status"].map(
-                {"Active": "A", "Inactive": "I"}
+                {
+                    "Active": "A",
+                    "Inactive": "I",
+                    "ACTIVE": "A",
+                    "INACTIVE": "I",
+                }
             )
 
         df_voters["Registration_Number"] = (
