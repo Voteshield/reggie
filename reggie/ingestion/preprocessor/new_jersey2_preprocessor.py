@@ -50,6 +50,16 @@ class PreprocessNewJersey2(Preprocessor):
                     break
             return df
 
+        def create_birthday_from_birthyear(df):
+            """
+            In Sept 2024, due to a law change, NJ stopped
+            giving us full birth date and now only gives
+            us birth year.
+            """
+            df["dob_year"] = df["dob_year"].map(lambda x: f"01-01-{x}")
+            df.rename(columns={"dob_year": "dob"}, inplace=True)
+            return df
+
         def combine_dfs(filelist):
             df = pd.DataFrame()
             for f in filelist:
@@ -58,7 +68,14 @@ class PreprocessNewJersey2(Preprocessor):
                     f["obj"], on_bad_lines="warn"
                 )
                 if "vlist" in f["name"]:
-                    new_df = format_birthdays_differently_per_county(new_df)
+                    if "dob" in new_df.columns:
+                        new_df = format_birthdays_differently_per_county(new_df)
+                    elif "dob_year" in new_df.columns:
+                        new_df = create_birthday_from_birthyear(new_df)
+                    else:
+                        # One file from Sept 2024 if missing both birthdate and birthyear
+                        new_df["dob"] = np.nan
+
                 df = pd.concat([df, new_df], axis=0)
             return df
 
