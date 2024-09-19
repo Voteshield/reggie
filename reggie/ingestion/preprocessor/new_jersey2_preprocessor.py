@@ -56,7 +56,11 @@ class PreprocessNewJersey2(Preprocessor):
             giving us full birth date and now only gives
             us birth year.
             """
-            df["dob_year"] = df["dob_year"].map(lambda x: f"01-01-{x}")
+            df["dob_year"] = pd.to_datetime(
+                    df["dob_year"].astype(str) + "-01-01",
+                    format="%Y-%m-%d",
+                    errors="coerce",
+                )
             df.rename(columns={"dob_year": "dob"}, inplace=True)
             return df
 
