@@ -358,7 +358,7 @@ class PreprocessGeorgia(Preprocessor):
         sorted_codes_dict = {
             k: {
                 "index": i,
-                "count": int(counts[k]),
+                "count": int(counts[i]),
                 "date": datetime.strptime(k[0:8], "%Y%m%d"),
             }
             for i, k in enumerate(sorted_codes)
