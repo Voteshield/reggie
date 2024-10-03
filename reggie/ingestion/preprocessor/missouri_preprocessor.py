@@ -104,7 +104,7 @@ class PreprocessMissouri(Preprocessor):
             sorted_codes_dict = {
                 k: {
                     "index": i,
-                    "count": int(counts[i]),
+                    "count": int(counts[k]),
                     "date": date_from_str(k),
                 }
                 for i, k in enumerate(sorted_codes)

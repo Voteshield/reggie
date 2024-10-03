@@ -201,7 +201,7 @@ class PreprocessTexas(Preprocessor):
         sorted_codes_dict = {
             k: {
                 "index": i,
-                "count": int(counts[i]),
+                "count": int(counts[k]),
                 "date": str(texas_datetime(k).date()),
             }
             for i, k in enumerate(sorted_codes)

@@ -108,7 +108,7 @@ class PreprocessOklahoma(Preprocessor):
         counts = counts[count_order]
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {
-            k: {"index": i, "count": int(counts[i]), "date": date_from_str(k)}
+            k: {"index": i, "count": int(counts[k]), "date": date_from_str(k)}
             for i, k in enumerate(sorted_codes)
         }
         hdf["array_position"] = hdf["ElectionDate"].map(

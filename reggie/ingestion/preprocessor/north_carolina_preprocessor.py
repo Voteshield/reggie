@@ -118,7 +118,7 @@ class PreprocessNorthCarolina(Preprocessor):
 
         sorted_codes = valid_elections.tolist()
         sorted_codes_dict = {
-            k: {"index": i, "count": int(counts[i]), "date": date_from_str(k)}
+            k: {"index": i, "count": int(counts[k]), "date": date_from_str(k)}
             for i, k in enumerate(sorted_codes)
         }
         vote_hist["array_position"] = vote_hist["election_desc"].map(
