@@ -114,7 +114,7 @@ class PreprocessNewYork(Preprocessor):
         gc.collect()
 
         sorted_codes_dict = {
-            k: {"index": i, "count": int(counts[k])}
+            k: {"index": i, "count": int(counts[i])}
             for i, k in enumerate(sorted_codes)
         }
         del counts

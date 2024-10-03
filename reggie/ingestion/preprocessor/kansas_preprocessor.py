@@ -111,7 +111,7 @@ class PreprocessKansas(Preprocessor):
             sorted_codes_dict = {
                 k: {
                     "index": i,
-                    "count": int(counts[k]),
+                    "count": int(counts[i]),
                     "date": ks_hist_date(k),
                 }
                 for i, k in enumerate(sorted_codes)
