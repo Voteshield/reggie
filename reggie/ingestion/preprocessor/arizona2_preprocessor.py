@@ -151,7 +151,7 @@ class PreprocessArizona2(Preprocessor):
         sorted_codes_dict = {
             k: {
                 "index": int(i),
-                "count": int(counts[i]),
+                "count": int(counts[k]),
                 "date": handle_history_dates(k),
             }
             for i, k in enumerate(sorted_codes)
