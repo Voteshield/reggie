@@ -193,3 +193,13 @@ ordered_generated_columns:
   - sparse_history
   - votetype_history
   - party_history
+# Arizona stopped using full election dates in Sept 2024,
+# but we can add back the ones we know about.
+# (Although it will be annoying to maintain this list.)
+election_dates:
+  GENERAL2020: 11/03/2020
+  PRIMARY2022: 08/02/2022
+  GENERAL2022: 11/08/2022
+  2024PRESIDENTIALPREFERENCE: 03/19/2024
+  PRIMARY2024: 07/30/2024
+  GENERAL2024: 11/05/2024
