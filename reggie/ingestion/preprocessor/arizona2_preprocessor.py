@@ -6,12 +6,20 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
+import re
 
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
+
+
+HISTORY_COLUMN_REGEX = re.compile(
+    "^(\d|GENERAL|PRIMARY|PRESIDENTIAL)",
+    flags=re.I,
+)
+YEAR_REGEX = re.compile("\d{4}")
 
 
 class PreprocessArizona2(Preprocessor):
@@ -95,8 +103,9 @@ class PreprocessArizona2(Preprocessor):
         # Starting in Feb 2024 occupation was removed from the columns they send us
         if "Occupation" not in main_df.columns:
             main_df["Occupation"] = np.nan
-        voter_columns = [c for c in main_df.columns if not c[0].isdigit()]
-        history_columns = [c for c in main_df.columns if c[0].isdigit()]
+
+        voter_columns = [c for c in main_df.columns if not HISTORY_COLUMN_REGEX.match(c)]
+        history_columns = [c for c in main_df.columns if HISTORY_COLUMN_REGEX.match(c)]
 
         self.column_check(voter_columns)
         to_normalize = history_columns + [
@@ -118,6 +127,22 @@ class PreprocessArizona2(Preprocessor):
             else x
         )
 
+        # AZ removed full history dates from column names in
+        # Sept 2024, so have to handle a little more manually now.
+        def handle_history_dates(col_name):
+            # Try original method, which works if full dates
+            d = date_from_str(col_name)
+            if d is not None:
+                return d
+            # Try manual matching to known elections
+            if col_name in self.config["election_dates"]:
+                return self.config["election_dates"][col_name]
+            # Default placeholder otherwise is just Jan 1
+            d = YEAR_REGEX.search(col_name)
+            if d is not None:
+                return f"01/01/{d.group(0)}"
+            return None
+
         # handle history:
         sorted_codes = history_columns[::-1]
         hist_df = main_df[sorted_codes]
@@ -126,8 +151,8 @@ class PreprocessArizona2(Preprocessor):
         sorted_codes_dict = {
             k: {
                 "index": int(i),
-                "count": int(counts[i]),
-                "date": date_from_str(k),
+                "count": int(counts[k]),
+                "date": handle_history_dates(k),
             }
             for i, k in enumerate(sorted_codes)
         }
