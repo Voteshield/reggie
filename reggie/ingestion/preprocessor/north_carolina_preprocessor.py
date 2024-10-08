@@ -142,8 +142,9 @@ class PreprocessNorthCarolina(Preprocessor):
         # registration dates of some cancelled and
         # inactive voters. Need to convert these to
         # explicitly null for our system.
+        # In Oct 2024, they switched to these to "##/##/####".
         voter_df["registr_dt"] = voter_df["registr_dt"].map(
-            lambda x: x if x != "XX-XX-XXXX" else ""
+            lambda x: x if (("X" not in x) and ("#" not in x)) else ""
         )
 
         voter_df = self.config.coerce_strings(voter_df)
