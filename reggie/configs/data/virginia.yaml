@@ -97,9 +97,9 @@ address_fields:
 street_address_fields:
   - HOUSE_NUMBER
   - HOUSENUMBERSUFFIX
+  - DIRECTION
   - STREET_NAME
   - STREETTYPECODENAME
-  - DIRECTION
   - POST_DIRECTION
   - CITY
 format:

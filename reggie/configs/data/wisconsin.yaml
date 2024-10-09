@@ -67,9 +67,7 @@ address_fields:
 street_address_fields:
   - HouseNumber
   - StreetName
-  - Address1
-  - Address2
-  - ZipCode
+  - MailingCityStateZip
 format:
   separate_hist: false
   separate_counties_voter_file: false

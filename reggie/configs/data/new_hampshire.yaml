@@ -60,8 +60,6 @@ street_address_fields:
   - ad_num_suffix_a
   - ad_num_suffix_b
   - ad_str1
-  - ad_str2
-  - ad_str3
   - ad_city
 format:
   separate_hist: true
