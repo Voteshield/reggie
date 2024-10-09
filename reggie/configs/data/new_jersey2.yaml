@@ -61,6 +61,14 @@ address_fields:
   - apt_unit
   - city
   - zip
+street_address_fields:
+  - street_num
+  - street_pre
+  - street_post
+  - street_base
+  - street_suff
+  - street_name
+  - city
 columns:
   id: text
   leg_id: int

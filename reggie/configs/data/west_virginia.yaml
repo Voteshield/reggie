@@ -95,6 +95,9 @@ address_fields:
   - MAIL STATE
   - MAIL ZIP
 
+street_address_fields:
+  - a
+
 # All columns
 # ID_VOTER|County_Name|FIRST NAME|Mid|LAST NAME|Suffix|DATE OF BIRTH|SEX|HOUSE NO|STREET|STREET2|UNIT|CITY|STATE|ZIP|MAIL HOUSE NO|MAIL STREET|MAIL STREET2|MAIL UNIT|MAIL CITY|MAIL STATE|MAIL ZIP|REGISTRATION DATE|PartyAffiliation|Status|Congressional District|Senatorial District|Delegate District|Magisterial District|Precinct_Number|POLL_NAME
 column_names:

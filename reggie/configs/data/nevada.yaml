@@ -52,6 +52,9 @@ address_fields:
   - City
   - State_addr
   - Zip
+street_address_fields:
+  - Address_1
+  - City
 format:
   separate_hist: true
   separate_counties_voter_file: false

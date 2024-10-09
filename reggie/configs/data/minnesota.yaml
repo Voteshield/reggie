@@ -53,6 +53,10 @@ address_fields:
   - MailCity
   - MailState
   - MailZipCode
+street_address_fields:
+  - HouseNumber
+  - StreetName
+  - City
 additional_snapshot_columns:
   all_history: text[]
 generated_columns:
