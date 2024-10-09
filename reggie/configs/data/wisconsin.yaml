@@ -65,7 +65,11 @@ address_fields:
   - UnitNumber
   - ZipCode
 street_address_fields:
-  - a
+  - HouseNumber
+  - StreetName
+  - Address1
+  - Address2
+  - ZipCode
 format:
   separate_hist: false
   separate_counties_voter_file: false

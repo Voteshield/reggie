@@ -64,10 +64,9 @@ address_fields:
 street_address_fields:
   - street_num
   - street_pre
-  - street_post
   - street_base
   - street_suff
-  - street_name
+  - street_post
   - city
 columns:
   id: text
