@@ -79,6 +79,13 @@ address_fields:
   - mailadd2
   - mailadd3
   - mailadd4
+street_address_fields:
+  - raddnumber
+  - rhalfcode
+  - rpredirection
+  - rstreetname
+  - rpostdirection
+  - rcity
 format:
   separate_hist: false
   segmented_files: false

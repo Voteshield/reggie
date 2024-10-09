@@ -66,6 +66,15 @@ address_fields:
   - MAILING_ADDRESS_LINE_THREE
   - MAILING_ADDRESS_LINE_FOUR
   - MAILING_ADDRESS_LINE_FIVE
+street_address_fields:
+  - STREET_NUMBER_PREFIX
+  - STREET_NUMBER
+  - STREET_NUMBER_SUFFIX
+  - DIRECTION_PREFIX
+  - STREET_NAME
+  - STREET_TYPE
+  - DIRECTION_SUFFIX
+  - CITY
 format:
   separate_hist: true
   segmented_files: false

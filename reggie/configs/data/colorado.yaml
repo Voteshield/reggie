@@ -82,6 +82,14 @@ address_fields:
   - MAILING_ZIP_CODE
   - MAILING_ZIP_PLUS
   - MAILING_COUNTRY
+street_address_fields:
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - RESIDENTIAL_CITY
 additional_snapshot_columns:
   all_history: text[]
   vote_type: text[]

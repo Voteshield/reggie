@@ -64,6 +64,11 @@ address_fields:
   - Mail_address_2
   - Mail_address_3
   - Mail_country
+street_address_fields:
+  - Residence_house_number
+  - Residence_street_name
+  - Residence_street_suffix
+  - Residence_city
 ordered_generated_columns:
   - all_history
   - sparse_history

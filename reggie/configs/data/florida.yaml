@@ -77,6 +77,9 @@ address_fields:
   - Mailing_State
   - Mailing_Zipcode
   - Mailing_Country
+street_address_fields:
+  - Residence_Address_Line_1
+  - Residence_City
 additional_snapshot_columns:
   all_history: text[]
 hist_columns:
