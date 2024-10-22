@@ -34,7 +34,9 @@ absentee_ballot_code: absentee
 vote_in_person_ballot_code: inPerson
 protected_ballot_code: protected
 provisional_ballot_code: provisional
-date_format: '%m/%d/%Y'
+date_format:
+  - '%m/%d/%Y'
+  - "%Y"
 generated_columns:
   all_history: text[]
   sparse_history: int[]
