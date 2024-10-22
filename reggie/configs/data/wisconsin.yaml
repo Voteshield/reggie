@@ -64,6 +64,10 @@ address_fields:
   - UnitType
   - UnitNumber
   - ZipCode
+street_address_fields:
+  - HouseNumber
+  - StreetName
+  - MailingCityStateZip
 format:
   separate_hist: false
   separate_counties_voter_file: false

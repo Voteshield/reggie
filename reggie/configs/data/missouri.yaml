@@ -56,6 +56,14 @@ address_fields:
   - Mailing City
   - Mailing State
   - Mailing ZipCode
+street_address_fields:
+  - House Number
+  - House Suffix
+  - Pre Direction
+  - Street Name
+  - Street Type
+  - Post Direction
+  - Residential City
 format:
   separate_hist: false
   separate_counties_voter_file: false

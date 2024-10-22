@@ -76,6 +76,14 @@ address_fields:
   - Mailing_City
   - Mailing_State
   - Mailing_Zipcode
+street_address_fields:
+  - Permanent_House_Number
+  - Permanent_Designator
+  - Permanent_Directional_Prefix
+  - Permanent_Street_Name
+  - Permanent_Street_Type
+  - Permanent_Directional_Suffix
+  - Permanent_City
 additional_snapshot_columns:
   all_history: text[]
   sparse_history: int[]

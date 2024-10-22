@@ -96,6 +96,14 @@ address_fields:
   - MAILING_ADDRESS_LINE_3
   - MAILING_CITY
   - MAILING_STATE
+street_address_fields:
+  - HOUSE_NUMBER
+  - HOUSENUMBERSUFFIX
+  - DIRECTION
+  - STREET_NAME
+  - STREETTYPECODENAME
+  - POST_DIRECTION
+  - CITY
 format:
   separate_hist: true
   separate_counties_voter_file: false

@@ -70,6 +70,12 @@ address_fields:
   - mailing_state
   - mailing_country
   - mailing_zip_code
+street_address_fields:
+  - street_number
+  - suff_a
+  - suff_b
+  - street_name
+  - city
 format:
   separate_hist: True
   segmented_files: false

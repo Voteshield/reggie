@@ -53,6 +53,9 @@ address_fields:
   - MAILING_ZIP_PLUS4
   - MAILING_COUNTRY
   - MAILING_POSTAL_CODE
+street_address_fields:
+  - RESIDENTIAL_ADDRESS1
+  - RESIDENTIAL_CITY
 additional_snapshot_columns:
   all_history: text[]
   general_history: text[]

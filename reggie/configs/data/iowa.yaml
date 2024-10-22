@@ -69,6 +69,14 @@ address_fields:
   - STATE_2
   - ZIP_CODE_2
   - ZIP_PLUS_2
+street_address_fields:
+  - HOUSE_NUM
+  - HOUSE_SUFFIX
+  - PRE_DIR
+  - STREET_NAME
+  - STREET_TYPE
+  - POST_DIR
+  - CITY_1
 format:
   separate_hist: false
   separate_counties_voter_file: false

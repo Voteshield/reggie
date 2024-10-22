@@ -62,6 +62,11 @@ address_fields:
   - mail_zip
   - county
   - mail_country
+street_address_fields:
+  - house_number
+  - house_number_suffix
+  - street_name
+  - city
 format:
   separate_hist: false
   segmented_files: true

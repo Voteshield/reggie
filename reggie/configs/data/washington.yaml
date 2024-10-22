@@ -76,7 +76,14 @@ address_fields:
   - MailCity
   - MailZip
   - MailCountry
-
+street_address_fields:
+  - RegStNum
+  - RegStFrac
+  - RegStPreDirection
+  - RegStName
+  - RegStType
+  - RegStPostDirection
+  - RegCity
 match_fields:
   - FName
   - LName

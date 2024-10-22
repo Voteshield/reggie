@@ -63,6 +63,15 @@ address_fields:
   - City
   - StateAddr
   - Zip
+street_address_fields:
+  - AddressNumber
+  - HouseFractionNumber
+  - AddressNumberSuffix
+  - StreetDirPrefix
+  - StreetName
+  - StreetType
+  - StreetDirSuffix
+  - City
 format:
   separate_hist: true
   segmented_files: false
