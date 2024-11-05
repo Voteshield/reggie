@@ -48,6 +48,11 @@ class PreprocessWisconsin(Preprocessor):
             main_file = preferred_files[0]
         else:
             main_file = new_files[0]
+        # In Nov 2024, WI started separating data into 2 files (active, inactive)
+        other_files = new_files[1:]
+        logging.info(
+            f"main file: {main_file['name']}; other files: {', '.join([f['name'] for f in other_files])}"
+        )
 
         chardata = main_file["obj"].read(100000)
         result = chardet.detect(chardata)
@@ -126,6 +131,20 @@ class PreprocessWisconsin(Preprocessor):
             dtype=dtype_dict,
             on_bad_lines="warn",
         )
+
+        # Read other files, if more than one
+        if len(other_files) > 0:
+            for next_file in other_files:
+                next_df = self.read_csv_count_error_lines(
+                    next_file["obj"],
+                    sep=file_sep,
+                    encoding=encoding_result,
+                    dtype=dtype_dict,
+                    on_bad_lines="warn",
+                )
+                main_df = pd.concat([main_df, next_df], axis=0)
+        main_df.reset_index(inplace=True, drop=True)
+
         del self.main_file, self.temp_files, new_files
         gc.collect()
 
