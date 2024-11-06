@@ -70,7 +70,7 @@ class PreprocessKansas(Preprocessor):
                 if df.columns[0] != self.config["ordered_columns_new"][0]:
                     # Assume they are scrambled but still the same columns;
                     # Rearrange order.
-                    df = df[c["ordered_columns_new"]]
+                    df = df[self.config["ordered_columns_new"]]
 
             else:
                 logging.info("Incorrect number of columns found for Kansas")
