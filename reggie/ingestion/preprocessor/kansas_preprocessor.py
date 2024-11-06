@@ -58,12 +58,21 @@ class PreprocessKansas(Preprocessor):
                     on_bad_lines="warn",
                     encoding="latin-1",
                 )
+
         try:
             df.columns = self.config["ordered_columns"]
         except ValueError:
-            try:
-                df.columns = self.config["ordered_columns_new"]
-            except ValueError:
+            if len(df.columns) == len(self.config["ordered_columns_new"]):
+
+                # In Nov 2024, Kansas scrambled the column order,
+                # although the columns are still the same set
+                # as "ordered_columns_new".
+                if df.columns[0] != self.config["ordered_columns_new"][0]:
+                    # Assume they are scrambled but still the same columns;
+                    # Rearrange order.
+                    df = df[c["ordered_columns_new"]]
+
+            else:
                 logging.info("Incorrect number of columns found for Kansas")
                 raise MissingNumColumnsError(
                     "{} state is missing columns".format(self.state),
