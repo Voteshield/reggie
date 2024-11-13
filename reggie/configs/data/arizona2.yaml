@@ -96,6 +96,13 @@ address_fields:
   - MailingState
   - MailingZip
   - MailingCountry
+street_address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - ResidenceCity
 columns:
     RegistrantID: int
     RegistrationDate: date

@@ -58,6 +58,9 @@ address_fields:
   - Mailing Address City
   - Mailing Address State
   - Mailing Address Zip
+street_address_fields:
+  - Legal Address Line 1
+  - Legal Address City
 generated_columns:
   all_history: text[]
   sparse_history: int[]

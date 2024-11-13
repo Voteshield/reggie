@@ -63,6 +63,9 @@ address_fields:
   - mail_city
   - mail_state
   - mail_zipcode
+street_address_fields:
+  - res_street_address
+  - res_city_desc
 data_chunk_links:
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvoter_Statewide.zip
   - https://s3.amazonaws.com/dl.ncsbe.gov/data/ncvhis_Statewide.zip

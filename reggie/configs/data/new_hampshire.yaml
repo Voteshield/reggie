@@ -55,6 +55,12 @@ address_fields:
   - mail_city
   - mail_st
   - mail_zip5
+street_address_fields:
+  - ad_num
+  - ad_num_suffix_a
+  - ad_num_suffix_b
+  - ad_str1
+  - ad_city
 format:
   separate_hist: true
   separate_counties_voter_file: false

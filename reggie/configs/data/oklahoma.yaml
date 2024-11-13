@@ -80,6 +80,13 @@ address_fields:
   - MailCity
   - MailState
   - MailZip
+street_address_fields:
+  - StreetNum
+  - StreetDir
+  - StreetName
+  - StreetType
+  - StreetPostDir
+  - City
 generated_columns:
   all_history: varchar[]
   votetype_history: varchar[]

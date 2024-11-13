@@ -103,6 +103,14 @@ address_fields:
   - text_mail_zip4
   - text_mail_carrier_rte
   - ind_mail_military
+street_address_fields:
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - text_res_city
 format:
   separate_hist: false
   segmented_files: true
