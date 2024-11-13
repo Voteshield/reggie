@@ -154,6 +154,16 @@ class PreprocessMichigan(Preprocessor):
                 inplace=True,
             )
 
+        # Sometime after July 2024, Michigan removed
+        # "IS_PERMANENT_ABSENTEE_VOTER" from the voter file.
+        # It was eventually replaced by "IS_PERM_AV_BALLOT_VOTER"
+        # but it may be missing from some files in the interim.
+        if "IS_PERM_AV_BALLOT_VOTER" in vdf.columns:
+            vdf.rename(
+                columns={"IS_PERM_AV_BALLOT_VOTER": "IS_PERMANENT_ABSENTEE_VOTER"},
+                inplace=True,
+            )
+
         vdf = self.reconcile_columns(vdf, self.config["columns"])
         vdf = fill_empty_columns(vdf)
         vdf = vdf.reindex(columns=self.config["ordered_columns"])
