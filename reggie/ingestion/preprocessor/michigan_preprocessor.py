@@ -207,6 +207,7 @@ class PreprocessMichigan(Preprocessor):
                         on_bad_lines="warn",
                         names=range(len(header) + 1)
                     )
+                    logging.info(f"This history file has: {hdf_tmp.shape[0]} rows")
 
                     # Drop final (empty) column
                     hdf_tmp.drop(columns=[hdf_tmp.columns[-1]], inplace=True)
@@ -238,6 +239,7 @@ class PreprocessMichigan(Preprocessor):
             # Collect history files, if multiple
             hdf = pd.concat([hdf, hdf_tmp])
         hdf = hdf.reset_index(drop=True)
+        logging.info(f"Total history has: {hdf.shape[0]} rows")
         del hist_files
         gc.collect()
 
