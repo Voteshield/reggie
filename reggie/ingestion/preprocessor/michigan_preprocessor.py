@@ -56,15 +56,16 @@ class PreprocessMichigan(Preprocessor):
             ]
             + [None]
         )[0]
-        hist_file = (
+        hist_files = (
             [
                 n
                 for n in new_files
                 if "entire_state_h" in n["name"]
                 or "EntireStateVoterHistory" in n["name"]
+                or "Entire State Voter History" in n["name"]
             ]
             + [None]
-        )[0]
+        )
         elec_codes = (
             [n for n in new_files if "electionscd" in n["name"]] + [None]
         )[0]
@@ -169,70 +170,75 @@ class PreprocessMichigan(Preprocessor):
         vdf = vdf.reindex(columns=self.config["ordered_columns"])
         vdf[self.config["party_identifier"]] = "npa"
 
-        logging.info("Loading history file: " + hist_file["name"])
-        if hist_file["name"][-3:] == "lst":
-            hcolspecs = [
-                [0, 13],
-                [13, 15],
-                [15, 20],
-                [20, 25],
-                [25, 38],
-                [38, 39],
-            ]
-            hdf = pd.read_fwf(
-                hist_file["obj"],
-                colspecs=hcolspecs,
-                names=self.config["fwf_hist_columns"],
-                na_filter=False,
-            )
-        elif hist_file["name"][-3:] == "csv":
-
-            # April 2024 history file has an empty column at end
-            # (since they dropped a column), but one too few headers.
-            # So need to read header separately to get it to read
-            # in correctly.
-            if self.file_date > datetime(2024, 4, 8).date():
-
-                header = hist_file["obj"].readline().decode().strip().replace('"',"")
-                header = header.split(",")
-
-                # Read extra column, in case there are inconsistent commas
-                hdf = self.read_csv_count_error_lines(
+        for hist_file in hist_files:
+            logging.info("Loading history file: " + hist_file["name"])
+            hdf = pd.DataFrame()
+            if hist_file["name"][-3:] == "lst":
+                hcolspecs = [
+                    [0, 13],
+                    [13, 15],
+                    [15, 20],
+                    [20, 25],
+                    [25, 38],
+                    [38, 39],
+                ]
+                hdf_tmp = pd.read_fwf(
                     hist_file["obj"],
-                    header=None,
+                    colspecs=hcolspecs,
+                    names=self.config["fwf_hist_columns"],
                     na_filter=False,
-                    on_bad_lines="warn",
-                    names=range(len(header) + 1)
                 )
+            elif hist_file["name"][-3:] == "csv":
 
-                # Drop final (empty) column
-                hdf.drop(columns=[hdf.columns[-1]], inplace=True)
+                # April 2024 history file has an empty column at end
+                # (since they dropped a column), but one too few headers.
+                # So need to read header separately to get it to read
+                # in correctly.
+                if self.file_date > datetime(2024, 4, 8).date():
 
-                # Apply header
-                hdf.columns = header
+                    header = hist_file["obj"].readline().decode().strip().replace('"',"")
+                    header = header.split(",")
 
+                    # Read extra column, in case there are inconsistent commas
+                    hdf_tmp = self.read_csv_count_error_lines(
+                        hist_file["obj"],
+                        header=None,
+                        na_filter=False,
+                        on_bad_lines="warn",
+                        names=range(len(header) + 1)
+                    )
+
+                    # Drop final (empty) column
+                    hdf_tmp.drop(columns=[hdf_tmp.columns[-1]], inplace=True)
+
+                    # Apply header
+                    hdf_tmp.columns = header
+
+                else:
+                    hdf_tmp = self.read_csv_count_error_lines(
+                        hist_file["obj"], na_filter=False, on_bad_lines="warn"
+                    )
+
+                if ("IS_ABSENTEE_VOTER" not in hdf_tmp.columns) and (
+                    "IS_PERMANENT_ABSENTEE_VOTER" in hdf_tmp.columns
+                ):
+                    hdf_tmp.rename(
+                        columns={
+                            "IS_PERMANENT_ABSENTEE_VOTER": "IS_ABSENTEE_VOTER"
+                        },
+                        inplace=True,
+                    )
+                # This is new
+                elif ("IS_ABSENTEE_VOTER" not in hdf_tmp.columns) and (
+                    "IS_PERMANENT_ABSENTEE_VOTER" not in hdf_tmp.columns
+                ):
+                    hdf_tmp["IS_ABSENTEE_VOTER"] = np.nan
             else:
-                hdf = self.read_csv_count_error_lines(
-                    hist_file["obj"], na_filter=False, on_bad_lines="warn"
-                )
-
-            if ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
-                "IS_PERMANENT_ABSENTEE_VOTER" in hdf.columns
-            ):
-                hdf.rename(
-                    columns={
-                        "IS_PERMANENT_ABSENTEE_VOTER": "IS_ABSENTEE_VOTER"
-                    },
-                    inplace=True,
-                )
-            # This is new
-            elif ("IS_ABSENTEE_VOTER" not in hdf.columns) and (
-                "IS_PERMANENT_ABSENTEE_VOTER" not in hdf.columns
-            ):
-                hdf["IS_ABSENTEE_VOTER"] = np.nan
-        else:
-            raise NotImplementedError("File format not implemented")
-        del hist_file
+                raise NotImplementedError("File format not implemented")
+            # Collect history files, if multiple
+            hdf = pd.concat([hdf, hdf_tmp])
+        hdf = hdf.reset_index(drop=True)
+        del hist_files
         gc.collect()
 
         # If hdf has ELECTION_DATE (new style) instead of ELECTION_CODE,
