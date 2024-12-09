@@ -65,7 +65,7 @@ class PreprocessMichigan(Preprocessor):
                 or "Entire State Voter History" in n["name"]
             ]
             + [None]
-        )
+        )[:-1]
         elec_codes = (
             [n for n in new_files if "electionscd" in n["name"]] + [None]
         )[0]
@@ -170,9 +170,9 @@ class PreprocessMichigan(Preprocessor):
         vdf = vdf.reindex(columns=self.config["ordered_columns"])
         vdf[self.config["party_identifier"]] = "npa"
 
+        hdf = pd.DataFrame()
         for hist_file in hist_files:
             logging.info("Loading history file: " + hist_file["name"])
-            hdf = pd.DataFrame()
             if hist_file["name"][-3:] == "lst":
                 hcolspecs = [
                     [0, 13],
