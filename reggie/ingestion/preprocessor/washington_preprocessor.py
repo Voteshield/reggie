@@ -49,7 +49,11 @@ class PreprocessWashington(Preprocessor):
         ]
 
         # there should be only one voter file
-        voter_file = [n for n in new_files if "vrdb" in n["name"].lower()][0]
+        voter_file = [
+            n for n in new_files
+            if "vrdb" in n["name"].lower()
+            or "voterregistrationexport" in n["name"].lower()
+        ][0]
         hist_files = [n for n in new_files if "history" in n["name"].lower()]
 
         if not self.ignore_checks:
