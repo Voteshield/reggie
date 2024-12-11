@@ -86,6 +86,10 @@ class PreprocessArizona2(Preprocessor):
             main_df = add_files_to_main_df(main_df, other_files)
             main_df.reset_index(drop=True, inplace=True)
 
+        # In Dec 2024, file contained 2 copies of "RegistrantID" - removing one
+        if len(np.where(main_df.columns == "RegistrantID")[0]) > 1:
+            main_df = main_df.loc[:, ~main_df.columns.duplicated()].copy()
+
         main_df = self.config.coerce_dates(main_df)
         main_df = self.config.coerce_strings(main_df)
         main_df = self.config.coerce_numeric(
