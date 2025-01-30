@@ -39,7 +39,7 @@ class PreprocessArizona2(Preprocessor):
     def execute(self):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
-        print("entering modified version")
+
         def file_is_active(filename):
             for word in ["Canceled", "Suspense", "Inactive", "Cancelled", "NotReg"]:
                 if word in filename:
@@ -198,21 +198,14 @@ class PreprocessArizona2(Preprocessor):
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         
+        # At some point in time they added in new columns we wanted to track
+        # These columns must be added to the end of the file to match the schema
+        # Or else will need to reconstuct the state. 
+        
+        # Todo: figure out a better way?
         ordered_cols = [col for col in expected_cols if col not in self.config["new_columns"]]
         ordered_cols += self.config["new_columns"]
-        print(ordered_cols)
         voter_df = voter_df[ordered_cols]
-
-        # Sometime they added the columns for VRAZ Voter ID and FedIDOnly, which
-        # we want to track, this adds them in 
-        # This must go at the end because these columns were added to postgres
-        # after the table had been created, putting them to the right of the
-        # history columns in the table.
-        # if "FedIDOnly" not in voter_df.columns:
-        #     voter_df["FedIDOnly"] = np.nan            
-        # 
-        # if "FedNoID" not in voter_df.columns:
-        #     voter_df["FedNoID"] = np.nan
 
         # Check the file for all the proper locales
         self.locale_check(
@@ -224,8 +217,7 @@ class PreprocessArizona2(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        print(voter_df.columns)
-        raise ValueError("stopping before upload")
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=False)),
