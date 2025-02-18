@@ -204,6 +204,9 @@ ordered_generated_columns:
   - sparse_history
   - votetype_history
   - party_history
+# These are new columns added after the files started being ingested. They 
+# correspond to columns manually added to the database, are added at the end
+# of preprocessing to ensure the order matches what is expected. 
 new_columns:
   - FedIDOnly
   - FedNoID
