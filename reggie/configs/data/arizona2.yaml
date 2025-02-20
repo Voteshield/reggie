@@ -143,6 +143,8 @@ columns:
     Municipal: text
     Precinct: text
     VRAZVoterID: text
+    FedIDOnly: text # Order shouldn' matter here?
+    FedNoID: text
 ordered_columns:
   - RegistrantID
   - RegistrationDate
@@ -183,6 +185,8 @@ ordered_columns:
   - Municipal
   - Precinct
   - VRAZVoterID
+  - FedIDOnly
+  - FedNoID
 column_aliases:
     Id: RegistrantID
     DOB(Restricted): DOB
@@ -200,6 +204,12 @@ ordered_generated_columns:
   - sparse_history
   - votetype_history
   - party_history
+# These are new columns added after the files started being ingested. They 
+# correspond to columns manually added to the database, are added at the end
+# of preprocessing to ensure the order matches what is expected. 
+new_columns:
+  - FedIDOnly
+  - FedNoID
 # Arizona stopped using full election dates in Sept 2024,
 # but we can add back the ones we know about.
 # (Although it will be annoying to maintain this list.)

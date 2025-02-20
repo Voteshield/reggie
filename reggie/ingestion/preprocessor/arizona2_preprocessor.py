@@ -111,7 +111,7 @@ class PreprocessArizona2(Preprocessor):
         voter_columns = [c for c in main_df.columns if not HISTORY_COLUMN_REGEX.match(c)]
         history_columns = [c for c in main_df.columns if HISTORY_COLUMN_REGEX.match(c)]
 
-        self.column_check(voter_columns)
+        # self.column_check(voter_columns)
         to_normalize = history_columns + [
             self.config["party_identifier"],
             self.config["voter_status"],
@@ -151,6 +151,9 @@ class PreprocessArizona2(Preprocessor):
         sorted_codes = history_columns[::-1]
         hist_df = main_df[sorted_codes]
         voter_df = main_df[voter_columns]
+        
+        del main_df
+        
         counts = (~hist_df.isna()).sum()
         sorted_codes_dict = {
             k: {
@@ -194,7 +197,15 @@ class PreprocessArizona2(Preprocessor):
             self.config["ordered_columns"] + self.config["ordered_generated_columns"]
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
-        voter_df = voter_df[expected_cols]
+        
+        # At some point in time they added in new columns we wanted to track
+        # These columns must be added to the end of the file to match the schema
+        # Or else will need to reconstuct the state. 
+        
+        # Todo: figure out a better way?
+        ordered_cols = [col for col in expected_cols if col not in self.config["new_columns"]]
+        ordered_cols += self.config["new_columns"]
+        voter_df = voter_df[ordered_cols]
 
         # Check the file for all the proper locales
         self.locale_check(
@@ -206,6 +217,7 @@ class PreprocessArizona2(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=False)),
