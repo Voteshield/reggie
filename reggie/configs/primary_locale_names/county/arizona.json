@@ -7,11 +7,11 @@
   { "name": "Gila", "id": "GILA" },
   { "name": "Graham", "id": "GRAHAM" },
   { "name": "Greenlee", "id": "GREENLEE" },
-  { "name": "La_Paz", "id": "LA_PAZ" },
+  { "name": "La Paz", "id": "LA_PAZ" },
   { "name": "Mohave", "id": "MOHAVE" },
   { "name": "Navajo", "id": "NAVAJO" },
   { "name": "Pinal", "id": "PINAL" },
-  { "name": "Santa_Cruz", "id": "SANTA_CRUZ" },
+  { "name": "Santa Cruz", "id": "SANTA_CRUZ" },
   { "name": "Yavapai", "id": "YAVAPAI" },
   { "name": "Yuma", "id": "YUMA" }
 ]
