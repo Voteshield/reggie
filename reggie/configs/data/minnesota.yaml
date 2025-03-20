@@ -9,6 +9,7 @@ county_identifier: CountyCode
 primary_locale_identifier: CountyCode
 numeric_primary_locale: true
 birthday_identifier: DOBYear
+registration_date_identifier: RegistrationDate
 voter_status: voter_status
 # These are only placeholder values, there is no voter status data provided in Minnesota
 voter_status_active:

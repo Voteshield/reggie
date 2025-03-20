@@ -9,6 +9,7 @@ county_identifier: COUNTY
 primary_locale_identifier: COUNTY
 numeric_primary_locale: false
 birthday_identifier: BIRTH_YEAR
+registration_date_identifier: REGISTRATION_DATE
 voter_status: STATUS
 voter_status_active:
   - Active

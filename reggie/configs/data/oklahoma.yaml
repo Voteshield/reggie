@@ -18,6 +18,7 @@ county_identifier: County
 numeric_primary_locale: False
 party_identifier: PolitalAff
 birthday_identifier: DateOfBirth
+registration_date_identifier: RegistrationDate
 voter_id: VoterID
 voter_status: Status
 voter_status_active:

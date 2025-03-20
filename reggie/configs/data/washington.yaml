@@ -17,6 +17,7 @@ primary_locale_identifier: CountyCode
 numeric_primary_locale: FALSE
 party_identifier: party_identifier
 birthday_identifier: Birthdate
+registration_date_identifier: Registrationdate
 voter_id: StateVoterID
 voter_status: StatusCode
 voter_status_active:

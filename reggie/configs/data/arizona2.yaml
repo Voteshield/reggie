@@ -16,6 +16,7 @@ primary_locale_identifier: County
 numeric_primary_locale: false
 precinct_identifier: Precinct
 birthday_identifier: DOB
+registration_date_identifier: RegistrationDate
 early_voter_identifier: PEVL
 voter_status: Status
 voter_status_active:

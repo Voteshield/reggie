@@ -10,6 +10,7 @@ county_identifier: County
 primary_locale_identifier: County
 numeric_primary_locale: false
 birthday_identifier: Birthdate
+registration_date_identifier: "Registration Date"
 date_format:
   - '%m/%d/%Y'
   - '%Y'

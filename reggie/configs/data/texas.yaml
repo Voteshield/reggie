@@ -8,6 +8,7 @@ county_identifier: County_Code
 primary_locale_identifier: County_Code
 numeric_primary_locale: true
 birthday_identifier: Date_of_Birth
+registration_date_identifier: Effective_Date_of_Registration
 voter_status: Status_Code
 voter_status_active:
   - V
