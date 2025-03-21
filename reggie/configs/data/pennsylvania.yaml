@@ -25,6 +25,7 @@ democratic_party: D
 republican_party: R
 no_party_affiliation: NF
 birthday_identifier: dob
+registration_date_identifier: registration_date
 demographic_fields_available:
   - age
   - gender

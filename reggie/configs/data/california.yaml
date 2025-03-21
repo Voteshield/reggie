@@ -12,6 +12,7 @@ county_identifier: CountyCode
 primary_locale_identifier: CountyCode
 numeric_primary_locale: true
 birthday_identifier: DOB
+registration_date_identifier: RegistrationDate
 voter_status: Status
 # CA only supplies us with voters who have the active status
 voter_status_active:

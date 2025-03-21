@@ -14,6 +14,7 @@ county_identifier: county
 primary_locale_identifier: county
 numeric_primary_locale: false
 birthday_identifier: dob
+registration_date_identifier: registration_date
 date_format:
   - "%m/%d/%y"
   - "%Y-%m-%d"

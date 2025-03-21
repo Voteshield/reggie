@@ -56,6 +56,8 @@ voter_status_inactive:
 # Demographic fields
 birthday_identifier: DATE OF BIRTH
 
+registration_date_identifier: "REGISTRATION DATE"
+
 # Party fields
 party_identifier: PartyAffiliation
 # lots of whitespace in PartyAffiliation column before cleaning
