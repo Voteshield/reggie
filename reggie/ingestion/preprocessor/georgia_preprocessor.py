@@ -277,19 +277,34 @@ class PreprocessGeorgia(Preprocessor):
 
         # If they exist, read new-style history files
         if len(vh_files_new_style) > 0:
-            concat_history_file_new = concat_and_delete(
-                vh_files_new_style, has_headers=True
-            )
-            del vh_files_new_style
-            gc.collect()
 
             logging.info("Reading new-style history files")
-            history_new = self.read_csv_count_error_lines(
-                concat_history_file_new,
-                sep=",",
-                header=0,
-            )
-            del concat_history_file_new
+
+            # March 2025 - New-style history file headers
+            # got switched around, so let's just read them
+            # one at a time and append to a dataframe:
+            history_new = pd.DataFrame()
+            for new_hist_file in vh_files_new_style:
+                df_tmp = self.read_csv_count_error_lines(
+                    new_hist_file["obj"],
+                    sep=",",
+                    header=0,
+                )
+                # Rearrange to original header order
+                df_tmp = df_tmp[[
+                    "County Name",
+                    "Voter Registration Number",
+                    "Election Date",
+                    "Election Type",
+                    "Party",
+                    "Ballot Style",
+                    "Absentee",
+                    "Provisional",
+                    "Supplemental",
+                ]]
+                history_new = pd.concat([history_new, df_tmp])
+            history_new.reset_index(drop=True, inplace=True)
+            del vh_files_new_style
             gc.collect()
 
             # Convert to match old style
