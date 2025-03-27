@@ -104,10 +104,11 @@ class PreprocessVermont(Preprocessor):
             election_counts.index[i]: {
                 "index": i,
                 "count": k,
+                # Vermont only lists general elections, so use an approx date in Nov
                 "date": str(
                     datetime.strptime(election_counts.index[i][:4], "%Y")
                     .date()
-                    .strftime("%m/%d/%Y")
+                    .strftime("11/05/%Y")
                 ),
             }
             for i, k in enumerate(election_counts)
