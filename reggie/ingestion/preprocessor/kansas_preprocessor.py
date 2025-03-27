@@ -91,11 +91,11 @@ class PreprocessKansas(Preprocessor):
 
         def ks_hist_date(s):
             try:
-                elect_year = parser.parse(s[2:6]).year
+                elect_year = datetime.strptime(s[2:6], "%Y").year
             except:
                 elect_year = -1
                 pass
-            if (elect_year < 1850) or (elect_year > date.today().year + 1):
+            if (elect_year < 1990) or (elect_year > date.today().year + 1):
                 elect_year = None
             return elect_year
 
