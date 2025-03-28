@@ -690,6 +690,9 @@ class Preprocessor:
         :param locale_set: a set of locale names derived from the snapshot
         :raises MissingLocaleError:
         """
+        # Prevent floats from being compared, in states with numeric locales
+        locale_set = {int(x) if type(x) == float else x for x in locale_set}
+
         # Convert locale_set items to strings
         locale_set = {
             str(item) if not isinstance(item, str) else item
@@ -715,9 +718,11 @@ class Preprocessor:
             if locale_diff:
                 raise MissingLocaleError(
                     f"{self.state} is missing expected locales: "
-                    f"{', '.join(locale_diff)}",
+                    f"{', '.join(locale_diff)}. "
+                    f"Instead, the file contains these locales: "
+                    f"{', '.join(locale_set - expected_locales)}. ",
                     self.state,
-                    locale_diff
+                    locale_diff,
                 )
         except MissingLocaleError as mle:
             # Save the error for future reference
