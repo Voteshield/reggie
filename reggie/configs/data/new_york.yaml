@@ -13,6 +13,7 @@ primary_locale_identifier: countycode
 numeric_primary_locale: true
 birthday_identifier: dob
 registration_date_identifier: regdate
+last_voted_date_identifier: lastvoteddate
 voter_status: status
 voter_status_active:
   - ACTIVE

@@ -18,6 +18,7 @@ numeric_primary_locale: FALSE
 party_identifier: party_identifier
 birthday_identifier: Birthdate
 registration_date_identifier: Registrationdate
+last_voted_date_identifier: LastVoted
 voter_id: StateVoterID
 voter_status: StatusCode
 voter_status_active:

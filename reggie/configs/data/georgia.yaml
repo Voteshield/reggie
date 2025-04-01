@@ -12,6 +12,7 @@ numeric_primary_locale: true
 precinct_identifier: County_precinct_id
 birthday_identifier: Year_of_Birth
 registration_date_identifier: Registration_date
+last_voted_date_identifier: Date_last_voted
 voter_status: Voter_status
 voter_status_active:
   - A

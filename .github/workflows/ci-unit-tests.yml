@@ -9,7 +9,7 @@ jobs:
     # Usnure of exact issue, but this seems to fix it, and more details here:
     # https://github.com/actions/setup-python/issues/544
     # https://github.com/actions/setup-python/issues/665
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
