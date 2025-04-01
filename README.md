@@ -68,7 +68,7 @@ pip install git+https://github.com/Voteshield/reggie.git
 
 ### Get code and install
 
-Reggie requires Python 3.6 or greater.  All commands are assumed to be within a terminal or command line application.
+Reggie requires Python 3.7 or greater.  All commands are assumed to be within a terminal or command line application.
 
 1. Checkout or download the code from [Github](https://github.com/Voteshield/reggie).
 2. Make sure to go into the project directory: `$ cd reggie`

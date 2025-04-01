@@ -18,6 +18,7 @@ county_identifier: County
 numeric_primary_locale: FALSE
 birthday_identifier: Year of Birth
 registration_date_identifier: "Date of Registration"
+last_voted_date_identifier: "Date last Voted"
 voter_id: VoterID
 voter_status: Status
 voter_status_active:
