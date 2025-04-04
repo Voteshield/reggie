@@ -14,6 +14,14 @@ numeric_primary_locale: true
 birthday_identifier: dob
 registration_date_identifier: regdate
 last_voted_date_identifier: lastvoteddate
+
+# These 2 values are needed to make EBNR feature work in NY:
+# NY is the only state where we can still do EBNR without full voting history,
+# since we have a last voted date
+voting_history_dates_insufficient: True
+# But we are storing it badly, so we need this to flag that we need to reformat it.
+badly_formatted_last_voted_date_field: True
+
 voter_status: status
 voter_status_active:
   - ACTIVE
