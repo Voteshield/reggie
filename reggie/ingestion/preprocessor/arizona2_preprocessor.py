@@ -131,6 +131,11 @@ class PreprocessArizona2(Preprocessor):
             else x
         )
 
+        # 2025 April - some truncated data is causing trouble, where
+        # RegistrantID = 0, so drop any row(s) that look like that:
+        bad_rows = main_df[main_df["RegistrantID"] == 0].index
+        main_df.drop(index=bad_rows, inplace=True)
+
         # AZ removed full history dates from column names in
         # Sept 2024, so have to handle a little more manually now.
         def handle_history_dates(col_name):
