@@ -156,9 +156,9 @@ class PreprocessArizona2(Preprocessor):
         sorted_codes = history_columns[::-1]
         hist_df = main_df[sorted_codes]
         voter_df = main_df[voter_columns]
-        
+
         del main_df
-        
+
         counts = (~hist_df.isna()).sum()
         sorted_codes_dict = {
             k: {
@@ -169,10 +169,14 @@ class PreprocessArizona2(Preprocessor):
             for i, k in enumerate(sorted_codes)
         }
 
+        def filter_vote_codes(x):
+            if type(x) is list:
+                return [c for c in x if not pd.isna(c)]
+            return []
+
         hist_df.loc[:, "vote_codes"] = pd.Series(hist_df.values.tolist())
-        hist_df.loc[:, "vote_codes"] = hist_df.loc[:, "vote_codes"].map(
-            lambda x: [c for c in x if not pd.isna(c)]
-        )
+        hist_df.loc[:, "vote_codes"] = hist_df.loc[:, "vote_codes"].map(filter_vote_codes)
+
         voter_df.loc[:, "votetype_history"] = hist_df.loc[:, "vote_codes"].map(
             lambda x: [c.split("_")[0] for c in x]
         )
@@ -191,9 +195,7 @@ class PreprocessArizona2(Preprocessor):
                 lambda x: c if not pd.isna(x) else np.nan
             )
         voter_df.loc[:, "all_history"] = pd.Series(hist_df.values.tolist())
-        voter_df.loc[:, "all_history"] = voter_df.loc[:, "all_history"].map(
-            lambda x: [c for c in x if not pd.isna(c)]
-        )
+        voter_df.loc[:, "all_history"] = voter_df.loc[:, "all_history"].map(filter_vote_codes)
         voter_df.loc[:, "sparse_history"] = voter_df.loc[:, "all_history"].map(
             insert_code_bin
         )
@@ -202,11 +204,11 @@ class PreprocessArizona2(Preprocessor):
             self.config["ordered_columns"] + self.config["ordered_generated_columns"]
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
-        
+
         # At some point in time they added in new columns we wanted to track
         # These columns must be added to the end of the file to match the schema
         # Or else will need to reconstuct the state. 
-        
+
         # Todo: figure out a better way?
         ordered_cols = [col for col in expected_cols if col not in self.config["new_columns"]]
         ordered_cols += self.config["new_columns"]
