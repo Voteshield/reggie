@@ -96,6 +96,13 @@ class PreprocessNewHampshire(Preprocessor):
             voters_df, extra_cols=["ad_str3", "mail_str3"]
         )
 
+        # Also April 2025 data has some bad rows that distribute data
+        # incorrectly and are missing at least County fields,
+        # most likely other fields as well.
+        # So, just drop these for now.
+        valid_counties = list(self.config.primary_locale_names["county"].keys())
+        voters_df = voters_df[voters_df["County"].isin(valid_counties)]
+
         # collect histories
         hist_df["combined_name"] = (
             hist_df["election_name"].str.replace(" ", "_").str.lower()
