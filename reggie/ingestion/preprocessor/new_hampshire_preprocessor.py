@@ -68,11 +68,29 @@ class PreprocessNewHampshire(Preprocessor):
                             encoding="latin-1",
                         )
 
+        # April 2025 file has changed voter and history file headers.
+        # So reset to original ones.
+        voters_df.rename(
+            columns=self.config["column_aliases_voter_file"],
+            inplace=True,
+        )
+        hist_df.rename(
+            columns=self.config["column_aliases_history_file"],
+            inplace=True,
+        )
+        # Also April 2025 election date data has format
+        # "3/12/2024 0:00:00" instead of "3/12/2024",
+        # so strip that time off.
+        hist_df["election_date"] = hist_df["election_date"].map(
+            lambda x: x.split()[0]
+        )
+
         # add dummy columns for birthday and voter_status
         voters_df[self.config["birthday_identifier"]] = 0
         voters_df[self.config["voter_status"]] = np.nan
 
         self.column_check(list(voters_df.columns))
+
         voters_df = self.config.coerce_strings(voters_df)
         voters_df = self.config.coerce_numeric(
             voters_df, extra_cols=["ad_str3", "mail_str3"]
