@@ -101,7 +101,13 @@ class PreprocessNewHampshire(Preprocessor):
         # most likely other fields as well.
         # So, just drop these for now.
         valid_counties = list(self.config.primary_locale_names["county"].keys())
+        orig_size = voters_df.shape[0]
         voters_df = voters_df[voters_df["County"].isin(valid_counties)]
+        dropped = orig_size - voters_df.shape[0]
+        logging.info(
+            f"Dropped {dropped} rows without valid county names,"
+            f"due to mangled data."
+        )
 
         # collect histories
         hist_df["combined_name"] = (
