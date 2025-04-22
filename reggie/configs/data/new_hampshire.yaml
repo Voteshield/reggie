@@ -171,3 +171,47 @@ county_names:
   rockingham
   strafford
   sullivan
+
+# April 2025, New Hampshire updated their voter and history column fields;
+# But it seems to be a one-to-one transition.
+column_aliases_voter_file:
+  "Voter ID": "id_voter"
+  "Last Name": "nm_last"
+  "First Name": "nm_first"
+  "Middle Name": "nm_mid"
+  "Suffix": "nm_suff"
+  "Party": "cd_party"
+  "Street Number": "ad_num"
+  "Address Suffix": "ad_num_suffix_a"
+  "House Fraction Number": "ad_num_suffix_b"
+  "Street Name": "ad_str1"
+  "Apartment / Unit Number": "ad_unit"
+  "Address Line 2": "ad_str2"
+  "Address Line 3": "ad_str3"
+  "Domicile City/Town": "ad_city"
+  "Postal City/Town": "ad_mail_city"
+  "State": "ad_st"
+  "Zip 5": "ad_zip5"
+  "Zip +4": "ad_zip4"
+  "Mailing Street Number": "mail_num"
+  "Mailing Address Suffix": "mail_num_suffix_a"
+  "Mailing House Fraction Number": "mail_num_suffix_b"
+  "Mailing Street Name": "mail_str1"
+  "Mailing Apartment / Unit Number": "mail_unit"
+  "Mailing Address Line 2": "mail_str2"
+  "Mailing Address Line 3": "mail_str3"
+  "Mailing Postal City/Town": "mail_city"
+  "Mailing State": "mail_st"
+  "Mailing Zip 5": "mail_zip5"
+  "Mailing Zip +4": "mail_zip4"
+  "Ward/District": "ward"
+  "County": "County"
+column_aliases_history_file:
+  "Voter ID": "id_voter"
+  "Election Date": "election_date"
+  "Election Name": "election_name"
+  "Election Type": "election_type"
+  "Election Category": "election_category"
+  "Ballot Type": "ballot_type"
+  "Party Voted": "cd_part_voted"
+  "City/Town": "town"
