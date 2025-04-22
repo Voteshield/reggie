@@ -78,6 +78,12 @@ class PreprocessNewHampshire(Preprocessor):
             columns=self.config["column_aliases_history_file"],
             inplace=True,
         )
+        # Also April 2025 election date data has format
+        # "3/12/2024 0:00:00" instead of "3/12/2024",
+        # so strip that time off.
+        hist_df["election_date"] = hist_df["election_date"].map(
+            lambda x: x.split()[0]
+        )
 
         # add dummy columns for birthday and voter_status
         voters_df[self.config["birthday_identifier"]] = 0
