@@ -70,7 +70,7 @@ class PreprocessNewHampshire(Preprocessor):
 
         # April 2025 file has changed voter and history file headers.
         # So reset to original ones.
-        df_voters.rename(
+        voters_df.rename(
             columns=self.config["column_aliases_voter_file"],
             inplace=True,
         )
