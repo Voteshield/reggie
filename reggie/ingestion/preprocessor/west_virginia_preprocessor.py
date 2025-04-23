@@ -2,6 +2,7 @@
 West Virginia preprocessor.
 """
 
+import chardet
 import datetime
 import gc
 import json
@@ -84,12 +85,21 @@ class PreprocessWestVirginia(Preprocessor):
             )
         voter_file = voter_files[0]
 
+        # April 2025 file was unexpectedly encoded as utf-8-sig
+        # so we need to detect and correctly read in that case.
+        encoding_result = chardet.detect(voter_file["obj"].read(1000))
+        voter_file["obj"].seek(0)
+        if encoding_result["encoding"] == "UTF-8-SIG":
+            voter_file_encoding = encoding_result["encoding"]
+        else:
+            voter_file_encoding = "latin-1"
+
         # Read voter file into pandas dataframe
         logging.info(f'[{config["state"]}] Loading voter file.')
         df_voters = pd.read_csv(
             voter_file["obj"],
             sep=config["delimiter"],
-            encoding="latin-1",
+            encoding=voter_file_encoding,
             dtype=str,
             header=0 if config["has_headers"] else None,
         )
