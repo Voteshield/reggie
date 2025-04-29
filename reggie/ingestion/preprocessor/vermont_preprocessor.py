@@ -54,7 +54,7 @@ class PreprocessVermont(Preprocessor):
         voter_file = [
             n
             for n in new_files
-            if "voter file" or "Statewidevoters" in n["name"].lower()
+            if ("voter file" in n["name"].lower()) or ("statewidevoters" in n["name"].lower())
         ][0]
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
 
