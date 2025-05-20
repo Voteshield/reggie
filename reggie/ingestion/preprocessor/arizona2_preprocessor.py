@@ -108,6 +108,34 @@ class PreprocessArizona2(Preprocessor):
         if "Occupation" not in main_df.columns:
             main_df["Occupation"] = np.nan
 
+        # In spring 2025, they replaced election names with non-descript column headers.
+        # However, we can tell that the 5 non-descript headers (EL1 through EL5) correspond
+        # with the 5 known elections (in 2022 & 2024) from the previous files.
+        # Since elections seem to only be added during even years, we can assume that
+        # these 5 elections will stay constant at least over the rest of 2025.
+        # However, we need to trigger manual intervention to re-evaluate the situation
+        # in 2026, if we have not received better data by then.
+        if date_from_str(self.raw_s3_file) <= "2026-01-01":
+            main_df.rename(
+                columns={
+                    "EL1": "PRIMARY2022",
+                    "EL2": "GENERAL2022",
+                    "EL3": "2024PRESIDENTIALPREFERENCE",
+                    "EL4": "PRIMARY2024",
+                    "EL5": "GENERAL2024",
+                },
+                inplace=True,
+            )
+        else:
+            raise ValueError(
+                "Arizona2 has unreliable election codes that we have been "
+                "assuming (during 2025) refer to 2024 and 2022 elections. "
+                "Since it is now 2026, Arizona may have recently or "
+                "will soon change the set of elections reported in the data. "
+                "Please take a look at the current file and see what the state "
+                "of the election data is."
+            )
+
         voter_columns = [c for c in main_df.columns if not HISTORY_COLUMN_REGEX.match(c)]
         history_columns = [c for c in main_df.columns if HISTORY_COLUMN_REGEX.match(c)]
 
