@@ -97,7 +97,9 @@ class PreprocessWestVirginia(Preprocessor):
 
         # May 2025 also has unmatched quotation marks, so we
         # need to start ignoring quotation marks:
-        if date_from_str(self.raw_s3_file) > "2025-04-01":
+        if (self.raw_s3_file is not None) and (
+            date_from_str(self.raw_s3_file) > "2025-04-01"
+        ):
             quoting = csv.QUOTE_NONE
         else:
             # Leave default for older data, in case it matters
