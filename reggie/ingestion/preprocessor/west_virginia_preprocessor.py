@@ -3,6 +3,7 @@ West Virginia preprocessor.
 """
 
 import chardet
+import csv
 import datetime
 import gc
 import json
@@ -94,6 +95,16 @@ class PreprocessWestVirginia(Preprocessor):
         else:
             voter_file_encoding = "latin-1"
 
+        # May 2025 also has unmatched quotation marks, so we
+        # need to start ignoring quotation marks:
+        if (self.raw_s3_file is not None) and (
+            date_from_str(self.raw_s3_file) > "2025-04-01"
+        ):
+            quoting = csv.QUOTE_NONE
+        else:
+            # Leave default for older data, in case it matters
+            quoting = csv.QUOTE_MINIMAL
+
         # Read voter file into pandas dataframe
         logging.info(f'[{config["state"]}] Loading voter file.')
         df_voters = pd.read_csv(
@@ -102,6 +113,7 @@ class PreprocessWestVirginia(Preprocessor):
             encoding=voter_file_encoding,
             dtype=str,
             header=0 if config["has_headers"] else None,
+            quoting=quoting,
         )
 
         df_voters.rename(
