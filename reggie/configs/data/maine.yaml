@@ -1,0 +1,145 @@
+#Maine has 2 Voter Files and 1 History File
+
+
+file_type: .txt
+delimiter: '|'
+state: maine
+abbreviation: me
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+date_format: ['%m/%d/%Y', '%Y']
+expected_number_of_files: 3
+primary_locale_identifier: CTY
+county_identifier: CTY
+numeric_primary_locale: TRUE
+birthday_identifier: YOB
+registration_date_identifier: "DT ACCEPT"
+voter_id: VOTER ID
+voter_status: STATUS
+voter_status_active:
+  - ACTIVE
+voter_status_inactive:
+  - CHALLENGED
+# Currently not used
+voter_status_preregistered: PR
+democratic_party: D
+republican_party: R
+no_party_affiliation: I
+party_identifier: party_identifier # it looks like Maine doesn't really have parties despite giving them to us?
+missing_required_fields: true
+demographic_fields_available:
+  - age
+  - status
+  - party  # ???
+name_fields:
+  - FIRST NAME
+  - MIDDLE NAME
+  - LAST NAME
+  - SUFF
+standard_name_fields:
+  - FIRST NAME
+  - MIDDLE NAME
+  - LAST NAME
+match_fields:
+  - FIRST NAME
+  - LAST NAME
+  - YOB
+address_fields:
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - MAIL ST NUM
+  - MAIL ST NUM A
+  - MAIL ST NUM B
+  - MAIL ST NAME1
+  - MAIL ST NAME2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+street_address_fields:
+  - 
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+column_names:
+  - REG TOWN
+  - VOTER ID
+  - STATUS
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - SUFF
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - ZIP4
+  - MAIL ST NUM
+  - MAIL ST NUM A
+  - MAIL ST NUM B
+  - MAIL ST NAME1
+  - MAIL ST NAME2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+  - MAIL ZIP4
+  - MAIL COUNTRY
+  - ENROLL
+  - DESIGNATE
+  - DT EFFECT
+  - DT ACCEPT
+  - DT STATUS CHG
+  - YOB
+  - REASON
+  - DT LAST ACTIVE
+  - WP
+  - CG
+  - SS
+  - SR
+  - CTY
+  - CC
+  - DA
+  - RD
+  - KCB
+  - ACF
+  - DT CHG
+
+
+county_codes:
+  Androscoggin: 01AND
+  Aroostook: 02ARO
+  Cumberland: 03CUM
+  Franklin: 04FRA
+  Hancock: 05HAN
+  Kennebec: 06KEN
+  Knox: 07KNO
+  Lincoln: 08LIN
+  Oxford: 09OXF
+  Penobscot: 10PEN
+  Piscataquis: 11PIS
+  Sagadahoc: 12SAG
+  Somerset: 13SOM
+  Waldo: 14WAL
+  Washington: 15WAS
+  York: 16YOR
