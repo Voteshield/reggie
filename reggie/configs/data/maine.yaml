@@ -20,9 +20,10 @@ registration_date_identifier: "DT ACCEPT"
 voter_id: VOTER ID
 voter_status: STATUS
 voter_status_active:
-  - ACTIVE
+  - A
 voter_status_inactive:
-  - CHALLENGED
+  - I
+voter_status_cancelled: C # comes from a separate file
 # Currently not used
 voter_status_preregistered: PR
 democratic_party: D
@@ -122,23 +123,23 @@ columns:
   MAIL COUNTRY: text
   ENROLL: text
   DESIGNATE: text
-  DT EFFECT: text
-  DT ACCEPT: text
+  DT EFFECT: text # date of registration (17 year olds only)
+  DT ACCEPT: text # date of registration for everyone else
   DT STATUS CHG: text
   YOB: text
   REASON: text
-  DT LAST ACTIVE: text
-  WP: text
-  CG: text
-  SS: text
-  SR: text
-  CTY: text
-  CC: text
-  DA: text
-  RD: text
-  KCB: text
-  ACF: text
-  DT CHG: text
+  DT LAST ACTIVE: text # date last active
+  WP: text # Ward/Precinct
+  CG: text # Congressional District
+  SS: text # State Senate
+  SR: text # State Representative
+  CTY: text # County (code...kind of)
+  CC: text # county commissioner district 
+  DA: text # district attorney
+  RD: text # register of deeds
+  KCB: text # knox county budget...???
+  ACF: text # aroostook county fiaancee ...???
+  DT CHG: text # date changed
   # dummy column
   party_identifier: text
 
