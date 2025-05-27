@@ -27,13 +27,12 @@ voter_status_inactive:
 voter_status_preregistered: PR
 democratic_party: D
 republican_party: R
-no_party_affiliation: I
-party_identifier: party_identifier # it looks like Maine doesn't really have parties despite giving them to us?
+no_party_affiliation: npa
+party_identifier: party_identifier # it looks like Maine doesn't really have parties despite giving us a long listing of party codes
 missing_required_fields: true
 demographic_fields_available:
   - age
   - status
-  - party  # ???
 name_fields:
   - FIRST NAME
   - MIDDLE NAME
@@ -67,7 +66,15 @@ address_fields:
   - MAIL STATE
   - MAIL ZIP
 street_address_fields:
-  - 
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
 generated_columns:
   all_history: text[]
   sparse_history: int[]
@@ -76,7 +83,66 @@ ordered_generated_columns:
   - all_history
   - sparse_history
   - votetype_history
-column_names:
+hist_columns:
+  - VOTER ID
+  - ELECTION DATE
+  - ELECTION NAME
+  - ELECTION TYPE
+  - ELECTION CATEGORY
+  - TOWN NAME WHERE VOTED
+  - BALLOT TYPE
+columns:
+  REG TOWN: text
+  VOTER ID: text
+  STATUS: text
+  LAST NAME: text
+  FIRST NAME: text
+  MIDDLE NAME: text
+  SUFF: text
+  ST NUM: text
+  ST NUM A: text
+  ST NUM B: text
+  ST NAME1: text
+  ST NAME2: text
+  UNIT: text
+  CITY: text
+  STATE: text
+  ZIP: text
+  ZIP4: text
+  MAIL ST NUM: text
+  MAIL ST NUM A: text
+  MAIL ST NUM B: text
+  MAIL ST NAME1: text
+  MAIL ST NAME2: text
+  MAIL UNIT: text
+  MAIL CITY: text
+  MAIL STATE: text
+  MAIL ZIP: text
+  MAIL ZIP4: text
+  MAIL COUNTRY: text
+  ENROLL: text
+  DESIGNATE: text
+  DT EFFECT: text
+  DT ACCEPT: text
+  DT STATUS CHG: text
+  YOB: text
+  REASON: text
+  DT LAST ACTIVE: text
+  WP: text
+  CG: text
+  SS: text
+  SR: text
+  CTY: text
+  CC: text
+  DA: text
+  RD: text
+  KCB: text
+  ACF: text
+  DT CHG: text
+  # dummy column
+  party_identifier: text
+
+ordered_columns:
   - REG TOWN
   - VOTER ID
   - STATUS
@@ -124,7 +190,7 @@ column_names:
   - KCB
   - ACF
   - DT CHG
-
+  - party_identifier
 
 county_codes:
   Androscoggin: 01AND
