@@ -62,7 +62,11 @@ class PreprocessMaine(Preprocessor):
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
                 
-        
+        if canncelled_df:
+            # For Some reason there are no counties in the cancelled df file
+            # Derive them from zip codes found in main file?
+            zip_dict = dict(zip(voter_df['ZIP'], voter_df['CTY']))
+            canncelled_df['CTY'] = canncelled_df['Zip5'].map(zip_dict)
         # there are about 5 entries in the cancelled file, that have an active 
         # status in the main file for some reason. 
         
