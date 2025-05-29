@@ -24,12 +24,11 @@ voter_status_active:
 voter_status_inactive:
   - I
 voter_status_cancelled: C # comes from a separate file
-# Currently not used
 voter_status_preregistered: PR
 democratic_party: D
 republican_party: R
 no_party_affiliation: npa
-party_identifier: party_identifier # it looks like Maine doesn't really have parties despite giving us a long listing of party codes
+party_identifier: party # it looks like Maine doesn't really have parties despite giving us a long listing of party codes
 missing_required_fields: true
 demographic_fields_available:
   - age
@@ -92,6 +91,56 @@ hist_columns:
   - ELECTION CATEGORY
   - TOWN NAME WHERE VOTED
   - BALLOT TYPE
+cancelled_columns:
+  Town Name: REG TOWN
+  Id_Voter: VOTER ID
+  Status: STATUS
+  Last Name: LAST NAME
+  First Name: FIRST NAME
+  Middle Name: MIDDLE NAME
+  Suffix: SUFF
+  Residence Street#: ST NUM
+  Suff A: ST NUM A
+  Suff B: ST NUM B
+  Street Name: ST NAME1
+  Address Line 2: ST NAME2
+  Unit: UNIT
+  City: CITY
+  State: STATE
+  Zip5: ZIP
+  Zip4: ZIP4
+  # Beginning here, the mail address columns have the exact same names in the
+  # file as the other address fields, hence the .1 in pandas
+  Mail Street#: MAIL ST NUM
+  Suff A.1: MAIL ST NUM A
+  Suff B.1: MAIL ST NUM B
+  Street Name.1: MAIL ST NAME1
+  Address Line 2.1: MAIL ST NAME2
+  Unit.1: MAIL UNIT
+  City.1: MAIL CITY
+  State.1: MAIL STATE
+  Zip5.1: MAIL ZIP
+  Zip4.1: MAIL ZIP4
+  Country: MAIL COUNTRY
+  Party: party # only exists here
+  Spec_Status: DESIGNATE # mostly null, but mostly S or O, what does it mean?
+  DT_Effect: DT EFFECT
+  DT_Accept: DT ACCEPT
+  DT_Stat_Change: DT STATUS CHG
+  DT_Birth: YOB
+  Off_Reason: REASON
+  DT_Last_Active: DT LAST ACTIVE
+  W-P: WP
+  CG: CG
+  SS: SS
+  SR: SR
+  Id_Parent_Area: Id_Parent_Area # No Clue, should be county but is not and doesn't seem to be zip either
+  CC: CC
+  DA: DA
+  RD: RD
+  KCB: KCB
+  ACF: ACF
+  DT_Last_Updated: DT CHG
 columns:
   REG TOWN: text
   VOTER ID: text
