@@ -44,7 +44,7 @@ class PreprocessMaine(Preprocessor):
         voter_df = pd.DataFrame()
         cancelled_df = pd.DataFrame()
         for file in new_files:
-            if "voter" in file:
+            if "voter.txt" in file["name"].lower(): # needsextension
                 logging.info("voter file found")
                 voter_df = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
@@ -57,24 +57,28 @@ class PreprocessMaine(Preprocessor):
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
             elif "cancelled" in file["name"].lower():
-                logging.info("vote history found")
+                logging.info("cancelled file found")
                 # cancelled file does not have county...for some reason.
                 cancelled_df= self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
                 cancelled_df.rename(columns=self.config["cancelled_columns"], inplace=True)
-        return cancelled_df
-                
-        if canncelled_df:
+        if not cancelled_df.empty:
             # For Some reason there are no counties in the cancelled df file
             # Derive them from zip codes found in main file?
             zip_dict = dict(zip(voter_df['ZIP'], voter_df['CTY']))
-            canncelled_df['CTY'] = canncelled_df['Zip5'].map(zip_dict)
+            cancelled_df['CTY'] = cancelled_df['ZIP'].map(zip_dict)
         # there are about 5 entries in the cancelled file, that have an active 
         # status in the main file for some reason. 
-        
-        # todo: merge them here somehow
+        print(voter_df.columns)
+        # keep the cancelled dataframe on top
+        voter_df = pd.concat(
+                    [cancelled_df,
+                    voter_df]
+                )
+        return voter_df, cancelled_df
 
+        
         unnamed_cols = voter_df.columns[voter_df.columns.str.contains("Unnamed")]
         voter_df.drop(columns=unnamed_cols, inplace=True)
 

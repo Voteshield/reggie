@@ -184,6 +184,7 @@ columns:
   CG: text # Congressional District
   SS: text # State Senate
   SR: text # State Representative
+  Id_Parent_Area: text # from cancelled file, no idea
   CTY: text # County (code...kind of)
   CC: text # county commissioner district 
   DA: text # district attorney
@@ -235,6 +236,7 @@ ordered_columns:
   - CG
   - SS
   - SR
+  - Id_Parent_Area # from cancelled file
   - CTY
   - CC
   - DA
