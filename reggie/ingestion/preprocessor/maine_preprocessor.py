@@ -42,6 +42,7 @@ class PreprocessMaine(Preprocessor):
         new_files = self.unpack_files(self.main_file, compression="unzip")
         # self.file_check(len(new_files))
         voter_df = pd.DataFrame()
+        cancelled_df = pd.DataFrame()
         for file in new_files:
             if "voter" in file:
                 logging.info("voter file found")
@@ -57,10 +58,12 @@ class PreprocessMaine(Preprocessor):
                 )
             elif "cancelled" in file["name"].lower():
                 logging.info("vote history found")
-                # cancelled file does not have county...for some reason. 
-                canncelled_df= self.read_csv_count_error_lines(
+                # cancelled file does not have county...for some reason.
+                cancelled_df= self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
+                cancelled_df.rename(columns=self.config["cancelled_columns"], inplace=True)
+        return cancelled_df
                 
         if canncelled_df:
             # For Some reason there are no counties in the cancelled df file

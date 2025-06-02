@@ -91,6 +91,8 @@ hist_columns:
   - ELECTION CATEGORY
   - TOWN NAME WHERE VOTED
   - BALLOT TYPE
+#Cancelled file has a different column naming system than the main file, below
+# are the cancelled file columns, with their main file equivalent for renaming
 cancelled_columns:
   Town Name: REG TOWN
   Id_Voter: VOTER ID

@@ -1,0 +1,18 @@
+[
+  { "name": "Androscoggin", "id": "01AND" },
+  { "name": "Aroostook", "id": "02ARO" },
+  { "name": "Cumberland", "id": "03CUM" },
+  { "name": "Franklin", "id": "04FRA" },
+  { "name": "Hancock", "id": "05HAN" },
+  { "name": "Kennebec", "id": "06KEN" },
+  { "name": "Knox", "id": "07KNO" },
+  { "name": "Lincoln", "id": "08LIN" },
+  { "name": "Oxford", "id": "09OXF" },
+  { "name": "Penobscot", "id": "10PEN" },
+  { "name": "Piscataquis", "id": "11PIS" },
+  { "name": "Sagadahoc", "id": "12SAG" },
+  { "name": "Somerset", "id": "13SOM" },
+  { "name": "Waldo", "id": "14WAL" },
+  { "name": "Washington", "id": "15WAS" },
+  { "name": "York", "id": "16YOR" }
+]
