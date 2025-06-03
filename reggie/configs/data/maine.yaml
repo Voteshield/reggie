@@ -29,6 +29,10 @@ democratic_party: D
 republican_party: R
 no_party_affiliation: U #Unenrolled but I think close enough?
 party_identifier: ENROLL
+absentee_ballot_code: "'ABSENTEE'"
+provisional_ballot_code: "'Provisional'"
+valid_voting_methods: ['Machine', 'Mail In', 'Provisional', 'Emergency']
+
 missing_required_fields: true
 demographic_fields_available:
   - age
@@ -76,6 +80,7 @@ street_address_fields:
   - CITY
   - STATE
   - ZIP
+# The history seems to be one file per election
 generated_columns:
   all_history: text[]
   sparse_history: int[]
@@ -146,7 +151,7 @@ cancelled_columns:
   DT_Last_Updated: DT CHG
 columns:
   REG TOWN: text
-  VOTER ID: text
+  VOTER ID: text # leading 0's will be kept if they exist
   STATUS: text
   LAST NAME: text
   FIRST NAME: text
@@ -160,8 +165,8 @@ columns:
   UNIT: text
   CITY: text
   STATE: text
-  ZIP: text
-  ZIP4: text
+  ZIP: int # Note, some of the zips start with 0, so will seem shorter than they should
+  ZIP4: int
   MAIL ST NUM: text
   MAIL ST NUM A: text
   MAIL ST NUM B: text
@@ -170,17 +175,17 @@ columns:
   MAIL UNIT: text
   MAIL CITY: text
   MAIL STATE: text
-  MAIL ZIP: text
-  MAIL ZIP4: text
+  MAIL ZIP: int
+  MAIL ZIP4: int
   MAIL COUNTRY: text
   ENROLL: text
   DESIGNATE: text
-  DT EFFECT: text # date of registration (17 year olds only)
-  DT ACCEPT: text # date of registration for everyone else
-  DT STATUS CHG: text
-  YOB: text
+  DT EFFECT: date # date of registration (17 year olds only)
+  DT ACCEPT: date # date of registration for everyone else
+  DT STATUS CHG: date
+  YOB: int
   REASON: text
-  DT LAST ACTIVE: text # date last active
+  DT LAST ACTIVE: date # date last active
   WP: text # Ward/Precinct
   CG: text # Congressional District
   SS: text # State Senate
@@ -192,7 +197,7 @@ columns:
   RD: text # register of deeds
   KCB: text # knox county budget...???
   ACF: text # aroostook county fiaancee ...???
-  DT CHG: text # date changed
+  DT CHG: date # date changed
 
 ordered_columns:
   - REG TOWN
