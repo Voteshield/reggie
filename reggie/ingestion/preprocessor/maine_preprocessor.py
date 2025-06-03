@@ -83,9 +83,16 @@ class PreprocessMaine(Preprocessor):
             # Derive them from zip codes found in main file?
             zip_dict = dict(zip(voter_df["ZIP"], voter_df["CTY"]))
             cancelled_df["CTY"] = cancelled_df["ZIP"].map(zip_dict)
+
+            # also for some reason they give your full birthday in the cancelld file?
+            cancelled_df[["MONTH", "DAY", "YOB"]] = cancelled_df[
+                "YOB"
+            ].str.split("/", expand=True)
+            cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
         # there are about 5 entries in the cancelled file, that have an active
         # status in the main file for some reason.
         # keep the cancelled dataframe on top
+
         voter_df = pd.concat([cancelled_df, voter_df])
 
         del cancelled_df
@@ -93,7 +100,6 @@ class PreprocessMaine(Preprocessor):
             voter_df.columns.str.contains("Unnamed")
         ]
         voter_df.drop(columns=unnamed_cols, inplace=True)
-
         self.column_check(voter_df.columns)
         if hist_df.empty:
             raise ValueError("must supply a file containing voter history")
@@ -143,6 +149,7 @@ class PreprocessMaine(Preprocessor):
             "ELECTION TYPE"
         ].apply(list)
 
+        del voter_id_groups
         logging.info("Coercing Strings")
         voter_df = self.config.coerce_strings(voter_df)
 
