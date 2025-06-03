@@ -130,6 +130,8 @@ class PreprocessMaine(Preprocessor):
 
         voter_df = voter_df.set_index(self.config["voter_id"], drop=False)
         voter_id_groups = hist_df.groupby(self.config["voter_id"])
+        del hist_df
+        
         voter_df["all_history"] = voter_id_groups["combined_name"].apply(list)
         voter_df["sparse_history"] = voter_df["all_history"].map(
             insert_code_bin
@@ -140,6 +142,8 @@ class PreprocessMaine(Preprocessor):
         voter_df["election_type_history"] = voter_id_groups[
             "ELECTION TYPE"
         ].apply(list)
+
+
 
         logging.info("Coercing Strings")
         voter_df = self.config.coerce_strings(voter_df)
