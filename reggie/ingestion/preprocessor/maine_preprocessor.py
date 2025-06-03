@@ -70,18 +70,17 @@ class PreprocessMaine(Preprocessor):
             cancelled_df['CTY'] = cancelled_df['ZIP'].map(zip_dict)
         # there are about 5 entries in the cancelled file, that have an active 
         # status in the main file for some reason. 
-        print(voter_df.columns)
         # keep the cancelled dataframe on top
         voter_df = pd.concat(
                     [cancelled_df,
                     voter_df]
                 )
-        return voter_df, cancelled_df
 
         
         unnamed_cols = voter_df.columns[voter_df.columns.str.contains("Unnamed")]
         voter_df.drop(columns=unnamed_cols, inplace=True)
 
+        return voter_df, cancelled_df
 
         cols_to_check = [x for x in voter_df.columns if x not in hist_df.columns]
         self.column_check(cols_to_check)

@@ -27,11 +27,12 @@ voter_status_cancelled: C # comes from a separate file
 voter_status_preregistered: PR
 democratic_party: D
 republican_party: R
-no_party_affiliation: npa
-party_identifier: party # it looks like Maine doesn't really have parties despite giving us a long listing of party codes
+no_party_affiliation: U #Unenrolled but I think close enough?
+party_identifier: ENROLL
 missing_required_fields: true
 demographic_fields_available:
   - age
+  - party
   - status
 name_fields:
   - FIRST NAME
@@ -124,7 +125,7 @@ cancelled_columns:
   Zip5.1: MAIL ZIP
   Zip4.1: MAIL ZIP4
   Country: MAIL COUNTRY
-  Party: party # only exists here
+  Party: ENROLL
   Spec_Status: DESIGNATE # mostly null, but mostly S or O, what does it mean?
   DT_Effect: DT EFFECT
   DT_Accept: DT ACCEPT
@@ -192,8 +193,6 @@ columns:
   KCB: text # knox county budget...???
   ACF: text # aroostook county fiaancee ...???
   DT CHG: text # date changed
-  # dummy column
-  party_identifier: text
 
 ordered_columns:
   - REG TOWN
@@ -244,7 +243,6 @@ ordered_columns:
   - KCB
   - ACF
   - DT CHG
-  - party_identifier
 
 county_codes:
   Androscoggin: 01AND
