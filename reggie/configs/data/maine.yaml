@@ -30,8 +30,7 @@ republican_party: R
 no_party_affiliation: U #Unenrolled but I think close enough?
 party_identifier: ENROLL
 absentee_ballot_code: "'ABSENTEE'"
-provisional_ballot_code: "'Provisional'"
-valid_voting_methods: ['Machine', 'Mail In', 'Provisional', 'Emergency']
+valid_voting_methods: ['ABSENTEE', "REGULAR"]
 
 missing_required_fields: true
 demographic_fields_available:
