@@ -55,8 +55,12 @@ class PreprocessMaine(Preprocessor):
                 logging.info(
                     f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN ID values"
                 )
-                # for some reason party exists in the cancelled file but not here
-                voter_df[self.config["party_identifier"]] = np.nan
+                voter_df_shape_before = voter_df.shape
+                voter_df.dropna(subset=["CTY"], inplace=True)
+                voter_df_shape_after = voter_df.shape
+                logging.info(
+                    f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN county values"
+                )
             elif "history" in file["name"].lower():
                 # Maine Voter History seems to come as one file per election, which is neat but it seems arbirtary how far back they go so lol.
                 logging.info("vote history found")
@@ -138,22 +142,27 @@ class PreprocessMaine(Preprocessor):
             "ELECTION TYPE"
         ].apply(list)
 
+        logging.info("Coercing Strings")
         voter_df = self.config.coerce_strings(voter_df)
+        
+        logging.info("Coercing Numbers")
         voter_df = self.config.coerce_numeric(voter_df)
+        logging.info("Coercing Dates")
         voter_df = self.config.coerce_dates(voter_df)
-        return voter_df, hist_df
+
 
         # Check the file for all the proper locales
-        # self.locale_check(
-        #     set(voter_df[self.config["primary_locale_identifier"]]),
-        # )
-
+        self.locale_check(
+            set(voter_df[self.config["primary_locale_identifier"]]),
+        )
         # self.meta = {
         #     "message": "vermont_{}".format(datetime.now().isoformat()),
         #     "array_encoding": json.dumps(sorted_codes_dict),
         #     "array_decoding": json.dumps(sorted_elections),
         # }
         logging.info("Processed Maine")
+        return voter_df, hist_df
+
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(voter_df.to_csv(encoding="utf-8", index=True)),

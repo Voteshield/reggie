@@ -250,19 +250,19 @@ ordered_columns:
   - DT CHG
 
 county_codes:
-  Androscoggin: 01AND
-  Aroostook: 02ARO
-  Cumberland: 03CUM
-  Franklin: 04FRA
-  Hancock: 05HAN
-  Kennebec: 06KEN
-  Knox: 07KNO
-  Lincoln: 08LIN
-  Oxford: 09OXF
-  Penobscot: 10PEN
-  Piscataquis: 11PIS
-  Sagadahoc: 12SAG
-  Somerset: 13SOM
-  Waldo: 14WAL
-  Washington: 15WAS
-  York: 16YOR
+  Androscoggin: 01and
+  Aroostook: 02aro
+  Cumberland: 03cum
+  Franklin: 04fra
+  Hancock: 05han
+  Kennebec: 06ken
+  Knox: 07kno
+  Lincoln: 08lin
+  Oxford: 09oxf
+  Penobscot: 10pen
+  Piscataquis: 11pis
+  Sagadahoc: 12sag
+  Somerset: 13som
+  Waldo: 14wal
+  Washington: 15was
+  York: 16yor
