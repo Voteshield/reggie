@@ -88,12 +88,11 @@ class PreprocessMaine(Preprocessor):
         # keep the cancelled dataframe on top
         voter_df = pd.concat([cancelled_df, voter_df])
 
+        del cancelled_df
         unnamed_cols = voter_df.columns[
             voter_df.columns.str.contains("Unnamed")
         ]
         voter_df.drop(columns=unnamed_cols, inplace=True)
-
-        cols_to_check = [x for x in voter_df.columns]
 
         self.column_check(voter_df.columns)
         if hist_df.empty:
@@ -155,13 +154,12 @@ class PreprocessMaine(Preprocessor):
         self.locale_check(
             set(voter_df[self.config["primary_locale_identifier"]]),
         )
-        # self.meta = {
-        #     "message": "vermont_{}".format(datetime.now().isoformat()),
-        #     "array_encoding": json.dumps(sorted_codes_dict),
-        #     "array_decoding": json.dumps(sorted_elections),
-        # }
+        self.meta = {
+            "message": "maine_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
+        }
         logging.info("Processed Maine")
-        return voter_df, hist_df
 
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
