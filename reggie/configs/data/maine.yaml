@@ -14,7 +14,7 @@ date_format: ['%m/%d/%Y', '%Y']
 expected_number_of_files: 3
 primary_locale_identifier: CTY
 county_identifier: CTY
-numeric_primary_locale: TRUE
+numeric_primary_locale: FALSE
 birthday_identifier: YOB
 registration_date_identifier: "DT ACCEPT"
 voter_id: VOTER ID
@@ -182,7 +182,7 @@ columns:
   DT EFFECT: date # date of registration (17 year olds only)
   DT ACCEPT: date # date of registration for everyone else
   DT STATUS CHG: date
-  YOB: int
+  YOB: date
   REASON: text
   DT LAST ACTIVE: date # date last active
   WP: text # Ward/Precinct
