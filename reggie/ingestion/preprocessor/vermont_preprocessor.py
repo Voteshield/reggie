@@ -66,7 +66,13 @@ class PreprocessVermont(Preprocessor):
         if len(vdf.columns) == 1:
             voter_file["obj"].seek(0)
             vdf = pd.read_csv(voter_file["obj"], sep=",", dtype=str)
-
+        
+        # June 2025, some of the columns have extra single quotes around the column names
+        for col in vdf.columns:
+            if "'" in col:
+                vdf.rename(columns={col: col.strip("'")}, inplace=True)
+        
+        vdf.rename(columns=self.config["rename_columns"], inplace=True)        
         vdf[self.config["voter_id"]] = vdf[self.config["voter_id"]].str.replace("'", "")
         
         # Note, in June 2025 Vermont added around 50 extra commas to the file
@@ -75,6 +81,8 @@ class PreprocessVermont(Preprocessor):
         election_columns = [
             col for col in vdf.columns if "election" in col.lower() or "statewide" in col.lower()
         ]
+        # added some columns that are new now, so needs reconciliaiton?
+        vdf = self.reconcile_columns(vdf, self.config["columns"])
         vdf[self.config["party_identifier"]] = np.nan
 
         cols_to_check = [x for x in vdf.columns if x not in election_columns]

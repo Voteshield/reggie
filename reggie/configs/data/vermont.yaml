@@ -185,6 +185,21 @@ ordered_columns:
   - Ward
   - party_identifier
 
+# In June 2025 they renamed some columns, this is the old to new dict
+rename_columns:
+  Legal Address Zip5: Legal Address Zip
+  Mailing Address Zip5: Mailing Address Zip
+  SEN: Senate District
+  Town Numeric: Town-Nemrc Number
+  ELEC: Polling Location
+  FIR: Fire District
+  POL: Police District
+  SCHL: School District
+  SEW: Sewer District
+  VIL: Village
+  WARD: Ward
+  WAT: Water District
+
 county_codes:
   Addison: 001
   Bennington: 002
