@@ -67,15 +67,35 @@ class PreprocessVermont(Preprocessor):
             voter_file["obj"].seek(0)
             vdf = pd.read_csv(voter_file["obj"], sep=",", dtype=str)
 
+        vdf[self.config["voter_id"]] = vdf[self.config["voter_id"]].str.replace("'", "")
+        
+        # Note, in June 2025 Vermont added around 50 extra commas to the file
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
         election_columns = [
-            col for col in vdf.columns if "election" in col.lower()
+            col for col in vdf.columns if "election" in col.lower() or "statewide" in col.lower()
         ]
         vdf[self.config["party_identifier"]] = np.nan
 
         cols_to_check = [x for x in vdf.columns if x not in election_columns]
         self.column_check(cols_to_check)
+
+
+        # In June of 2025 they changed the format of the file slightly and
+        # changed election column names.
+        # The new election column names look like: 11/02/2010-2010 STATEWIDE GENERAL
+        # when we expect: 2008 Gen Election Participation, to rename them just
+        rename_dict = {}
+        for election_column in election_columns:
+            try:
+                election_year = election_column.split("-")[0].split("/")[-1]
+                # Check to see if you can make the substring a year
+                datetime.datetime.strptime(election_year, "%Y")
+                election_string = f"{election_year}_Gen_Election"
+                rename_dict[election_column] = election_string
+            except ValueError:
+                logging.info("election columns in original format")
+                break
 
         # strip the word "participation" and replace spaces with underscores
         # for consistency
