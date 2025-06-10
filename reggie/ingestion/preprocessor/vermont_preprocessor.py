@@ -51,11 +51,15 @@ class PreprocessVermont(Preprocessor):
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
         self.file_check(len(new_files))
-        voter_file = [
-            n
-            for n in new_files
-            if ("voter file" in n["name"].lower()) or ("statewidevoters" in n["name"].lower())
-        ][0]
+        
+        try:
+            voter_file = [
+                n
+                for n in new_files
+                if ("voter file" in n["name"].lower()) or ("statewidevoters" in n["name"].lower())
+            ][0]
+        except IndexError:
+            voter_file = [n for n in new_files if ".csv" in n["name"].lower()][0]
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
 
         # Sometimes, instead of the | seperator it is a tab
