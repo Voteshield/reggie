@@ -29,6 +29,7 @@ not_registered_voter_status_set:
 voter_status_preregistered: PR
 democratic_party: D
 republican_party: R
+libertarian_party: L
 no_party_affiliation: U #Unenrolled but I think close enough?
 party_identifier: ENROLL
 absentee_ballot_code: "'ABSENTEE'"
