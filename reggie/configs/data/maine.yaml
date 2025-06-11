@@ -24,6 +24,8 @@ voter_status_active:
 voter_status_inactive:
   - I
 voter_status_cancelled: C # comes from a separate file
+not_registered_voter_status_set: 
+  - C
 voter_status_preregistered: PR
 democratic_party: D
 republican_party: R
