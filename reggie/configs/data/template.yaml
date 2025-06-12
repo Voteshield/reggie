@@ -50,10 +50,16 @@ early_voter_identifier: PEVL
 
 
 ###############################
-# A list of all date formats used in the file,
+# The date format or date formats used in the file,
 # particularly in the regular date columns, e.g. the formats
-# seen in the birth_date, registration_date, etc columns).
+# seen in the birth_date, registration_date, etc columns.
 # (The history stuff may be handled separately, depending on it's formatting).
+#
+# If all date columns have the same format, make it a single value like this:
+date_format: '%Y-%m-%d'
+### OR ! ####
+# If multiple different date formats are used for different columns (ugh),
+# make it a list like this:
 date_format:
   - '%Y-%m-%d'
   - '%Y'
@@ -121,6 +127,19 @@ independent: ind
 other: oth
 libertarian: lbt
 green: grn
+
+
+###############################
+# General Note:
+# Our system assumes that birth_date, voter status, and party columns exist by default.
+# If any of those 3 are missing in your state's file, you will need to create dummy
+# columns for them and assign the identifiers appropriately.
+# e.g.
+birthday_identifier: birthday_identifier
+voter_status: voter_status
+party_identifier: party_identifier
+# And then add those columns (with null values) to the dataframe during preprocessing,
+# and to the column lists below.
 
 
 ###############################
@@ -283,20 +302,51 @@ ordered_columns:
   - Precinct
 
 
-# TODO History Stuff
-
+# History Columns
+# You should consolidate voting history data into a few standard columns with lists of
+# election data. You can follow the way this is done in most state preprocessors.
+# Basically "all_history" should list election identifiers in human-readable format,
+# e.g. for a single voter you will see a list like:
+# ["general_2020-11-02", "general_2022-11-03", "primary_2022-06-02"]
+# "sparse_history" will be the same list of elections but encoded into numbers using
+# the meta-data json key that you will also create during preprocessing.
+# If the data exists, "votetype_history" and "party_history" will be lists of the
+# codes or parties associated with each election, e.g.:
+# ["A", "P", "PV", "P"] for vote types, depending on the codes used in the state.
+# ["D", "R", "D", "N", "R"] for parties, depending on the codes used in the state.
+#
+# Only list columns here if you can actually create them from the data you are
+# given in this state.
 generated_columns:
   all_history: text[]
   sparse_history: int[]
   votetype_history: text[]
+  party_history: text[]
 # Same columns as above, just listed in the order they appear in the final dataframe.
 ordered_generated_columns:
   - all_history
   - sparse_history
   - votetype_history
+  - party_history
 
 
-# Note on other features: race and gender and ethnicity automatically work based on columns with the word "race" or "gender" or "ethnic"
+
+###############################
+# General Note:
+#
+# This is not an exhaustive list of everything you might need to include in a yaml config,
+# for example you may need to store codes describing race, or a lookup to deal with particularly
+# complicated locale or other data, or a lookup for column aliases as files change over time.
+# You can also always add any custom stuff that you might need to use for preprocessing.
+
+
+
+###############################
+# Note on Feature Creation for the Analysis pages:
+#
+# You may have to do some manual work to figure out if features are being created correctly
+# from the available data
+race and gender and ethnicity automatically work based on columns with the word "race" or "gender" or "ethnic"
 # Go check that this is working manually.
 
 # Date features add_days_since_features()
@@ -304,17 +354,21 @@ ordered_generated_columns:
 
 # Reggie - Don't forget to add the primary locale names (id = whatever our system calls it, name = pretty human readable name.)
 
+###############################
+# Note on Inspector yaml config:
 
 # Inspector YAML:
 # New summary columns for status ... (only for states with a voter status column)
 # status_active, status_inactive, status_other
 
-# Frontend:
+###############################
+# Note on Frontend config:
+#
 # Turn date and other features on the frontend config side - src/config/demographics.js
 # demographicGroupsAvailable = basic options
 # changeTypesUnavailable = NOT reregistration
 
-
+# Poke around and make sure all the features you would expect to pop up on the frontend, do in fact pop up. Otherwise investigate why not.
 
 
 
