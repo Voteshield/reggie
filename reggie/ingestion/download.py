@@ -460,7 +460,6 @@ class Preprocessor:
 
     def s3_download(self):
         name = "/tmp/voteshield_{}".format(self.raw_s3_file.split("/")[-1])
-        print(self.s3_bucket)
         return FileItem(key=self.raw_s3_file, name=name, s3_bucket=self.s3_bucket)
 
     def unpack_files(self, file_obj, compression="unzip"):
