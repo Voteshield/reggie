@@ -1,0 +1,434 @@
+# Template yaml config file for onboarding a new state.
+
+# Add notes about the file / formats here.
+
+
+###############################
+# State name and abbreviation
+state: template
+abbreviation: tp
+
+# Not used but good to have a record of
+file_type: csv
+source: boe
+file_class: voter_file
+
+# I don't believe this is used anywhere
+format:
+  separate_hist: false
+  segmented_files: true
+
+# Used in some cases
+has_headers: YES
+
+# Used in "file_check" during raw file processing
+expected_number_of_files: 2
+
+
+###############################
+# Standard column names
+
+voter_id: RegistrantID
+
+county_identifier: County
+primary_locale_identifier: County
+# Whether or not the primary locale values are numeric
+numeric_primary_locale: false
+
+precinct_identifier: Precinct
+
+birthday_identifier: BirthDate
+
+# This is a newer addition - We need this for EBNR calculations.
+# If the state does not have registration date values,
+# we may need to adjust how we do EBNR there.
+registration_date_identifier: RegistrationDate
+
+# Only use this if state has a "permanent absentee" type column.
+# This is not very common though.
+early_voter_identifier: PEVL
+
+
+###############################
+# The date format or date formats used in the file,
+# particularly in the regular date columns, e.g. the formats
+# seen in the birth_date, registration_date, etc columns.
+# (The history stuff may be handled separately, depending on its formatting).
+#
+# If all date columns have the same format, make it a single value like this:
+date_format: '%Y-%m-%d'
+### OR ! ####
+# If multiple different date formats are used for different columns (ugh),
+# make it a list like this:
+date_format:
+  - '%Y-%m-%d'
+  - '%Y'
+
+
+###############################
+# The column that has voter status.
+voter_status: Status
+
+# The possible values of the voter status column:
+
+# "voter_status_active" is a list of all voter statuses that should be considered "active"
+# voters. This could include e.g. "active", "active_military",
+# "active_federal_elections_only", etc.
+voter_status_active:
+  - Active
+
+# "voter_status_inactive" is a list of all voter statuses that should be considered "inactive"
+# voters. This could include e.g. "inactive", "challenged", and any other statuses that the
+# data scientists say to consider "inactive".
+voter_status_inactive:
+  - Inactive
+
+# "not_registered_voter_status_set" is a list of all voter statuses that should be considered
+# "not on the rolls". This could include e.g. "cancelled", "not registered", "not eligible",
+# and any other statuses that the data scientists say to consider not on the rolls.
+not_registered_voter_status_set:
+  - Canceled
+  - Not_eligible
+  - Not_registered
+
+# The value of the single voter status meaning "cancelled". This should also be listed as
+# part of the "not_registered_voter_status_set" above, but also add it here separately please.
+voter_status_cancelled: Canceled
+
+# Add any other voter statuses you observe in the data here, with the naming convention
+# "voter_status_{X}", even if you don't know what they mean. This will ensure they get
+# added as features that can be seen on the analysis page.
+#
+# If there is a preregistered / 17 year old status, add it as "voter_status_preregistered".
+# Currently, preregistered voters occupy a gray area in our data processing:
+# they are kept in the file and differencing is done on them, but they are not included
+# in our counts of active / inactive / activations / deactivations or other counts
+# that depends on having a specifically Active or Inactive status.
+voter_status_preregistered: p17
+voter_status_suspense: suspense
+
+# The column with voter status reason codes, if it exists. This is somewhat common but
+# only exists in around 1/3 of states we have on the platform, so it may not exist in yours.
+reason_code: statusreason
+
+
+###############################
+# The column that has party information.
+party_identifier: Party
+
+# The possible values of the party column:
+
+# These are the most important three:
+democratic_party: dem
+republican_party: rep
+no_party_affiliation:  pnd
+
+# Other parties can be added at your discretion, if they seem prevalent enough in the data.
+independent: ind
+other: oth
+libertarian: lbt
+green: grn
+
+
+###############################
+# General Note:
+# Our system assumes that birth_date, voter status, and party columns exist by default.
+# If any of those 3 are missing in your state's file, you will need to create dummy
+# columns for them and assign the identifiers appropriately.
+# e.g.
+birthday_identifier: birthday_identifier
+voter_status: voter_status
+party_identifier: party_identifier
+# And then add those columns (with null values) to the dataframe during preprocessing,
+# and to the column lists below.
+
+
+###############################
+# Voting History codes
+
+# If absentee and provisional data exists within the voting history, add the vote type
+# codes used for absentee and provisional here. You might have to turn on the history
+# features described below and take a look at the strings that are getting generated to
+# see if you need the extra single quotations on these.
+#
+# IMPORTANT: All voting history features are turned off for new states by default.
+# If your state has this data, you will need to go manually add it to the state white-lists
+# for the relevant voting history feature functions:
+#
+# get_participation() - You can turn this on for any state that has voting history with DATES.
+#
+# get_local_engagement() - You can turn this on for any state that has voting history at all.
+#
+# get_votetype_from_dataframe() - You can turn this on for any state that includes vote types
+#   with its voting history. You will need to create a "votetype_history" column in the
+#   final dataframe, with a list of vote type codes over all elections for each voter.
+#
+# get_partisanship_from_dataframe() - You can turn this on for any state that includes
+#   party data with its voting history (usually only for the primaries). You will need to
+#   create a "party_history" column in the final dataframe, with a list of party codes
+#   over all elections for each voter (codes may be null for general elections and only
+#   exist for primaries).
+#
+absentee_ballot_code: "'a'"
+provisional_ballot_code: "'pv'"
+# This is not actually used in the code, but nice to list the options here just for visibility.
+valid_voting_methods: ['e', 'a', 'p', 'pv']
+
+
+###############################
+# A list of which demographics columns are available in this state.
+# This is used for the demographics-based ML algorithm.
+# The only possible options here are: ["age", "gender", "party", "race", "status"].
+demographic_fields_available:
+  - age
+  - party
+  - status
+
+###############################
+# This is the short list of columns that we should match on when doing "secondary
+# matching" between removal and registration groups at the same date. The standard fields
+# we use are First Name, Last Name (NOT Middle Name), and Birth Date or Birth Year. If
+# your state does not have Birth Date / Birth Year available, it is probably inadvisable
+# to do this matching at all, so please leave this key out of your yaml entirely.
+match_fields:
+  - LastName
+  - FirstName
+  - BirthDate
+
+# Used to define the compound change_type "name" changes.
+# List all columns you want to be included in "name" change groups.
+name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+
+# This is used for matching duplicates in Jiamin's create_dupes_custom_population()
+# vote-cli function.
+standard_name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+
+# Used to define the compound change_type "address" changes.
+# List all columns you want to be included in "address" change groups.
+# This generally includes all residential AND mail address fields, if available.
+address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - MailingAddress
+  - MailingCity
+  - MailingState
+  - MailingZip
+  - MailingCountry
+
+# This is used in the relatively new add_common_address_features(). This is a feature
+# used to check if removal or deactivations happen to multiple voters in the same
+# apartement building. This should include the house/building number and all other
+# street & town information but NOT the apartment or unit number.
+street_address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - City
+
+# Whatever columns you get in the voter file (minus voting history information, we are going
+# to reformat and add that later). Also, whatever data types they should be in our postgres
+# tables. Most fields should be "text". Dates should be "date". * Sometimes * voter ID or
+# county ID should be an int, e.g. if we want to automatically ignore leading zeros. But
+# unless you have a good reason, default to making these text too, and then double checking
+# that the text is interpreted correctly in our system, e.g. county "4" not "4.0".
+columns:
+    RegistrantID: int
+    RegistrationDate: date
+    EffectiveDateofChange: date
+    BirthDate: date
+    LastName: text
+    FirstName: text
+    MiddleName: text
+    Suffix: text
+    Status: text
+    StatusReason: text
+    County: text
+    HouseNumber: text
+    StreetPrefix: text
+    StreetName: text
+    StreetType: text
+    StreetSuffix: text
+    UnitType: text
+    UnitNumber: text
+    City: text
+    MailingAddress: text
+    MailingCity: text
+    MailingState: text
+    MailingZip: text
+    MailingCountry: text
+    Party: text
+    PEVL: text
+    Precinct: text
+# Same columns as above, just listed in the order they appear in the file.
+ordered_columns:
+  - RegistrantID
+  - RegistrationDate
+  - EffectiveDateofChange
+  - BirthDate
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - Status
+  - StatusReason
+  - County
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - City
+  - MailingAddress
+  - MailingCity
+  - MailingState
+  - MailingZip
+  - MailingCountry
+  - Party
+  - PEVL
+  - Precinct
+
+
+# History Columns
+# You should consolidate voting history data into a few standard columns with lists of
+# election data. You can follow the way this is done in most state preprocessors.
+# Basically "all_history" should list election identifiers in human-readable format,
+# e.g. for a single voter you will see a list like:
+# ["general_2020-11-02", "general_2022-11-03", "primary_2022-06-02"]
+# "sparse_history" will be the same list of elections but encoded into numbers using
+# the meta-data json key that you will also create during preprocessing.
+# If the data exists, "votetype_history" and "party_history" will be lists of the
+# codes or parties associated with each election, e.g.:
+# ["A", "P", "PV", "P"] for vote types, depending on the codes used in the state.
+# ["D", "R", "D", "N", "R"] for parties, depending on the codes used in the state.
+#
+# Only list columns here if you can actually create them from the data you are
+# given in this state.
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+  party_history: text[]
+# Same columns as above, just listed in the order they appear in the final dataframe.
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+  - party_history
+
+
+
+###############################
+# General Note:
+#
+# This is not an exhaustive list of everything you might need to include in a yaml config,
+# for example you may need to store codes describing race, or a lookup to deal with
+# particularly complicated locale or other data, or a lookup for column aliases as files
+# change over time. You can also always add any custom stuff that you might need to use
+# for preprocessing.
+#
+# Also, on the reggie side, don't forget to add the dictionary of primary locale names,
+# where "id" is whatever the locale is called in our database, and "name" is the pretty
+# human-readable version of that locale name.
+# Also, this same locale json file will need to be added to the frontend repo as well as
+# reggie.
+
+
+###############################
+# Note on Feature Creation for the Analysis pages:
+#
+# You may have to do some manual work to figure out if features are being created correctly
+# from the available data. Take a look at the data you have that could generate features
+# (e.g. age/birthday, status, status reason, party, gender, race, ethnicity, voting history
+# participation/votetype/party codes, registration date or other dates), and then make sure
+# it is showing up as expected on the frontend. If not, figure out why.
+# In many cases, the features should get created automatically as long as your config is set
+# up right.
+#
+# For birthday/status/status_reason/party, the features should work automatically as long as
+# the relevant {X}_identifier above is set correctly.
+#
+# For dates, the features should get created by add_days_since_features() long as the data
+# type for each date column above is "date".
+#
+# For gender/race/ethnicity, the feature is generated as long as the column contains the word
+# "gender"/"race"/"ethnic"; if this isn't true, you might have to change the feature function
+# code a little to make it work with whatever column name you have.
+#
+# As I said above, voting history features will need to be turned on manually, and might also
+# need a little massaging to work right.
+
+
+###############################
+# Note on Inspector yaml config:
+#
+# When you get over to the Inspector side, there's another yaml config there, but it's a
+# little less involved.
+#
+# parquet_columns - This is just the same voter data and history columns,
+#   with the parquet variable types instead of postgres ones.
+#
+# change_history_types - The change types tracked by the mod matrix and change history,
+#   so e.g. don't list party if you don't have party data,
+#   don't list activated/deactivated if you don't have status data
+#
+# summary_columns & summary_types - The full set of demographics to summarize for each file,
+# and the data types to use in postgres summaries table.
+#   Standard columns are:
+#   - [totals (int), date (timestamp), state (text), locale (text), locale_type (text)]
+#   All other columns are ints:
+#   - [ages_18_34, ages_35_49, ages_50_64, ages_65_130] (if we have age data)
+#   - Whatever party codes we want to track, but definitely whatever codes correspond to
+#     Republican, Democrat, and Unaffiliated.
+#   - [status_active, status_inactive, status_other]
+#
+# primary_key - primary key for the mods table:
+#   [pre_date, post_date, voter ID column name, and change_type]
+#
+# base_columns - base columns and data types to create the mods table:
+#   [pre_date, post_date, voter ID column name, change_type, pre_value, post_value, state]
+#
+# If your state has multiple locales to aggregate by, they get listed in lists of
+# key_locale_identifiers (the column names used in your data file) and key_locale_types
+# (the standard names we use for those locale types: county, jurisdiction, and
+# congressional_district).
+
+
+###############################
+# Note on Frontend config:
+#
+# When you get to the Frontend, you shouldn't have much to do, primarily just create a
+# state entry in the states config (src/config/states.js), and add the locales json file
+# (to src/data/counties or the correct locale type).
+#
+# For "demographicGroupsAvailable" options are:
+#   ['age', 'party', 'status', (and soon to be EBNR_status)].
+#   If your state is missing any of these big 3, remove it from this list.
+#
+# For "changeTypesUnavailable", you will probably need to add "early_voter" unless you
+# have permanent absentee data.
+#   If you are missing party data, add "party".
+#   If you are missing status data, add "activated" and "deactivated".
+#   If you are missing birth date, add "birthday".
+#
+# The other thing you may need to do is add the specific backend feature names for this
+# state to the feature config in src/config/demographics.js
+# If you can see features in the backend populations table (or in the payload on the
+# frontend) that are not being displayed, you probably need to add those feature names
+# as another "apiId" for the equivalent feature in src/config/demographics.js
+
