@@ -53,7 +53,7 @@ early_voter_identifier: PEVL
 # The date format or date formats used in the file,
 # particularly in the regular date columns, e.g. the formats
 # seen in the birth_date, registration_date, etc columns.
-# (The history stuff may be handled separately, depending on it's formatting).
+# (The history stuff may be handled separately, depending on its formatting).
 #
 # If all date columns have the same format, make it a single value like this:
 date_format: '%Y-%m-%d'
@@ -72,7 +72,8 @@ voter_status: Status
 # The possible values of the voter status column:
 
 # "voter_status_active" is a list of all voter statuses that should be considered "active"
-# voters. This could include e.g. "active", "active_military", "active_federal_elections_only", etc.
+# voters. This could include e.g. "active", "active_military",
+# "active_federal_elections_only", etc.
 voter_status_active:
   - Active
 
@@ -202,7 +203,8 @@ name_fields:
   - MiddleName
   - Suffix
 
-# This is used for matching duplicates in Jiamin's create_dupes_custom_population() vote-cli function.
+# This is used for matching duplicates in Jiamin's create_dupes_custom_population()
+# vote-cli function.
 standard_name_fields:
   - LastName
   - FirstName
@@ -238,11 +240,11 @@ street_address_fields:
   - City
 
 # Whatever columns you get in the voter file (minus voting history information, we are going
-# to reformat and add that later). Also, whatever data types they should be in our postgres tables.
-# Most fields should be "text". Dates should be "date". * Sometimes * voter ID or county ID should be
-# an int, e.g. if we want to automatically ignore leading zeros. But unless you have a good reason,
-# default to making these text too, and then double checking that the text is interpreted correctly
-# in our system, e.g. county "4" not "4.0".
+# to reformat and add that later). Also, whatever data types they should be in our postgres
+# tables. Most fields should be "text". Dates should be "date". * Sometimes * voter ID or
+# county ID should be an int, e.g. if we want to automatically ignore leading zeros. But
+# unless you have a good reason, default to making these text too, and then double checking
+# that the text is interpreted correctly in our system, e.g. county "4" not "4.0".
 columns:
     RegistrantID: int
     RegistrationDate: date
@@ -335,14 +337,16 @@ ordered_generated_columns:
 # General Note:
 #
 # This is not an exhaustive list of everything you might need to include in a yaml config,
-# for example you may need to store codes describing race, or a lookup to deal with particularly
-# complicated locale or other data, or a lookup for column aliases as files change over time.
-# You can also always add any custom stuff that you might need to use for preprocessing.
+# for example you may need to store codes describing race, or a lookup to deal with
+# particularly complicated locale or other data, or a lookup for column aliases as files
+# change over time. You can also always add any custom stuff that you might need to use
+# for preprocessing.
 #
 # Also, on the reggie side, don't forget to add the dictionary of primary locale names,
 # where "id" is whatever the locale is called in our database, and "name" is the pretty
 # human-readable version of that locale name.
-# Also, this same locale json file will need to be added to the frontend repo as well as reggie.
+# Also, this same locale json file will need to be added to the frontend repo as well as
+# reggie.
 
 
 ###############################
@@ -393,14 +397,16 @@ ordered_generated_columns:
 #     Republican, Democrat, and Unaffiliated.
 #   - [status_active, status_inactive, status_other]
 #
-# primary_key - primary key for the mods table: [pre_date, post_date, voter ID column name, and change_type]
+# primary_key - primary key for the mods table:
+#   [pre_date, post_date, voter ID column name, and change_type]
 #
 # base_columns - base columns and data types to create the mods table:
 #   [pre_date, post_date, voter ID column name, change_type, pre_value, post_value, state]
 #
-# If your state has multiple locales to aggregate by, they get listed in lists of key_locale_identifiers
-# (the column names used in your data file) and key_locale_types
-# (the standard names we use for those locale types: county, jurisdiction, and congressional_district).
+# If your state has multiple locales to aggregate by, they get listed in lists of
+# key_locale_identifiers (the column names used in your data file) and key_locale_types
+# (the standard names we use for those locale types: county, jurisdiction, and
+# congressional_district).
 
 
 ###############################
