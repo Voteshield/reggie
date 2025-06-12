@@ -338,51 +338,91 @@ ordered_generated_columns:
 # for example you may need to store codes describing race, or a lookup to deal with particularly
 # complicated locale or other data, or a lookup for column aliases as files change over time.
 # You can also always add any custom stuff that you might need to use for preprocessing.
-
+#
+# Also, on the reggie side, don't forget to add the dictionary of primary locale names,
+# where "id" is whatever the locale is called in our database, and "name" is the pretty
+# human-readable version of that locale name.
+# Also, this same locale json file will need to be added to the frontend repo as well as reggie.
 
 
 ###############################
 # Note on Feature Creation for the Analysis pages:
 #
 # You may have to do some manual work to figure out if features are being created correctly
-# from the available data
-race and gender and ethnicity automatically work based on columns with the word "race" or "gender" or "ethnic"
-# Go check that this is working manually.
+# from the available data. Take a look at the data you have that could generate features
+# (e.g. age/birthday, status, status reason, party, gender, race, ethnicity, voting history
+# participation/votetype/party codes, registration date or other dates), and then make sure
+# it is showing up as expected on the frontend. If not, figure out why.
+# In many cases, the features should get created automatically as long as your config is set
+# up right.
+#
+# For birthday/status/status_reason/party, the features should work automatically as long as
+# the relevant {X}_identifier above is set correctly.
+#
+# For dates, the features should get created by add_days_since_features() long as the data
+# type for each date column above is "date".
+#
+# For gender/race/ethnicity, the feature is generated as long as the column contains the word
+# "gender"/"race"/"ethnic"; if this isn't true, you might have to change the feature function
+# code a little to make it work with whatever column name you have.
+#
+# As I said above, voting history features will need to be turned on manually, and might also
+# need a little massaging to work right.
 
-# Date features add_days_since_features()
-
-
-# Reggie - Don't forget to add the primary locale names (id = whatever our system calls it, name = pretty human readable name.)
 
 ###############################
 # Note on Inspector yaml config:
+#
+# When you get over to the Inspector side, there's another yaml config there, but it's a
+# little less involved.
+#
+# parquet_columns - This is just the same voter data and history columns,
+#   with the parquet variable types instead of postgres ones.
+#
+# change_history_types - The change types tracked by the mod matrix and change history,
+#   so e.g. don't list party if you don't have party data,
+#   don't list activated/deactivated if you don't have status data
+#
+# summary_columns & summary_types - The full set of demographics to summarize for each file,
+# and the data types to use in postgres summaries table.
+#   Standard columns are:
+#   - [totals (int), date (timestamp), state (text), locale (text), locale_type (text)]
+#   All other columns are ints:
+#   - [ages_18_34, ages_35_49, ages_50_64, ages_65_130] (if we have age data)
+#   - Whatever party codes we want to track, but definitely whatever codes correspond to
+#     Republican, Democrat, and Unaffiliated.
+#   - [status_active, status_inactive, status_other]
+#
+# primary_key - primary key for the mods table: [pre_date, post_date, voter ID column name, and change_type]
+#
+# base_columns - base columns and data types to create the mods table:
+#   [pre_date, post_date, voter ID column name, change_type, pre_value, post_value, state]
+#
+# If your state has multiple locales to aggregate by, they get listed in lists of key_locale_identifiers
+# (the column names used in your data file) and key_locale_types
+# (the standard names we use for those locale types: county, jurisdiction, and congressional_district).
 
-# Inspector YAML:
-# New summary columns for status ... (only for states with a voter status column)
-# status_active, status_inactive, status_other
 
 ###############################
 # Note on Frontend config:
 #
-# Turn date and other features on the frontend config side - src/config/demographics.js
-# demographicGroupsAvailable = basic options
-# changeTypesUnavailable = NOT reregistration
-
-# Poke around and make sure all the features you would expect to pop up on the frontend, do in fact pop up. Otherwise investigate why not.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# When you get to the Frontend, you shouldn't have much to do, primarily just create a
+# state entry in the states config (src/config/states.js), and add the locales json file
+# (to src/data/counties or the correct locale type).
+#
+# For "demographicGroupsAvailable" options are:
+#   ['age', 'party', 'status', (and soon to be EBNR_status)].
+#   If your state is missing any of these big 3, remove it from this list.
+#
+# For "changeTypesUnavailable", you will probably need to add "early_voter" unless you
+# have permanent absentee data.
+#   If you are missing party data, add "party".
+#   If you are missing status data, add "activated" and "deactivated".
+#   If you are missing birth date, add "birthday".
+#
+# The other thing you may need to do is add the specific backend feature names for this
+# state to the feature config in src/config/demographics.js
+# If you can see features in the backend populations table (or in the payload on the
+# frontend) that are not being displayed, you probably need to add those feature names
+# as another "apiId" for the equivalent feature in src/config/demographics.js
 
