@@ -108,6 +108,20 @@ class PreprocessArizona2(Preprocessor):
         if "Occupation" not in main_df.columns:
             main_df["Occupation"] = np.nan
 
+        # Keep values in new columns FedIDOnly and FedNoID consistent (true/false, not yes/no):
+        def convert_to_boolean(x):
+            if x == "yes":
+                return "true"
+            elif x == "no":
+                return "false"
+            else:
+                return x
+
+        if "FedIDOnly" in main_df.columns:
+            main_df["FedIDOnly"] = main_df["FedIDOnly"].map(convert_to_boolean)
+        if "FedNoID" in main_df.columns:
+            main_df["FedNoID"] = main_df["FedNoID"].map(convert_to_boolean)
+
         # In spring 2025, they replaced election names with non-descript column headers.
         # However, we can tell that the 5 non-descript headers (EL1 through EL5) correspond
         # with the 5 known elections (in 2022 & 2024) from the previous files.
