@@ -1,11 +1,9 @@
 import datetime
-import gc
 import json
 import logging
 
 from datetime import datetime
-from dateutil import parser
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
+from io import StringIO
 
 import numpy as np
 import pandas as pd
@@ -14,10 +12,6 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
-)
-from reggie.ingestion.utils import (
-    format_column_name,
-    MissingNumColumnsError,
 )
 
 
@@ -31,7 +25,7 @@ class PreprocessVermont(Preprocessor):
             raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=force_date,
-            **kwargs
+            **kwargs,
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
@@ -51,11 +45,18 @@ class PreprocessVermont(Preprocessor):
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
         self.file_check(len(new_files))
-        voter_file = [
-            n
-            for n in new_files
-            if ("voter file" in n["name"].lower()) or ("statewidevoters" in n["name"].lower())
-        ][0]
+
+        try:
+            voter_file = [
+                n
+                for n in new_files
+                if ("voter file" in n["name"].lower())
+                or ("statewidevoters" in n["name"].lower())
+            ][0]
+        except IndexError:
+            voter_file = [n for n in new_files if ".csv" in n["name"].lower()][
+                0
+            ]
         vdf = pd.read_csv(voter_file["obj"], sep="|", dtype=str)
 
         # Sometimes, instead of the | seperator it is a tab
@@ -67,25 +68,57 @@ class PreprocessVermont(Preprocessor):
             voter_file["obj"].seek(0)
             vdf = pd.read_csv(voter_file["obj"], sep=",", dtype=str)
 
+        # June 2025, some of the columns have extra single quotes around the column names
+        for col in vdf.columns:
+            if "'" in col:
+                vdf.rename(columns={col: col.strip("'")}, inplace=True)
+
+        vdf.rename(columns=self.config["rename_columns"], inplace=True)
+        vdf[self.config["voter_id"]] = vdf[
+            self.config["voter_id"]
+        ].str.replace("'", "")
+
+        # Note, in June 2025 Vermont added around 50 extra commas to the file
         unnamed_cols = vdf.columns[vdf.columns.str.contains("Unnamed")]
         vdf.drop(columns=unnamed_cols, inplace=True)
         election_columns = [
-            col for col in vdf.columns if "election" in col.lower()
+            col
+            for col in vdf.columns
+            if "election" in col.lower() or "statewide" in col.lower()
         ]
+        # added some columns that are new now, so needs reconciliaiton?
         vdf[self.config["party_identifier"]] = np.nan
 
-        cols_to_check = [x for x in vdf.columns if x not in election_columns]
-        self.column_check(cols_to_check)
-
-        # strip the word "participation" and replace spaces with underscores
-        # for consistency
-        rename_dict = {
-            col: col.replace(" Participation", "").replace(" ", "_")
-            for col in election_columns
-        }
+        # In June of 2025 they changed the format of the file slightly and
+        # changed election column names.
+        # The new election column names look like: 11/02/2010-2010 STATEWIDE GENERAL
+        # when we expect: 2008 Gen Election Participation, to rename them just
+        rename_dict = {}
+        for election_column in election_columns:
+            try:
+                election_year = election_column.split("-")[0].split("/")[-1]
+                # Check to see if you can make the substring a year
+                datetime.strptime(election_year, "%Y")
+                election_string = f"{election_year}_Gen_Election"
+                rename_dict[election_column] = election_string
+            except ValueError:
+                logging.info("election columns in original format")
+                # strip the word "participation" and replace spaces with underscores
+                # for consistency
+                rename_dict = {
+                    col: col.replace(" Participation", "").replace(" ", "_")
+                    for col in election_columns
+                }
 
         vdf.rename(columns=rename_dict, inplace=True)
 
+        # In June 2025 extra columns that cannot be renamed were added, this removes them
+        cols_to_reconcile = list(self.config["columns"].keys()) + list(
+            rename_dict.values()
+        )
+        vdf = self.reconcile_columns(vdf, cols_to_reconcile)
+
+        # Use the renamed election columns
         election_columns = list(rename_dict.values())
         # Replacing the boolean values in the cells with the election name for
         # processing
@@ -139,11 +172,13 @@ class PreprocessVermont(Preprocessor):
             e.g. some mail zip codes look like "x1j4"
             """
             try:
-                return str(int(z)).rjust(5,"0")
+                return str(int(z)).rjust(5, "0")
             except ValueError:
                 return z
 
-        vdf[self.config["voter_id"]] = vdf[self.config["voter_id"]].str.rjust(9,"0")
+        vdf[self.config["voter_id"]] = vdf[self.config["voter_id"]].str.rjust(
+            9, "0"
+        )
         vdf["Legal Address Zip"] = vdf["Legal Address Zip"].map(pad_zips)
         vdf["Mailing Address Zip"] = vdf["Mailing Address Zip"].map(pad_zips)
 
