@@ -1,0 +1,270 @@
+#Maine has 2 Voter Files and 1 History File
+
+
+file_type: .txt
+delimiter: '|'
+state: maine
+abbreviation: me
+source: boe
+file_class: voter_file
+has_headers: TRUE
+fixed_width: FALSE
+separate_hispanic_origin: FALSE
+date_format: ['%m/%d/%Y', '%Y']
+expected_number_of_files: 3
+primary_locale_identifier: CTY
+county_identifier: CTY
+numeric_primary_locale: FALSE
+birthday_identifier: YOB
+registration_date_identifier: "DT ACCEPT"
+voter_id: VOTER ID
+voter_status: STATUS
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
+voter_status_cancelled: C # comes from a separate file
+not_registered_voter_status_set: 
+  - C
+voter_status_preregistered: PR
+democratic_party: D
+republican_party: R
+libertarian_party: L
+no_party_affiliation: U #Unenrolled but I think close enough?
+party_identifier: ENROLL
+absentee_ballot_code: "'ABSENTEE'"
+valid_voting_methods: ['ABSENTEE', "REGULAR"]
+
+missing_required_fields: true
+demographic_fields_available:
+  - age
+  - party
+  - status
+name_fields:
+  - FIRST NAME
+  - MIDDLE NAME
+  - LAST NAME
+  - SUFF
+standard_name_fields:
+  - FIRST NAME
+  - MIDDLE NAME
+  - LAST NAME
+match_fields:
+  - FIRST NAME
+  - LAST NAME
+  - YOB
+address_fields:
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - MAIL ST NUM
+  - MAIL ST NUM A
+  - MAIL ST NUM B
+  - MAIL ST NAME1
+  - MAIL ST NAME2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+street_address_fields:
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+# The history seems to be one file per election
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
+hist_columns:
+  - VOTER ID
+  - ELECTION DATE
+  - ELECTION NAME
+  - ELECTION TYPE
+  - ELECTION CATEGORY
+  - TOWN NAME WHERE VOTED
+  - BALLOT TYPE
+#Cancelled file has a different column naming system than the main file, below
+# are the cancelled file columns, with their main file equivalent for renaming
+cancelled_columns:
+  Town Name: REG TOWN
+  Id_Voter: VOTER ID
+  Status: STATUS
+  Last Name: LAST NAME
+  First Name: FIRST NAME
+  Middle Name: MIDDLE NAME
+  Suffix: SUFF
+  Residence Street#: ST NUM
+  Suff A: ST NUM A
+  Suff B: ST NUM B
+  Street Name: ST NAME1
+  Address Line 2: ST NAME2
+  Unit: UNIT
+  City: CITY
+  State: STATE
+  Zip5: ZIP
+  Zip4: ZIP4
+  # Beginning here, the mail address columns have the exact same names in the
+  # file as the other address fields, hence the .1 in pandas
+  Mail Street#: MAIL ST NUM
+  Suff A.1: MAIL ST NUM A
+  Suff B.1: MAIL ST NUM B
+  Street Name.1: MAIL ST NAME1
+  Address Line 2.1: MAIL ST NAME2
+  Unit.1: MAIL UNIT
+  City.1: MAIL CITY
+  State.1: MAIL STATE
+  Zip5.1: MAIL ZIP
+  Zip4.1: MAIL ZIP4
+  Country: MAIL COUNTRY
+  Party: ENROLL
+  Spec_Status: DESIGNATE # mostly null, but mostly S or O, what does it mean?
+  DT_Effect: DT EFFECT
+  DT_Accept: DT ACCEPT
+  DT_Stat_Change: DT STATUS CHG
+  DT_Birth: YOB
+  Off_Reason: REASON
+  DT_Last_Active: DT LAST ACTIVE
+  W-P: WP
+  CG: CG
+  SS: SS
+  SR: SR
+  Id_Parent_Area: Id_Parent_Area # No Clue, should be county but is not and doesn't seem to be zip either
+  CC: CC
+  DA: DA
+  RD: RD
+  KCB: KCB
+  ACF: ACF
+  DT_Last_Updated: DT CHG
+columns:
+  REG TOWN: text
+  VOTER ID: text # leading 0's will be kept if they exist
+  STATUS: text
+  LAST NAME: text
+  FIRST NAME: text
+  MIDDLE NAME: text
+  SUFF: text
+  ST NUM: text
+  ST NUM A: text
+  ST NUM B: text
+  ST NAME1: text
+  ST NAME2: text
+  UNIT: text
+  CITY: text
+  STATE: text
+  ZIP: int # Note, some of the zips start with 0, so will seem shorter than they should
+  ZIP4: int
+  MAIL ST NUM: text
+  MAIL ST NUM A: text
+  MAIL ST NUM B: text
+  MAIL ST NAME1: text
+  MAIL ST NAME2: text
+  MAIL UNIT: text
+  MAIL CITY: text
+  MAIL STATE: text
+  MAIL ZIP: int
+  MAIL ZIP4: int
+  MAIL COUNTRY: text
+  ENROLL: text
+  DESIGNATE: text
+  DT EFFECT: date # date of registration (17 year olds only)
+  DT ACCEPT: date # date of registration for everyone else
+  DT STATUS CHG: date
+  YOB: date
+  REASON: text
+  DT LAST ACTIVE: date # date last active
+  WP: text # Ward/Precinct
+  CG: text # Congressional District
+  SS: text # State Senate
+  SR: text # State Representative
+  Id_Parent_Area: text # from cancelled file, no idea
+  CTY: text # County (code...kind of)
+  CC: text # county commissioner district 
+  DA: text # district attorney
+  RD: text # register of deeds
+  KCB: text # knox county budget...???
+  ACF: text # aroostook county fiaancee ...???
+  DT CHG: date # date changed
+
+ordered_columns:
+  - REG TOWN
+  - VOTER ID
+  - STATUS
+  - LAST NAME
+  - FIRST NAME
+  - MIDDLE NAME
+  - SUFF
+  - ST NUM
+  - ST NUM A
+  - ST NUM B
+  - ST NAME1
+  - ST NAME2
+  - UNIT
+  - CITY
+  - STATE
+  - ZIP
+  - ZIP4
+  - MAIL ST NUM
+  - MAIL ST NUM A
+  - MAIL ST NUM B
+  - MAIL ST NAME1
+  - MAIL ST NAME2
+  - MAIL UNIT
+  - MAIL CITY
+  - MAIL STATE
+  - MAIL ZIP
+  - MAIL ZIP4
+  - MAIL COUNTRY
+  - ENROLL
+  - DESIGNATE
+  - DT EFFECT
+  - DT ACCEPT
+  - DT STATUS CHG
+  - YOB
+  - REASON
+  - DT LAST ACTIVE
+  - WP
+  - CG
+  - SS
+  - SR
+  - Id_Parent_Area # from cancelled file
+  - CTY
+  - CC
+  - DA
+  - RD
+  - KCB
+  - ACF
+  - DT CHG
+
+county_codes:
+  Androscoggin: 01and
+  Aroostook: 02aro
+  Cumberland: 03cum
+  Franklin: 04fra
+  Hancock: 05han
+  Kennebec: 06ken
+  Knox: 07kno
+  Lincoln: 08lin
+  Oxford: 09oxf
+  Penobscot: 10pen
+  Piscataquis: 11pis
+  Sagadahoc: 12sag
+  Somerset: 13som
+  Waldo: 14wal
+  Washington: 15was
+  York: 16yor
