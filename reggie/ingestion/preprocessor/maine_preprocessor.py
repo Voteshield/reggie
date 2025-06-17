@@ -89,10 +89,9 @@ class PreprocessMaine(Preprocessor):
                 "YOB"
             ].str.split("/", expand=True)
             cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
-        # there are about 5 entries in the cancelled file, that have an active
-        # status in the main file for some reason.
-        # keep the cancelled dataframe on top
 
+        # there are several entries in the cancelled file, that have an active
+        # status in the main file
         voter_df = pd.concat([cancelled_df, voter_df])
 
         del cancelled_df
