@@ -40,8 +40,10 @@ class PreprocessMaine(Preprocessor):
 
         def keep_most_recent_record(voters_df, cancelled_df):
             """
-            A small number of voter ids will appear across tthe two files. We should keep whichever one is most recently updated.
-            The DT CHG field contains the date the entry in each file was most recently changed.
+            A small number of voter ids will appear across tthe two files. We 
+            should keep whichever one is most recently updated. The DT CHG 
+            field contains the date the entry in each file was most recently 
+            changed.
             :param voters_df: the voter file dataframe
             :param cancelled_df: the cancelled dataframe
             :return: The combined dataframe keeping the most recent entry across the two files.
