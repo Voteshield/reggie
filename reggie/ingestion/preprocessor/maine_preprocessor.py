@@ -34,7 +34,6 @@ class PreprocessMaine(Preprocessor):
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
 
-
     def execute(self):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
@@ -42,39 +41,61 @@ class PreprocessMaine(Preprocessor):
         def keep_most_recent_record(voters_df, cancelled_df):
             """
             A small number of voter ids will appear across tthe two files. We should keep whichever one is most recently updated.
-            The DT CHG field contains the date the entry in each file was most recently changed. 
+            The DT CHG field contains the date the entry in each file was most recently changed.
             :param voters_df: the voter file dataframe
             :param cancelled_df: the cancelled dataframe
-            :return: The combined dataframe keeping the most recent entry across the two files. 
+            :return: The combined dataframe keeping the most recent entry across the two files.
             """
-            
+
             voters_df_ids = voters_df[self.config["voter_id"]].to_list()
             cancelled_df_ids = cancelled_df[self.config["voter_id"]].to_list()
             intersetion_ids = set(voters_df_ids).intersection(
-                set(cancelled_df_ids))
-            cancelled_df_intersection = cancelled_df[cancelled_df[self.config["voter_id"]].isin(intersetion_ids)][[self.config["voter_id"], "DT STATUS CHG"]]
-            voter_df_intersection = voters_df[voters_df[self.config["voter_id"]].isin(intersetion_ids)][[self.config["voter_id"], "DT STATUS CHG"]]
+                set(cancelled_df_ids)
+            )
+            cancelled_df_intersection = cancelled_df[
+                cancelled_df[self.config["voter_id"]].isin(intersetion_ids)
+            ][[self.config["voter_id"], "DT STATUS CHG"]]
+            voter_df_intersection = voters_df[
+                voters_df[self.config["voter_id"]].isin(intersetion_ids)
+            ][[self.config["voter_id"], "DT STATUS CHG"]]
 
             # rename date cancelled to avoid the confusing _x _y merge
-            cancelled_df_intersection.rename(columns={"DT STATUS CHG": "DT CHG CANCELLED"}, inplace=True)
-            merged_df = pd.merge(cancelled_df_intersection, voter_df_intersection, on=self.config["voter_id"])
-            
+            cancelled_df_intersection.rename(
+                columns={"DT STATUS CHG": "DT CHG CANCELLED"}, inplace=True
+            )
+            merged_df = pd.merge(
+                cancelled_df_intersection,
+                voter_df_intersection,
+                on=self.config["voter_id"],
+            )
+
             # Make datetimes to make the comparison make sense.
-            merged_df["DT CHG CANCELLED"] = pd.to_datetime(merged_df["DT CHG CANCELLED"])
-            merged_df["DT STATUS CHG"] = pd.to_datetime(merged_df["DT STATUS CHG"])
-            merged_df['Cancelled_Recent'] = merged_df["DT CHG CANCELLED"] > merged_df[
-                "DT CHG"]
+            merged_df["DT CHG CANCELLED"] = pd.to_datetime(
+                merged_df["DT CHG CANCELLED"]
+            )
+            merged_df["DT STATUS CHG"] = pd.to_datetime(
+                merged_df["DT STATUS CHG"]
+            )
+            merged_df["Cancelled_Recent"] = (
+                merged_df["DT CHG CANCELLED"] > merged_df["DT CHG"]
+            )
             print(merged_df)
             # Grab the ids to drop from the cancelled file
-            ids_to_drop = merged_df[merged_df["Cancelled_Recent"] == True][self.config["voter_id"]]
-            logging.info(f"Dropped {len(ids_to_drop)} records from the active file with a more recent cancellation entry")
-            voters_df = voters_df[~voters_df[self.config["voter_id"]].isin(list(ids_to_drop))]
+            ids_to_drop = merged_df[merged_df["Cancelled_Recent"] == True][
+                self.config["voter_id"]
+            ]
+            logging.info(
+                f"Dropped {len(ids_to_drop)} records from the active file with a more recent cancellation entry"
+            )
+            voters_df = voters_df[
+                ~voters_df[self.config["voter_id"]].isin(list(ids_to_drop))
+            ]
             return pd.concat([cancelled_df, voters_df])
-        
+
         new_files = self.unpack_files(self.main_file, compression="unzip")
         # Due to the way the history files are done for this state, there are a
         # variable number of correct files, so checking the number of files is
-        # not possible. 
+        # not possible.
         # self.file_check(len(new_files))
         voter_df = pd.DataFrame()
         cancelled_df = pd.DataFrame()
@@ -98,7 +119,7 @@ class PreprocessMaine(Preprocessor):
                     f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN county values"
                 )
             elif "history" in file["name"].lower():
-                # Maine Voter History seems to come one file per election, 
+                # Maine Voter History seems to come one file per election,
                 logging.info("vote history found")
                 new_hist = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
@@ -128,7 +149,9 @@ class PreprocessMaine(Preprocessor):
 
         # there are several entries in the cancelled file, that have an active
         # status in the main file
-        voter_df = keep_most_recent_record(voters_df=voter_df, cancelled_df=cancelled_df)
+        voter_df = keep_most_recent_record(
+            voters_df=voter_df, cancelled_df=cancelled_df
+        )
         del cancelled_df
         unnamed_cols = voter_df.columns[
             voter_df.columns.str.contains("Unnamed")
