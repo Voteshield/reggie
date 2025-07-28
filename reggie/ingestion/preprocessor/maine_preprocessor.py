@@ -54,16 +54,19 @@ class PreprocessMaine(Preprocessor):
             intersetion_ids = set(voters_df_ids).intersection(
                 set(cancelled_df_ids)
             )
+            print(intersetion_ids)
             cancelled_df_intersection = cancelled_df[
                 cancelled_df[self.config["voter_id"]].isin(intersetion_ids)
-            ][[self.config["voter_id"], "DT STATUS CHG"]]
+            ][[self.config["voter_id"], "DT CHG"]]
             voter_df_intersection = voters_df[
                 voters_df[self.config["voter_id"]].isin(intersetion_ids)
-            ][[self.config["voter_id"], "DT STATUS CHG"]]
-
+            ][[self.config["voter_id"], "DT CHG"]]
+            print(cancelled_df_intersection)
+            print(voter_df_intersection)
+            print(voter_df_intersection)
             # rename date cancelled to avoid the confusing _x _y merge
             cancelled_df_intersection.rename(
-                columns={"DT STATUS CHG": "DT CHG CANCELLED"}, inplace=True
+                columns={"DT CHG": "DT CHG CANCELLED"}, inplace=True
             )
             merged_df = pd.merge(
                 cancelled_df_intersection,
@@ -75,13 +78,16 @@ class PreprocessMaine(Preprocessor):
             merged_df["DT CHG CANCELLED"] = pd.to_datetime(
                 merged_df["DT CHG CANCELLED"]
             )
-            merged_df["DT STATUS CHG"] = pd.to_datetime(
-                merged_df["DT STATUS CHG"]
+            merged_df["DT CHG"] = pd.to_datetime(
+                merged_df["DT CHG"]
             )
+            
+            # Comparisons against missing data (like NaT are always false)
+            # This means that when there are NaT values, they are not dropped
+            # This should keep both entries in the file
             merged_df["Cancelled_Recent"] = (
                 merged_df["DT CHG CANCELLED"] > merged_df["DT CHG"]
             )
-            print(merged_df)
             # Grab the ids to drop from the cancelled file
             ids_to_drop = merged_df[merged_df["Cancelled_Recent"] == True][
                 self.config["voter_id"]
