@@ -43,7 +43,7 @@ class PreprocessNewHampshire(Preprocessor):
             # ignore ".mdb" files
             file_type_list = [".xlsx", ".csv", ".txt"]
             if any(x in f["name"] for x in file_type_list):
-                if "history" in f["name"].lower():
+                if ("history" in f["name"].lower()) or ("vh" in f["name"].lower()):
                     logging.info("Found history file: {}".format(f["name"]))
                     if ".xlsx" in f["name"]:
                         hist_df = pd.read_excel(f["obj"])
