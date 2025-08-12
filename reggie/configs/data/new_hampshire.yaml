@@ -206,6 +206,10 @@ column_aliases_voter_file:
   "Mailing Zip +4": "mail_zip4"
   "Ward/District": "ward"
   "County": "County"
+# August 2025 file also had slight variations on these 2 fields:
+  "Apartment/Unit Number": "ad_unit"
+  "Mailing Apartment/Unit Number": "mail_unit"
+
 column_aliases_history_file:
   "Voter ID": "id_voter"
   "Election Date": "election_date"
