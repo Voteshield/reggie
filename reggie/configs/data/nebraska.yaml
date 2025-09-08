@@ -1,7 +1,7 @@
 file_type: txt
 delimiter: '\t'
 state: nebraska
-abbreviation: ks
+abbreviation: ne
 source: boe
 file_class: voter_file
 expected_number_of_files: 1
