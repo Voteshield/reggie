@@ -1,0 +1,388 @@
+file_type: txt
+delimiter: '\t'
+state: nebraska
+abbreviation: ks
+source: boe
+file_class: voter_file
+expected_number_of_files: 1
+voter_id: text_registrant_id
+county_identifier: db_logid
+primary_locale_identifier: db_logid
+numeric_primary_locale: false
+birthday_identifier: birth_year
+encoding: latin-1
+registration_date_identifier: date_of_registration
+voter_status: cde_registrant_status
+voter_status_active:
+  - A
+voter_status_inactive:
+  - I
+democratic_party: Democratic
+republican_party: Republican
+libertarian_party: Libertarian
+no_party_affiliation: Nonpartisan
+demographic_fields_available:
+  - age
+  - gender
+  - party
+  - status
+date_format: '%m/%d/%Y'
+party_identifier: desc_party
+has_headers: YES
+match_fields:
+  - text_name_first
+  - text_name_last
+  - date_of_birth
+name_fields:
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+standard_name_fields:
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+address_fields:
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - cde_res_unit_type
+  - text_res_unit_nbr
+  - text_res_city
+  - cde_res_state
+  - text_res_zip5
+  - text_res_zip4
+  - text_res_carrier_rte
+  - ind_res_military
+  - text_mail_address1
+  - text_mail_address2
+  - text_mail_address3
+  - text_mail_address4
+  - text_mail_city
+  - cde_mail_state
+  - text_mail_zip5
+  - text_mail_zip4
+  - text_mail_carrier_rte
+  - ind_mail_military
+  - ind_mail_foreign
+street_address_fields:
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - text_res_city
+generated_columns:
+  all_history: int[]
+ordered_generated_columns:
+  - all_history
+format:
+  separate_hist: false
+  separate_counties_voter_file: false
+  separate_counties_hist_file: false
+  hist_election_rows: false
+  columnar_elections: true
+columns:
+  db_logid: text
+  cde_registrant_status: text
+  cde_name_title: text
+  text_name_first: text
+  text_name_middle: text
+  text_name_last: text
+  cde_name_suffix: text
+  text_registrant_id: text
+  text_res_address_nbr: text
+  text_res_address_nbr_suffix: text
+  cde_street_dir_prefix: text
+  text_street_name: text
+  cde_street_type: text
+  cde_street_dir_suffix: text
+  cde_res_unit_type: text
+  text_res_unit_nbr: text
+  text_res_city: text
+  cde_res_state: text
+  text_res_zip5: text
+  text_res_zip4: text
+  text_res_carrier_rte: text
+  ind_res_military: text
+  text_mail_address1: text
+  text_mail_address2: text
+  text_mail_address3: text
+  text_mail_address4: text
+  text_mail_city: text
+  cde_mail_state: text
+  text_mail_zip5: text
+  text_mail_zip4: text
+  text_mail_carrier_rte: text
+  ind_mail_military: text
+  ind_mail_foreign: text
+  desc_party: text
+  precinct_part_text_name: text
+  precinct_part_text_designation: text
+  precinct_text_name: text
+  precinct_text_designation: text
+  birth_year: text
+  date_of_registration: text
+  text_phone_area_code: text
+  text_phone_exchange: text
+  text_phone_last_four: text
+  text_election_code_1: text
+  text_election_code_2: text
+  text_election_code_3: text
+  text_election_code_4: text
+  text_election_code_5: text
+  text_election_code_6: text
+  text_election_code_7: text
+  text_election_code_8: text
+  text_election_code_9: text
+  text_election_code_10: text
+  text_res_physical_address: text
+  polling_place_text_name: text
+  polling_place_text_address1: text
+  polling_place_text_address2: text
+  polling_place_text_address3: text
+  polling_place_text_address4: text
+  polling_place_text_city: text
+  polling_place_cde_state: text
+  polling_place_text_zip5: text
+  polling_place_text_zip4: text
+  district_ta: text
+  district_aa: text
+  district_as: text
+  district_cc: text
+  district_cd: text
+  district_cg: text
+  district_ci: text
+  district_co: text
+  district_ed: text
+  district_fd: text
+  district_ho: text
+  district_ja: text
+  district_jc: text
+  district_jd: text
+  district_jj: text
+  district_js: text
+  district_lc: text
+  district_ld: text
+  district_ma: text
+  district_nr: text
+  district_pp: text
+  district_ps: text
+  district_rd: text
+  district_rg: text
+  district_ri: text
+  district_sb: text
+  district_sd: text
+  district_se: text
+  district_tw: text
+  district_ud: text
+  district_vi: text
+  district_wa: text
+  district_we: text
+hist_columns:
+  - text_election_code_1
+  - text_election_code_2
+  - text_election_code_3
+  - text_election_code_4
+  - text_election_code_5
+  - text_election_code_6
+  - text_election_code_7
+  - text_election_code_8
+  - text_election_code_9
+  - text_election_code_10
+ordered_columns:
+  - db_logid
+  - cde_registrant_status
+  - cde_name_title
+  - text_name_first
+  - text_name_middle
+  - text_name_last
+  - cde_name_suffix
+  - text_registrant_id
+  - text_res_address_nbr
+  - text_res_address_nbr_suffix
+  - cde_street_dir_prefix
+  - text_street_name
+  - cde_street_type
+  - cde_street_dir_suffix
+  - cde_res_unit_type
+  - text_res_unit_nbr
+  - text_res_city
+  - cde_res_state
+  - text_res_zip5
+  - text_res_zip4
+  - text_res_carrier_rte
+  - ind_res_military
+  - text_mail_address1
+  - text_mail_address2
+  - text_mail_address3
+  - text_mail_address4
+  - text_mail_city
+  - cde_mail_state
+  - text_mail_zip5
+  - text_mail_zip4
+  - text_mail_carrier_rte
+  - ind_mail_military
+  - ind_mail_foreign
+  - desc_party
+  - precinct_part_text_name
+  - precinct_part_text_designation
+  - precinct_text_name
+  - precinct_text_designation
+  - birth_year
+  - date_of_registration
+  - text_phone_area_code
+  - text_phone_exchange
+  - text_phone_last_four
+  - text_election_code_1
+  - text_election_code_2
+  - text_election_code_3
+  - text_election_code_4
+  - text_election_code_5
+  - text_election_code_6
+  - text_election_code_7
+  - text_election_code_8
+  - text_election_code_9
+  - text_election_code_10
+  - text_res_physical_address
+  - polling_place_text_name
+  - polling_place_text_address1
+  - polling_place_text_address2
+  - polling_place_text_address3
+  - polling_place_text_address4
+  - polling_place_text_city
+  - polling_place_cde_state
+  - polling_place_text_zip5
+  - polling_place_text_zip4
+  - district_ta
+  - district_aa
+  - district_as
+  - district_cc
+  - district_cd
+  - district_cg
+  - district_ci
+  - district_co
+  - district_ed
+  - district_fd
+  - district_ho
+  - district_ja
+  - district_jc
+  - district_jd
+  - district_jj
+  - district_js
+  - district_lc
+  - district_ld
+  - district_ma
+  - district_nr
+  - district_pp
+  - district_ps
+  - district_rd
+  - district_rg
+  - district_ri
+  - district_sb
+  - district_sd
+  - district_se
+  - district_tw
+  - district_ud
+  - district_vi
+  - district_wa
+  - district_we
+county_names:
+  - Adams
+  - Antelope
+  - Arthur
+  - Banner
+  - Blaine
+  - Boone
+  - Box Butte
+  - Boyd
+  - Brown
+  - Buffalo
+  - Burt
+  - Butler
+  - Cass
+  - Cedar
+  - Chase
+  - Cherry
+  - Cheyenne
+  - Clay
+  - Colfax
+  - Cuming
+  - Custer
+  - Dakota
+  - Dawes
+  - Dawson
+  - Deuel
+  - Dixon
+  - Dodge
+  - Douglas
+  - Dundy
+  - Fillmore
+  - Franklin
+  - Frontier
+  - Furnas
+  - Gage
+  - Garden
+  - Garfield
+  - Gosper
+  - Grant
+  - Greeley
+  - Hall
+  - Hamilton
+  - Harlan
+  - Hayes
+  - Hitchcock
+  - Holt
+  - Hooker
+  - Howard
+  - Jefferson
+  - Johnson
+  - Kearney
+  - Keith
+  - Keya Paha
+  - Kimball
+  - Knox
+  - Lancaster
+  - Lincoln
+  - Logan
+  - Loup
+  - Madison
+  - Mcpherson
+  - Merrick
+  - Morrill
+  - Nance
+  - Nemaha
+  - Nuckolls
+  - Otoe
+  - Pawnee
+  - Perkins
+  - Phelps
+  - Pierce
+  - Platte
+  - Polk
+  - Red Willow
+  - Richardson
+  - Rock
+  - Saline
+  - Sarpy
+  - Saunders
+  - Scotts Bluff
+  - Seward
+  - Sheridan
+  - Sherman
+  - Sioux
+  - Stanton
+  - Thayer
+  - Thomas
+  - Thurston
+  - Valley
+  - Washington
+  - Wayne
+  - Webster
+  - Wheeler
+  - York
