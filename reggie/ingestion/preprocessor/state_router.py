@@ -12,6 +12,7 @@ from .maine_preprocessor import PreprocessMaine
 from .michigan_preprocessor import PreprocessMichigan
 from .minnesota_preprocessor import PreprocessMinnesota
 from .missouri_preprocessor import PreprocessMissouri
+from .nebraska_preprocessor import PreprocessNebraska
 from .nevada_preprocessor import PreprocessNevada
 from .new_hampshire_preprocessor import PreprocessNewHampshire
 from .new_jersey_preprocessor import PreprocessNewJersey
@@ -53,6 +54,7 @@ def state_router(
         "michigan": PreprocessMichigan,
         "minnesota": PreprocessMinnesota,
         "missouri": PreprocessMissouri,
+        "nebraska": PreprocessNebraska,
         "nevada": PreprocessNevada,
         "new_hampshire": PreprocessNewHampshire,
         "new_jersey": PreprocessNewJersey,
