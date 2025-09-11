@@ -11,6 +11,7 @@ from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
 )
+import json
 
 
 class PreprocessNebraska(Preprocessor):
@@ -29,18 +30,34 @@ class PreprocessNebraska(Preprocessor):
         self.processed_file = None
 
     def ne_hist_date(self, s, history_code_df):
+        election_date = ""
         try:
             election_date = history_code_df[
                 history_code_df["text_election_code"] == s
             ]["date_election"]
+            # Make sure date is in expected format
             election_date = datetime.strptime(
                 election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
             ).date()
+            
+            #Convert back to string, clunky but probably necessary
+            election_date = election_date.strftime("%m/%d/%Y")
+
         except ValueError:
             logging.info("Error converting string to year for NE History")
             raise
         except IndexError:
-            logging.info(f"election code {s} does not exist, skipping")
+            try:
+                temp_year = datetime.strptime(s[-2:], "%y").year
+                if s[:2] == "GN":
+                    election_date = f"11/05/{temp_year}"
+                    return election_date
+                if s[:2] == "PR":
+                    election_date = f"05/15/{temp_year}"
+                    return election_date
+            except ValueError:
+                logging.info(f"election code {s} does not exist, skipping")
+            election_date = ""
         return election_date
 
     def add_history(self, main_df, hist_code_df):
@@ -62,18 +79,26 @@ class PreprocessNebraska(Preprocessor):
         unique_codes = unique_codes[count_order]
         counts = counts[count_order]
         sorted_codes = unique_codes.tolist()
-        sorted_codes_dict = {
-            k: {
-                "index": i,
-                "count": int(counts[i]),
-                "date": self.ne_hist_date(k, hist_code_df),
-            }
-            for i, k in enumerate(sorted_codes)
-        }
+        sorted_codes_dict = {}
+        for i, k in enumerate(sorted_codes):
+            election_date = self.ne_hist_date(k, hist_code_df)
+            if election_date:
+                sorted_codes_dict[k] = {"index": i,
+                                        "count": int(counts[i]),
+                                        "date": election_date
+                                        }
+            else:
+                logging.info(f"removing election {k}")
+                sorted_codes.remove(k)
 
         def insert_code_bin(arr):
-            return [sorted_codes_dict[k]["index"] for k in arr]
-
+            history_list = []
+            for k in arr:
+                try:
+                    history_list.append(sorted_codes_dict[k])
+                except KeyError:
+                    logging.info(f"key unavailable {k}")
+            return history_list
         main_df["all_history"] = main_df[self.config["hist_columns"]].apply(
             lambda x: list(x.dropna().str.replace(" ", "")), axis=1
         )
@@ -95,7 +120,7 @@ class PreprocessNebraska(Preprocessor):
             filename = f["name"].replace(" ", "").lower()
             if ".txt" in filename:
                 logging.info(
-                    "reading Nebraska voter file from {}".format(f["name"])
+                    "Reading Nebraska voter file from {}".format(f["name"])
                 )
                 df = self.read_csv_count_error_lines(
                     f["obj"],
@@ -105,6 +130,7 @@ class PreprocessNebraska(Preprocessor):
                     encoding="latin-1",
                 )
             if "historycode" in filename:
+                logging.info("Reading Nebraska history code file")
                 history_code_df = self.read_csv_count_error_lines(
                     f["obj"],
                     on_bad_lines="warn",
@@ -113,6 +139,9 @@ class PreprocessNebraska(Preprocessor):
             self.config["voter_status"]
         ].str.replace(" ", "")
 
+        if history_code_df.empty:
+            raise ValueError("History Code File Missing")
+        
         history_code_df["text_election_code"] = history_code_df[
             "text_election_code"
         ].str.replace(" ", "")
@@ -131,9 +160,9 @@ class PreprocessNebraska(Preprocessor):
         )
 
         self.meta = {
-            "message": "kansas_{}".format(datetime.now().isoformat()),
-            "array_encoding": sorted_codes_dict,
-            "array_decoding": sorted_codes,
+            "message": "nebraska_{}".format(datetime.now().isoformat()),
+            "array_encoding": json.dumps(sorted_codes_dict),
+            "array_decoding": json.dumps(sorted_codes),
         }
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
