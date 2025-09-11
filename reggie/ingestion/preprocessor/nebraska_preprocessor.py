@@ -1,20 +1,17 @@
 import logging
 
-from datetime import datetime, date
+from datetime import datetime
 from io import StringIO
 
 import numpy as np
 import pandas as pd
 
-from ballotshield.utils import find_next_s3_key
 from reggie.ingestion.download import (
     FileItem,
     Preprocessor,
     date_from_str,
 )
-from reggie.ingestion.utils import (
-    MissingNumColumnsError,
-)
+
 
 class PreprocessNebraska(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
@@ -26,30 +23,34 @@ class PreprocessNebraska(Preprocessor):
             raw_s3_file=raw_s3_file,
             config_file=config_file,
             force_date=force_date,
-            **kwargs
+            **kwargs,
         )
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
 
-    def ne_hist_date(self, s):
+    def ne_hist_date(self, s, history_code_df):
         try:
-            print(s)
-            print(s[:-2])
-            elect_year = datetime.strptime(s[:-2], "%y").year
+            election_date = history_code_df[
+                history_code_df["text_election_code"] == s
+            ]["date_election"]
+            election_date = datetime.strptime(
+                election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
+            ).date()
         except ValueError:
             logging.info("Error converting string to year for NE History")
             raise
-        return elect_year
+        except IndexError:
+            logging.info(f"election code {s} does not exist, skipping")
+        return election_date
 
     def add_history(self, main_df, hist_code_df):
         count_df = pd.DataFrame()
         for idx, hist in enumerate(self.config["hist_columns"]):
             unique_codes, counts = np.unique(
-                main_df[hist].str.replace(" ", "_").dropna().values,
+                main_df[hist].str.replace(" ", "").dropna().values,
                 return_counts=True,
             )
-            print(unique_codes)
-            # print(counts)
+
             count_df_new = pd.DataFrame(
                 index=unique_codes, data=counts, columns=["counts_" + hist]
             )
@@ -65,7 +66,7 @@ class PreprocessNebraska(Preprocessor):
             k: {
                 "index": i,
                 "count": int(counts[i]),
-                "date": self.ne_hist_date(k),
+                "date": self.ne_hist_date(k, hist_code_df),
             }
             for i, k in enumerate(sorted_codes)
         }
@@ -73,12 +74,13 @@ class PreprocessNebraska(Preprocessor):
         def insert_code_bin(arr):
             return [sorted_codes_dict[k]["index"] for k in arr]
 
-        main_df["all_history"] = main_df[
-            self.config["hist_columns"]
-        ].apply(lambda x: list(x.dropna().str.replace(" ", "_")), axis=1)
+        main_df["all_history"] = main_df[self.config["hist_columns"]].apply(
+            lambda x: list(x.dropna().str.replace(" ", "")), axis=1
+        )
         main_df.all_history = main_df.all_history.map(insert_code_bin)
+
         return sorted_codes, sorted_codes_dict
-    
+
     def execute(self):
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
@@ -90,11 +92,11 @@ class PreprocessNebraska(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
         for f in new_files:
-            # print(f)
-            filename = f["name"].replace(" ","").lower()
-            print(filename)
+            filename = f["name"].replace(" ", "").lower()
             if ".txt" in filename:
-                logging.info("reading Nebraska file from {}".format(f["name"]))
+                logging.info(
+                    "reading Nebraska voter file from {}".format(f["name"])
+                )
                 df = self.read_csv_count_error_lines(
                     f["obj"],
                     sep="\t",
@@ -102,17 +104,22 @@ class PreprocessNebraska(Preprocessor):
                     on_bad_lines="warn",
                     encoding="latin-1",
                 )
-            df[self.config["voter_status"]] = df[
-                self.config["voter_status"]
-            ].str.replace(" ", "")
             if "historycode" in filename:
                 history_code_df = self.read_csv_count_error_lines(
                     f["obj"],
                     on_bad_lines="warn",
                 )
-        print(history_code_df)
-        print(df[self.config["hist_columns"]])
-        sorted_codes, sorted_codes_dict = self.add_history(main_df=df)
+        df[self.config["voter_status"]] = df[
+            self.config["voter_status"]
+        ].str.replace(" ", "")
+
+        history_code_df["text_election_code"] = history_code_df[
+            "text_election_code"
+        ].str.replace(" ", "")
+
+        sorted_codes, sorted_codes_dict = self.add_history(
+            main_df=df, hist_code_df=history_code_df
+        )
 
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
@@ -128,7 +135,6 @@ class PreprocessNebraska(Preprocessor):
             "array_encoding": sorted_codes_dict,
             "array_decoding": sorted_codes,
         }
-        raise ValueError("stopping")
         self.processed_file = FileItem(
             name="{}.processed".format(self.config["state"]),
             io_obj=StringIO(df.to_csv(encoding="utf-8", index=False)),

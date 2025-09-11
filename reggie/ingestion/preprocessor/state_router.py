@@ -1,5 +1,3 @@
-import logging
-from reggie.configs.configs import Config
 from .arizona_preprocessor import PreprocessArizona
 from .arizona2_preprocessor import PreprocessArizona2
 from .california_preprocessor import PreprocessCalifornia
