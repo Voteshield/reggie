@@ -9,7 +9,7 @@ voter_id: text_registrant_id
 county_identifier: db_logid
 primary_locale_identifier: db_logid
 numeric_primary_locale: false
-birthday_identifier: birth_year
+birthday_identifier: date_of_birth
 encoding: latin-1
 registration_date_identifier: date_of_registration
 voter_status: cde_registrant_status
@@ -26,7 +26,9 @@ demographic_fields_available:
   - gender
   - party
   - status
-date_format: '%m/%d/%Y'
+date_format: 
+  - '%m/%d/%Y'
+  - '%Y'
 party_identifier: desc_party
 has_headers: YES
 match_fields:
@@ -103,11 +105,11 @@ columns:
   cde_street_type: text
   cde_street_dir_suffix: text
   cde_res_unit_type: text
-  text_res_unit_nbr: text
+  text_res_unit_nbr: int
   text_res_city: text
   cde_res_state: text
-  text_res_zip5: text
-  text_res_zip4: text
+  text_res_zip5: int
+  text_res_zip4: int
   text_res_carrier_rte: text
   ind_res_military: text
   text_mail_address1: text
@@ -116,8 +118,8 @@ columns:
   text_mail_address4: text
   text_mail_city: text
   cde_mail_state: text
-  text_mail_zip5: text
-  text_mail_zip4: text
+  text_mail_zip5: int
+  text_mail_zip4: int
   text_mail_carrier_rte: text
   ind_mail_military: text
   ind_mail_foreign: text
@@ -126,8 +128,8 @@ columns:
   precinct_part_text_designation: text
   precinct_text_name: text
   precinct_text_designation: text
-  birth_year: text
-  date_of_registration: text
+  date_of_birth: date
+  date_of_registration: date
   text_phone_area_code: text
   text_phone_exchange: text
   text_phone_last_four: text
@@ -234,7 +236,7 @@ ordered_columns:
   - precinct_part_text_designation
   - precinct_text_name
   - precinct_text_designation
-  - birth_year
+  - date_of_birth
   - date_of_registration
   - text_phone_area_code
   - text_phone_exchange
