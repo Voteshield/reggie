@@ -5,7 +5,6 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
-from pandas.errors import ValueLabelTypeMismatch
 
 from reggie.ingestion.download import (
     FileItem,
