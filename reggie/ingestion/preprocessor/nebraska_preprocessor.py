@@ -5,6 +5,7 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
+from pandas.errors import ValueLabelTypeMismatch
 
 from reggie.ingestion.download import (
     FileItem,
@@ -39,8 +40,8 @@ class PreprocessNebraska(Preprocessor):
             election_date = datetime.strptime(
                 election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
             ).date()
-            
-            #Convert back to string, clunky but probably necessary
+
+            # Convert back to string, clunky but probably necessary
             election_date = election_date.strftime("%m/%d/%Y")
 
         except ValueError:
@@ -56,11 +57,12 @@ class PreprocessNebraska(Preprocessor):
                     election_date = f"05/15/{temp_year}"
                     return election_date
             except ValueError:
-                logging.info(f"election code {s} does not exist, skipping")
+                logging.info(f"election code {s} does not exist in election map file, skipping")
             election_date = ""
         return election_date
 
     def add_history(self, main_df, hist_code_df):
+
         count_df = pd.DataFrame()
         for idx, hist in enumerate(self.config["hist_columns"]):
             unique_codes, counts = np.unique(
@@ -83,26 +85,14 @@ class PreprocessNebraska(Preprocessor):
         for i, k in enumerate(sorted_codes):
             election_date = self.ne_hist_date(k, hist_code_df)
             if election_date:
-                sorted_codes_dict[k] = {"index": i,
-                                        "count": int(counts[i]),
-                                        "date": election_date
-                                        }
+                sorted_codes_dict[k] = {
+                    "index": i,
+                    "count": int(counts[i]),
+                    "date": election_date,
+                }
             else:
                 logging.info(f"removing election {k}")
                 sorted_codes.remove(k)
-
-        def insert_code_bin(arr):
-            history_list = []
-            for k in arr:
-                try:
-                    history_list.append(sorted_codes_dict[k])
-                except KeyError:
-                    logging.info(f"key unavailable {k}")
-            return history_list
-        main_df["all_history"] = main_df[self.config["hist_columns"]].apply(
-            lambda x: list(x.dropna().str.replace(" ", "")), axis=1
-        )
-        main_df.all_history = main_df.all_history.map(insert_code_bin)
 
         return sorted_codes, sorted_codes_dict
 
@@ -141,7 +131,7 @@ class PreprocessNebraska(Preprocessor):
 
         if history_code_df.empty:
             raise ValueError("History Code File Missing")
-        
+
         history_code_df["text_election_code"] = history_code_df[
             "text_election_code"
         ].str.replace(" ", "")
@@ -149,6 +139,21 @@ class PreprocessNebraska(Preprocessor):
         sorted_codes, sorted_codes_dict = self.add_history(
             main_df=df, hist_code_df=history_code_df
         )
+
+        df["all_history"] = df[self.config["hist_columns"]].apply(
+            lambda x: list(x.dropna().str.replace(" ", "")), axis=1
+        )
+
+        def insert_code_bin(arr):
+            history_list = []
+            for k in arr:
+                try:
+                    history_list.append(sorted_codes_dict[k]["index"])
+                except KeyError:
+                    pass
+            return history_list
+
+        df["sparse_history"] = df["all_history"].apply(insert_code_bin)
 
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)

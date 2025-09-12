@@ -80,9 +80,11 @@ street_address_fields:
   - cde_street_dir_suffix
   - text_res_city
 generated_columns:
-  all_history: int[]
+  all_history: text[]
+  sparse_history: int[]
 ordered_generated_columns:
   - all_history
+  - sparse_history
 format:
   separate_hist: false
   separate_counties_voter_file: false
