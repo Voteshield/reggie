@@ -99,7 +99,7 @@ columns:
   text_name_middle: text
   text_name_last: text
   cde_name_suffix: text
-  text_registrant_id: text
+  text_registrant_id: int
   text_res_address_nbr: text
   text_res_address_nbr_suffix: text
   cde_street_dir_prefix: text
