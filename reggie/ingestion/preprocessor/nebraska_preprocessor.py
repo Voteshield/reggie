@@ -154,6 +154,11 @@ class PreprocessNebraska(Preprocessor):
 
         df["sparse_history"] = df["all_history"].apply(insert_code_bin)
 
+        expected_cols = (
+            self.config["ordered_columns"] + self.config["ordered_generated_columns"]
+        )
+        df = self.reconcile_columns(df, expected_cols)
+        
         df = self.config.coerce_numeric(df)
         df = self.config.coerce_strings(df)
         df = self.config.coerce_dates(df)

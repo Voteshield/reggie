@@ -164,6 +164,7 @@ columns:
   district_ci: text
   district_co: text
   district_ed: text
+  district_es: text
   district_fd: text
   district_ho: text
   district_ja: text
@@ -272,6 +273,7 @@ ordered_columns:
   - district_ci
   - district_co
   - district_ed
+  - district_es
   - district_fd
   - district_ho
   - district_ja
