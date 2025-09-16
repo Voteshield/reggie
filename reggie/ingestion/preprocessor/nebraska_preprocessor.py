@@ -102,7 +102,7 @@ class PreprocessNebraska(Preprocessor):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip"
         )
-
+        history_code_df = pd.DataFrame()
         if not self.ignore_checks:
             self.file_check(len(new_files))
         for f in new_files:
@@ -123,6 +123,7 @@ class PreprocessNebraska(Preprocessor):
                 history_code_df = self.read_csv_count_error_lines(
                     f["obj"],
                     on_bad_lines="warn",
+                    encoding="latin-1"
                 )
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]
@@ -159,7 +160,7 @@ class PreprocessNebraska(Preprocessor):
         )
         df = self.reconcile_columns(df, expected_cols)
         
-        df = self.config.coerce_numeric(df)
+        df = self.config.coerce_numeric(df, extra_cols=["text_res_zip5", "text_mail_zip5", "text_mail_zip4", "polling_place_text_zip5", "polling_place_text_zip4"])
         df = self.config.coerce_strings(df)
         df = self.config.coerce_dates(df)
 

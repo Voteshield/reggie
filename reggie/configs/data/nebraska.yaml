@@ -153,8 +153,8 @@ columns:
   polling_place_text_address4: text
   polling_place_text_city: text
   polling_place_cde_state: text
-  polling_place_text_zip5: text
-  polling_place_text_zip4: text
+  polling_place_text_zip5: int
+  polling_place_text_zip4: int
   district_ta: text
   district_aa: text
   district_as: text
