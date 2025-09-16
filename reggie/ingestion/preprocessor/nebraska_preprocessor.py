@@ -56,7 +56,9 @@ class PreprocessNebraska(Preprocessor):
                     election_date = f"05/15/{temp_year}"
                     return election_date
             except ValueError:
-                logging.info(f"election code {s} does not exist in election map file, skipping")
+                logging.info(
+                    f"election code {s} does not exist in election map file, skipping"
+                )
             election_date = ""
         return election_date
 
@@ -121,9 +123,7 @@ class PreprocessNebraska(Preprocessor):
             if "historycode" in filename:
                 logging.info("Reading Nebraska history code file")
                 history_code_df = self.read_csv_count_error_lines(
-                    f["obj"],
-                    on_bad_lines="warn",
-                    encoding="latin-1"
+                    f["obj"], on_bad_lines="warn", encoding="latin-1"
                 )
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]
@@ -156,11 +156,21 @@ class PreprocessNebraska(Preprocessor):
         df["sparse_history"] = df["all_history"].apply(insert_code_bin)
 
         expected_cols = (
-            self.config["ordered_columns"] + self.config["ordered_generated_columns"]
+            self.config["ordered_columns"]
+            + self.config["ordered_generated_columns"]
         )
         df = self.reconcile_columns(df, expected_cols)
-        
-        df = self.config.coerce_numeric(df, extra_cols=["text_res_zip5", "text_mail_zip5", "text_mail_zip4", "polling_place_text_zip5", "polling_place_text_zip4"])
+
+        df = self.config.coerce_numeric(
+            df,
+            extra_cols=[
+                "text_res_zip5",
+                "text_mail_zip5",
+                "text_mail_zip4",
+                "polling_place_text_zip5",
+                "polling_place_text_zip4",
+            ],
+        )
         df = self.config.coerce_strings(df)
         df = self.config.coerce_dates(df)
 
