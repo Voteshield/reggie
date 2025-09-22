@@ -44,8 +44,11 @@ class PreprocessNebraska(Preprocessor):
             election_date = election_date.strftime("%m/%d/%Y")
 
         except ValueError:
-            logging.info("Error converting string to year for NE History")
-            raise
+            election_date = datetime.strptime(
+                election_date.iloc[0], "%Y-%m-%d"
+            ).date()
+            election_date = election_date.strftime("%m/%d/%Y")
+            return election_date
         except IndexError:
             try:
                 temp_year = datetime.strptime(s[-2:], "%y").year
@@ -135,6 +138,10 @@ class PreprocessNebraska(Preprocessor):
         history_code_df["text_election_code"] = history_code_df[
             "text_election_code"
         ].str.replace(" ", "")
+
+        print(df.columns)
+        if "birth_year" in df.columns:
+            df.rename(columns={"birth_year": "date_of_birth"}, inplace=True)
 
         sorted_codes, sorted_codes_dict = self.add_history(
             main_df=df, hist_code_df=history_code_df
