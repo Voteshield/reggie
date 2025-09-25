@@ -36,32 +36,36 @@ class PreprocessNebraska(Preprocessor):
             election_date = history_code_df[
                 history_code_df["text_election_code"] == s
             ]["date_election"]
-            if election_date.count(":") == 2:
+            election_date = election_date.iloc[0]
+            if (
+                election_date.count("/") == 2
+                and election_date.item().count("-") == 0
+            ):
                 election_date = datetime.strptime(
-                    election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
+                    election_date, "%m/%d/%Y %H:%M:%S"
                 ).date()
-    
+
                 # Convert back to string, clunky but probably necessary
                 election_date = election_date.strftime("%m/%d/%Y")
                 return election_date
             elif election_date.count(":") == 1:
                 election_date = datetime.strptime(
-                    election_date.iloc[0], "%m/%d/%y %H:%M"
+                    election_date, "%m/%d/%y %H:%M"
                 ).date()
 
                 election_date = election_date.strftime("%m/%d/%Y")
                 return election_date
             elif election_date.count("-") == 2:
-                election_date = election_date.iloc[0].split(" ")[0]
+                election_date = election_date.split(" ")[0]
                 election_date = datetime.strptime(
                     election_date, "%Y-%m-%d"
                 ).date()
                 election_date = election_date.strftime("%m/%d/%Y")
                 return election_date
         except IndexError:
-            # In this case, the election code does not exist in the elction code
-            # file but we can add in some approximate dates for the general
-            # and primary elections, which have predictable coding. Typically
+            # In this case, the election code does not exist in the election code
+            # file, but we can add in some approximate dates for the general
+            # and primary elections, which have predictable coding. Typically,
             # these are very old elections, like ones in the 80s and 90s
             try:
                 temp_year = datetime.strptime(s[-2:], "%y").year
@@ -108,7 +112,9 @@ class PreprocessNebraska(Preprocessor):
                     "date": election_date,
                 }
             else:
-                logging.info(f"removing election {k} for not having an election date in the file")
+                logging.info(
+                    f"removing election {k} for not having an election date in the file"
+                )
                 sorted_codes.remove(k)
 
         return sorted_codes, sorted_codes_dict
@@ -142,15 +148,9 @@ class PreprocessNebraska(Preprocessor):
                     history_code_df = self.read_csv_count_error_lines(
                         f["obj"], on_bad_lines="warn", encoding="latin-1"
                     )
-                elif ".xlxs" in filename and "donotuse" not in filename:
-                    logging.info("Reading Excel Nebraska history code file")
-                    history_code_df = pd.read_excel(
-                        f["obj"], on_bad_lines="warn"
-                    )                
                 elif ".xlsx" in filename and "donotuse" not in filename:
                     logging.info("Reading Excel Nebraska history code file")
-                    history_code_df = pd.read_excel(
-                        f["obj"], dtype=str)
+                    history_code_df = pd.read_excel(f["obj"], dtype=str)
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]
         ].str.replace(" ", "")
