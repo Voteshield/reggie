@@ -32,24 +32,37 @@ class PreprocessNebraska(Preprocessor):
     def ne_hist_date(self, s, history_code_df):
         election_date = ""
         try:
+            # Make sure date is in expected format
             election_date = history_code_df[
                 history_code_df["text_election_code"] == s
             ]["date_election"]
-            # Make sure date is in expected format
-            election_date = datetime.strptime(
-                election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
-            ).date()
+            if election_date.count(":") == 2:
+                election_date = datetime.strptime(
+                    election_date.iloc[0], "%m/%d/%Y %H:%M:%S"
+                ).date()
+    
+                # Convert back to string, clunky but probably necessary
+                election_date = election_date.strftime("%m/%d/%Y")
+                return election_date
+            elif election_date.count(":") == 1:
+                election_date = datetime.strptime(
+                    election_date.iloc[0], "%m/%d/%y %H:%M"
+                ).date()
 
-            # Convert back to string, clunky but probably necessary
-            election_date = election_date.strftime("%m/%d/%Y")
-
-        except ValueError:
-            election_date = datetime.strptime(
-                election_date.iloc[0], "%Y-%m-%d"
-            ).date()
-            election_date = election_date.strftime("%m/%d/%Y")
-            return election_date
+                election_date = election_date.strftime("%m/%d/%Y")
+                return election_date
+            elif election_date.count("-") == 2:
+                election_date = election_date.iloc[0].split(" ")[0]
+                election_date = datetime.strptime(
+                    election_date, "%Y-%m-%d"
+                ).date()
+                election_date = election_date.strftime("%m/%d/%Y")
+                return election_date
         except IndexError:
+            # In this case, the election code does not exist in the elction code
+            # file but we can add in some approximate dates for the general
+            # and primary elections, which have predictable coding. Typically
+            # these are very old elections, like ones in the 80s and 90s
             try:
                 temp_year = datetime.strptime(s[-2:], "%y").year
                 if s[:2] == "GN":
@@ -60,7 +73,7 @@ class PreprocessNebraska(Preprocessor):
                     return election_date
             except ValueError:
                 logging.info(
-                    f"election code {s} does not exist in election map file, skipping"
+                    f"election code {s} found in the voter file does not exist in election map file, skipping"
                 )
             election_date = ""
         return election_date
@@ -95,7 +108,7 @@ class PreprocessNebraska(Preprocessor):
                     "date": election_date,
                 }
             else:
-                logging.info(f"removing election {k}")
+                logging.info(f"removing election {k} for not having an election date in the file")
                 sorted_codes.remove(k)
 
         return sorted_codes, sorted_codes_dict
@@ -123,11 +136,21 @@ class PreprocessNebraska(Preprocessor):
                     on_bad_lines="warn",
                     encoding="latin-1",
                 )
-            if "historycode" in filename:
-                logging.info("Reading Nebraska history code file")
-                history_code_df = self.read_csv_count_error_lines(
-                    f["obj"], on_bad_lines="warn", encoding="latin-1"
-                )
+            if "historycode" in filename and "donotuse" not in filename:
+                if ".csv" in filename:
+                    logging.info("Reading csv Nebraska history code file")
+                    history_code_df = self.read_csv_count_error_lines(
+                        f["obj"], on_bad_lines="warn", encoding="latin-1"
+                    )
+                elif ".xlxs" in filename and "donotuse" not in filename:
+                    logging.info("Reading Excel Nebraska history code file")
+                    history_code_df = pd.read_excel(
+                        f["obj"], on_bad_lines="warn"
+                    )                
+                elif ".xlsx" in filename and "donotuse" not in filename:
+                    logging.info("Reading Excel Nebraska history code file")
+                    history_code_df = pd.read_excel(
+                        f["obj"], dtype=str)
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]
         ].str.replace(" ", "")
@@ -139,7 +162,6 @@ class PreprocessNebraska(Preprocessor):
             "text_election_code"
         ].str.replace(" ", "")
 
-        print(df.columns)
         if "birth_year" in df.columns:
             df.rename(columns={"birth_year": "date_of_birth"}, inplace=True)
 
