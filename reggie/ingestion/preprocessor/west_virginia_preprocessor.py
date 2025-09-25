@@ -145,6 +145,10 @@ class PreprocessWestVirginia(Preprocessor):
                 "PARTY_AFFILIATION": "PartyAffiliation",
                 "MAGISTERIAL_DISTRICT": "Magisterial District",
                 "COUNTY_PRECINCT": "Precinct_Number",
+                # Some more changes as of 2025-09-04
+                "POLL_PLACE_NAME": "POLL_NAME",
+                # 2025-09-11
+                "POLL_PLACE": "POLL_NAME"
             },
             inplace=True,
             errors="ignore"
@@ -153,6 +157,10 @@ class PreprocessWestVirginia(Preprocessor):
         # adds dummy column to wv to match format of older files
         if "mail unit" not in df_voters.columns.str.lower():
             df_voters["MAIL UNIT"] = np.nan
+
+        # 2025-09-04 adding dummy suffix column here as well
+        if "suffix" not in df_voters.columns.str.lower():
+            df_voters["Suffix"] = np.nan
 
         # Apparently during redistricting the relevant fields will be dropped entirely
         # and then re-added to the file after updates.
