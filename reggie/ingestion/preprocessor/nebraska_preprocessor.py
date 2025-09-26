@@ -131,7 +131,7 @@ class PreprocessNebraska(Preprocessor):
             self.file_check(len(new_files))
         for f in new_files:
             filename = f["name"].replace(" ", "").lower()
-            if ".txt" in filename:
+            if "psr" in filename and ".txt" in filename:
                 logging.info(
                     "Reading Nebraska voter file from {}".format(f["name"])
                 )
