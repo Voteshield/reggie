@@ -29,7 +29,18 @@ class PreprocessNebraska(Preprocessor):
         self.raw_s3_file = raw_s3_file
         self.processed_file = None
 
-    def ne_hist_date(self, s, history_code_df):
+    def ne_hist_date(self, s, history_code_df) -> str:
+        """
+        Takes the history code dataframe and retrieves the date each election
+        code corresponds to. Sometimes, there are election codes in the history
+        columns in the voter file that does not correspond to any code given
+        in the code file.
+        Args:
+            s: The string value in the voter file column to look up in the code file
+            history_code_df: The history code file
+        Returns:
+            election_date: string containing the date in MM/DD/YYYY format
+        """
         election_date = ""
         try:
             # Make sure date is in expected format
@@ -82,8 +93,20 @@ class PreprocessNebraska(Preprocessor):
             election_date = ""
         return election_date
 
-    def add_history(self, main_df, hist_code_df):
+    def add_history(self, main_df, hist_code_df) -> tuple:
+        """
+        Combines the history columns and data into their sorted codes, and
+        sorted codes dictionary, containing the counts, codes and dates.
 
+        Args:
+            main_df: The main voter file, containing the history columns
+            hist_code_df: The history code file
+        Returns:
+            sorted_codes: the codes used in NE's history columns (ex GN24)
+                sorted by count
+            sorted_codes_dict: the dictionary containing the decoding for the
+                election codes, their counts and the date of the election
+        """
         count_df = pd.DataFrame()
         for idx, hist in enumerate(self.config["hist_columns"]):
             unique_codes, counts = np.unique(
@@ -174,6 +197,15 @@ class PreprocessNebraska(Preprocessor):
         )
 
         def insert_code_bin(arr):
+            """
+            Takes the all history column and makes it into a sparse list, containing
+            just the indexes corresponding to the sorted code dict, for each election code
+            in the file
+                Args:
+                    arr: the array of values in the all history column
+                Returns:
+                    history_list: the list of sparse index values for the history file
+            """
             history_list = []
             for k in arr:
                 try:
