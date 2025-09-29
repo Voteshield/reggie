@@ -74,10 +74,14 @@ class PreprocessNebraska(Preprocessor):
                 election_date = election_date.strftime("%m/%d/%Y")
                 return election_date
         except IndexError:
-            # In this case, the election code does not exist in the election code
-            # file, but we can add in some approximate dates for the general
-            # and primary elections, which have predictable coding. Typically,
-            # these are very old elections, like ones in the 80s and 90s
+            # In this case, the election code we are looking up does not exist
+            # in the election code file, so instead approximate dates for the
+            # general and primary elections, which have predictable formats.
+            # The format for these will be like GN96 or PR00 Typically, these
+            # are very old elections, like ones in the 80s though 00s.
+            # There will be no value returned if the code is both not in the
+            # election code file, and it's not some easily understandable code.
+            # For instance, we skip codes like ADAMS or FN39Q
             try:
                 temp_year = datetime.strptime(s[-2:], "%y").year
                 if s[:2] == "GN":
