@@ -77,9 +77,9 @@ class PreprocessNebraska(Preprocessor):
             # In this case, the election code we are looking up does not exist
             # in the election code file, so instead approximate dates for the
             # general and primary elections, which have predictable formats.
-            # The format for these will be like GN96 or PR00 and will be given 
-            # a date around the usuall time primaries and general elections 
-            # happen. Typically, these are very old elections, like elections 
+            # The format for these will be like GN96 or PR00 and will be given
+            # a date around the usuall time primaries and general elections
+            # happen. Typically, these are very old elections, like elections
             # from 80s though 00s.
 
             # There will be no value returned if the code is both not in the
