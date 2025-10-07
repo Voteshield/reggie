@@ -61,9 +61,7 @@ class PreprocessMaine(Preprocessor):
             voter_df_intersection = voters_df[
                 voters_df[self.config["voter_id"]].isin(intersetion_ids)
             ][[self.config["voter_id"], "DT CHG"]]
-            print(cancelled_df_intersection)
-            print(voter_df_intersection)
-            print(voter_df_intersection)
+
             # rename date cancelled to avoid the confusing _x _y merge
             cancelled_df_intersection.rename(
                 columns={"DT CHG": "DT CHG CANCELLED"}, inplace=True
@@ -149,11 +147,12 @@ class PreprocessMaine(Preprocessor):
             zip_dict = dict(zip(voter_df["ZIP"], voter_df["CTY"]))
             cancelled_df["CTY"] = cancelled_df["ZIP"].map(zip_dict)
 
-            # also for some reason they give your full birthday in the cancelld file?
-            cancelled_df[["MONTH", "DAY", "YOB"]] = cancelled_df[
-                "YOB"
-            ].str.split("/", expand=True)
-            cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
+            # also for some reason they give your full birthday in the cancelled file?
+            if "month" in cancelled_df.columns.str.lower():
+                cancelled_df[["MONTH", "DAY", "YOB"]] = cancelled_df[
+                    "YOB"
+                ].str.split("/", expand=True)
+                cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
 
         # there are several entries in the cancelled file, that have an active
         # status in the main file
