@@ -40,9 +40,9 @@ class PreprocessMaine(Preprocessor):
 
         def keep_most_recent_record(voters_df, cancelled_df):
             """
-            A small number of voter ids will appear across tthe two files. We 
-            should keep whichever one is most recently updated. The DT CHG 
-            field contains the date the entry in each file was most recently 
+            A small number of voter ids will appear across tthe two files. We
+            should keep whichever one is most recently updated. The DT CHG
+            field contains the date the entry in each file was most recently
             changed.
             :param voters_df: the voter file dataframe
             :param cancelled_df: the cancelled dataframe
@@ -54,16 +54,13 @@ class PreprocessMaine(Preprocessor):
             intersetion_ids = set(voters_df_ids).intersection(
                 set(cancelled_df_ids)
             )
-            print(intersetion_ids)
             cancelled_df_intersection = cancelled_df[
                 cancelled_df[self.config["voter_id"]].isin(intersetion_ids)
             ][[self.config["voter_id"], "DT CHG"]]
             voter_df_intersection = voters_df[
                 voters_df[self.config["voter_id"]].isin(intersetion_ids)
             ][[self.config["voter_id"], "DT CHG"]]
-            print(cancelled_df_intersection)
-            print(voter_df_intersection)
-            print(voter_df_intersection)
+
             # rename date cancelled to avoid the confusing _x _y merge
             cancelled_df_intersection.rename(
                 columns={"DT CHG": "DT CHG CANCELLED"}, inplace=True
@@ -78,10 +75,8 @@ class PreprocessMaine(Preprocessor):
             merged_df["DT CHG CANCELLED"] = pd.to_datetime(
                 merged_df["DT CHG CANCELLED"]
             )
-            merged_df["DT CHG"] = pd.to_datetime(
-                merged_df["DT CHG"]
-            )
-            
+            merged_df["DT CHG"] = pd.to_datetime(merged_df["DT CHG"])
+
             # Comparisons against missing data (like NaT are always false)
             # This means that when there are NaT values, they are not dropped
             # This should keep both entries in the file
@@ -126,8 +121,12 @@ class PreprocessMaine(Preprocessor):
                 logging.info(
                     f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN county values"
                 )
-            elif "history" in file["name"].lower():
+            elif (
+                "history" in file["name"].lower()
+                and ".html" not in file["name"].lower()
+            ):
                 # Maine Voter History seems to come one file per election,
+                # Sometimes they have a history report html file that we skip
                 logging.info("vote history found")
                 new_hist = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
@@ -140,6 +139,10 @@ class PreprocessMaine(Preprocessor):
                 cancelled_df = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
+                if "DT_ACCEPT" in cancelled_df.columns:
+                    cancelled_df.rename(
+                        columns={"DT_ACCEPT": "DT ACCEPT"}, inplace=True
+                    )
                 cancelled_df.rename(
                     columns=self.config["cancelled_columns"], inplace=True
                 )
@@ -149,11 +152,14 @@ class PreprocessMaine(Preprocessor):
             zip_dict = dict(zip(voter_df["ZIP"], voter_df["CTY"]))
             cancelled_df["CTY"] = cancelled_df["ZIP"].map(zip_dict)
 
-            # also for some reason they give your full birthday in the cancelld file?
-            cancelled_df[["MONTH", "DAY", "YOB"]] = cancelled_df[
-                "YOB"
-            ].str.split("/", expand=True)
-            cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
+            # also for some reason they sometimes give the full birthday in the
+            # cancelled file.
+            # Starting in the 2025-08-08 file, they switched to just birth year
+            if "month" in cancelled_df.columns.str.lower():
+                cancelled_df[["MONTH", "DAY", "YOB"]] = cancelled_df[
+                    "YOB"
+                ].str.split("/", expand=True)
+                cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
 
         # there are several entries in the cancelled file, that have an active
         # status in the main file
@@ -165,6 +171,11 @@ class PreprocessMaine(Preprocessor):
             voter_df.columns.str.contains("Unnamed")
         ]
         voter_df.drop(columns=unnamed_cols, inplace=True)
+
+        # This was removed in the 2025-08-08 file
+        if "Id_Parent_Area" not in voter_df.columns:
+            voter_df["Id_Parent_Area"] = None
+
         self.column_check(voter_df.columns)
         if hist_df.empty:
             raise ValueError("must supply a file containing voter history")
