@@ -151,6 +151,9 @@ cancelled_columns:
   KCB: KCB
   ACF: ACF
   DT_Last_Updated: DT CHG
+  # September 2025 file includes an audit date that appears to be
+  # the same date as "date changed" in previous files
+  DT AUDIT: DT CHG
 columns:
   REG TOWN: text
   VOTER ID: text # leading 0's will be kept if they exist
