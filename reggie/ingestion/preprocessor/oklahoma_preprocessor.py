@@ -46,9 +46,13 @@ class PreprocessOklahoma(Preprocessor):
         precincts_file = [x for x in new_files if 'precincts' in x["name"].lower()][0]
         if precincts_file is None:
             raise ValueError("Missing Precincts File")
-        voter_files = list(filter(lambda v: re.search('cty[0-9]+_vr.csv', v["name"].lower()), new_files))
-        self.file_check(len(voter_files) + 1)
-        hist_files = list(filter(lambda v: re.search('cty[0-9]+_vh.csv', v["name"].lower()), new_files))
+        voter_files = list(filter(lambda v: re.search('_vr.csv', v["name"].lower()), new_files))
+        hist_files = list(filter(lambda v: re.search('_vh.csv', v["name"].lower()), new_files))
+
+        # 2025 November - Started getting files from Aristotle, that groups all counties into "CDs",
+        # (currently 5, but not sure if it's fixed or not). So this check doesn't make sense any more.
+        # self.file_check(len(voter_files) + 1)
+
         vdf = pd.DataFrame()
         hdf = pd.DataFrame()
         dtypes = self.config['dtypes']
