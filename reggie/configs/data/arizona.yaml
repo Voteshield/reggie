@@ -39,11 +39,15 @@ not_registered_voter_status_set:
   - 'R   ' # cancelled
   - 'N   ' # not eligible
   - 'NR  ' # not registered
-#  - 'S   ' # suspense
-voter_status_suspense: 'S   '
+  - 'S   ' # suspense
 # Clint: "It appears from media reports that 'suspense' in AZ is a 'not registered'.
 # They can't vote because the voter needs to provide more info to election officials."
 # But Clint thinks we should leave it in the file for now, until we find out more.
+#
+# As of November 2025, Arizona SoS has confirmed this, so suspense has been
+# included in "not registered".
+# Clint: "We learned that the "suspense" status is effectively the same as a
+# "not registered" status."
 
 democratic_party: DEMOCRATIC
 republican_party: REPUBLICAN
