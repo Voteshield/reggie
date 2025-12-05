@@ -278,7 +278,7 @@ class PreprocessTexas(Preprocessor):
             older files (and VoteShield's database).
             """
             d = {}
-            for old, new_list in self.config["address_parser_mapping"]:
+            for old, new_list in self.config["address_parser_mapping"].items():
                 d[old] = " ".join(
                     filter(
                         None,
