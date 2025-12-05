@@ -449,3 +449,56 @@ county_names:
 
 ethnicity_options:
   'Y': hispanic
+
+# In October 2025, Texas changed it's data to csv format.
+# It consolidated addresses into single strings, which we
+# attempt to parse back into their component parts, to match
+# the existing database. The usaddress parser package does
+# not match our existing parts perfectly, so we need to
+# handle edge cases. We consolidate fields that seem manageable
+# according to the following mapping:
+address_parser_mapping:
+  Permanent_House_Number:
+    - AddressNumberPrefix
+    - AddressNumber
+    - AddressNumberSuffix
+  Permanent_Directional_Prefix:
+    - StreetNamePreDirectional
+  Permanent_Street_Name:
+    - StreetNamePreModifier
+    - StreetName
+  Permanent_Street_Type:
+    - StreetNamePreType
+    - StreetNamePostType
+  Permanent_Directional_Suffix:
+    - StreetNamePostDirectional
+  Permanent_Unit_Number:
+    - OccupancyIdentifier
+    - SubaddressIdentifier
+  Permanent_Unit_Type:
+    - OccupancyType
+    - SubaddressType
+  # Because the strings don't include state, if anything
+  # gets parsed to 'state', it's likely a city/town/locality.
+  Permanent_City:
+    - PlaceName
+    - StateName
+  Permanent_Zipcode:
+    - ZipCode
+# For any other ("unmanageable") fields, we give up on parsing and
+# just put the full address string into the "Permanent_Street_Name"
+# field.
+default_address_field: Permanent_Street_Name
+unmanageable_address_fields:
+  - NotAddress
+  - Recipient
+  - BuildingName
+  - CornerOf
+  - LandmarkName
+  - IntersectionSeparator
+  - USPSBoxType
+  - USPSBoxID
+  - USPSBoxGroupType
+  - USPSBoxGroupID
+# Overall, this should at least produce repeatable results,
+# that will allow us to understand when the address has been changed.

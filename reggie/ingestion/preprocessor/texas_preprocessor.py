@@ -8,6 +8,7 @@ from io import StringIO, SEEK_END, SEEK_SET
 
 import numpy as np
 import pandas as pd
+import usaddress
 
 from reggie.ingestion.download import (
     Preprocessor,
@@ -249,3 +250,57 @@ class PreprocessTexas(Preprocessor):
             io_obj=StringIO(df_voter.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )
+
+    def parse_and_map_address(self, address):
+        """
+        Attempt to parse a single address string
+        and map it back into the existing database
+        fields, if at all possible.
+        """
+        def parsed_to_dict(parsed_address):
+            """
+            Turn parser pieces into a dictionary.
+            If multiple parts parse to the same type of
+            piece, solve by concatenating pieces in order.
+            """
+            d = {}
+            for piece, piece_type in parsed_address:
+                if piece_type not in d:
+                    d[piece_type] = piece
+                else:
+                    d[piece_type] += " " + piece
+            return d
+
+        def map_to_existing_fields(address_dict):
+            """
+            Convert the parsed address dictionary
+            back to the fields that exist in Texas'
+            older files (and VoteShield's database).
+            """
+            d = {}
+            for old, new_list in self.config["address_parser_mapping"]:
+                d[old] = " ".join(
+                    filter(
+                        None,
+                        [address_dict[x] if (x in address_dict) else None for x in new_list]
+                    )
+                )
+            return d
+
+        parsed_tuples = usaddress.parse(address)
+
+        # If contains an unmanageable type, just return whole
+        # string in default field (Permanent_Street_Name).
+        piece_types = [piece[1] for piece in parsed]
+        if len(set(piece_types).intersection(self.config["unmanageable_address_fields"])):
+            return {
+                self.config["default_address_field"]: address
+            }
+        else:
+            # Consolidate parsed tuples into dict
+            parsed_dict = parsed_to_dict(parsed_tuples)
+            return map_to_existing_fields(parsed_dict)
+
+# DO THIS in main function
+# parsed_addresses = df['residential_address'].map(parse_and_map_address)
+# addr_df = pd.DataFrame(parsed_addresses.tolist())
