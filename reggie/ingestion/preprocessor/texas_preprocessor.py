@@ -291,7 +291,7 @@ class PreprocessTexas(Preprocessor):
 
         # If contains an unmanageable type, just return whole
         # string in default field (Permanent_Street_Name).
-        piece_types = [piece[1] for piece in parsed]
+        piece_types = [piece[1] for piece in parsed_tuples]
         if len(set(piece_types).intersection(self.config["unmanageable_address_fields"])):
             return {
                 self.config["default_address_field"]: address
@@ -302,5 +302,5 @@ class PreprocessTexas(Preprocessor):
             return map_to_existing_fields(parsed_dict)
 
 # DO THIS in main function
-# parsed_addresses = df['residential_address'].map(parse_and_map_address)
+# parsed_addresses = df['residential_address'].map(self.parse_and_map_address)
 # addr_df = pd.DataFrame(parsed_addresses.tolist())
