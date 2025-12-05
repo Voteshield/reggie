@@ -506,7 +506,7 @@ unmanageable_address_fields:
 # 2025 October column alias list
 # new column name: original column name
 column_aliases:
-    county_code: County_code
+    county_code: County_Code
     precinct: Precinct
     vuid: VUID
     last_name: Last_Name

@@ -167,13 +167,21 @@ class PreprocessTexas(Preprocessor):
                 del i["obj"]
                 gc.collect()
 
+            df_voter["Effective_Date_of_Registration"] = (
+                df_voter["Effective_Date_of_Registration"]
+                .fillna(-1)
+                .astype(int, errors="ignore")
+                .astype(str)
+                .replace("-1", np.nan)
+            )
+
         # New normal csv format (starting October 2025)
         else:
             df_voter = pd.DataFrame()
             df_hist = pd.DataFrame()
             for i in new_files:
-                logging.info("Loading file {}".format(i))
-                new_df = pd.read_csv(i["obj"], widths=widths, header=None)
+                logging.info(f"Loading file {i['name']}")
+                new_df = pd.read_csv(i["obj"])
 
                 # Currently, we have no new history files to look at.
                 # But eventually, will have to disambiguate voter and history files.
@@ -183,6 +191,9 @@ class PreprocessTexas(Preprocessor):
                 del i["obj"]
                 gc.collect()
 
+            if df_hist.empty:
+                df_hist = pd.DataFrame(columns=self.config["hist_columns"])
+
             # Convert single address string back to multiple fields
             parsed_addresses = df_voter["residential_address"].map(
                 self.parse_and_map_address
@@ -191,9 +202,10 @@ class PreprocessTexas(Preprocessor):
                 [df_voter, pd.DataFrame(parsed_addresses.tolist())],
                 axis=1,
             )
+            df_voter.drop(columns=["residential_address"], inplace=True)
 
             # Rename other columns back to old names
-            df_voters.rename(
+            df_voter.rename(
                 columns=self.config["column_aliases"],
                 inplace=True,
             )
@@ -211,21 +223,12 @@ class PreprocessTexas(Preprocessor):
             ]:
                 df_voter[col] = None
 
-
-        if df_hist.empty:
-            logging.info("This file contains no voter history")
-
-        df_voter["Effective_Date_of_Registration"] = (
-            df_voter["Effective_Date_of_Registration"]
-            .fillna(-1)
-            .astype(int, errors="ignore")
-            .astype(str)
-            .replace("-1", np.nan)
-        )
         df_voter[self.config["party_identifier"]] = "npa"
+
         df_hist[self.config["hist_columns"]] = df_hist[
             self.config["hist_columns"]
         ].replace(np.nan, "", regex=True)
+
         df_hist["election_name"] = (
             df_hist["Election_Date"].astype(str)
             + "_"
@@ -267,15 +270,24 @@ class PreprocessTexas(Preprocessor):
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
-        logging.info("Texas: history apply")
-        voter_groups = df_hist.groupby(self.config["voter_id"])
-        sparse_history = voter_groups["array_position"].apply(list)
-        vote_type = voter_groups["Election_Voting_Method"].apply(list)
 
-        df_voter = df_voter.set_index(self.config["voter_id"])
-        df_voter["sparse_history"] = sparse_history
-        df_voter["all_history"] = voter_groups["election_name"].apply(list)
-        df_voter["vote_type"] = vote_type
+        if df_hist.empty:
+            logging.info("This file contains no voter history")
+            df_voter = df_voter.set_index(self.config["voter_id"])
+            df_voter["sparse_history"] = None
+            df_voter["all_history"] = None
+            df_voter["vote_type"] = None
+        else:
+            logging.info("Texas: history apply")
+            voter_groups = df_hist.groupby(self.config["voter_id"])
+            sparse_history = voter_groups["array_position"].apply(list)
+            vote_type = voter_groups["Election_Voting_Method"].apply(list)
+
+            df_voter = df_voter.set_index(self.config["voter_id"])
+            df_voter["sparse_history"] = sparse_history
+            df_voter["all_history"] = voter_groups["election_name"].apply(list)
+            df_voter["vote_type"] = vote_type
+
         gc.collect()
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
@@ -287,7 +299,7 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_Zipcode",
             ],
         )
-        df_voter.drop(self.config["hist_columns"], axis=1, inplace=True)
+        df_voter.drop(self.config["hist_columns"], axis=1, inplace=True, errors="ignore")
 
         # Check the file for all the proper locales
         self.locale_check(
