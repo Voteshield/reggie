@@ -502,3 +502,22 @@ unmanageable_address_fields:
   - USPSBoxGroupID
 # Overall, this should at least produce repeatable results,
 # that will allow us to understand when the address has been changed.
+
+# 2025 October column alias list
+# new column name: original column name
+column_aliases:
+    county_code: County_code
+    precinct: Precinct
+    vuid: VUID
+    last_name: Last_Name
+    first_name: First_Name
+    mid_name: Middle_Name
+    former_last: Former_Last_Name
+    suff: Suffix
+    gender: Gender
+    dob: Date_of_Birth
+    # residential_address - handling this separately
+    mailing_address: Mailing_Address_1
+    cd_status: Status_Code
+    dt_effective_registration: Effective_Date_of_Registration
+    hispanic_surname: Hispanic_Surname_Flag
