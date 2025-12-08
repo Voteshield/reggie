@@ -85,14 +85,16 @@ def get_object_mem(key, s3_bucket):
     return file_obj
 
 
-def concat_and_delete(in_list, has_headers=False):
+def concat_and_delete(in_list, has_headers=False, check_encoding=False):
     """
     Take a list of FileItem objects,
     and concat them into a single object
     that can be read
     :param in_list: list of file objects
     :param has_headers: True if each file has a
-                        header, False otherwise
+        header, False otherwise
+    :check_encoding: if True, need to check
+        encoding before reading files
     :return: combined file object
     """
     outfile = StringIO()
@@ -100,7 +102,16 @@ def concat_and_delete(in_list, has_headers=False):
     if has_headers:
         write_header = True
 
+    encoding = "utf-8"
+    if check_encoding:
+        result = chardet.detect(in_list[0]["obj"].read())
+        # reset file pointer
+        in_list[0]["obj"].seek(0)
+        encoding = result["encoding"]
+    logging.info(f"CVC: encoding {encoding}")
+
     for f_obj in in_list:
+        logging.info(f"CVC: {f_obj['name']}")
 
         if has_headers:
             h = f_obj["obj"].readline()
@@ -150,10 +161,12 @@ class FileItem(object):
             self.obj = get_object_mem(key, s3_bucket)
         elif filename is not None:
             try:
+                logging.info("CVC try-ing..")
                 with open(filename) as f:
                     s = f.read()
                     self.obj = StringIO(s)
             except UnicodeDecodeError:
+                logging.info("CVC unicode..")
                 with open(filename, "rb") as f:
                     s = f.read()
                     self.obj = BytesIO(s)
