@@ -56,8 +56,9 @@ class PreprocessFlorida(Preprocessor):
 
         if not self.ignore_checks:
             self.file_check(len(voter_files))
-        concat_voter_file = concat_and_delete(voter_files)
-        concat_history_file = concat_and_delete(vote_history_files)
+
+        concat_voter_file = concat_and_delete(voter_files, check_encoding=True)
+        concat_history_file = concat_and_delete(vote_history_files, check_encoding=True)
         del new_files, vote_history_files, voter_files
         gc.collect()
 

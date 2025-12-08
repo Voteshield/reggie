@@ -1,3 +1,4 @@
+import chardet
 import json
 import logging
 import os
@@ -85,14 +86,16 @@ def get_object_mem(key, s3_bucket):
     return file_obj
 
 
-def concat_and_delete(in_list, has_headers=False):
+def concat_and_delete(in_list, has_headers=False, check_encoding=False):
     """
     Take a list of FileItem objects,
     and concat them into a single object
     that can be read
     :param in_list: list of file objects
     :param has_headers: True if each file has a
-                        header, False otherwise
+        header, False otherwise
+    :check_encoding: if True, need to check
+        encoding before reading files
     :return: combined file object
     """
     outfile = StringIO()
@@ -100,8 +103,14 @@ def concat_and_delete(in_list, has_headers=False):
     if has_headers:
         write_header = True
 
-    for f_obj in in_list:
+    encoding = "utf-8"
+    if check_encoding:
+        result = chardet.detect(in_list[0]["obj"].read())
+        # reset file pointer
+        in_list[0]["obj"].seek(0)
+        encoding = result["encoding"]
 
+    for f_obj in in_list:
         if has_headers:
             h = f_obj["obj"].readline()
             # Write header only once
@@ -110,7 +119,7 @@ def concat_and_delete(in_list, has_headers=False):
                 write_header = False
 
         s = f_obj["obj"].read()
-        outfile.write(s.decode())
+        outfile.write(s.decode(encoding=encoding))
     outfile.seek(0)
     return outfile
 
