@@ -1,3 +1,4 @@
+import chardet
 import json
 import logging
 import os
