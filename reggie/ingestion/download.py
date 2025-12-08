@@ -122,7 +122,7 @@ def concat_and_delete(in_list, has_headers=False, check_encoding=False):
                 write_header = False
 
         s = f_obj["obj"].read()
-        outfile.write(s.decode())
+        outfile.write(s.decode(encoding=encoding))
     outfile.seek(0)
     return outfile
 
