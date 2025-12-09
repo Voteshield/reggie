@@ -221,7 +221,20 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_State",
                 "Mailing_Zipcode",
             ]:
-                df_voter[col] = None
+                df_voter[col] = np.nan
+
+            # Make sure precinct is int, to match existing data
+            def int_precincts(x):
+                if not pd.isnull(x):
+                    try:
+                        x = str(int(x))
+                    except ValueError:
+                        pass
+                return x
+            df_voter["Precinct"] = df_voter["Precinct"].map(int_precincts)
+
+            # Match original column ordering
+            df_voter = df_voter[self.config["ordered_columns"][:-1]]
 
         df_voter[self.config["party_identifier"]] = "npa"
 
