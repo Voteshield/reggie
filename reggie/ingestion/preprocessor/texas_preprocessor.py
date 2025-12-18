@@ -44,16 +44,27 @@ class PreprocessTexas(Preprocessor):
         )
         new_files = [x for x in new_files if "Summary_File" not in x["name"]]
 
-        # This won't pass anymore, with October 2025 files
+        # This won't pass anymore, with October 2025 and after files;
+        # Counties are now broken up into 1 or 2 files, so it's not
+        # possible to conclusively check the total number.
         # if not self.ignore_checks:
         #     self.file_check(len(new_files))
 
-        is_fixed_width_format = True
-        if ".csv" in new_files[0]["name"]:
-            is_fixed_width_format = False
+        # Files from end of 2025 have new csv voter data,
+        # and old fixed-width history data mixed together.
+        txt_files = [x for x in new_files if ".txt" in x["name"]]
+        csv_files = [x for x in new_files if ".csv" in x["name"]]
+        if len(txt_files) > 0:
+            df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
+        else:
+            df_hist = pd.DataFrame()
+        if len(csv_files) > 0:
+            df_voter = pd.DataFrame()
+        else:
+            df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
 
         # Fixed width format - Was Used Until August 2025
-        if is_fixed_width_format:
+        if len(txt_files) > 0:
             widths_one = [
                 3,
                 10,
@@ -122,10 +133,8 @@ class PreprocessTexas(Preprocessor):
                 3,
                 6,
             ]
-            df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
-            df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
             have_length = False
-            for i in new_files:
+            for i in txt_files:
                 file_len = i["obj"].seek(SEEK_END)
                 i["obj"].seek(SEEK_SET)
                 if "count" not in i["name"] and file_len != 0:
@@ -167,19 +176,18 @@ class PreprocessTexas(Preprocessor):
                 del i["obj"]
                 gc.collect()
 
-            df_voter["Effective_Date_of_Registration"] = (
-                df_voter["Effective_Date_of_Registration"]
-                .fillna(-1)
-                .astype(int, errors="ignore")
-                .astype(str)
-                .replace("-1", np.nan)
-            )
+            if not df_voter.empty:
+                df_voter["Effective_Date_of_Registration"] = (
+                    df_voter["Effective_Date_of_Registration"]
+                    .fillna(-1)
+                    .astype(int, errors="ignore")
+                    .astype(str)
+                    .replace("-1", np.nan)
+                )
 
         # New normal csv format (starting October 2025)
-        else:
-            df_voter = pd.DataFrame()
-            df_hist = pd.DataFrame()
-            for i in new_files:
+        if len(csv_files) > 0:
+            for i in csv_files:
                 logging.info(f"Loading file {i['name']}")
                 new_df = pd.read_csv(i["obj"])
 
