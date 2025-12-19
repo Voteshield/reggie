@@ -104,13 +104,9 @@ def concat_and_delete(in_list, has_headers=False, check_encoding=False):
         write_header = True
 
     encoding = "utf-8"
-    if check_encoding:
-        result = chardet.detect(in_list[0]["obj"].read())
-        # reset file pointer
-        in_list[0]["obj"].seek(0)
-        encoding = result["encoding"]
 
     for f_obj in in_list:
+
         if has_headers:
             h = f_obj["obj"].readline()
             # Write header only once
@@ -119,6 +115,11 @@ def concat_and_delete(in_list, has_headers=False, check_encoding=False):
                 write_header = False
 
         s = f_obj["obj"].read()
+        if check_encoding:
+            result = chardet.detect(s)
+            encoding = result["encoding"]
+
+        logging.info(f"{f_obj['name']}: {encoding}")
         outfile.write(s.decode(encoding=encoding))
     outfile.seek(0)
     return outfile
