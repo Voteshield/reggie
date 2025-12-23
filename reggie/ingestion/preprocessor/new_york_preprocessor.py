@@ -6,6 +6,7 @@ from datetime import datetime
 from io import StringIO
 
 import numpy as np
+import pandas as pd
 
 from reggie.ingestion.download import (
     FileItem,
@@ -41,19 +42,29 @@ class PreprocessNewYork(Preprocessor):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="infer"
         )
-
-        if not self.ignore_checks:
-            self.file_check(len(new_files))
-
-        # no longer include pdfs in file list anyway, can just assign main file
-        self.main_file = new_files[0]
+        del self.main_file, self.temp_files
         gc.collect()
-        main_df = self.read_csv_count_error_lines(
-            self.main_file["obj"],
-            header=None,
-            encoding="latin-1",
-            on_bad_lines="warn",
-        )
+
+        # As of December 2025, NY is now providing an additional
+        # purged file that we request, so now there are either 1
+        # or 2 files. We can't handle multiple sizes currently in
+        # file_check.
+        # TODO: Make file_check more flexible.
+        #if not self.ignore_checks:
+        #    self.file_check(len(new_files))
+
+        new_files = [n for n in new_files if ".txt" in n["name"].lower()]
+        main_df = pd.DataFrame()
+        for new_file in new_files:
+            new_df = self.read_csv_count_error_lines(
+                new_file["obj"],
+                header=None,
+                encoding="latin-1",
+                on_bad_lines="warn",
+            )
+            main_df = pd.concat([main_df, new_df], axis=0, ignore_index=True)
+        del new_files, new_df
+        gc.collect()
 
         # In Dec 2021, NY added 2 columns (RAPARTMENTTYPE, RADDRNONSTD),
         # and rearranged the other address columns slightly.
@@ -86,8 +97,6 @@ class PreprocessNewYork(Preprocessor):
                 main_df.memory_usage(deep=True).sum()
             )
         )
-        del self.main_file, self.temp_files, new_files
-        gc.collect()
 
         null_hists = main_df.voterhistory != main_df.voterhistory
         main_df.voterhistory[null_hists] = NULL_CHAR
