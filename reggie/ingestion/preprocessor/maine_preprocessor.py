@@ -104,8 +104,8 @@ class PreprocessMaine(Preprocessor):
         cancelled_df = pd.DataFrame()
         hist_df = pd.DataFrame()
         for file in new_files:
-            if "voter.txt" in file["name"].lower():  # needsextension
-                logging.info("voter file found")
+            if "voter.txt" in file["name"].lower():  # needs extension
+                logging.info(f"voter file found: {file['name']}")
                 voter_df = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
@@ -127,18 +127,26 @@ class PreprocessMaine(Preprocessor):
             ):
                 # Maine Voter History seems to come one file per election,
                 # Sometimes they have a history report html file that we skip
-                logging.info("vote history found")
+                logging.info(f"vote history found: {file['name']}")
                 new_hist = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
                 logging.info(f"concatenating {file['name']}")
                 hist_df = pd.concat([hist_df, new_hist])
             elif "cancelled" in file["name"].lower():
-                logging.info("cancelled file found")
                 # Note: the cancelled file does not have a county column
-                cancelled_df = self.read_csv_count_error_lines(
-                    file["obj"], sep="|", dtype="str", on_bad_lines="warn"
-                )
+                logging.info(f"cancelled file found: {file['name']}")
+
+                # September 2025 file has .xlsx instead of .txt file
+                if ".txt" in file["name"].lower():
+                    cancelled_df = self.read_csv_count_error_lines(
+                        file["obj"], sep="|", dtype="str", on_bad_lines="warn"
+                    )
+                elif ".xlsx" in file["name"].lower():
+                    cancelled_df = pd.read_excel(
+                        file["obj"], dtype="str",
+                    )
+
                 if "DT_ACCEPT" in cancelled_df.columns:
                     cancelled_df.rename(
                         columns={"DT_ACCEPT": "DT ACCEPT"}, inplace=True

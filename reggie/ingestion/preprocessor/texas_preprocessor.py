@@ -8,6 +8,7 @@ from io import StringIO, SEEK_END, SEEK_SET
 
 import numpy as np
 import pandas as pd
+import usaddress
 
 from reggie.ingestion.download import (
     Preprocessor,
@@ -41,134 +42,214 @@ class PreprocessTexas(Preprocessor):
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip"
         )
+        new_files = [x for x in new_files if "Summary_File" not in x["name"]]
 
-        if not self.ignore_checks:
-            self.file_check(len(new_files))
-        widths_one = [
-            3,
-            10,
-            10,
-            50,
-            50,
-            50,
-            50,
-            4,
-            1,
-            8,
-            9,
-            12,
-            2,
-            50,
-            12,
-            2,
-            12,
-            12,
-            50,
-            9,
-            110,
-            50,
-            50,
-            20,
-            20,
-            8,
-            1,
-            1,
-            8,
-            2,
-            3,
-            6,
-        ]
-        widths_two = [
-            3,
-            4,
-            10,
-            50,
-            50,
-            50,
-            50,
-            4,
-            1,
-            8,
-            9,
-            12,
-            2,
-            50,
-            12,
-            2,
-            12,
-            12,
-            50,
-            9,
-            110,
-            50,
-            50,
-            20,
-            20,
-            8,
-            1,
-            1,
-            8,
-            2,
-            3,
-            6,
-        ]
-        df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
-        df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
-        have_length = False
-        for i in new_files:
-            file_len = i["obj"].seek(SEEK_END)
-            i["obj"].seek(SEEK_SET)
-            if "count" not in i["name"] and file_len != 0:
+        # This won't pass anymore, with October 2025 and after files;
+        # Counties are now broken up into 1 or 2 files, so it's not
+        # possible to conclusively check the total number.
+        # if not self.ignore_checks:
+        #     self.file_check(len(new_files))
 
-                if not have_length:
-                    line_length = len(i["obj"].readline())
-                    i["obj"].seek(SEEK_END)
-                    have_length = True
-                    if line_length == 686:
-                        widths = widths_one
-                    elif line_length == 680:
-                        widths = widths_two
-                    else:
-                        raise ValueError(
-                            "Width possibilities have changed,"
-                            "new width found: {}".format(line_length)
+        # Files from end of 2025 have new csv voter data,
+        # and old fixed-width history data mixed together.
+        txt_files = [x for x in new_files if ".txt" in x["name"]]
+        csv_files = [x for x in new_files if ".csv" in x["name"]]
+        if len(txt_files) > 0:
+            df_hist = pd.DataFrame(columns=self.config.raw_file_columns())
+        else:
+            df_hist = pd.DataFrame()
+        if len(csv_files) > 0:
+            df_voter = pd.DataFrame()
+        else:
+            df_voter = pd.DataFrame(columns=self.config.raw_file_columns())
+
+        # Fixed width format - Was Used Until August 2025
+        if len(txt_files) > 0:
+            widths_one = [
+                3,
+                10,
+                10,
+                50,
+                50,
+                50,
+                50,
+                4,
+                1,
+                8,
+                9,
+                12,
+                2,
+                50,
+                12,
+                2,
+                12,
+                12,
+                50,
+                9,
+                110,
+                50,
+                50,
+                20,
+                20,
+                8,
+                1,
+                1,
+                8,
+                2,
+                3,
+                6,
+            ]
+            widths_two = [
+                3,
+                4,
+                10,
+                50,
+                50,
+                50,
+                50,
+                4,
+                1,
+                8,
+                9,
+                12,
+                2,
+                50,
+                12,
+                2,
+                12,
+                12,
+                50,
+                9,
+                110,
+                50,
+                50,
+                20,
+                20,
+                8,
+                1,
+                1,
+                8,
+                2,
+                3,
+                6,
+            ]
+            have_length = False
+            for i in txt_files:
+                file_len = i["obj"].seek(SEEK_END)
+                i["obj"].seek(SEEK_SET)
+                if "count" not in i["name"] and file_len != 0:
+
+                    if not have_length:
+                        line_length = len(i["obj"].readline())
+                        i["obj"].seek(SEEK_END)
+                        have_length = True
+                        if line_length == 686:
+                            widths = widths_one
+                        elif line_length == 680:
+                            widths = widths_two
+                        else:
+                            raise ValueError(
+                                "Width possibilities have changed,"
+                                "new width found: {}".format(line_length)
+                            )
+                        have_length = True
+                    logging.info("Loading file {}".format(i))
+                    new_df = pd.read_fwf(i["obj"], widths=widths, header=None)
+                    try:
+                        new_df.columns = self.config.raw_file_columns()
+                    except ValueError:
+                        logging.info("Incorrect number of columns found for texas")
+                        raise MissingNumColumnsError(
+                            "{} state is missing columns".format(self.state),
+                            self.state,
+                            len(self.config.raw_file_columns()),
+                            len(new_df.columns),
                         )
-                    have_length = True
-                logging.info("Loading file {}".format(i))
-                new_df = pd.read_fwf(i["obj"], widths=widths, header=None)
-                try:
-                    new_df.columns = self.config.raw_file_columns()
-                except ValueError:
-                    logging.info("Incorrect number of columns found for texas")
-                    raise MissingNumColumnsError(
-                        "{} state is missing columns".format(self.state),
-                        self.state,
-                        len(self.config.raw_file_columns()),
-                        len(new_df.columns),
-                    )
-                if new_df["Election_Date"].head(n=100).isnull().sum() > 75:
-                    df_voter = pd.concat(
-                        [df_voter, new_df], axis=0, ignore_index=True
-                    )
-                else:
-                    df_hist = pd.concat(
-                        [df_hist, new_df], axis=0, ignore_index=True
-                    )
-            del i["obj"]
-            gc.collect()
-        if df_hist.empty:
-            logging.info("This file contains no voter history")
-        df_voter["Effective_Date_of_Registration"] = (
-            df_voter["Effective_Date_of_Registration"]
-            .fillna(-1)
-            .astype(int, errors="ignore")
-            .astype(str)
-            .replace("-1", np.nan)
-        )
+                    if new_df["Election_Date"].head(n=100).isnull().sum() > 75:
+                        df_voter = pd.concat(
+                            [df_voter, new_df], axis=0, ignore_index=True
+                        )
+                    else:
+                        df_hist = pd.concat(
+                            [df_hist, new_df], axis=0, ignore_index=True
+                        )
+                del i["obj"]
+                gc.collect()
+
+            if not df_voter.empty:
+                df_voter["Effective_Date_of_Registration"] = (
+                    df_voter["Effective_Date_of_Registration"]
+                    .fillna(-1)
+                    .astype(int, errors="ignore")
+                    .astype(str)
+                    .replace("-1", np.nan)
+                )
+
+        # New normal csv format (starting October 2025)
+        if len(csv_files) > 0:
+            for i in csv_files:
+                logging.info(f"Loading file {i['name']}")
+                new_df = pd.read_csv(i["obj"])
+
+                # Currently, we have no new history files to look at.
+                # But eventually, will have to disambiguate voter and history files.
+                df_voter = pd.concat(
+                    [df_voter, new_df], axis=0, ignore_index=True
+                )
+                del i["obj"]
+                gc.collect()
+
+            if df_hist.empty:
+                df_hist = pd.DataFrame(columns=self.config["hist_columns"])
+
+            # Convert single address string back to multiple fields
+            parsed_addresses = df_voter["residential_address"].map(
+                self.parse_and_map_address
+            )
+            df_voter = pd.concat(
+                [df_voter, pd.DataFrame(parsed_addresses.tolist())],
+                axis=1,
+            )
+            df_voter.drop(columns=["residential_address"], inplace=True)
+
+            # Rename other columns back to old names
+            df_voter.rename(
+                columns=self.config["column_aliases"],
+                inplace=True,
+            )
+
+            # Add other missing columns.
+            # Note: We are not bothering to try to parse out
+            # City/State/Zip for the mailing address, and are just
+            # putting the full string in "Mailing_Address_1".
+            for col in [
+                "Permanent_Designator",
+                "Mailing_Address_2",
+                "Mailing_City",
+                "Mailing_State",
+                "Mailing_Zipcode",
+            ]:
+                df_voter[col] = np.nan
+
+            # Make sure precinct is int, to match existing data
+            def int_precincts(x):
+                if not pd.isnull(x):
+                    try:
+                        x = str(int(x))
+                    except ValueError:
+                        pass
+                return x
+            df_voter["Precinct"] = df_voter["Precinct"].map(int_precincts)
+
+            # Match original column ordering
+            df_voter = df_voter[self.config["ordered_columns"][:-1]]
+
         df_voter[self.config["party_identifier"]] = "npa"
+
         df_hist[self.config["hist_columns"]] = df_hist[
             self.config["hist_columns"]
         ].replace(np.nan, "", regex=True)
+
         df_hist["election_name"] = (
             df_hist["Election_Date"].astype(str)
             + "_"
@@ -210,15 +291,24 @@ class PreprocessTexas(Preprocessor):
         df_hist["array_position"] = df_hist["election_name"].map(
             lambda x: int(sorted_codes_dict[x]["index"])
         )
-        logging.info("Texas: history apply")
-        voter_groups = df_hist.groupby(self.config["voter_id"])
-        sparse_history = voter_groups["array_position"].apply(list)
-        vote_type = voter_groups["Election_Voting_Method"].apply(list)
 
-        df_voter = df_voter.set_index(self.config["voter_id"])
-        df_voter["sparse_history"] = sparse_history
-        df_voter["all_history"] = voter_groups["election_name"].apply(list)
-        df_voter["vote_type"] = vote_type
+        if df_hist.empty:
+            logging.info("This file contains no voter history")
+            df_voter = df_voter.set_index(self.config["voter_id"])
+            df_voter["sparse_history"] = None
+            df_voter["all_history"] = None
+            df_voter["vote_type"] = None
+        else:
+            logging.info("Texas: history apply")
+            voter_groups = df_hist.groupby(self.config["voter_id"])
+            sparse_history = voter_groups["array_position"].apply(list)
+            vote_type = voter_groups["Election_Voting_Method"].apply(list)
+
+            df_voter = df_voter.set_index(self.config["voter_id"])
+            df_voter["sparse_history"] = sparse_history
+            df_voter["all_history"] = voter_groups["election_name"].apply(list)
+            df_voter["vote_type"] = vote_type
+
         gc.collect()
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
@@ -230,7 +320,7 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_Zipcode",
             ],
         )
-        df_voter.drop(self.config["hist_columns"], axis=1, inplace=True)
+        df_voter.drop(self.config["hist_columns"], axis=1, inplace=True, errors="ignore")
 
         # Check the file for all the proper locales
         self.locale_check(
@@ -249,3 +339,61 @@ class PreprocessTexas(Preprocessor):
             io_obj=StringIO(df_voter.to_csv(encoding="utf-8")),
             s3_bucket=self.s3_bucket,
         )
+
+    def parse_and_map_address(self, address):
+        """
+        Attempt to parse a single address string
+        and map it back into the existing database
+        fields, if at all possible.
+        """
+        def parsed_to_dict(parsed_address):
+            """
+            Turn parser pieces into a dictionary.
+            If multiple parts parse to the same type of
+            piece, solve by concatenating pieces in order.
+            """
+            d = {}
+            for piece, piece_type in parsed_address:
+                if piece_type not in d:
+                    d[piece_type] = piece
+                else:
+                    d[piece_type] += " " + piece
+            return d
+
+        def map_to_existing_fields(address_dict):
+            """
+            Convert the parsed address dictionary
+            back to the fields that exist in Texas'
+            older files (and VoteShield's database).
+            """
+            d = {}
+            for old, new_list in self.config[
+                "address_parser_mapping"
+            ].items():
+                d[old] = " ".join(
+                    filter(
+                        None,
+                        [
+                            address_dict[x]
+                            if (x in address_dict) else None
+                            for x in new_list
+                        ]
+                    )
+                )
+            return d
+
+        parsed_tuples = usaddress.parse(address)
+
+        # If contains an unmanageable type, just return whole
+        # string in default field (Permanent_Street_Name).
+        piece_types = [piece[1] for piece in parsed_tuples]
+        if len(set(piece_types).intersection(
+            self.config["unmanageable_address_fields"])
+        ):
+            return {
+                self.config["default_address_field"]: address
+            }
+        else:
+            # Consolidate parsed tuples into dict
+            parsed_dict = parsed_to_dict(parsed_tuples)
+            return map_to_existing_fields(parsed_dict)
