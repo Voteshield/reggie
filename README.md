@@ -8,7 +8,7 @@ Reggie is created by [VoteShield](https://votehshield.us/), a data analytics too
 
 Voter registration files are maintained in almost every state, and though they contain different data, each one usually includes basic data about every registered voter in that state and usually includes a voter history which usually includes last or each time they voted.
 
-Each state has it's own laws, systems, and processes on how they manage, store, define, and allow access to their voter registration files.
+Each state has its own laws, systems, and processes on how they manage, store, define, and allow access to their voter registration files.
 
 ## Supported states
 
