@@ -16,10 +16,10 @@ from reggie.ingestion.download import (
 
 
 HISTORY_COLUMN_REGEX = re.compile(
-    "^(\d|GENERAL|PRIMARY|PRESIDENTIAL)",
+    r"^(\d|GENERAL|PRIMARY|PRESIDENTIAL)",
     flags=re.I,
 )
-YEAR_REGEX = re.compile("\d{4}")
+YEAR_REGEX = re.compile(r"\d{4}")
 
 
 class PreprocessArizona2(Preprocessor):
