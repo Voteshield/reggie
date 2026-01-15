@@ -16,10 +16,10 @@ from reggie.ingestion.download import (
 
 
 HISTORY_COLUMN_REGEX = re.compile(
-    "^(\d|GENERAL|PRIMARY|PRESIDENTIAL)",
+    r"^(\d|GENERAL|PRIMARY|PRESIDENTIAL)",
     flags=re.I,
 )
-YEAR_REGEX = re.compile("\d{4}")
+YEAR_REGEX = re.compile(r"\d{4}")
 
 
 class PreprocessArizona2(Preprocessor):
@@ -129,7 +129,10 @@ class PreprocessArizona2(Preprocessor):
         # these 5 elections will stay constant at least over the rest of 2025.
         # However, we need to trigger manual intervention to re-evaluate the situation
         # in 2026, if we have not received better data by then.
-        if date_from_str(self.raw_s3_file) <= "2026-01-01":
+        #
+        # As of Jan 2026, moving this date forward; we'll see if we have a new election
+        # in the data by end of March.
+        if date_from_str(self.raw_s3_file) <= "2026-03-31":
             main_df.rename(
                 columns={
                     "EL1": "PRIMARY2022",
