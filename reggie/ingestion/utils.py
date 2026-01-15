@@ -272,9 +272,10 @@ def format_column_name(c):
 def normalize_columns(df, cols, types=None):
     missing_cols = [c for c in cols if c not in df.columns.values.tolist()]
     wanted_cols = [c for c in df.columns.values.tolist() if c in cols]
-    df = df[wanted_cols]
+    #Explicitly use copy to avoid a using a view
+    df = df[wanted_cols].copy()
     for c in missing_cols:
-        df[c] = None
+        df.loc[:, c] = None
     common_cols = [c for c in cols if c in df.columns.values.tolist()]
     df = df[common_cols]
     return df, common_cols
