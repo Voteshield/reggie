@@ -191,7 +191,10 @@ class Config(object):
             df[field] = df[field].astype(int, errors='ignore')
         for field in extra_cols:
             df[field] = pd.to_numeric(df[field],
-                                      errors='coerce').fillna(df[field])
+                                      errors='coerce')
+            # downcasting objects is deprecated as of pandas 2.2.0, this
+            # retains the previous behavior
+            df[field] = df[field].fillna(df[field]).infer_objects(copy=False)
         return df
 
     def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
