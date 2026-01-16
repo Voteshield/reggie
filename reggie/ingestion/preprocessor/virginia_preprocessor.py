@@ -103,7 +103,7 @@ class PreprocessVirginia(Preprocessor):
             hist_df["PROVISIONAL"], "provisional_", ""
         )
         # replace the empty strings with nan for cleaner db cell values
-        hist_df["votetype_history"].replace("", np.nan, inplace=True)
+        hist_df["votetype_history"] = hist_df["votetype_history"].replace("", np.nan)
 
         sorted_codes = hist_df["combined_name"].unique().tolist()
         sorted_codes.sort(
