@@ -99,7 +99,8 @@ class PreprocessNewYork(Preprocessor):
         )
 
         null_hists = main_df.voterhistory != main_df.voterhistory
-        main_df.voterhistory[null_hists] = NULL_CHAR
+        main_df.loc[null_hists, "voterhistory"] = NULL_CHAR
+
         all_codes = (
             main_df.voterhistory.str.replace(" ", "_")
             .str.replace("[", "")
