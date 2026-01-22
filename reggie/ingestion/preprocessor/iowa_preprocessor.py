@@ -125,7 +125,7 @@ class PreprocessIowa(Preprocessor):
 
         for c in self.config["election_dates"]:
             null_rows = df_voters[c].isnull()
-            df_voters[c][null_rows] = ""
+            df_voters.loc[null_rows, c]= ""
 
             # each key contains info from the columns
             prefix = c.split("_")[0] + key_delim
@@ -133,7 +133,7 @@ class PreprocessIowa(Preprocessor):
             # and the corresponding votervotemethod column
             vote_type_col = c.replace("ELECTION_DATE", "VOTERVOTEMETHOD")
             null_rows = df_voters[vote_type_col].isnull()
-            df_voters[vote_type_col].loc[null_rows] = ""
+            df_voters.loc[null_rows, vote_type_col] = ""
             # add election type and date
             df_voters[c] = prefix + df_voters[c].str.strip()
             # add voting method
@@ -148,8 +148,8 @@ class PreprocessIowa(Preprocessor):
                 # primary
                 org_col = c.replace("PRIMARY_ELECTION_DATE", "POLITICAL_ORGANIZATION")
                 party_col = c.replace("PRIMARY_ELECTION_DATE", "POLITICAL_PARTY")
-                df_voters[org_col].loc[df_voters[org_col].isnull()] = ""
-                df_voters[party_col].loc[df_voters[party_col].isnull()] = ""
+                df_voters.loc[df_voters[org_col].isnull(), org_col] = ""
+                df_voters.loc[df_voters[party_col].isnull(), party_col] = ""
                 party_info = (
                     df_voters[party_col].str.strip()
                     + key_delim
@@ -190,19 +190,18 @@ class PreprocessIowa(Preprocessor):
         # labels for each election I think it makes sense to also keep them
         # in addition to the sparse history
         df_voters["sparse_history"] = df_voters.all_history.apply(ins_code_bin)
-
         self.meta = {
             "message": "iowa_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(elections.tolist()),
         }
-        for c in df_voters.columns:
-            df_voters[c].loc[df_voters[c].isnull()] = ""
 
         for c in df_voters.columns:
+            df_voters[c] = df_voters[c].astype(str)
+            df_voters.loc[df_voters[c].isnull(), c]= ""
+
             df_voters[c] = (
                 df_voters[c]
-                .astype(str)
                 .str.encode("utf-8", errors="ignore")
                 .str.decode("utf-8")
             )
