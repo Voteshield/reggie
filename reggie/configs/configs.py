@@ -221,7 +221,7 @@ class Config(object):
                 print(df[field])
                 df[field] = (
                     df[field]
-                    .astype(str))
+                    .apply(str))
                 df[field] = (
                     df[field]
                     .str.strip()
