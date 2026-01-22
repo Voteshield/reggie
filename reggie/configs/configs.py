@@ -217,9 +217,11 @@ class Config(object):
             and (field != self.data["voter_status"]) \
             and (field != self.data["party_identifier"]) \
             and (field not in exclude):
-                df[field] = (
-                    df[field]
-                    .apply(str))
+                # df[field] = (
+                #     df[field]
+                #     .apply(str))
+                df.loc[:, field] = df.loc[:, field].astype(str)
+
                 df[field] = (
                     df[field]
                     .str.strip()
