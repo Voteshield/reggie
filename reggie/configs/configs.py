@@ -191,7 +191,7 @@ class Config(object):
             df[field] = df[field].astype(int, errors='ignore')
         for field in extra_cols:
             df[field] = pd.to_numeric(df[field],
-                                      errors='coerce').fillna(df[field]).infer_objects(copy=False)
+                                      errors='coerce').fillna(df[field])
         return df
 
     def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
