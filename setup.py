@@ -12,9 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[
-        "pandas>=0.23.1",
+        "pandas==2.2.1",
         "click>=7.1.2",
-        "numpy>=1.19.2",
+        "numpy==1.26.4",
         "zipfile2>=0.0.12",
         "PyYAML>=5.3.1",
         "boto3>=1.15.12",
