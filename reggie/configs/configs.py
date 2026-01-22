@@ -219,7 +219,9 @@ class Config(object):
             and (field not in exclude):
                 df[field] = (
                     df[field]
-                    .astype(str)
+                    .astype(str))
+                df[field] = (
+                    df[field]
                     .str.strip()
                     .str.split()
                     .str.join(" ")
