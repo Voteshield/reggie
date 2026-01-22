@@ -220,15 +220,13 @@ class Config(object):
                 df[field] = (
                     df[field]
                     .apply(str))
-                df.loc[:, field] = df.loc[:, field].astype(str).str.strip().str.split().str.join(" ").str.lower()
-
-                # df[field] = (
-                #     df[field]
-                #     .str.strip()
-                #     .str.split()
-                #     .str.join(" ")
-                #     .str.lower()
-                # )
+                df[field] = (
+                    df[field]
+                    .str.strip()
+                    .str.split()
+                    .str.join(" ")
+                    .str.lower()
+                )
                 df[field] = (
                     df[field].str.encode("utf-8", errors="ignore").str.decode("utf-8")
                 )
