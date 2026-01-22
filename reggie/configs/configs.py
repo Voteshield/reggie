@@ -191,7 +191,8 @@ class Config(object):
             df[field] = df[field].astype(int, errors='ignore')
         for field in extra_cols:
             df[field] = pd.to_numeric(df[field],
-                                      errors='coerce').fillna(df[field])
+                                      errors='coerce').fillna(df[field]).infer_objects(copy=False)
+
         return df
 
     def coerce_strings(self, df, extra_cols=None, exclude=[''], col_list="columns"):
@@ -218,7 +219,9 @@ class Config(object):
             and (field not in exclude):
                 df[field] = (
                     df[field]
-                    .astype(str)
+                    .apply(str))
+                df[field] = (
+                    df[field]
                     .str.strip()
                     .str.split()
                     .str.join(" ")
