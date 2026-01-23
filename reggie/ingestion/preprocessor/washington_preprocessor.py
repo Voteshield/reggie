@@ -172,8 +172,11 @@ class PreprocessWashington(Preprocessor):
         to_numeric = [
             df_voter.loc[:, col].str.isnumeric().all() for col in df_voter.columns
         ]
-        df_voter.loc[:, to_numeric] = df_voter.loc[:, to_numeric].fillna(-1).astype(int)
-
+        df_voter.loc[:, to_numeric] = (
+            df_voter.loc[:, to_numeric].infer_objects(copy=False)
+            .fillna(-1)
+            .astype(int)
+        )
         df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_strings(
             df_voter,

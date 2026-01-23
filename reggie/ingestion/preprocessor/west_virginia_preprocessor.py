@@ -316,14 +316,15 @@ class PreprocessWestVirginia(Preprocessor):
             # NOTE: This assumes that "Y" is always used for yes
             df_history["votetype"] = "unknown"
             if history_2022_format:
-                df_history.votetype[df_history.CD_ENTRY_TYPE == "A"] = "absentee"
-                df_history.votetype[df_history.CD_ENTRY_TYPE == "E"] = "early"
-                df_history.votetype[df_history.CD_ENTRY_TYPE == "R"] = "regular"
+                df_history.loc[df_history["CD_ENTRY_TYPE"] == "A", "votetype"] = "absentee"
+                df_history.loc[df_history["CD_ENTRY_TYPE"] == "E", "votetype"] = "early"
+                df_history.loc[df_history["CD_ENTRY_TYPE"] == "R", "votetype"] = "regular"
             else:
-                df_history.votetype[df_history.fl_absentee == "Y"] = "absentee"
-                df_history.votetype[df_history.fl_early_voting == "Y"] = "early"
-                df_history.votetype[df_history.fl_regular == "Y"] = "regular"
+                df_history.loc[df_history["fl_absentee"] == "Y", "votetype"] = "absentee"
+                df_history.loc[df_history["fl_early_voting"] == "Y", "votetype"] = "early"
+                df_history.loc[df_history["fl_regular"] == "Y", "votetype"] = "regular"
 
+            df_history["votetype"] = df_history["votetype"].astype(str)
             # Clean the challenged flag, which looks to only be checked
             # if the voter voted absentee
             # NOTE: Assuming empty is not challenged i.e. False
