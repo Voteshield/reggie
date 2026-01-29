@@ -306,7 +306,7 @@ column_aliases:
   text_voter_id: text_registrant_id
   splitprecinct_text_name: precinct_part_text_name
   splitprecinct_text_designation: precinct_part_text_designation
-  date_of_registration: date_of_reg
+  date_of_reg: date_of_registration
   location_text_name: polling_place_text_name
   location_text_address1: polling_place_text_address1
   location_text_address2: polling_place_text_address2
