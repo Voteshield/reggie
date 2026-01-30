@@ -181,6 +181,13 @@ class PreprocessNebraska(Preprocessor):
                 elif ".xlsx" in filename and "donotuse" not in filename:
                     logging.info("Reading Excel Nebraska history code file")
                     history_code_df = pd.read_excel(f["obj"], dtype=str)
+
+        # Oct 2026 file involved some column name changes
+        df.rename(
+            columns=self.config["column_aliases"],
+            inplace=True,
+        )
+
         df[self.config["voter_status"]] = df[
             self.config["voter_status"]
         ].str.replace(" ", "")
