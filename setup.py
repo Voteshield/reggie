@@ -14,7 +14,7 @@ setuptools.setup(
     install_requires=[
         "pandas==2.3.3",
         "click>=7.1.2",
-        "numpy==1.26.4",
+        "numpy==2.4.2",
         "zipfile2>=0.0.12",
         "PyYAML>=5.3.1",
         "boto3>=1.15.12",
