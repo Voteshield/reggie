@@ -297,3 +297,22 @@ ordered_columns:
   - district_vi
   - district_wa
   - district_we
+
+# Some column names changed in Oct 2026.
+# They left us a very nice readme about it.
+column_aliases:
+  # new column name: original column name
+  cde_voter_status: cde_registrant_status
+  text_voter_id: text_registrant_id
+  splitprecinct_text_name: precinct_part_text_name
+  splitprecinct_text_designation: precinct_part_text_designation
+  date_of_reg: date_of_registration
+  location_text_name: polling_place_text_name
+  location_text_address1: polling_place_text_address1
+  location_text_address2: polling_place_text_address2
+  location_text_address3: polling_place_text_address3
+  location_text_address4: polling_place_text_address4
+  location_text_city: polling_place_text_city
+  location_cde_state: polling_place_cde_state
+  location_text_zip5: polling_place_text_zip5
+  location_text_zip4: polling_place_text_zip4
