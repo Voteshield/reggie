@@ -88,6 +88,16 @@ class PreprocessNorthCarolina(Preprocessor):
             if field not in voter_df.columns:
                 voter_df[field] = np.nan
 
+        # In February 2026, NC added 3 new columns:
+        # [hava_id_req, ssn, no_dl_ssn_chkbx]
+        # We will drop them at least temporarilty, so that we can
+        # continue processing files.
+        voter_df = voter_df.drop(columns=[
+            "hava_id_req",
+            "ssn",
+            "no_dl_ssn_chkbx",
+        ], errors="ignore")
+
         if len(voter_df.columns) == len(self.config["ordered_columns"]):
             # Rearrange into original order
             voter_df = voter_df[self.config["ordered_columns"]]
