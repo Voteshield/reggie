@@ -121,9 +121,9 @@ class PreprocessCalifornia(Preprocessor):
 
         # Have to use longer whole string not just suffix because hist will
         # match to voter file
-        voter_file = [f for f in new_files if "vrd" in f["name"].lower()][0]
-        district_file = [f for f in new_files if "pd" in f["name"].lower()][0]
-        history_file = [f for f in new_files if "vph" in f["name"].lower()][0]
+        voter_file = [f for f in new_files if "vrd" in f["name"].split("/")[-1].lower()][0]
+        district_file = [f for f in new_files if "pd" in f["name"].split("/")[-1].lower()][0]
+        history_file = [f for f in new_files if "vph" in f["name"].split("/")[-1].lower()][0]
         print(voter_file)
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
