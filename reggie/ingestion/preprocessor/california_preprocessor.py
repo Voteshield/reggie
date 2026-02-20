@@ -119,11 +119,22 @@ class PreprocessCalifornia(Preprocessor):
         del self.main_file, self.temp_files
         gc.collect()
 
-        # Have to use longer whole string not just suffix because hist will
-        # match to voter file
-        voter_file = [f for f in new_files if "vrd" in f["name"].split("/")[-1].lower()][0]
-        district_file = [f for f in new_files if "pd" in f["name"].split("/")[-1].lower()][0]
-        history_file = [f for f in new_files if "vph" in f["name"].split("/")[-1].lower()][0]
+        # File names structured like
+        # '/CA DATE/PVRDR_2571/2355-348216-59-pvrdr-pd.TXT',
+        # '/CA DATE/PVRDR_2571/2355-348216-59-pvrdr-vrd.TXT',
+        # '/CA DATE/PVRDR_2571/2355-348216-59-pvrdr-vph.TXT'
+        # OR
+        # '/CA DATE/PVRDR_2571/2355-348216-59-pd.TXT',
+        # '/CA DATE/PVRDR_2571/2355-348216-59-vrd.TXT',
+        # '/CA DATE/PVRDR_2571/2355-348216-59-vph.TXT'
+        # Split on the last - to get prevent matching to other areas of this
+        # redundant string
+        voter_file = [f for f in new_files if "vrd" in f["name"].split("-")[-1].lower()][0]
+        district_file = [f for f in new_files if "pd" in f["name"].split("-")[-1].lower()][0]
+        history_file = [f for f in new_files if "vph" in f["name"].split("-")[-1].lower()][0]
+        logging.info(f"voter file: {voter_file}")
+        logging.info(f"district file: {district_file}")
+        logging.info(f"history file: {history_file}")
         temp_voter_id_df = pd.read_csv(
             voter_file["obj"],
             sep="\t",
