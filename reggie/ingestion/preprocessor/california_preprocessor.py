@@ -129,9 +129,31 @@ class PreprocessCalifornia(Preprocessor):
         # '/CA DATE/PVRDR_2571/2355-348216-59-vph.TXT'
         # Split on the last - to get prevent matching to other areas of this
         # redundant string
-        voter_file = [f for f in new_files if "vrd" in f["name"].split("-")[-1].lower()][0]
-        district_file = [f for f in new_files if "pd" in f["name"].split("-")[-1].lower()][0]
-        history_file = [f for f in new_files if "vph" in f["name"].split("-")[-1].lower()][0]
+        # Also can be
+        # '/CA DATE/2355-358809-59-2355-358809-59-2355-348216-59-pvrdr-pd-20260220-1655.TXT'
+        # '/CA DATE/2355-358809-59-2355-358809-59-2355-348216-59-pvrdr-vph-20260220-1655.TXT'
+        # '/CA DATE/2355-358809-59-2355-358809-59-2355-348216-59-pvrdr-vrd-20260220-1655.TXT'
+        
+        def find_files(files, type):
+            for file in files:
+                stripped_file_name = file.split("/")[-1].lower()
+                stripped_file_name = stripped_file_name.replace("pvrdr", "")
+                if type == "voter":
+                    if "vrd" in stripped_file_name:
+                        return file
+                if type == "history":
+                    if "vph" in stripped_file_name:
+                        return file
+                if type == "district":
+                    if "pd" in stripped_file_name:
+                        return file
+            # File found that's not one of the three expected files
+            logging.info(f"extra file found: {file}")
+
+        
+        voter_file = find_files(new_files, "voter")
+        district_file = find_files(new_files, "district")
+        history_file = find_files(new_files, "history")
         logging.info(f"voter file: {voter_file}")
         logging.info(f"district file: {district_file}")
         logging.info(f"history file: {history_file}")
