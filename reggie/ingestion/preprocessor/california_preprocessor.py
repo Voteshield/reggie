@@ -134,17 +134,17 @@ class PreprocessCalifornia(Preprocessor):
         # '/CA DATE/2355-358809-59-2355-358809-59-2355-348216-59-pvrdr-vph-20260220-1655.TXT'
         # '/CA DATE/2355-358809-59-2355-358809-59-2355-348216-59-pvrdr-vrd-20260220-1655.TXT'
         
-        def find_files(files, type):
+        def find_files(files, file_type):
             for file in files:
-                stripped_file_name = file.split("/")[-1].lower()
+                stripped_file_name = file["name"].split("/")[-1].lower()
                 stripped_file_name = stripped_file_name.replace("pvrdr", "")
-                if type == "voter":
+                if file_type == "voter":
                     if "vrd" in stripped_file_name:
                         return file
-                if type == "history":
+                if file_type == "history":
                     if "vph" in stripped_file_name:
                         return file
-                if type == "district":
+                if file_type == "district":
                     if "pd" in stripped_file_name:
                         return file
             # File found that's not one of the three expected files
