@@ -212,6 +212,32 @@ class PreprocessTexas(Preprocessor):
             )
             df_voter.drop(columns=["residential_address"], inplace=True)
 
+            # New files from 2025 Dec and forward sometimes drop
+            # hispanic_surname_flag entirely or use alternative
+            # column "spanish_mailing", i.e. "has the voter requested
+            # mailings in Spanish?"
+            # I will put this into the same column (hispanic_surname_flag)
+            # in our db schema, just so we can keep a record of it.
+            if "spanish_mailing" in df_voter.columns:
+                df_voter.rename(
+                    columns={"spanish_mailing": "hispanic_surname"},
+                    inplace=True,
+                )
+            if "hispanic_surname" not in df_voter.columns:
+                df_voter["hispanic_surname"] = np.nan
+
+            # A single wayward file from 2026 Feb has irregular columns,
+            # so adjust them.
+            if "county_name" in df_voter.columns:
+                df_voter.drop(columns=["county_name"], inplace=True)
+            if "registration_date" in df_voter.columns:
+                df_voter.drop(columns=["registration_date"], inplace=True)
+            if "edr" in df_voter.columns:
+                df_voter.rename(
+                    columns={"edr": "dt_effective_registration"},
+                    inplace=True,
+                )
+
             # Rename other columns back to old names
             df_voter.rename(
                 columns=self.config["column_aliases"],
