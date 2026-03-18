@@ -133,27 +133,37 @@ class PreprocessTexas(Preprocessor):
                 3,
                 6,
             ]
-            have_length = False
             for i in txt_files:
+                # Actually, need to check FWF lengths on each file,
+                # since lengths can be mixed now (as of Feb 2026).
+                # We have old history files with length 686
+                # mixed with new voter files with length 667.
                 file_len = i["obj"].seek(SEEK_END)
                 i["obj"].seek(SEEK_SET)
-                if "count" not in i["name"] and file_len != 0:
+                if ("count" not in i["name"]) and (file_len != 0):
+                    # Check length for every file
+                    line_length = len(i["obj"].readline())
+                    logging.info(
+                        f"File: {i['name']} has line_length {line_length}"
+                    )
+                    if line_length == 686:
+                        widths = widths_one.copy()
+                    elif line_length == 667:
+                        # This is a close variant of the 686 format
+                        widths = widths_one.copy()
+                        # Status code and reg date are flipped
+                        widths[25] = 1
+                        widths[26] = 8
+                    elif line_length == 680:
+                        widths = widths_two.copy()
+                    else:
+                        raise ValueError(
+                            "Width possibilities have changed,"
+                            "new width found: {}".format(line_length)
+                        )
 
-                    if not have_length:
-                        line_length = len(i["obj"].readline())
-                        i["obj"].seek(SEEK_END)
-                        have_length = True
-                        if line_length == 686:
-                            widths = widths_one
-                        elif line_length == 680:
-                            widths = widths_two
-                        else:
-                            raise ValueError(
-                                "Width possibilities have changed,"
-                                "new width found: {}".format(line_length)
-                            )
-                        have_length = True
                     logging.info("Loading file {}".format(i))
+                    i["obj"].seek(SEEK_SET)
                     new_df = pd.read_fwf(i["obj"], widths=widths, header=None)
                     try:
                         new_df.columns = self.config.raw_file_columns()
@@ -165,6 +175,13 @@ class PreprocessTexas(Preprocessor):
                             len(self.config.raw_file_columns()),
                             len(new_df.columns),
                         )
+
+                    # Columns need to change slightly for new line length variant
+                    if line_length == 667:
+                        new_df.rename(columns={"Effective_Date_of_Registration": "Status_Code_new"}, inplace=True)
+                        new_df.rename(columns={"Status_Code": "Effective_Date_of_Registration"}, inplace=True)
+                        new_df.rename(columns={"Status_Code_new": "Status_Code"}, inplace=True)
+
                     if new_df["Election_Date"].head(n=100).isnull().sum() > 75:
                         df_voter = pd.concat(
                             [df_voter, new_df], axis=0, ignore_index=True
