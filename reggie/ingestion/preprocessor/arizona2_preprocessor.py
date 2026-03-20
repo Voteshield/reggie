@@ -130,9 +130,10 @@ class PreprocessArizona2(Preprocessor):
         # However, we need to trigger manual intervention to re-evaluate the situation
         # in 2026, if we have not received better data by then.
         #
-        # As of Jan 2026, moving this date forward; we'll see if we have a new election
-        # in the data by end of March.
-        if date_from_str(self.raw_s3_file) <= "2026-03-31":
+        # Moving this date forward again; the next election in Arizona
+        # is the primary on 2026-07-21. So election cols won't change until
+        # at least then:
+        if date_from_str(self.raw_s3_file) <= "2026-07-21":
             main_df.rename(
                 columns={
                     "EL1": "PRIMARY2022",
