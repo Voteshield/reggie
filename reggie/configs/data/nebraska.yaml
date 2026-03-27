@@ -316,3 +316,6 @@ column_aliases:
   location_cde_state: polling_place_cde_state
   location_text_zip5: polling_place_text_zip5
   location_text_zip4: polling_place_text_zip4
+  # 2026 March - Some more column changes
+  text_voterno: text_registrant_id
+  birth_year: date_of_birth
