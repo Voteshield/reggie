@@ -1,14 +1,13 @@
-# Add notes about the file / formats here.
+# New Mexico
+
+# Weirdest thing about these files is (I think) vote history
+# VH is stored with a column per election (eg MM/DD/YYYY-ELECTION NAME)
+# Voting location data is included if an individual voted in that election
+# Not every election is in every file (but dropped elections are old and/or low turnout)
 
 # Files delivered as 4 csvs in a zip
 # Encoded with UTF-8 BOM so need to use utf-8-sig instead of latin-1
 # Trailing comma on every row creates an unnamed extra column that needs to be dropped
-
-# Voting history stored with a column per election (eg MM/DD/YYYY-ELECTION NAME)
-# Sometimes named like "MM/DD/YYYY-YYYY GENERAL"
-# Absentee/early/in person can be extracted from voting location
-# Relatedly, voting location available but I'm not currently doing anything with it
-# Not sure if they'll drop old election columns from the file after a new election
 
 ###############################
 # State name and abbreviation
@@ -102,15 +101,12 @@ voter_status_inactive:
 # "not on the rolls". This could include e.g. "cancelled", "not registered", "not eligible",
 # and any other statuses that the data scientists say to consider not on the rolls.
 
-#### is this best left empty or commented??
-not_registered_voter_status_set:
-#   - Canceled
-#   - Not_eligible
-#   - Not_registered
+# (NM has no "not registered" statuses, not sure if I handled this properly below)
+not_registered_voter_status_set: []
 
 # The value of the single voter status meaning "cancelled". This should also be listed as
 # part of the "not_registered_voter_status_set" above, but also add it here separately please.
-# voter_status_cancelled: Canceled
+voter_status_cancelled: [] #likewise not sure if this is better commented out or empty
 
 # Add any other voter statuses you observe in the data here, with the naming convention
 # "voter_status_{X}", even if you don't know what they mean. This will ensure they get
@@ -144,6 +140,13 @@ no_party_affiliation:  DTS
 other: OTH
 libertarian: LIB
 green: GRN
+working_families: WFP
+# below aren't currently ballot qualified
+# per https://ballotpedia.org/List_of_political_parties_in_the_United_States
+# not 100% sure I have all the names right
+# better_for_america: BFA
+# freedom: FRE
+# independent_new_mexico: INM
 
 
 
@@ -160,7 +163,7 @@ green: GRN
 # and to the column lists below.
 
 
-###############################
+############################### *I feel like I might have made some mistakes in this section
 # Voting History codes
 
 # If absentee and provisional data exists within the voting history, add the vote type
@@ -191,7 +194,7 @@ green: GRN
 #   exist for primaries).
 #
 absentee_ballot_code: "A"
-#provisional_ballot_code: "'pv'" --- NOT SEEING ANY EVIDENCE OF PROVISIONAL BALLOT DATA
+#provisional_ballot_code: "'pv'" # not seeing any evidence of provisionals
 # This is not actually used in the code, but nice to list the options here just for visibility.
 valid_voting_methods: ['E', 'A', 'P'] # Early, absentee, polling place
 
@@ -201,7 +204,7 @@ valid_voting_methods: ['E', 'A', 'P'] # Early, absentee, polling place
 # This is used for the demographics-based ML algorithm.
 # The only possible options here are: ["age", "gender", "party", "race", "status"].
 demographic_fields_available:
-  - age # going to have to compute this from birth_year?
+  - age # okay if we only have birth year?
   - party
   - gender
   - status
@@ -253,7 +256,6 @@ address_fields:
   - MailingCity
   - MailingState
   - MailingZip
-  - MailingCountry
 
 # This is used in the relatively new add_common_address_features(). This is a feature
 # used to check if removal or deactivations happen to multiple voters in the same
@@ -383,7 +385,9 @@ generated_columns:
   all_history: text[]
   sparse_history: int[]
   votetype_history: text[]
-  #party_history: text[]
+  #party_history: text[] 
+# I'm assuming party_history would be specific to if the VH provides party? Not from other party column?
+
 # Same columns as above, just listed in the order they appear in the final dataframe.
 ordered_generated_columns:
   - all_history

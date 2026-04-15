@@ -37,7 +37,7 @@ class PreprocessNewMexico(Preprocessor):
             if ".csv" in f["name"] and "._" not in f["name"]:
                 temp_df = self.read_csv_count_error_lines(
                     f["obj"],
-                    encoding="utf-8-sig", # problematic UTF-8 BOM, couldn't use latin-1
+                    encoding="utf-8-sig",
                     on_bad_lines="warn",
                 )
                 df = pd.concat([df, temp_df], axis=0)
@@ -46,7 +46,14 @@ class PreprocessNewMexico(Preprocessor):
         # Drop unnamed columns from trailing commas in CSV
         df = df.drop(columns=[c for c in df.columns if "Unnamed" in str(c)])
 
+        # Quick flag that NM isn't sending the exact same election columns in every file
+        # In particular, a few runoffs were dropped in the more recent files
+        # Not sure if this will impact EBNR or other things BUT
+        # I think the impacts will be minimal because VERY few voters (like 1 out of 1.4M)
+        # participated in only a dropped runoff and no other elections
+
         # Detect and separate out election columns (format = "11/03/2020-GENERAL ELECTION") 
+        # Note these change across files (unfortunately)
         date_pattern = re.compile(r"^\d{2}/\d{2}/\d{4}-")
         election_cols = [c for c in df.columns if date_pattern.match(c)]
 
@@ -54,17 +61,17 @@ class PreprocessNewMexico(Preprocessor):
         self.column_check(list(set(df.columns) - set(election_cols)))
 
         # Parse date and election type from a column header string
-        # e.g. "11/03/2020-2020 GENERAL ELECTION" -> (datetime, "general_2020-11-03")
+        # e.g. "11/03/2020-2020 GENERAL ELECTION" -> (datetime, "2020-11-03_general")
         def parse_election_col(col_name):
             date_str, election_name = col_name.split("-", 1)
             dt = datetime.strptime(date_str, "%m/%d/%Y")
-            # Skip extra year if restated in election name
+            # Skip extra year if it gets restated in election name
             words = election_name.strip().lower().split()
             election_type = next((w for w in words if not w.isdigit()), words[0])
-            election_id = "{}_{}".format(election_type, dt.strftime("%Y-%m-%d"))
+            election_id = "{}_{}".format(dt.strftime("%Y-%m-%d"), election_type)
             return dt, election_id
 
-        # Sort election columns ascending by date (oldest first)
+        # Sort election columns ascending by date
         election_cols_sorted = sorted(
             election_cols,
             key=lambda c: datetime.strptime(c.split("-")[0], "%m/%d/%Y"),
@@ -72,12 +79,13 @@ class PreprocessNewMexico(Preprocessor):
         col_to_id = {col: parse_election_col(col)[1] for col in election_cols_sorted}
 
         # Build array_encoding metadata: election_id -> {index, count, date}
+        # "%Y-%m-%d"
         sorted_codes = [col_to_id[c] for c in election_cols_sorted]
         sorted_codes_dict = {
             col_to_id[c]: {
                 "index": i,
                 "count": int(df[c].notna().sum()),
-                "date": c.split("-")[0],
+                "date": datetime.strptime(c.split("-")[0], "%m/%d/%Y").strftime("%Y-%m-%d"),
             }
             for i, c in enumerate(election_cols_sorted)
         }
@@ -94,7 +102,7 @@ class PreprocessNewMexico(Preprocessor):
         hist_df = hist_df[hist_df["vote_value"].str.strip() != ""]
 
         hist_df["election_id"] = hist_df["election_col"].map(col_to_id)
-        # Extract just the code before the first dash (eg E from "E-SANTA FE COUNTY")
+        # Extract just the vote type before the first dash (eg E from "E-SANTA FE COUNTY")
         hist_df["vote_type"] = hist_df["vote_value"].str.split("-").str[0].str.strip()
 
         df = df.set_index(voter_id, drop=False)
@@ -109,7 +117,7 @@ class PreprocessNewMexico(Preprocessor):
         df["sparse_history"] = df["all_history"].map(insert_code_bin)
         df = df.reset_index(drop=True)
 
-        # Drop the raw election columns now that history arrays are built
+        # Drop the raw election columns
         df = df.drop(columns=election_cols)
 
         # Coerce dates, numerics, and strings to standard types
@@ -131,8 +139,17 @@ class PreprocessNewMexico(Preprocessor):
         )
         df = self.config.coerce_strings(df)
 
-        # Normalize district columns to clean integer strings e.g. "1" not "1.0"
+        # Extract district numbers
         for col in ["Congressional", "Legislative", "Senate", "CountyCommissioner"]:
+            df[col] = df[col].apply(
+                lambda x: re.search(r"\d+", str(x)).group()
+                if pd.notna(x) and re.search(r"\d+", str(x))
+                else x
+            )
+            df[col] = df[col].map(ensure_int_string)
+
+        # Strip float artifacts from numeric address fields
+        for col in ["HouseNumber", "UnitNumber", "Zip", "MailingZip"]:
             df[col] = df[col].map(ensure_int_string)
 
         # Verify all locale values in the file are recognized
