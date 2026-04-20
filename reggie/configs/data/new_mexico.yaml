@@ -97,17 +97,6 @@ voter_status_active:
 voter_status_inactive:
   - Inactive
 
-# "not_registered_voter_status_set" is a list of all voter statuses that should be considered
-# "not on the rolls". This could include e.g. "cancelled", "not registered", "not eligible",
-# and any other statuses that the data scientists say to consider not on the rolls.
-
-# (NM has no "not registered" statuses, not sure if I handled this properly below)
-not_registered_voter_status_set: []
-
-# The value of the single voter status meaning "cancelled". This should also be listed as
-# part of the "not_registered_voter_status_set" above, but also add it here separately please.
-voter_status_cancelled: [] #likewise not sure if this is better commented out or empty
-
 # Add any other voter statuses you observe in the data here, with the naming convention
 # "voter_status_{X}", even if you don't know what they mean. This will ensure they get
 # added as features that can be seen on the analysis page.
@@ -249,6 +238,7 @@ address_fields:
   - City
   - State
   - Zip
+# These are being left out since they seem redundant with the individual fields.
 #  - Address
 #  - Address2
   - MailingAddress
