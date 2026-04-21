@@ -35,6 +35,7 @@ class PreprocessNewMexico(Preprocessor):
         df = pd.DataFrame()
         for f in new_files:
             if ".csv" in f["name"] and "._" not in f["name"]:
+                logging.info(f"Reading voter file: {f['name']}")
                 temp_df = self.read_csv_count_error_lines(
                     f["obj"],
                     encoding="utf-8-sig",
@@ -60,15 +61,16 @@ class PreprocessNewMexico(Preprocessor):
         # Verify fixed voter columns match yaml
         self.column_check(list(set(df.columns) - set(election_cols)))
 
-        # Parse date and election type from a column header string
-        # e.g. "11/03/2020-2020 GENERAL ELECTION" -> (datetime, "2020-11-03_general")
+        # Parse date and election name from a column header string
+        # e.g. "06/03/2020-2020 RUNOFF ELECTION" -> (datetime, "2020-06-03_runoff_election")
         def parse_election_col(col_name):
             date_str, election_name = col_name.split("-", 1)
             dt = datetime.strptime(date_str, "%m/%d/%Y")
             # Skip extra year if it gets restated in election name
             words = election_name.strip().lower().split()
-            election_type = next((w for w in words if not w.isdigit()), words[0])
-            election_id = "{}_{}".format(dt.strftime("%Y-%m-%d"), election_type)
+            # Retain all non-numeric words as the full election name
+            election_name = "_".join([w for w in words if not w.isdigit()])
+            election_id = "{}_{}".format(dt.strftime("%Y-%m-%d"), election_name)
             return dt, election_id
 
         # Sort election columns ascending by date
@@ -148,8 +150,8 @@ class PreprocessNewMexico(Preprocessor):
             )
             df[col] = df[col].map(ensure_int_string)
 
-        # Strip float artifacts from numeric address fields
-        for col in ["HouseNumber", "UnitNumber", "Zip", "MailingZip"]:
+        # Strip float artifacts from numeric address fields, and voter ID
+        for col in ["VoterID", "HouseNumber", "UnitNumber", "Zip", "MailingZip"]:
             df[col] = df[col].map(ensure_int_string)
 
         # Verify all locale values in the file are recognized
