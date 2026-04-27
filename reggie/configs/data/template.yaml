@@ -438,3 +438,12 @@ ordered_generated_columns:
 # frontend) that are not being displayed, you probably need to add those feature names
 # as another "apiId" for the equivalent feature in src/config/demographics.js
 
+###############################
+# Note on elections (Ballotpedia) data:
+#
+# When onboarding a new state, you'll also need to populate the <new_state>.elections
+# table. This is a one-time job of re-ingesting the most recently acquired Ballotpedia
+# data. All Ballotpedia data contains all states' elections, they just can't be loaded
+# into the VoteShield database until the new state schema and elections table have been
+# created, so there is a table for it to go into.
+# This can be done by running the vote-cli command "elections-etl".
