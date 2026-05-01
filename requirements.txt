@@ -8,7 +8,7 @@ pandas==2.3.3
 pytest>=6.0.0
 python-slugify>=4.0.1
 PyYAML>=5.3.1
-requests>=2.20.0
+requests>=2.33.1
 xlrd>=1.2.0
 zipfile2>=0.0.12
 chardet>=4.0.0
