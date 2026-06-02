@@ -1,5 +1,5 @@
 boto3>=1.43.1
-bs4>=0.0.1
+bs4>=0.0.2
 click>=7.1.2
 detect_delimiter>=0.1.1
 numpy==1.26.4
