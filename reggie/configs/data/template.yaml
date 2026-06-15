@@ -39,10 +39,16 @@ precinct_identifier: Precinct
 
 birthday_identifier: BirthDate
 
-# This is a newer addition - We need this for EBNR calculations.
-# If the state does not have registration date values,
-# we may need to adjust how we do EBNR there.
+# This is a newer addition - We only need this for
+# removal eligibility (EBNR) calculations.
 registration_date_identifier: RegistrationDate
+# If the state does not have registration date values,
+# or if this state is exempt from the NVRA, or doesn't
+# have other data sufficient to perform EBNR calculations,
+# then you may need to add one or more of the following flags:
+# insufficient_registration_date_for_EBNR: True
+# insufficient_status_for_EBNR: True
+# insufficient_history_for_EBNR: True
 
 # Only use this if state has a "permanent absentee" type column.
 # This is not very common though.
@@ -432,3 +438,12 @@ ordered_generated_columns:
 # frontend) that are not being displayed, you probably need to add those feature names
 # as another "apiId" for the equivalent feature in src/config/demographics.js
 
+###############################
+# Note on elections (Ballotpedia) data:
+#
+# When onboarding a new state, you'll also need to populate the <new_state>.elections
+# table. This is a one-time job of re-ingesting the most recently acquired Ballotpedia
+# data. All Ballotpedia data contains all states' elections, they just can't be loaded
+# into the VoteShield database until the new state schema and elections table have been
+# created, so there is a table for it to go into.
+# This can be done by running the vote-cli command "elections-etl".

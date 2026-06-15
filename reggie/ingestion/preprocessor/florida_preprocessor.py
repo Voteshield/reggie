@@ -46,6 +46,16 @@ class PreprocessFlorida(Preprocessor):
         del self.main_file, self.temp_files
         gc.collect()
 
+        # In 2026-04-14 file, Florida added 2 apparently useless
+        # folders full of extra county text files
+        # (details are in the state-by-state processing doc.)
+        # I am filtering out the files in these folders entirely.
+        new_files = [
+            f for f in new_files
+            if ("verificationfiles" not in f["name"].lower())
+            and ("processedfiles" not in f["name"].lower())
+        ]
+
         vote_history_files = []
         voter_files = []
         for i in new_files:

@@ -1,0 +1,305 @@
+# New Mexico
+
+# Weirdest thing about these files is (I think) vote history
+# VH is stored with a column per election (eg MM/DD/YYYY-ELECTION NAME)
+# Voting location data is included if an individual voted in that election
+# Not every election is in every file (but dropped elections are old and/or low turnout)
+
+# Files delivered as 4 csvs in a zip
+# Encoded with UTF-8 BOM so need to use utf-8-sig instead of latin-1
+# Trailing comma on every row creates an unnamed extra column that needs to be dropped
+
+###############################
+# State name and abbreviation
+state: new_mexico
+abbreviation: nm
+
+# Not used but good to have a record of
+file_type: csv
+source: boe
+file_class: voter_file
+
+# I don't believe this is used anywhere
+format:
+  separate_hist: false
+  columnar_elections: true 
+  hist_election_rows: false 
+  segmented_files: true
+
+# Used in some cases
+has_headers: YES
+
+# Used in "file_check" during raw file processing
+expected_number_of_files: 4
+
+
+###############################
+# Standard column names
+
+voter_id: VoterID
+
+county_identifier: County
+primary_locale_identifier: County
+# Whether or not the primary locale values are numeric
+numeric_primary_locale: false
+
+precinct_identifier: PrecinctPart
+
+birthday_identifier: DOB
+
+# This is a newer addition - We only need this for
+# removal eligibility (EBNR) calculations.
+registration_date_identifier: RegDate
+
+
+###############################
+# The date format or date formats used in the file,
+# particularly in the regular date columns, e.g. the formats
+# seen in the birth_date, registration_date, etc columns.
+date_format:
+  - '%m/%d/%Y'
+  - '%Y'
+
+
+###############################
+# The column that has voter status.
+voter_status: Status
+
+# The possible values of the voter status column:
+
+# "voter_status_active" is a list of all voter statuses that should be considered "active"
+# voters. This could include e.g. "active", "active_military",
+# "active_federal_elections_only", etc.
+voter_status_active:
+  - Active
+
+# "voter_status_inactive" is a list of all voter statuses that should be considered "inactive"
+# voters. This could include e.g. "inactive", "challenged", and any other statuses that the
+# data scientists say to consider "inactive".
+voter_status_inactive:
+  - Inactive
+
+
+###############################
+# The column that has party information.
+party_identifier: Party
+
+# The possible values of the party column:
+
+# These are the most important three:
+democratic_party: DEM
+republican_party: REP
+no_party_affiliation:  DTS
+
+# Other parties can be added at your discretion, if they seem prevalent enough in the data.
+other: OTH
+libertarian: LIB
+green: GRN
+working_families: WFP
+# below aren't currently ballot qualified
+# per https://ballotpedia.org/List_of_political_parties_in_the_United_States
+# not 100% sure I have all the names right
+# better_for_america: BFA
+# freedom: FRE
+# independent_new_mexico: INM
+
+
+###############################
+# Voting History codes
+absentee_ballot_code: "A"
+# provisional_ballot_code: None - not seeing any evidence of provisionals
+
+# This is not actually used in the code, but nice to list the options here just for visibility.
+valid_voting_methods: ['E', 'A', 'P'] # Early, absentee, polling place
+
+# Voting History features available (handled on the Inspector side):
+#
+# YES TO DATES
+# get_participation() - You can turn this on for any state that has voting history with DATES.
+#
+# YES TO VOTE HISTORY
+# get_local_engagement() - You can turn this on for any state that has voting history at all.
+#
+# YES TO VOTE TYPES (E A P)
+# get_votetype_from_dataframe() - You can turn this on for any state that includes vote types
+#   with its voting history. You will need to create a "votetype_history" column in the
+#   final dataframe, with a list of vote type codes over all elections for each voter.
+#
+# NO PARTISANSHIP IN PRIMARY DATA
+# get_partisanship_from_dataframe() - You can turn this on for any state that includes
+#   party data with its voting history (usually only for the primaries). You will need to
+#   create a "party_history" column in the final dataframe, with a list of party codes
+#   over all elections for each voter (codes may be null for general elections and only
+#   exist for primaries).
+
+
+###############################
+# A list of which demographics columns are available in this state.
+# This is used for the demographics-based ML algorithm.
+# The only possible options here are: ["age", "gender", "party", "race", "status"].
+demographic_fields_available:
+  - age
+  - party
+  - gender
+  - status
+
+###############################
+# This is the short list of columns that we should match on when doing "secondary
+# matching" between removal and registration groups at the same date. The standard fields
+# we use are First Name, Last Name (NOT Middle Name), and Birth Date or Birth Year. If
+# your state does not have Birth Date / Birth Year available, it is probably inadvisable
+# to do this matching at all, so please leave this key out of your yaml entirely.
+match_fields:
+  - LastName
+  - FirstName
+  - DOB
+
+# Used to define the compound change_type "name" changes.
+name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+
+# This is used for matching duplicates in create_dupes_custom_population()
+# vote-cli function.
+standard_name_fields:
+  - LastName
+  - FirstName
+  - MiddleName
+
+# Used to define the compound change_type "address" changes.
+# List all columns you want to be included in "address" change groups.
+# This generally includes all residential AND mail address fields, if available.
+address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - City
+  - State
+  - Zip
+# These are being left out since they seem redundant with the individual fields.
+#  - Address
+#  - Address2
+  - MailingAddress
+  - MailingAddress2
+  - MailingCity
+  - MailingState
+  - MailingZip
+
+# This is used in the relatively new add_common_address_features(). This is a feature
+# used to check if removal or deactivations happen to multiple voters in the same
+# apartement building. This should include the house/building number and all other
+# street & town information but NOT the apartment or unit number.
+street_address_fields:
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - City
+
+
+columns:
+    VoterID: text
+    RegDate: date
+    DOB: date
+    LastName: text
+    FirstName: text
+    MiddleName: text
+    Suffix: text
+    Gender: text
+    Status: text
+    County: text
+    RegType: text
+    HouseNumber: text
+    StreetPrefix: text
+    StreetName: text
+    StreetType: text
+    StreetSuffix: text
+    UnitType: text
+    UnitNumber: text
+    Address: text
+    Address2: text
+    City: text
+    State: text
+    Zip: text
+    MailingAddress: text
+    MailingAddress2: text
+    MailingCity: text
+    MailingState: text
+    MailingZip: text
+    Party: text
+    PrecinctPart: text
+    Congressional: text
+    CountyCommissioner: text
+    DistrictAttorneyJudicialDistrict: text
+    EducationCommission: text
+    JudicialDistrict: text
+    Legislative: text
+    Magistrate: text
+    Municipal: text
+    Councilor: text
+    Senate: text
+    TelephoneNum: text
+
+
+ordered_columns:
+  - VoterID
+  - RegDate
+  - DOB
+  - LastName
+  - FirstName
+  - MiddleName
+  - Suffix
+  - Gender
+  - Status
+  - County
+  - RegType
+  - HouseNumber
+  - StreetPrefix
+  - StreetName
+  - StreetType
+  - StreetSuffix
+  - UnitType
+  - UnitNumber
+  - Address
+  - Address2
+  - City
+  - State
+  - Zip
+  - MailingAddress
+  - MailingAddress2
+  - MailingCity
+  - MailingState
+  - MailingZip
+  - Party
+  - PrecinctPart
+  - Congressional
+  - CountyCommissioner
+  - DistrictAttorneyJudicialDistrict
+  - EducationCommission
+  - JudicialDistrict
+  - Legislative
+  - Magistrate
+  - Municipal
+  - Councilor
+  - Senate
+  - TelephoneNum
+
+
+# History Columns
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  votetype_history: text[]
+
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - votetype_history
