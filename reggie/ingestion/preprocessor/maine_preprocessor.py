@@ -104,11 +104,14 @@ class PreprocessMaine(Preprocessor):
         cancelled_df = pd.DataFrame()
         hist_df = pd.DataFrame()
         for file in new_files:
-            if "voter.txt" in file["name"].lower():  # needs extension
+            if ".html" in file["name"].lower():
+                continue
+            elif "voter.txt" in file["name"].lower() or ("a&i" and "partycampaignusevoterfile") in file["name"].lower(): 
                 logging.info(f"voter file found: {file['name']}")
                 voter_df = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
+                voter_df.rename(columns=self.config["rename_columns"], inplace=True)
                 voter_df_shape_before = voter_df.shape
                 voter_df.dropna(subset=["VOTER ID"], inplace=True)
                 voter_df_shape_after = voter_df.shape
@@ -121,9 +124,13 @@ class PreprocessMaine(Preprocessor):
                 logging.info(
                     f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN county values"
                 )
+                
+                #As of June 2026, there are no more reason codes in Maine, 
+                # The other missing columns are: 
+                if "REASON" not in voter_df.columns:
+                    voter_df["REASON"] = np.NAN
             elif (
                 "history" in file["name"].lower()
-                and ".html" not in file["name"].lower()
             ):
                 # Maine Voter History seems to come one file per election,
                 # Sometimes they have a history report html file that we skip
@@ -133,7 +140,7 @@ class PreprocessMaine(Preprocessor):
                 )
                 logging.info(f"concatenating {file['name']}")
                 hist_df = pd.concat([hist_df, new_hist])
-            elif "cancelled" in file["name"].lower():
+            elif "cancelled" or "cxl" in file["name"].lower():
                 # Note: the cancelled file does not have a county column
                 logging.info(f"cancelled file found: {file['name']}")
 
