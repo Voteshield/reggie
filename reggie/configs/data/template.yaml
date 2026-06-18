@@ -252,33 +252,33 @@ street_address_fields:
 # unless you have a good reason, default to making these text too, and then double checking
 # that the text is interpreted correctly in our system, e.g. county "4" not "4.0".
 columns:
-    RegistrantID: int
-    RegistrationDate: date
-    EffectiveDateofChange: date
-    BirthDate: date
-    LastName: text
-    FirstName: text
-    MiddleName: text
-    Suffix: text
-    Status: text
-    StatusReason: text
-    County: text
-    HouseNumber: text
-    StreetPrefix: text
-    StreetName: text
-    StreetType: text
-    StreetSuffix: text
-    UnitType: text
-    UnitNumber: text
-    City: text
-    MailingAddress: text
-    MailingCity: text
-    MailingState: text
-    MailingZip: text
-    MailingCountry: text
-    Party: text
-    PEVL: text
-    Precinct: text
+  RegistrantID: int
+  RegistrationDate: date
+  EffectiveDateofChange: date
+  BirthDate: date
+  LastName: text
+  FirstName: text
+  MiddleName: text
+  Suffix: text
+  Status: text
+  StatusReason: text
+  County: text
+  HouseNumber: text
+  StreetPrefix: text
+  StreetName: text
+  StreetType: text
+  StreetSuffix: text
+  UnitType: text
+  UnitNumber: text
+  City: text
+  MailingAddress: text
+  MailingCity: text
+  MailingState: text
+  MailingZip: text
+  MailingCountry: text
+  Party: text
+  PEVL: text
+  Precinct: text
 # Same columns as above, just listed in the order they appear in the file.
 ordered_columns:
   - RegistrantID
