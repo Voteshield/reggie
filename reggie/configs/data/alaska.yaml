@@ -26,7 +26,7 @@ primary_locale_identifier: STATE_HOUSE_DISTRICT
 numeric_primary_locale: true
 precinct_identifier: PRECINCT
 
-birthday_identifier: BIRTHDAY   # no birth dates in Alaska - this is a dummy column
+birthday_identifier: BIRTH_DATE   # no birth dates in Alaska - this is a dummy column
 registration_date_identifier: REG_DATE
 
 date_format: '%m/%d/%Y'
@@ -105,31 +105,13 @@ address_fields:
   - MAILING_ZIP
   - MAILING_COUNTRY
 
-
-gender_codes:
-  Male: 'M'
-  Female: 'F'
-  Unidentified: 'U'
-
-
-# This is used in the relatively new add_common_address_features(). This is a feature
-# used to check if removal or deactivations happen to multiple voters in the same
-# apartement building. This should include the house/building number and all other
-# street & town information but NOT the apartment or unit number.
 street_address_fields:
   - RESIDENCE ADDRESS
   - RESIDENCE CITY
 
-# Whatever columns you get in the voter file (minus voting history information, we are going
-# to reformat and add that later). Also, whatever data types they should be in our postgres
-# tables. Most fields should be "text". Dates should be "date". * Sometimes * voter ID or
-# county ID should be an int, e.g. if we want to automatically ignore leading zeros. But
-# unless you have a good reason, default to making these text too, and then double checking
-# that the text is interpreted correctly in our system, e.g. county "4" not "4.0".
 columns:
   UN: text
   PARTY: text
-  # DP: text - split into:
   STATE_HOUSE_DISTRICT: text
   PRECINCT: text
   LAST_NAME: text
@@ -154,44 +136,12 @@ columns:
   GENDER: text
   CC: text
   STATUS: text
-  BIRTHDAY: text  # dummy column we added
-
-
-
-  VH1: text
-  VH2: text
-  VH3: text
-  VH4: text
-  VH5: text
-  VH6: text
-  VH7: text
-  VH8: text
-  VH9: text
-  VH10: text
-  VH11: text
-  VH12: text
-  VH13: text
-  VH14: text
-  VH15: text
-  VH16: text
-
-
-inactive voters also have:
-  CONDITION_DATE: text  (need to add the "_")
-  CC: text
-
-
-(not AK:)
-  BirthDate: date
-  Status: text
-  County: text
-  Party: text
+  BIRTH_DATE: text  # dummy column we added
 
 ordered_columns:
   - UN
   - PARTY
-  #- DP
-  - HOUSE_DISTRICT
+  - STATE_HOUSE_DISTRICT
   - PRECINCT
   - LAST_NAME
   - FIRST_NAME
@@ -199,6 +149,7 @@ ordered_columns:
   - SUFFIX_NAME
   - ASCENSION
   - REG_DATE
+  - CONDITION_DATE
   - ORG_REG_DATE
   - DIST_DATE
   - RESIDENCE_ADDRESS
@@ -212,23 +163,7 @@ ordered_columns:
   - MAILING_ZIP
   - MAILING_COUNTRY
   - GENDER
-  - VH1
-  - VH2
-  - VH3
-  - VH4
-  - VH5
-  - VH6
-  - VH7
-  - VH8
-  - VH9
-  - VH10
-  - VH11
-  - VH12
-  - VH13
-  - VH14
-  - VH15
-  - VH16
-
+  - CC
 
 # History Columns
 # You should consolidate voting history data into a few standard columns with lists of

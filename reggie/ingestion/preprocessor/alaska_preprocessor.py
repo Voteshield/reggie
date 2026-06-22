@@ -18,6 +18,18 @@ import gc
 import json
 
 
+# CVC TODO in preprocessor:
+- no party -> change N > U
+- column alias to new style columns (plus add _ in inactive's "condition date", "cc")
+- add 2 inactive columns, if inactive file is not present
+- split up D/P into 2 columns
+- add dummy "birthday" column
+- add a literal status column and assign values based on the "inactive" file
+
+- when processing first 2 files, determine if its ok that "county_identifier" is None
+
+
+
 class PreprocessAlaska(Preprocessor):
     def __init__(self, raw_s3_file, config_file, force_date=None, **kwargs):
 
