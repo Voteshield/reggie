@@ -1,3 +1,4 @@
+from .alaska_preprocessor import PreprocessAlaska
 from .arizona_preprocessor import PreprocessArizona
 from .arizona2_preprocessor import PreprocessArizona2
 from .california_preprocessor import PreprocessCalifornia
@@ -41,6 +42,7 @@ def state_router(
     **kwargs
 ):
     routes = {
+        "alaska": PreprocessAlaska,
         "arizona": PreprocessArizona,
         "arizona2": PreprocessArizona2,
         "california": PreprocessCalifornia,

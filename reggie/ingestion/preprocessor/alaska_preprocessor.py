@@ -1,33 +1,19 @@
+import datetime
+import json
+import logging
+
+import numpy as np
+import pandas as pd
+
+from datetime import datetime
+from dateutil import parser
+from io import StringIO
+
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
-from dateutil import parser
-from reggie.ingestion.utils import (
-    MissingNumColumnsError,
-    format_column_name,
-)
-import logging
-import pandas as pd
-import datetime
-from io import StringIO, BytesIO, SEEK_END, SEEK_SET
-import numpy as np
-from datetime import datetime
-import gc
-import json
-
-
-# CVC TODO in preprocessor:
-- no party -> change N > U
-- column alias to new style columns (plus add _ in inactive's "condition date", "cc")
-- add 2 inactive columns, if inactive file is not present
-- split up D/P into 2 columns
-- add dummy "birthday" column
-- add a literal status column and assign values based on the "inactive" file
-
-- when processing first 2 files, determine if its ok that "county_identifier" is None
-
 
 
 class PreprocessAlaska(Preprocessor):
@@ -50,12 +36,82 @@ class PreprocessAlaska(Preprocessor):
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(self.main_file, compression="unzip")
-        voter_file = [n for n in new_files if "voter" in n["name"].lower()][0]
 
-        df_voter = pd.read_csv(voter_file["obj"], dtype=str).drop("UN", axis=1)
-        df_hist = df_voter.loc[
-            :, [self.config["voter_id"]] + self.config["election_columns"]
+        # Filter for csv files only
+        new_files = [
+            n for n in new_files if ".csv" in n["name"].lower()
         ]
+
+        # Inactive voter file always contains the word "inactive" somewhere
+        inactive_file_list = [
+            n for n in new_files if "inactive" in n["name"].lower()
+        ]
+
+        # In all earlier packages (and some later ones), inactive file is not present
+        if len(inactive_file_list) == 0:
+            inactive_file = None
+            # Active voter file should be the only csv
+            active_file = new_files[0]
+            logging.info(
+                f"Found active voter file: {active_voter_file}"
+                f"and no inactive voter file."
+            )
+        else:
+            inactive_file = inactive_file_list[0]
+            # Active voter file should be the only other csv
+            active_file = [
+                n for n in new_files if n != inactive_file["name"]
+            ][0]
+            logging.info(
+                f"Found active voter file: {active_voter_file}"
+                f"and inactive voter file: {inactive_voter_file}"
+            )
+
+        df_voter = pd.read_csv(active_file["obj"])
+        df_voter["STATUS"] = "active"
+
+        if inactive_file:
+            df_inactive = pd.read_csv(inactive_file["obj"])
+            df_inactive["STATUS"] = "inactive"
+            df_voter = pd.concat([df_voter, df_inactive], axis=0)
+            df_voter.reset_index(drop=True, inplace=True)
+
+        # Normalize: sometimes column names are missing underscore
+        # or are otherwise irregular from file to file
+        for c in df_voter.columns:
+            df_voter.rename(
+                columns={c: c.replace(" ", "_")},
+                inplace=True
+        )
+        df_voter.rename(
+            columns=self.config["column_aliases"],
+            inplace=True,
+        )
+
+        # Add dummy birth date column, to prevent errors
+        df_voter["BIRTH_DATE"] = None
+
+        # If no inactive columns, add them, to match 2-file version
+        for c in ["CONDITION_DATE", "CC"]:
+            if c not in df_voter.columns:
+                df[c] = None
+
+        # Split out "state house district" and "precinct" into
+        # 2 separate columns.
+        # They are contained together in "DP" column.
+        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["DP"].str.split("-")[0][0]
+        df_voter["PRECINCT"] = df_voter["DP"].str.split("-")[0][1]
+
+        # Party codes N and U both correspond to "no party",
+        # so consolidate them both as U.
+        df_voter["PARTY"] = df_voter["PARTY"].map(
+            lambda x: "U" if x == "N" else x
+        )
+
+
+
+        # todo finish...
+
 
         # --- handling the vote history file --- #
 
