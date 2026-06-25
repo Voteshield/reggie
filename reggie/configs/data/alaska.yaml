@@ -21,7 +21,7 @@ format:
 
 voter_id: ASCENSION
 county_identifier: None   # no county data in Alaska
-primary_locale_identifier: STATE_HOUSE_DISTRICT
+primary_locale_identifier: BOROUGH
 numeric_primary_locale: true
 precinct_identifier: PRECINCT
 
@@ -126,6 +126,7 @@ columns:
   CC: text          # "condition (reason) code", only present in inactive file
   STATUS: text      # column VoteShield adds, based on which file a voter was in
   BIRTH_DATE: text  # dummy column VoteShield adds
+  BOROUGH: text      # VoteShield will derive and use boroughs and census areas as primary locale
 
 ordered_columns:
   - UN
@@ -155,6 +156,7 @@ ordered_columns:
   - CC
   - STATUS
   - BIRTH_DATE
+  - BOROUGH
 
 generated_columns:
   all_history: text[]
