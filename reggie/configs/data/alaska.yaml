@@ -170,5 +170,340 @@ ordered_generated_columns:
 
 # Some files have slight column name variations.
 column_aliases:
-    'D/P': DP
-    'ASCENSION #': ASCENSION
+  'D/P': DP
+  'ASCENSION #': ASCENSION
+
+# Alaska voter file does not contain a good option for primary locale.
+# So, map city of residence to either borough (19 total) or census area (11 total)
+cities_to_boroughs:
+  adak: aleutians_west
+  akhiok: kodiak_island
+  akiachak: bethel
+  akiak: bethel
+  akutan: aleutians_east
+  alakanuk: kusilvak
+  alatna: yukon_koyukuk
+  aleknagik: dillingham
+  'alexander creek': matanuska_susitna
+  allakaket: yukon_koyukuk
+  ambler: northwest_arctic
+  amchitka: aleutians_west
+  'anaktuvuk pass': north_slope
+  'anchor point': kenai_peninsula
+  anchorage: anchorage
+  anderson: denali
+  angoon: hoonah_angoon
+  aniak: bethel
+  anvik: yukon_koyukuk
+  'arctic village': yukon_koyukuk
+  atka: aleutians_west
+  atmautluak: bethel
+  atqasuk: north_slope
+  barrow: north_slope
+  beaver: yukon_koyukuk
+  beluga: kenai_peninsula
+  bethel: bethel
+  bettles: yukon_koyukuk
+  'bettles field': yukon_koyukuk
+  'big lake': matanuska_susitna
+  'birch creek': yukon_koyukuk
+  'bird creek': anchorage
+  boundary: southeast_fairbanks
+  'brevig mission': nome
+  buckland: northwest_arctic
+  cantwell: denali
+  central: yukon_koyukuk
+  chalkyitsik: yukon_koyukuk
+  'chandalar lake': yukon_koyukuk
+  chefornak: bethel
+  'chenega bay': chugach
+  chevak: kusilvak
+  chickaloon: matanuska_susitna
+  chicken: southeast_fairbanks
+  chignik: lake_and_peninsula
+  'chignik bay': lake_and_peninsula
+  'chignik lagoon': lake_and_peninsula
+  'chignik lake': lake_and_peninsula
+  chiniak: kodiak_island
+  chisana: copper_river
+  chistochina: copper_river
+  chitina: copper_river
+  chuathbaluk: bethel
+  chugiak: anchorage
+  circle: yukon_koyukuk
+  'circle city': yukon_koyukuk
+  'clam gulch': kenai_peninsula
+  'clarks point': dillingham
+  clear: denali
+  'clear afs': denali
+  'clear sfs': denali
+  'coffman cove': prince_of_wales_hyder
+  'cold bay': aleutians_east
+  coldfoot: yukon_koyukuk
+  colville: north_slope
+  'cooper landing': kenai_peninsula
+  'copper center': copper_river
+  cordova: chugach
+  council: nome
+  craig: prince_of_wales_hyder
+  'crooked creek': bethel
+  'cube cove': hoonah_angoon
+  deadhorse: north_slope
+  deering: northwest_arctic
+  'delta junction': southeast_fairbanks
+  'denali national park': denali
+  dillingham: dillingham
+  diomede: nome
+  'dot lake': southeast_fairbanks
+  douglas: juneau
+  'dutch harbor': aleutians_west
+  eagle: southeast_fairbanks
+  'eagle river': anchorage
+  'eareckson as': aleutians_west
+  'edna bay': prince_of_wales_hyder
+  eek: bethel
+  egegik: lake_and_peninsula
+  'eielson afb': fairbanks_north_star
+  ekwok: dillingham
+  'elfin cove': hoonah_angoon
+  elim: nome
+  ellamar: chugach
+  'elmendorf afb': anchorage
+  emmonak: kusilvak
+  ester: fairbanks_north_star
+  'esther island': chugach
+  eureka: matanuska_susitna
+  evansville: yukon_koyukuk
+  'excursion inlet': haines
+  fairbanks: fairbanks_north_star
+  'false pass': aleutians_east
+  ferry: denali
+  flat: yukon_koyukuk
+  'fort greely': southeast_fairbanks
+  'fort richardson': anchorage
+  'fort wainwright': fairbanks_north_star
+  'fort yukon': yukon_koyukuk
+  'fortuna ledge': kusilvak
+  'funter bay': hoonah_angoon
+  gakona: copper_river
+  galena: yukon_koyukuk
+  gambell: nome
+  girdwood: anchorage
+  glennallen: copper_river
+  golovin: nome
+  'goodnews bay': bethel
+  grayling: yukon_koyukuk
+  gulkana: copper_river
+  gustavus: hoonah_angoon
+  haines: haines
+  'halibut cove': kenai_peninsula
+  'hawk inlet': juneau
+  'hawkins island': chugach
+  healy: denali
+  'healy lake': southeast_fairbanks
+  'hobart bay': petersburg
+  hollis: prince_of_wales_hyder
+  'holy cross': yukon_koyukuk
+  homer: kenai_peninsula
+  hoonah: hoonah_angoon
+  'hooper bay': kusilvak
+  hope: kenai_peninsula
+  houston: matanuska_susitna
+  hughes: yukon_koyukuk
+  huslia: yukon_koyukuk
+  hydaburg: prince_of_wales_hyder
+  hyder: prince_of_wales_hyder
+  igiugig: lake_and_peninsula
+  iliamna: lake_and_peninsula
+  indian: anchorage
+  'indian mountain afs': yukon_koyukuk
+  'ivanof bay': lake_and_peninsula
+  jber: anchorage
+  juneau: juneau
+  'kachemak bay': kenai_peninsula
+  kake: prince_of_wales_hyder
+  kaktovik: north_slope
+  kalskag: bethel
+  kaltag: yukon_koyukuk
+  karluk: kodiak_island
+  kasaan: prince_of_wales_hyder
+  kasigluk: bethel
+  kasilof: kenai_peninsula
+  kenai: kenai_peninsula
+  kennicott: copper_river
+  'kenny lake': copper_river
+  ketchikan: ketchikan_gateway
+  kiana: northwest_arctic
+  'king cove': aleutians_east
+  'king salmon': bristol_bay
+  kipnuk: bethel
+  kivalina: northwest_arctic
+  klawock: prince_of_wales_hyder
+  klukwan: hoonah_angoon
+  kobuk: northwest_arctic
+  kodiak: kodiak_island
+  kokhanok: lake_and_peninsula
+  koliganek: dillingham
+  kongiganak: bethel
+  kotlik: kusilvak
+  kotzebue: northwest_arctic
+  koyuk: nome
+  koyukuk: yukon_koyukuk
+  kupreanof: petersburg
+  'kupreanof island': petersburg
+  kwethluk: bethel
+  kwigillingok: bethel
+  'lake louise': matanuska_susitna
+  'lake minchumina': yukon_koyukuk
+  'larsen bay': kodiak_island
+  levelock: lake_and_peninsula
+  'lime village': bethel
+  livengood: yukon_koyukuk
+  'lower kalskag': bethel
+  'main bay': chugach
+  'mankomen lake': copper_river
+  'manley hot springs': yukon_koyukuk
+  manokotak: dillingham
+  marshall: kusilvak
+  'may creek': copper_river
+  mccarthy: copper_river
+  mcgrath: yukon_koyukuk
+  mekoryuk: bethel
+  mentasta: copper_river
+  'mentasta lake': copper_river
+  metlakatla: prince_of_wales_hyder
+  'meyers chuck': wrangell
+  minto: yukon_koyukuk
+  'moose pass': kenai_peninsula
+  'mountain village': kusilvak
+  nabesna: copper_river
+  naknek: bristol_bay
+  nanwalek: kenai_peninsula
+  napakiak: bethel
+  napaskiak: bethel
+  naukati: prince_of_wales_hyder
+  'nelson lagoon': aleutians_east
+  nenana: yukon_koyukuk
+  'new stuyahok': dillingham
+  newhalen: lake_and_peninsula
+  newtok: bethel
+  nightmute: bethel
+  nikiski: kenai_peninsula
+  nikolai: yukon_koyukuk
+  nikolski: aleutians_west
+  ninilchik: kenai_peninsula
+  noatak: northwest_arctic
+  nome: nome
+  nondalton: lake_and_peninsula
+  noorvik: northwest_arctic
+  'north pole': fairbanks_north_star
+  northway: southeast_fairbanks
+  nuiqsut: north_slope
+  nulato: yukon_koyukuk
+  'nunam iqua': kusilvak
+  nunapitchuk: bethel
+  'old harbor': kodiak_island
+  oscarville: bethel
+  ouzinkie: kodiak_island
+  palmer: matanuska_susitna
+  paxson: copper_river
+  'pedro bay': lake_and_peninsula
+  pelican: hoonah_angoon
+  perryville: lake_and_peninsula
+  petersburg: petersburg
+  'pilot point': lake_and_peninsula
+  'pilot station': kusilvak
+  'pitkas point': kusilvak
+  platinum: bethel
+  'point baker': prince_of_wales_hyder
+  'point hope': north_slope
+  'point lay': north_slope
+  'port alexander': prince_of_wales_hyder
+  'port alsworth': lake_and_peninsula
+  'port armstrong': sitka
+  'port fidalgo': chugach
+  'port graham': kenai_peninsula
+  'port heiden': lake_and_peninsula
+  'port lions': kodiak_island
+  'port moller': aleutians_east
+  'port protection': prince_of_wales_hyder
+  portage: anchorage
+  'portage creek': dillingham
+  'prudhoe bay': north_slope
+  'puget bay': kenai_peninsula
+  quinhagak: bethel
+  rampart: yukon_koyukuk
+  'red devil': bethel
+  ruby: yukon_koyukuk
+  'russian mission': kusilvak
+  salcha: fairbanks_north_star
+  'sand point': aleutians_east
+  savoonga: nome
+  saxman: ketchikan_gateway
+  'scammon bay': kusilvak
+  selawik: northwest_arctic
+  seldovia: kenai_peninsula
+  seward: kenai_peninsula
+  shageluk: yukon_koyukuk
+  shaktoolik: nome
+  'sheep mountain': matanuska_susitna
+  'shemya afs': aleutians_west
+  shishmaref: nome
+  shungnak: northwest_arctic
+  sitka: sitka
+  skagway: skagway
+  skwentna: matanuska_susitna
+  slana: copper_river
+  sleetmute: bethel
+  soldotna: kenai_peninsula
+  'south naknek': bristol_bay
+  'st george island': aleutians_west
+  'st marys': kusilvak
+  'st michael': nome
+  'st paul': aleutians_west
+  'st paul island': aleutians_west
+  stebbins: nome
+  sterling: kenai_peninsula
+  'stevens village': yukon_koyukuk
+  'stony river': bethel
+  sutton: matanuska_susitna
+  takotna: yukon_koyukuk
+  talkeetna: matanuska_susitna
+  tanacross: southeast_fairbanks
+  tanana: yukon_koyukuk
+  tatitlek: chugach
+  tazlina: copper_river
+  teller: nome
+  'tenakee springs': hoonah_angoon
+  tetlin: southeast_fairbanks
+  'thorne bay': prince_of_wales_hyder
+  'tin city': nome
+  togiak: dillingham
+  tok: southeast_fairbanks
+  'toksook bay': bethel
+  tonsina: copper_river
+  'trapper creek': matanuska_susitna
+  tuluksak: bethel
+  tuntutuliak: bethel
+  tununak: bethel
+  'twin hills': dillingham
+  'two rivers': fairbanks_north_star
+  tyonek: kenai_peninsula
+  ugashik: lake_and_peninsula
+  'unakwik inlet': chugach
+  unalakleet: nome
+  unalaska: aleutians_west
+  'upper kalskag': bethel
+  utqiagvik: north_slope
+  valdez: chugach
+  venetie: yukon_koyukuk
+  wainwright: north_slope
+  wales: nome
+  wasilla: matanuska_susitna
+  'whale pass': prince_of_wales_hyder
+  'white mountain': nome
+  whittier: chugach
+  willow: matanuska_susitna
+  wiseman: yukon_koyukuk
+  wrangell: wrangell
+  yakutat: yakutat
