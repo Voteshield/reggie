@@ -423,8 +423,8 @@ ordered_generated_columns:
 # (to src/data/counties or the correct locale type).
 #
 # For "demographicGroupsAvailable" options are:
-#   ['age', 'party', 'status', (and soon to be EBNR_status)].
-#   If your state is missing any of these big 3, remove it from this list.
+#   ['age', 'party', 'status', 'eligibility'].
+#   If your state is missing any of these, remove it from this list.
 #
 # For "changeTypesUnavailable", you will probably need to add "early_voter" unless you
 # have permanent absentee data.
