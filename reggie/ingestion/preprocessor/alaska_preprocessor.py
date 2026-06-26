@@ -115,10 +115,13 @@ class PreprocessAlaska(Preprocessor):
         # 2 separate columns.
         # They are contained together in "DP" column.
         df_voter["STATE_HOUSE_DISTRICT"] = df_voter["DP"].str.split("-")[0][0]
-        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["STATE_HOUSE_DISTRICT"].map(lambda x: str(int(x)))
+        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["STATE_HOUSE_DISTRICT"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
         df_voter["PRECINCT"] = df_voter["DP"].str.split("-")[0][1]
-        df_voter["PRECINCT"] = df_voter["PRECINCT"].map(lambda x: str(int(x)))
+        df_voter["PRECINCT"] = df_voter["PRECINCT"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
         df_voter.drop(columns=["DP"], inplace=True)
+
+        # Ensure zips are ints
+        df_voter["RESIDENCE_ZIP"] = df_voter["RESIDENCE_ZIP"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
 
         # Party codes N and U both correspond to "no party",
         # so consolidate them both as U.
@@ -132,53 +135,62 @@ class PreprocessAlaska(Preprocessor):
         # Check that we have ended up with all the expected columns
         self.column_check(list(set(df_voter.columns) - set(hist_columns)))
 
-        def collect_history_codes(column_data, election_code=True):
+        # Collect unique elections and their counts,
+        # while populating vote history arrays
+        elections = {}
+        def collect_vote_history(column_data, election_code=True):
             codes = []
             for c in column_data:
-                if (c is not np.nan) and (c is not None):
+                if (not pd.isna(c)) and (c is not None):
                     # Make election codes slightly more reader-friendly
                     if election_code:
-                        elec = c.split()[0]
-                        codes.append("20" + elec[:2] + "_" + elec[2:])
+                        election = c.split()[0]
+                        election = "20" + election[:2] + "_" + election[2:]
+                        codes.append(election)
+                        if election in elections:
+                            elections[election]["count"] += 1
+                        else:
+                            elections[election] = {}
+                            elections[election]["name"] = election
+                            elections[election]["count"] = 1
                     else:
                         codes.append(c.split()[1])
             return codes
 
         df_voter["all_history"] = df_voter[hist_columns].apply(
-            lambda x: collect_history_codes(x, election_code=True),
+            lambda x: collect_vote_history(x, election_code=True),
             axis=1,
         )
         df_voter["votetype_history"] = df_voter[hist_columns].apply(
-            lambda x: collect_history_codes(x, election_code=False),
+            lambda x: collect_vote_history(x, election_code=False),
             axis=1,
         )
+        df_voter.drop(columns=hist_columns, inplace=True)
 
+        # Alaska doesn't provide full election dates, so best we can do is guess:
+        # Generals are in early November: Assign Nov 4
+        # Alaska primaries are always in mid-August: Assign Aug 15
+        # Other local elections we really have no good way of guessing, so let's put them
+        # in the middle of the year: Assign July 1
+        for election in elections:
+            if election.split("_")[1] == "GENR":
+                elections[election]["date"] = election.split("_")[0] + "-11-04"
+            elif election.split("_")[1] == "PRIM":
+                elections[election]["date"] = election.split("_")[0] + "-08-15"
+            else:
+                elections[election]["date"] = election.split("_")[0] + "-07-01"
 
-        # Alaska primary is always mid-August, so assign Aug 15 for primary dates
-        # All other elections, we have no way of knowing, so stick them in the middle of the year ? July 1 ?
-
-        elections, counts = np.unique(
-            df_hist.loc[:, ["all_history", "election_year"]].apply(
-                tuple, axis=1
-            ),
-            return_counts=True,
-        )
-
+        elections = list(elections.values())
+        sorted_elections = sorted(elections, key=lambda x: x["date"], reverse=True)
         sorted_elections_dict = {
-            k[0]: {"index": i, "count": int(counts[i]), "date": int(k[1])}
-            for i, k in enumerate(elections)
+            elec["name"]: {"index": idx, "count": int(elec["count"]), "date": elec["date"]}
+            for idx, elec in enumerate(sorted_elections)
         }
+        sorted_elections = [e["name"] for e in sorted_elections]
 
-
-
-        sorted_elections = list(sorted_elections_dict.keys())
-
-        df_hist.loc[:, "sparse_history"] = df_hist.all_history.map(
+        df_hist.loc[:, "sparse_history"] = df_voter["all_history"].map(
             lambda x: sorted_elections_dict[x]["index"]
         )
-
-
-
 
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_numeric(df_voter)
@@ -189,10 +201,10 @@ class PreprocessAlaska(Preprocessor):
             city = row["RESIDENCE_CITY"]
             # There are ~50k null residence cities, but almost no null mailing cities.
             # Fallback to mailing city if residence city is unusable
-            if (row["RESIDENCE_CITY"] is np.nan) or (row["RESIDENCE_CITY"] is None) or (
+            if (pd.isna(row["RESIDENCE_CITY"])) or (row["RESIDENCE_CITY"] is None) or (
                 row["RESIDENCE_CITY"] in ['federal', 'fedeal', 'overseas', '-']):
                 city = row["MAILING_CITY"]
-            if (city is np.nan) or (city is None) or (
+            if (pd.isna(city)) or (city is None) or (
                 city in ['federal', 'fedeal', 'overseas', '-']):
                 return np.nan
             if city in self.config["cities_to_boroughs"]:
@@ -221,8 +233,8 @@ class PreprocessAlaska(Preprocessor):
 
         self.meta = {
             "message": "alaska_{}".format(datetime.now().isoformat()),
-            "array_encoding": json.dumps(sorted_codes_dict),
-            "array_decoding": json.dumps(sorted_codes),
+            "array_encoding": json.dumps(sorted_elections_dict),
+            "array_decoding": json.dumps(sorted_elections),
         }
 
         self.processed_file = FileItem(
