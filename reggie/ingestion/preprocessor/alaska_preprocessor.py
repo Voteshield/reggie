@@ -211,7 +211,7 @@ class PreprocessAlaska(Preprocessor):
                 return self.config["cities_to_boroughs"][city]
             else:
                 raise UnknownCityError(
-                    f"Encountered unknown city ("{city}") in Alaska, "
+                    f"Encountered unknown city '{city}' in Alaska, "
                     f"that is not associated with a known borough or census area. "
                     f"Please add {city} to the cities_to_boroughs dictionary in alaska.yaml, "
                     f"and then reprocess this file."
