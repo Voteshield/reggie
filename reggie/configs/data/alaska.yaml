@@ -22,6 +22,7 @@ format:
 voter_id: ASCENSION
 county_identifier: None   # no county data in Alaska
 primary_locale_identifier: BOROUGH
+primary_locale_type: borough
 numeric_primary_locale: false
 precinct_identifier: PRECINCT
 
