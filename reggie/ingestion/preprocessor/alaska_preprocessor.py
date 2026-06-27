@@ -120,7 +120,8 @@ class PreprocessAlaska(Preprocessor):
         df_voter["PRECINCT"] = df_voter["PRECINCT"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
         df_voter.drop(columns=["DP"], inplace=True)
 
-        # Ensure zips are ints
+        # Ensure voter ID and zips are also ints
+        df_voter["ASCENSION"] = df_voter["ASCENSION"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
         df_voter["RESIDENCE_ZIP"] = df_voter["RESIDENCE_ZIP"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
 
         # Party codes N and U both correspond to "no party",
@@ -188,8 +189,8 @@ class PreprocessAlaska(Preprocessor):
         }
         sorted_elections = [e["name"] for e in sorted_elections]
 
-        df_hist.loc[:, "sparse_history"] = df_voter["all_history"].map(
-            lambda x: sorted_elections_dict[x]["index"]
+        df_voter["sparse_history"] = df_voter["all_history"].map(
+            lambda x: [sorted_elections_dict[e]["index"] for e in x]
         )
 
         df_voter = self.config.coerce_strings(df_voter)
@@ -221,7 +222,7 @@ class PreprocessAlaska(Preprocessor):
             borough_lookup, axis=1
         )
 
-        # Reorder voter columns
+        # Reorder voter columns into canonical order
         df_voter = [
             self.config(["ordered_columns"]) + self.config(
                 ["ordered_generated_columns"]

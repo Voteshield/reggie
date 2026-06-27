@@ -51,16 +51,16 @@ libertarian: L
 green: G
 
 # Voting History
-absentee_ballot_code: "'a'"
-provisional_ballot_code: "'q'"
+absentee_ballot_code: "A"
+provisional_ballot_code: "Q"
 # This is not actually used in the code,
 # but nice to list the options here just for visibility
 valid_voting_methods: [
-  'p', # in person at polls
-  'e', # early ballot
-  'a', # absentee ballot
-  'q', # questioned ballot (equivalent to provisional)
-  'm', # voted by mail
+  'P', # in person at polls
+  'E', # early ballot
+  'A', # absentee ballot
+  'Q', # questioned ballot (equivalent to provisional)
+  'M', # voted by mail
 ]
 
 demographic_fields_available:
