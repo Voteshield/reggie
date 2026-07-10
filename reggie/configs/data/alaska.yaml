@@ -20,9 +20,10 @@ format:
 # expected_number_of_files: 1 or 2
 
 voter_id: ASCENSION
-county_identifier: None   # no county data in Alaska
+# consider boroughs and census areas as the county equivalent
+county_identifier: BOROUGH
 primary_locale_identifier: BOROUGH
-primary_locale_type: borough
+primary_locale_type: county
 numeric_primary_locale: false
 precinct_identifier: PRECINCT
 
