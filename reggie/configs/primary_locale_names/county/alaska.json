@@ -28,5 +28,6 @@
   { "name": "Southeast Fairbanks Census Area", "id": "southeast_fairbanks" },
   { "name": "City and Borough of Wrangell", "id": "wrangell" },
   { "name": "City and Borough of Yakutat", "id": "yakutat" },
-  { "name": "Yukon-Koyukuk Census Area", "id": "yukon_koyukuk" }
+  { "name": "Yukon-Koyukuk Census Area", "id": "yukon_koyukuk" },
+  { "name": "Unknown", "id": "unknown" }
 ]

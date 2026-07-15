@@ -114,15 +114,21 @@ class PreprocessAlaska(Preprocessor):
         # Split out "state house district" and "precinct" into
         # 2 separate columns.
         # They are contained together in "DP" column.
-        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["DP"].str.split("-")[0][0]
-        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["STATE_HOUSE_DISTRICT"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
-        df_voter["PRECINCT"] = df_voter["DP"].str.split("-")[0][1]
-        df_voter["PRECINCT"] = df_voter["PRECINCT"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
+        df_voter["STATE_HOUSE_DISTRICT"] = df_voter["DP"].map(
+            lambda x: str(int(x.split("-")[0])) if not pd.isna(x) else x
+        )
+        df_voter["PRECINCT"] = df_voter["DP"].map(
+            lambda x: str(int(x.split("-")[1])) if not pd.isna(x) else x
+        )
         df_voter.drop(columns=["DP"], inplace=True)
 
         # Ensure voter ID and zips are also ints
-        df_voter["ASCENSION"] = df_voter["ASCENSION"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
-        df_voter["RESIDENCE_ZIP"] = df_voter["RESIDENCE_ZIP"].map(lambda x: str(int(x)) if not pd.isna(x) else x)
+        df_voter["ASCENSION"] = df_voter["ASCENSION"].map(
+            lambda x: str(int(x)) if not pd.isna(x) else x
+        )
+        df_voter["RESIDENCE_ZIP"] = df_voter["RESIDENCE_ZIP"].map(
+            lambda x: str(int(x)) if not pd.isna(x) else x
+        )
 
         # Party codes N and U both correspond to "no party",
         # so consolidate them both as U.
@@ -193,24 +199,37 @@ class PreprocessAlaska(Preprocessor):
             lambda x: [sorted_elections_dict[e]["index"] for e in x]
         )
 
+        # coerce_strings is resulting in literal "nan", which doesn't appear
+        # to happen in any other state. I'm hesitant to change the general behavior
+        # for other states which seem to be working ok, so I'll just prevent it
+        # here by replacing np.nan with empty string.
+        text_fields = [
+            c for c, v in self.config.data["columns"].items()
+            if v == "text" or "char" in v
+        ]
+        for f in text_fields:
+            df_voter[f] = df_voter[f].fillna("")
+
         df_voter = self.config.coerce_strings(df_voter)
         df_voter = self.config.coerce_numeric(df_voter)
         df_voter = self.config.coerce_dates(df_voter)
 
         # Map cities to boroughs / census areas:
-        def borough_lookup(row):
-            city = row["RESIDENCE_CITY"]
-            # There are ~50k null residence cities, but almost no null mailing cities.
-            # Fallback to mailing city if residence city is unusable
-            if (pd.isna(row["RESIDENCE_CITY"])) or (row["RESIDENCE_CITY"] is None) or (
-                row["RESIDENCE_CITY"] in ['federal', 'fedeal', 'overseas', '-']):
-                city = row["MAILING_CITY"]
-            if (pd.isna(city)) or (city is None) or (
-                city in ['federal', 'fedeal', 'overseas', '-']):
-                return np.nan
+        def borough_lookup(city):
+            # There are sometimes up to ~80k null residence cities,
+            # due to residence addresses being marked as "private".
+            # Also, sometimes city is listed as "federal" or "overseas".
+            # In all of these cases, we assign the voter to fictional borough, "unknown".
+            if pd.isna(city) or (city is None) or (
+                city in ["federal", "fedeal", "overseas", "-", ""]):
+                return "unknown"
+
             if city in self.config["cities_to_boroughs"]:
                 return self.config["cities_to_boroughs"][city]
             else:
+                # City set seems well-normalized. If a new city appears,
+                # we probably need someone to take a look and
+                # add it to the borough lookup, or possibly assign it to "unknown".
                 raise UnknownCityError(
                     f"Encountered unknown city '{city}' in Alaska, "
                     f"that is not associated with a known borough or census area. "
@@ -218,9 +237,7 @@ class PreprocessAlaska(Preprocessor):
                     f"and then reprocess this file."
                 )
 
-        df_voter["BOROUGH"] = df_voter[["RESIDENCE_CITY", "MAILING_CITY"]].apply(
-            borough_lookup, axis=1
-        )
+        df_voter["BOROUGH"] = df_voter["RESIDENCE_CITY"].map(borough_lookup)
 
         # Reorder voter columns into canonical order
         df_voter = [

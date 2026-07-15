@@ -176,7 +176,11 @@ column_aliases:
   'ASCENSION #': ASCENSION
 
 # Alaska voter file does not contain a good option for primary locale.
-# So, map city of residence to either borough (19 total) or census area (11 total)
+# So, map city of residence to either borough (19 total) or census area (11 total).
+# In some cases, residence address is either null (private)
+# or listed as "federal" or "overseas".
+# In these cases, we cannot place the voter in a borough,
+# so we assign them to a fictional borough, "unknown".
 cities_to_boroughs:
   adak: aleutians_west
   akhiok: kodiak_island
