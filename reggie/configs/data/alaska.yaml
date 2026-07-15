@@ -128,7 +128,7 @@ columns:
   CC: text          # "condition (reason) code", only present in inactive file
   STATUS: text      # column VoteShield adds, based on which file a voter was in
   BIRTH_DATE: text  # dummy column VoteShield adds
-  BOROUGH: text      # VoteShield will derive and use boroughs and census areas as primary locale
+  BOROUGH: text     # VoteShield will derive and use boroughs and census areas as primary locale
 
 ordered_columns:
   - UN

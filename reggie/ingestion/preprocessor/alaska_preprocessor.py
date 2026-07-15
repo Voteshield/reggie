@@ -64,12 +64,27 @@ class PreprocessAlaska(Preprocessor):
             inactive_file = inactive_file_list[0]
             # Active voter file should be the only other csv
             active_file = [
-                n for n in new_files if n != inactive_file["name"]
+                n for n in new_files if n["name"] != inactive_file["name"]
             ][0]
             logging.info(
                 f"Found active voter file: {active_file['name']}, "
                 f"and inactive voter file: {inactive_file['name']}"
             )
+
+        def normalize_headers(df):
+            # Normalize: sometimes column names are missing an
+            # underscore or are otherwise irregular from file to file,
+            # including varying between the active and inactive file.
+            df.rename(
+                columns=self.config["column_aliases"],
+                inplace=True,
+            )
+            for c in df.columns:
+                df.rename(
+                    columns={c: c.replace(" ", "_")},
+                    inplace=True
+            )
+            return df
 
         df_voter = self.read_csv_count_error_lines(
             active_file["obj"],
@@ -77,6 +92,7 @@ class PreprocessAlaska(Preprocessor):
             on_bad_lines="warn",
         )
         df_voter["STATUS"] = "active"
+        df_voter = normalize_headers(df_voter)
 
         if inactive_file:
             df_inactive = self.read_csv_count_error_lines(
@@ -85,20 +101,9 @@ class PreprocessAlaska(Preprocessor):
                 on_bad_lines="warn",
             )
             df_inactive["STATUS"] = "inactive"
+            df_inactive = normalize_headers(df_inactive)
             df_voter = pd.concat([df_voter, df_inactive], axis=0)
             df_voter.reset_index(drop=True, inplace=True)
-
-        # Normalize: sometimes column names are missing underscore
-        # or are otherwise irregular from file to file
-        df_voter.rename(
-            columns=self.config["column_aliases"],
-            inplace=True,
-        )
-        for c in df_voter.columns:
-            df_voter.rename(
-                columns={c: c.replace(" ", "_")},
-                inplace=True
-        )
 
         # Add dummy birth date column, to prevent errors
         df_voter["BIRTH_DATE"] = None
@@ -240,10 +245,8 @@ class PreprocessAlaska(Preprocessor):
         df_voter["BOROUGH"] = df_voter["RESIDENCE_CITY"].map(borough_lookup)
 
         # Reorder voter columns into canonical order
-        df_voter = [
-            self.config(["ordered_columns"]) + self.config(
-                ["ordered_generated_columns"]
-            )
+        df_voter = df_voter[
+            self.config["ordered_columns"] + self.config["ordered_generated_columns"]
         ]
 
         # Set voter ID as index
