@@ -226,7 +226,7 @@ class PreprocessAlaska(Preprocessor):
             # Also, sometimes city is listed as "federal" or "overseas".
             # In all of these cases, we assign the voter to fictional borough, "unknown".
             if pd.isna(city) or (city is None) or (
-                city in ["federal", "fedeal", "overseas", "-", ""]):
+                city in ["federal", "fedeal", "feder", "overseas", "-", ""]):
                 return "unknown"
 
             if city in self.config["cities_to_boroughs"]:
