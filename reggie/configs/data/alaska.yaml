@@ -110,10 +110,10 @@ columns:
   MIDDLE_NAME: text
   SUFFIX_NAME: text
   ASCENSION: text
-  REG_DATE: date
+  REG_DATE: date  # most recent registration date
   CONDITION_DATE: date  # only present in inactive file
-  ORG_REG_DATE: date
-  DIST_DATE: date
+  ORG_REG_DATE: date  # original registration date
+  DIST_DATE: date  # date voter registered in current house district
   RESIDENCE_ADDRESS: text
   RESIDENCE_CITY: text
   RESIDENCE_ZIP: text
@@ -127,7 +127,7 @@ columns:
   GENDER: text
   CC: text          # "condition (reason) code", only present in inactive file
   STATUS: text      # column VoteShield adds, based on which file a voter was in
-  BIRTH_DATE: text  # dummy column VoteShield adds
+  BIRTH_DATE: text  # dummy column VoteShield adds, since birth dates are not provided
   BOROUGH: text     # VoteShield will derive and use boroughs and census areas as primary locale
 
 ordered_columns:
