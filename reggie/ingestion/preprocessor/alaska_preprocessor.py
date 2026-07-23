@@ -111,14 +111,13 @@ class PreprocessAlaska(Preprocessor):
         # Add borough column, which we will populate with a lookup later
         df_voter["BOROUGH"] = None
 
-        # If no inactive columns, add them, to match 2-file version
-        for c in ["CONDITION_DATE", "CC"]:
+        # If no inactive columns (condition date, CC),
+        # add them, to match 2-file version.
+        # Also, very occasionally, the "UN" or "REG_DATE"
+        # columns are just missing.
+        for c in ["CONDITION_DATE", "CC", "UN", "REG_DATE"]:
             if c not in df_voter.columns:
                 df_voter[c] = None
-
-        # Very occasionally, the "UN" column is missing
-        if "UN" not in df_voter.columns:
-            df_voter["UN"] = None
 
         # Split out "state house district" and "precinct" into
         # 2 separate columns.
