@@ -116,6 +116,10 @@ class PreprocessAlaska(Preprocessor):
             if c not in df_voter.columns:
                 df_voter[c] = None
 
+        # Very occasionally, the "UN" column is missing
+        if "UN" not in df_voter.columns:
+            df_voter["UN"] = None
+
         # Split out "state house district" and "precinct" into
         # 2 separate columns.
         # They are contained together in "DP" column.
