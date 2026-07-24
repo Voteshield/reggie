@@ -177,19 +177,26 @@ class PreprocessAlaska(Preprocessor):
             codes = []
             for c in column_data:
                 if (not pd.isna(c)) and (c is not None):
-                    # Make election codes slightly more reader-friendly
-                    if election_code:
-                        election = c.split()[0]
-                        election = "20" + election[:2] + "_" + election[2:]
-                        codes.append(election)
-                        if election in elections:
-                            elections[election]["count"] += 1
+                    parts = c.split()
+                    # All voting history data should have 2 parts
+                    # separated by a space, e.g. "24GENR P".
+                    # If there aren't 2 parts, then data in this row
+                    # has probably gotten mis-aligned, so don't attempt
+                    # to interpret it.
+                    if len(parts) == 2:
+                        # Make election codes slightly more reader-friendly
+                        if election_code:
+                            election = parts[0]
+                            election = "20" + election[:2] + "_" + election[2:]
+                            codes.append(election)
+                            if election in elections:
+                                elections[election]["count"] += 1
+                            else:
+                                elections[election] = {}
+                                elections[election]["name"] = election
+                                elections[election]["count"] = 1
                         else:
-                            elections[election] = {}
-                            elections[election]["name"] = election
-                            elections[election]["count"] = 1
-                    else:
-                        codes.append(c.split()[1])
+                            codes.append(parts[1])
             return codes
 
         df_voter["all_history"] = df_voter[hist_columns].apply(
