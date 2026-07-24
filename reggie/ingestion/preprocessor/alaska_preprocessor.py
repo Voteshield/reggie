@@ -86,20 +86,40 @@ class PreprocessAlaska(Preprocessor):
             )
             return df
 
-        df_voter = self.read_csv_count_error_lines(
-            active_file["obj"],
-            sep=",",
-            on_bad_lines="warn",
-        )
+        try:
+            df_voter = self.read_csv_count_error_lines(
+                active_file["obj"],
+                sep=",",
+                on_bad_lines="warn",
+            )
+        except UnicodeDecodeError:
+            # After July 2022, files are sometimes
+            # encoded with something other than utf-8
+            active_file["obj"].seek(0)
+            df_voter = self.read_csv_count_error_lines(
+                active_file["obj"],
+                sep=",",
+                on_bad_lines="warn",
+                encoding="latin-1",
+            )
         df_voter["STATUS"] = "active"
         df_voter = normalize_headers(df_voter)
 
         if inactive_file:
-            df_inactive = self.read_csv_count_error_lines(
-                inactive_file["obj"],
-                sep=",",
-                on_bad_lines="warn",
-            )
+            try:
+                df_inactive = self.read_csv_count_error_lines(
+                    inactive_file["obj"],
+                    sep=",",
+                    on_bad_lines="warn",
+                )
+            except UnicodeDecodeError:
+                inactive_file["obj"].seek(0)
+                df_inactive = self.read_csv_count_error_lines(
+                    inactive_file["obj"],
+                    sep=",",
+                    on_bad_lines="warn",
+                    encoding="latin-1",
+                )
             df_inactive["STATUS"] = "inactive"
             df_inactive = normalize_headers(df_inactive)
             df_voter = pd.concat([df_voter, df_inactive], axis=0)
