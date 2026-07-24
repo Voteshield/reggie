@@ -50,6 +50,12 @@ republican_party: R
 no_party_affiliation: U
 libertarian: L
 green: G
+# Other party codes:
+# A = Alaskan Independence Party
+# C = Alaska Constitution Party
+# V = Veterans Party of Alaska
+# X = Alaska America Party
+# W = UCES’ Clowns Party
 
 # Voting History
 absentee_ballot_code: "A"
