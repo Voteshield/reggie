@@ -100,6 +100,12 @@ street_address_fields:
   - RESIDENCE ADDRESS
   - RESIDENCE CITY
 
+# Because alaska active and inactive file in the same package
+# are sometimes collected days apart from each other,
+# there is a possibility of being slightly higher duplicate
+# voters than in other states (up to 3%)
+max_duplicate_voters: 3.0
+
 columns:
   UN: text
   PARTY: text
