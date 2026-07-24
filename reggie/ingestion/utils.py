@@ -81,6 +81,13 @@ class InvalidDataError(Exception):
     pass
 
 
+class UnknownCityError(Exception):
+    """
+    For the case of a new city in Alaska, without a known borough / census area.
+    """
+    pass
+
+
 def generate_s3_key(file_class, state, source, download_date, file_type,
                     compression=None, testing=False):
     return "{}/{}/{}/{}.{}{}".format(file_class, state,
