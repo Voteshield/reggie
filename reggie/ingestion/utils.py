@@ -8,7 +8,8 @@ from botocore.exceptions import ClientError
 
 from reggie.configs.configs import Config
 from reggie.reggie_constants import META_FILE_PREFIX, NULL_CHAR, \
-    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX
+    PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX, \
+    ELIGIBILITY_FILE_PREFIX
 
 s3 = boto3.resource("s3")
 
@@ -155,9 +156,13 @@ def get_s3_uploads(state, file_class, source, s3_bucket, testing=False):
     :return:
     """
     assert(file_class in [PROCESSED_FILE_PREFIX, RAW_FILE_PREFIX, MODIFICATION_FILE_PREFIX,
-                          META_FILE_PREFIX])
+                          META_FILE_PREFIX, ELIGIBILITY_FILE_PREFIX])
     if not testing:
-        prefix = "{}/{}/{}".format(file_class, state, source)
+        # eligibility parquet files don't include source in prefix
+        if file_class == ELIGIBILITY_FILE_PREFIX:
+            prefix = f"{file_class}/{state}"
+        else:
+            prefix = "{}/{}/{}".format(file_class, state, source)
     else:
         prefix = "testing/{}/{}/".format(file_class, state)
     keys = [a for a in s3.Bucket(s3_bucket).objects.filter(Prefix=prefix)
