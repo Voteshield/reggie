@@ -262,7 +262,7 @@ class PreprocessTexas(Preprocessor):
             # In Aug 2026 file, seems to be some systematic extra
             # internal space in the column "mail_street_name"
             if "mail_street_name" in df_voter.columns:
-                df["mail_street_name"] = df["mail_street_name"].str.split().str.join(" ")
+                df_voter["mail_street_name"] = df_voter["mail_street_name"].str.split().str.join(" ")
 
             # Rename other columns back to old names
             df_voter.rename(
