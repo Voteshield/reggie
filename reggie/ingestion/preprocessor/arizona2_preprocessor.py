@@ -20,6 +20,7 @@ HISTORY_COLUMN_REGEX = re.compile(
     flags=re.I,
 )
 YEAR_REGEX = re.compile(r"\d{4}")
+ELECTION_TYPE_REGEX = re.compile(r"^(GENERAL|PRIMARY)(\d{4})$")
 
 
 class PreprocessArizona2(Preprocessor):
@@ -179,6 +180,17 @@ class PreprocessArizona2(Preprocessor):
             # Try manual matching to known elections
             if col_name in self.config["election_dates"]:
                 return self.config["election_dates"][col_name]
+            # For elections in the future where exact dates have not
+            # been put in the arizona yaml yet, use approximate dates
+            # based on election type.
+            # Generals assumed to be in early Nov (Nov 4).
+            # Primaries assumed to be mid/late July (July 21) going forward, as per this report:
+            # https://www.mohave.gov/news-notices/posts/arizona-has-a-new-2026-primary-election-date/
+            d = ELECTION_TYPE_REGEX.match(col_name)
+            if d is not None:
+                if d.group(1) == "GENERAL":
+                    return f"11/04/{d.group(2)}"
+                return f"07/21/{d.group(2)}"
             # Default placeholder otherwise is just Jan 1
             d = YEAR_REGEX.search(col_name)
             if d is not None:
