@@ -219,15 +219,19 @@ class PreprocessTexas(Preprocessor):
             if df_hist.empty:
                 df_hist = pd.DataFrame(columns=self.config["hist_columns"])
 
-            # Convert single address string back to multiple fields
-            parsed_addresses = df_voter["residential_address"].map(
-                self.parse_and_map_address
-            )
-            df_voter = pd.concat(
-                [df_voter, pd.DataFrame(parsed_addresses.tolist())],
-                axis=1,
-            )
-            df_voter.drop(columns=["residential_address"], inplace=True)
+            df_voter.columns = df_voter.columns.str.lower()
+
+            # Convert single address string back to multiple fields,
+            # in files that have combined "residential_address"
+            if "residential_address" in df_voter.columns:
+                parsed_addresses = df_voter["residential_address"].map(
+                    self.parse_and_map_address
+                )
+                df_voter = pd.concat(
+                    [df_voter, pd.DataFrame(parsed_addresses.tolist())],
+                    axis=1,
+                )
+                df_voter.drop(columns=["residential_address"], inplace=True)
 
             # New files from 2025 Dec and forward sometimes drop
             # hispanic_surname_flag entirely or use alternative
@@ -255,6 +259,11 @@ class PreprocessTexas(Preprocessor):
                     inplace=True,
                 )
 
+            # In Aug 2026 file, seems to be some systematic extra
+            # internal space in the column "mail_street_name"
+            if "mail_street_name" in df_voter.columns:
+                df_voter["mail_street_name"] = df_voter["mail_street_name"].str.split().str.join(" ")
+
             # Rename other columns back to old names
             df_voter.rename(
                 columns=self.config["column_aliases"],
@@ -272,7 +281,8 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_State",
                 "Mailing_Zipcode",
             ]:
-                df_voter[col] = np.nan
+                if col not in df_voter.columns:
+                    df_voter[col] = np.nan
 
             # Make sure precinct is int, to match existing data
             def int_precincts(x):

@@ -521,3 +521,18 @@ column_aliases:
     cd_status: Status_Code
     dt_effective_registration: Effective_Date_of_Registration
     hispanic_surname: Hispanic_Surname_Flag
+    # Yet another set of column renames, Aug 2026
+    tx_street_number: Permanent_House_Number
+    tx_designator: Permanent_Designator
+    pre_direction: Permanent_Directional_Prefix
+    street_name: Permanent_Street_Name
+    street_type: Permanent_Street_Type
+    post_direction: Permanent_Directional_Suffix
+    cd_unit_type: Permanent_Unit_Type
+    tx_unit: Permanent_Unit_Number
+    ad_city: Permanent_City
+    tx_zip5: Permanent_Zipcode
+    mail_street_name: Mailing_Address_1
+    mail_ad_city: Mailing_City
+    mail_cd_state: Mailing_State
+    mail_ad_zip5: Mailing_Zipcode

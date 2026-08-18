@@ -202,6 +202,12 @@ class PreprocessGeorgia(Preprocessor):
             df_voters = self.reconcile_columns(df_voters, self.config["columns"])
             df_voters["Race_desc"] = df_voters["Race"]
 
+            # A null voter registration number converted them to floats, so force back to ints
+            df_voters.dropna(subset=["Registration_Number"], inplace=True)
+            df_voters["Registration_Number"] = df_voters["Registration_Number"].map(
+                lambda x: int(x)
+            )
+
             # Convert county back to numbers to match existing system
             county_dict = self.config.primary_locale_names[self.config.primary_locale_type]
             county_dict = {v.lower(): str(int(k)) for k, v in county_dict.items()}
