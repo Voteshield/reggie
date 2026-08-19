@@ -104,6 +104,7 @@ hist_columns:
 cancelled_columns:
   Town Name: REG TOWN
   Id_Voter: VOTER ID
+  VOTER_REC_NUM: Voter ID # changed 07-16-2026
   Status: STATUS
   Last Name: LAST NAME
   First Name: FIRST NAME
@@ -282,7 +283,14 @@ rename_columns:
   VOTER_STATUS: STATUS
   W-P: WP
   REG_DATE: DT ACCEPT # No longer do we have DT_EFFECT, it seems no more status change date either
-
+#  DT_STATUS_CHG: DT_CHG # New column name in 2026-07-13
+  DT_CHG: DT CHG
+  DT_STATUS_CHG: DT STATUS CHG
+  O_MAIL_COUNTRY: MAIL COUNTRY
+  MAIL_ADD_LINE2: MAIL ST NAME2
+  ELIG_DATE: DT EFFECT
+  MAIL_ZIP4: MAIL ZIP4
+  DES: DESIGNATE
 county_codes:
   Androscoggin: 01and
   Aroostook: 02aro

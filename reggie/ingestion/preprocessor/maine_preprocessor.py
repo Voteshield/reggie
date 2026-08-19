@@ -60,7 +60,6 @@ class PreprocessMaine(Preprocessor):
             voter_df_intersection = voters_df[
                 voters_df[self.config["voter_id"]].isin(intersetion_ids)
             ][[self.config["voter_id"], "DT CHG"]]
-
             # rename date cancelled to avoid the confusing _x _y merge
             cancelled_df_intersection.rename(
                 columns={"DT CHG": "DT CHG CANCELLED"}, inplace=True
@@ -103,15 +102,27 @@ class PreprocessMaine(Preprocessor):
         voter_df = pd.DataFrame()
         cancelled_df = pd.DataFrame()
         hist_df = pd.DataFrame()
+        voter_file_filenames = ["voter.txt", "partycampaignusevoterfile"]
+        cancelled_file_filenames = ["cxl", "cxld", "cancelled"]
         for file in new_files:
             if ".html" in file["name"].lower():
                 continue
-            elif "voter.txt" in file["name"].lower() or ("a&i" and "partycampaignusevoterfile") in file["name"].lower(): 
+            elif any(
+                file_name in file["name"].lower()
+                for file_name in voter_file_filenames
+            ) and not (
+                any(
+                    file_name in file["name"].lower()
+                    for file_name in cancelled_file_filenames
+                )
+            ):
                 logging.info(f"voter file found: {file['name']}")
                 voter_df = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
-                voter_df.rename(columns=self.config["rename_columns"], inplace=True)
+                voter_df.rename(
+                    columns=self.config["rename_columns"], inplace=True
+                )
                 voter_df_shape_before = voter_df.shape
                 voter_df.dropna(subset=["VOTER ID"], inplace=True)
                 voter_df_shape_after = voter_df.shape
@@ -124,14 +135,12 @@ class PreprocessMaine(Preprocessor):
                 logging.info(
                     f"Dropped {voter_df_shape_before[0] - voter_df_shape_after[0]} rows due to NaN county values"
                 )
-                
-                #As of June 2026, there are no more reason codes in Maine, 
-                # The other missing columns are: 
+
+                # As of June 2026, there are no more reason codes in Maine,
+                # The other missing columns are:
                 if "REASON" not in voter_df.columns:
                     voter_df["REASON"] = np.NAN
-            elif (
-                "history" in file["name"].lower()
-            ):
+            elif "history" in file["name"].lower():
                 # Maine Voter History seems to come one file per election,
                 # Sometimes they have a history report html file that we skip
                 logging.info(f"vote history found: {file['name']}")
@@ -151,22 +160,32 @@ class PreprocessMaine(Preprocessor):
                     )
                 elif ".xlsx" in file["name"].lower():
                     cancelled_df = pd.read_excel(
-                        file["obj"], dtype="str",
+                        file["obj"],
+                        dtype="str",
                     )
 
                 if "DT_ACCEPT" in cancelled_df.columns:
                     cancelled_df.rename(
                         columns={"DT_ACCEPT": "DT ACCEPT"}, inplace=True
                     )
-                cancelled_df.rename(
-                    columns=self.config["cancelled_columns"], inplace=True
-                )
+                if "VOTER_REC_NUM" in cancelled_df.columns:
+                    # The 2026-07-13 file now mirrors the active file
+                    cancelled_df.rename(
+                        columns=self.config["rename_columns"], inplace=True
+                    )
+                else:
+                    # Prior to 2026-07-13 the cancelled file had it's own
+                    # unique columns that required renaming
+                    cancelled_df.rename(
+                        columns=self.config["cancelled_columns"], inplace=True
+                    )
         if not cancelled_df.empty:
-            # For Some reason there are no counties in the cancelled df file
-            # Derive them from zip codes found in main file?
-            zip_dict = dict(zip(voter_df["ZIP"], voter_df["CTY"]))
-            cancelled_df["CTY"] = cancelled_df["ZIP"].map(zip_dict)
 
+            if "CTY" not in cancelled_df.columns:
+                # For Some reason there are no counties in the cancelled df file
+                # Derive them from zip codes found in main file?
+                zip_dict = dict(zip(voter_df["ZIP"], voter_df["CTY"]))
+                cancelled_df["CTY"] = cancelled_df["ZIP"].map(zip_dict)
             # also for some reason they sometimes give the full birthday in the
             # cancelled file.
             # Starting in the 2025-08-08 file, they switched to just birth year
@@ -178,18 +197,38 @@ class PreprocessMaine(Preprocessor):
 
         # there are several entries in the cancelled file, that have an active
         # status in the main file
+
         voter_df = keep_most_recent_record(
             voters_df=voter_df, cancelled_df=cancelled_df
         )
+
         del cancelled_df
         unnamed_cols = voter_df.columns[
             voter_df.columns.str.contains("Unnamed")
         ]
         voter_df.drop(columns=unnamed_cols, inplace=True)
 
-        # This was removed in the 2025-08-08 file
-        if "Id_Parent_Area" not in voter_df.columns:
-            voter_df["Id_Parent_Area"] = None
+        if (
+            voter_df[self.config["county_identifier"]]
+            .isin(self.config["county_codes"])
+            .any()
+        ):
+            county_code_dict = {
+                k.lower(): v for k, v in self.config["county_codes"].items()
+            }
+            voter_df[self.config["county_identifier"]] = (
+                voter_df[self.config["county_identifier"]]
+                .str.lower()
+                .map(county_code_dict)
+            )
+
+        # These were removed in the 2025-08-08 file and the 2026-07-13 files
+        if "MAIL ZIP4" in voter_df.columns:
+            voter_df["MAIL ZIP"] = voter_df["MAIL ZIP4"]
+        dropped_columns = ["Id_Parent_Area", "DT LAST ACTIVE"]
+        for col in dropped_columns:
+            if col not in voter_df.columns:
+                voter_df[col] = None
 
         self.column_check(voter_df.columns)
         if hist_df.empty:
