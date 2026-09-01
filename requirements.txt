@@ -1,4 +1,4 @@
-boto3>=1.43.58
+boto3>=1.43.83
 bs4>=0.0.1
 click>=8.4.2
 detect_delimiter>=0.1.1
