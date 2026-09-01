@@ -11,5 +11,5 @@ PyYAML>=6.0.3
 requests>=2.34.2
 xlrd>=2.0.2
 zipfile2>=0.0.12
-chardet>=4.0.0
+chardet>=7.6.0
 usaddress>=0.5.16
