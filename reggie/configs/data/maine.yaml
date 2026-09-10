@@ -104,6 +104,7 @@ hist_columns:
 cancelled_columns:
   Town Name: REG TOWN
   Id_Voter: VOTER ID
+  VOTER_REC_NUM: Voter ID # changed 07-16-2026
   Status: STATUS
   Last Name: LAST NAME
   First Name: FIRST NAME
@@ -253,7 +254,43 @@ ordered_columns:
   - KCB
   - ACF
   - DT CHG
-
+    
+# In June 2026 Maine renamed some columns, this is the old to new dict
+rename_columns:
+  REG_MUNI: REG TOWN
+  VOTER_REC_NUM: VOTER ID
+  LAST_NAME: LAST NAME
+  FIRST_NAME: FIRST NAME
+  MIDDLE_NAME: MIDDLE NAME
+  SUFFIX: SUFF
+  RES_STR_NUM: ST NUM
+  RES_SUF_A: ST NUM A
+  RES_SUF_B: ST NUM B
+  RES_STR_NAME: ST NAME1
+  RES_UNIT_TYPE: ST NAME2
+  RES_UNIT_NUM: UNIT
+  RES_MUNI: CITY # same 
+  RES_ST: STATE
+  RES_ZIP5: ZIP
+  RES_ZIP4: ZIP4
+  MAIL_STR_NUM: MAIL ST NUM
+  MAIL_SUF_A: MAIL ST NUM A
+  MAIL_SUF_B: MAIL ST NUM B
+  MAIL_STR_NAME: MAIL ST NAME1
+  MAIL_UNIT_NUM: MAIL UNIT
+  MAIL_MUNI: MAIL CITY
+  MAIL_ST: MAIL STATE
+  VOTER_STATUS: STATUS
+  W-P: WP
+  REG_DATE: DT ACCEPT # No longer do we have DT_EFFECT, it seems no more status change date either
+#  DT_STATUS_CHG: DT_CHG # New column name in 2026-07-13
+  DT_CHG: DT CHG
+  DT_STATUS_CHG: DT STATUS CHG
+  O_MAIL_COUNTRY: MAIL COUNTRY
+  MAIL_ADD_LINE2: MAIL ST NAME2
+  ELIG_DATE: DT EFFECT
+  MAIL_ZIP4: MAIL ZIP4
+  DES: DESIGNATE
 county_codes:
   Androscoggin: 01and
   Aroostook: 02aro
