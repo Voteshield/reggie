@@ -476,3 +476,4 @@ column_aliases:
     Mailing Zip Code: Mail_zip_code
     Mailing Zipcode: Mail_zip_code
     Mailing Country: Mail_country
+    NMVCounty: County_code
