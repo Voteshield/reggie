@@ -447,3 +447,9 @@ ordered_generated_columns:
 # into the VoteShield database until the new state schema and elections table have been
 # created, so there is a table for it to go into.
 # This can be done by running the vote-cli command "elections-etl".
+
+###############################
+# Add to VoteShield Brand Assets:
+#
+# See Inspector wiki page on adding a state for details:
+# https://github.com/Voteshield/Inspector/wiki/Adding-a-State#add-to-voteshield-brand-assets
