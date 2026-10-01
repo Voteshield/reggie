@@ -186,6 +186,7 @@ ordered_generated_columns:
 column_aliases:
   'D/P': DP
   'ASCENSION #': ASCENSION
+  CONDITION: CC
 
 # Alaska voter file does not contain a good option for primary locale.
 # So, map city of residence to either borough (19 total) or census area (11 total).
