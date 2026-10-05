@@ -204,15 +204,44 @@ class PreprocessTexas(Preprocessor):
 
         # New normal csv format (starting October 2025)
         if len(csv_files) > 0:
+            hist_aliases = self.config["hist_column_aliases"]
             for i in csv_files:
                 logging.info(f"Loading file {i['name']}")
-                new_df = pd.read_csv(i["obj"])
+                header = pd.read_csv(i["obj"], nrows=0).columns
+                i["obj"].seek(SEEK_SET)
 
-                # Currently, we have no new history files to look at.
-                # But eventually, will have to disambiguate voter and history files.
-                df_voter = pd.concat(
-                    [df_voter, new_df], axis=0, ignore_index=True
-                )
+                # History csv files (starting Aug 2026) repeat the voter
+                # columns, plus one row per voter per election.
+                if set(hist_aliases).issubset(header):
+                    new_df = pd.read_csv(
+                        i["obj"],
+                        usecols=list(hist_aliases),
+                        dtype={
+                            col: str for col in hist_aliases
+                            if col != "VUID"
+                        },
+                    )
+                    new_df.rename(columns=hist_aliases, inplace=True)
+                    # Match the old fixed-width YYYYMMDD election dates
+                    new_df["Election_Date"] = new_df[
+                        "Election_Date"
+                    ].str.replace("-", "", regex=False)
+                    df_hist = pd.concat(
+                        [df_hist, new_df], axis=0, ignore_index=True
+                    )
+                # Other election layouts (e.g. a single-county export with
+                # "Election Id" and "Voting Method") have no election type
+                # or party, so they can't be keyed like the rest.
+                elif any("election" in col.lower() for col in header):
+                    logging.warning(
+                        f"Skipping file {i['name']}: "
+                        "unrecognized history layout"
+                    )
+                else:
+                    new_df = pd.read_csv(i["obj"])
+                    df_voter = pd.concat(
+                        [df_voter, new_df], axis=0, ignore_index=True
+                    )
                 del i["obj"]
                 gc.collect()
 

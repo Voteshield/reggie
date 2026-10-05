@@ -536,3 +536,14 @@ column_aliases:
     mail_ad_city: Mailing_City
     mail_cd_state: Mailing_State
     mail_ad_zip5: Mailing_Zipcode
+
+# 2026 Aug csv history files
+# new column name: original history column name
+# BALLOT_STATUS carries the same codes as the old fixed-width
+# voting method (AB/AV/AX/ED/EV); BALLOT_TYPE collapses mail to BM.
+hist_column_aliases:
+    VUID: VUID
+    ELECTION_DATE: Election_Date
+    ELEC_TYPE: Election_Type
+    CD_PARTY: Election_Party
+    BALLOT_STATUS: Election_Voting_Method
