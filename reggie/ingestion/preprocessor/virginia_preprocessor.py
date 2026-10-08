@@ -7,12 +7,31 @@ from datetime import datetime
 from io import StringIO
 
 import numpy as np
+import pandas as pd
 
 from reggie.ingestion.download import (
     Preprocessor,
     date_from_str,
     FileItem,
 )
+
+HIST_REQUIRED_COLUMNS = {
+    "IDENTIFICATION_NUMBER",
+    "ELECTION_NAME",
+    "ELECTION_DATE",
+    "ELECTION_TYPE",
+    "PRIMARY_TYPE_CODE_NAME",
+}
+VOTETYPE_FLAG_COLUMNS = ["VOTE_IN_PERSON", "PROTECTED", "ABSENTEE", "PROVISIONAL"]
+
+
+def read_header(file_obj):
+    """Return the set of column names on the first line, rewinding the file."""
+    line = file_obj.readline()
+    file_obj.seek(0)
+    if isinstance(line, bytes):
+        line = line.decode("ISO-8859-1")
+    return {c.strip().strip('"') for c in line.strip().split(",")}
 
 
 class PreprocessVirginia(Preprocessor):
@@ -38,29 +57,43 @@ class PreprocessVirginia(Preprocessor):
             file_obj=self.main_file, compression="unzip"
         )
 
-        # throw exception if missing one of the two files needed for processing
-        valid_files = []
-        for file in new_files:
-            valid_files.append(file["name"].lower())
-
         if not self.ignore_checks:
             self.file_check(len(new_files))
-        # faster to just join them into a tab separated string
-        valid_files = "\t".join(valid_files)
-        if "history" not in valid_files or "registered" not in valid_files:
-            raise ValueError("must supply both history and voter file")
 
+        # History arrives as a cumulative "Vote_History" file and, since
+        # 2026-10-03, also as one file per election whose name does not
+        # contain "history", so history files are identified by header
+        voters_df = None
+        hist_dfs = []
         for f in new_files:
-            if "history" in f["name"].lower():
-                logging.info("vote history found")
-                hist_df = self.read_csv_count_error_lines(
-                    f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
-                )
-            elif "registered" in f["name"].lower():
+            if "registered" in f["name"].lower():
                 logging.info("voter file found")
                 voters_df = self.read_csv_count_error_lines(
                     f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
                 )
+            elif HIST_REQUIRED_COLUMNS.issubset(read_header(f["obj"])):
+                logging.info("vote history found: {}".format(f["name"]))
+                hist_dfs.append(
+                    self.read_csv_count_error_lines(
+                        f["obj"],
+                        on_bad_lines="warn",
+                        encoding="ISO-8859-1",
+                        usecols=lambda c: c in self.config["hist_columns"],
+                    )
+                )
+            else:
+                logging.warning(
+                    "skipping {}: neither voter file nor vote history".format(
+                        f["name"]
+                    )
+                )
+
+        # throw exception if missing one of the two files needed for processing
+        if voters_df is None or not hist_dfs:
+            raise ValueError("must supply both history and voter file")
+        hist_df = pd.concat(hist_dfs, ignore_index=True)
+        del hist_dfs
+
         voters_df[self.config["party_identifier"]] = np.nan
         voters_df = self.reconcile_columns(voters_df, self.config["columns"])
         self.column_check(list(voters_df.columns))
@@ -82,10 +115,14 @@ class PreprocessVirginia(Preprocessor):
             + hist_df["ELECTION_DATE"]
         )
 
-        # 2024-06-04 file removed VOTE_IN_PERSON and PROTECTED from history file
-        for col in ["VOTE_IN_PERSON", "PROTECTED"]:
+        # 2024-06-04 file removed VOTE_IN_PERSON and PROTECTED from history file.
+        # The per-election files (first received 2026-10-03) have no ABSENTEE or
+        # PROVISIONAL either, so their rows get NaN votetype_history
+        for col in VOTETYPE_FLAG_COLUMNS:
             if col not in hist_df.columns:
                 hist_df[col] = False
+            else:
+                hist_df[col] = hist_df[col].astype("boolean").fillna(False).astype(bool)
 
         # Gathers the votetype columns that are initially boolean and replaces them with the word version of their name
         # collect all the columns where the value is True, combine to one votetype history separated by underscores
