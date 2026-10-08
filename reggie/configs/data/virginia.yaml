@@ -61,6 +61,13 @@ hist_columns:
   - PROTECTED
   - ABSENTEE
   - PROVISIONAL
+# A file in the zip is a history file if its header has all of these columns
+hist_identifier_columns:
+  - IDENTIFICATION_NUMBER
+  - ELECTION_NAME
+  - ELECTION_DATE
+  - ELECTION_TYPE
+  - PRIMARY_TYPE_CODE_NAME
 match_fields:
   - FIRST_NAME
   - LAST_NAME

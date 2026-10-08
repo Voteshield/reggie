@@ -15,13 +15,6 @@ from reggie.ingestion.download import (
     FileItem,
 )
 
-HIST_REQUIRED_COLUMNS = {
-    "IDENTIFICATION_NUMBER",
-    "ELECTION_NAME",
-    "ELECTION_DATE",
-    "ELECTION_TYPE",
-    "PRIMARY_TYPE_CODE_NAME",
-}
 VOTETYPE_FLAG_COLUMNS = ["VOTE_IN_PERSON", "PROTECTED", "ABSENTEE", "PROVISIONAL"]
 
 
@@ -71,7 +64,9 @@ class PreprocessVirginia(Preprocessor):
                 voters_df = self.read_csv_count_error_lines(
                     f["obj"], on_bad_lines="warn", encoding="ISO-8859-1"
                 )
-            elif HIST_REQUIRED_COLUMNS.issubset(read_header(f["obj"])):
+            elif set(self.config["hist_identifier_columns"]).issubset(
+                read_header(f["obj"])
+            ):
                 logging.info("vote history found: {}".format(f["name"]))
                 hist_dfs.append(
                     self.read_csv_count_error_lines(
