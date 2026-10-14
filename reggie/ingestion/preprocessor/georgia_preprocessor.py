@@ -422,6 +422,9 @@ class PreprocessGeorgia(Preprocessor):
             ],
         )
 
+        # Oct 2026 file had problems with a mail zip >> largest postgres int (2,147,483,647)
+        df_voters["Mail_zip_code"] = df_voters["Mail_zip_code"].clip(upper=2_000_000_000)
+
         # Check the file for all the proper locales
         df_voters["County_code"] = df_voters["County_code"].astype(float).astype(int).astype(str)
         self.locale_check(
