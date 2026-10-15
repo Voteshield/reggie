@@ -450,58 +450,104 @@ county_names:
 ethnicity_options:
   'Y': hispanic
 
+# Texas has many different versions of address
+# normalization (and de-normalization).
+# We put config data here to handle 2 separate cases:
+# a full address parse, and a parse of only the street name segment.
+address_parse_type:
+
 # In October 2025, Texas changed it's data to csv format.
 # It consolidated addresses into single strings, which we
 # attempt to parse back into their component parts, to match
 # the existing database. The usaddress parser package does
 # not match our existing parts perfectly, so we need to
 # handle edge cases. We consolidate fields that seem manageable
-# according to the following mapping:
-address_parser_mapping:
-  Permanent_House_Number:
-    - AddressNumberPrefix
-    - AddressNumber
-    - AddressNumberSuffix
-  Permanent_Directional_Prefix:
-    - StreetNamePreDirectional
-  Permanent_Street_Name:
-    - StreetNamePreModifier
-    - StreetName
-  Permanent_Street_Type:
-    - StreetNamePreType
-    - StreetNamePostType
-  Permanent_Directional_Suffix:
-    - StreetNamePostDirectional
-  Permanent_Unit_Number:
-    - OccupancyIdentifier
-    - SubaddressIdentifier
-  Permanent_Unit_Type:
-    - OccupancyType
-    - SubaddressType
-  # Because the strings don't include state, if anything
-  # gets parsed to 'state', it's likely a city/town/locality.
-  Permanent_City:
-    - PlaceName
-    - StateName
-  Permanent_Zipcode:
-    - ZipCode
-# For any other ("unmanageable") fields, we give up on parsing and
-# just put the full address string into the "Permanent_Street_Name"
-# field.
-default_address_field: Permanent_Street_Name
-unmanageable_address_fields:
-  - NotAddress
-  - Recipient
-  - BuildingName
-  - CornerOf
-  - LandmarkName
-  - IntersectionSeparator
-  - USPSBoxType
-  - USPSBoxID
-  - USPSBoxGroupType
-  - USPSBoxGroupID
+# according to the following mapping.
+  full_parse:
+    address_parser_mapping:
+      Permanent_House_Number:
+        - AddressNumberPrefix
+        - AddressNumber
+        - AddressNumberSuffix
+      Permanent_Directional_Prefix:
+        - StreetNamePreDirectional
+      Permanent_Street_Name:
+        - StreetNamePreModifier
+        - StreetName
+      Permanent_Street_Type:
+        - StreetNamePreType
+        - StreetNamePostType
+      Permanent_Directional_Suffix:
+        - StreetNamePostDirectional
+      Permanent_Unit_Number:
+        - OccupancyIdentifier
+        - SubaddressIdentifier
+      Permanent_Unit_Type:
+        - OccupancyType
+        - SubaddressType
+      # Because the strings don't include state, if anything
+      # gets parsed to 'state', it's likely a city/town/locality.
+      Permanent_City:
+        - PlaceName
+        - StateName
+      Permanent_Zipcode:
+        - ZipCode
+    # For any other ("unmanageable") fields, we give up on parsing and
+    # just put the full address string into the "Permanent_Street_Name"
+    # field.
+    default_address_field: Permanent_Street_Name
+    unmanageable_address_fields:
+      - NotAddress
+      - Recipient
+      - BuildingName
+      - CornerOf
+      - LandmarkName
+      - IntersectionSeparator
+      - USPSBoxType
+      - USPSBoxID
+      - USPSBoxGroupType
+      - USPSBoxGroupID
+
+# In May 2026, briefly Texas normalized its 4 street name fields
+# into a single "streetname". We attempt to parse the pieces out,
+# to minimize the size of the address diff.
+  street_name_only:
+    address_parser_mapping:
+      Permanent_Directional_Prefix:
+        - StreetNamePreDirectional
+      Permanent_Street_Name:
+        - StreetNamePreModifier
+        - StreetName
+      Permanent_Street_Type:
+        - StreetNamePreType
+        - StreetNamePostType
+      Permanent_Directional_Suffix:
+        - StreetNamePostDirectional
+    default_address_field: Permanent_Street_Name
+    unmanageable_address_fields:
+      - NotAddress
+      - Recipient
+      - BuildingName
+      - CornerOf
+      - LandmarkName
+      - IntersectionSeparator
+      - USPSBoxType
+      - USPSBoxID
+      - USPSBoxGroupType
+      - USPSBoxGroupID
+      - ZipCode
+      - PlaceName
+      - StateName
+      - SubaddressType
+      - OccupancyType
+      - SubaddressIdentifier
+      - OccupancyIdentifier
+      - AddressNumberSuffix
+      - AddressNumber
+      - AddressNumberPrefix
 # Overall, this should at least produce repeatable results,
 # that will allow us to understand when the address has been changed.
+
 
 # 2025 October column alias list
 # new column name: original column name

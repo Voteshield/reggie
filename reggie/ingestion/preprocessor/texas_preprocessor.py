@@ -253,8 +253,11 @@ class PreprocessTexas(Preprocessor):
             # Convert single address string back to multiple fields,
             # in files that have combined "residential_address"
             if "residential_address" in df_voter.columns:
+                full_parse_config = self.config["address_parse_type"][
+                    "full_parse"
+                ]
                 parsed_addresses = df_voter["residential_address"].map(
-                    self.parse_and_map_address
+                    lambda a: self.parse_and_map_address(a, full_parse_config)
                 )
                 df_voter = pd.concat(
                     [df_voter, pd.DataFrame(parsed_addresses.tolist())],
@@ -309,16 +312,28 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_City",
                 "Mailing_State",
                 "Mailing_Zipcode",
-                # 2026-05-20 file has yet more changes
-                # to the way address fields are split up.
-                # Seems most of the street data pieces are
-                # now in a unified "streetname" field
-                "Permanent_Directional_Prefix",
-                "Permanent_Street_Type",
-                "Permanent_Directional_Suffix",
             ]:
                 if col not in df_voter.columns:
                     df_voter[col] = np.nan
+
+            # Convert unified "streetname" field back to multiple
+            # fields, in 2026-05-20 file:
+            if (
+                "Permanent_Directional_Prefix" not in df_voter.columns
+                and "Permanent_Street_Type" not in df_voter.columns
+                and "Permanent_Directional_Suffix" not in df_voter.columns
+            ):
+                street_parse_config = self.config["address_parse_type"][
+                    "street_name_only"
+                ]
+                parsed_addresses = df_voter["Permanent_Street_Name"].map(
+                    lambda a: self.parse_and_map_address(a, street_parse_config)
+                )
+                df_voter.drop(columns=["Permanent_Street_Name"], inplace=True)
+                df_voter = pd.concat(
+                    [df_voter, pd.DataFrame(parsed_addresses.tolist())],
+                    axis=1,
+                )
 
             # Make sure precinct is int, to match existing data
             def int_precincts(x):
@@ -429,11 +444,13 @@ class PreprocessTexas(Preprocessor):
             s3_bucket=self.s3_bucket,
         )
 
-    def parse_and_map_address(self, address):
+    def parse_and_map_address(self, address, parse_config):
         """
         Attempt to parse a single address string
         and map it back into the existing database
         fields, if at all possible.
+        parse_config is one of the dicts under
+        "address_parse_type" in the yaml.
         """
         def parsed_to_dict(parsed_address):
             """
@@ -456,7 +473,7 @@ class PreprocessTexas(Preprocessor):
             older files (and VoteShield's database).
             """
             d = {}
-            for old, new_list in self.config[
+            for old, new_list in parse_config[
                 "address_parser_mapping"
             ].items():
                 d[old] = " ".join(
@@ -477,10 +494,10 @@ class PreprocessTexas(Preprocessor):
         # string in default field (Permanent_Street_Name).
         piece_types = [piece[1] for piece in parsed_tuples]
         if len(set(piece_types).intersection(
-            self.config["unmanageable_address_fields"])
+            parse_config["unmanageable_address_fields"])
         ):
             return {
-                self.config["default_address_field"]: address
+                parse_config["default_address_field"]: address
             }
         else:
             # Consolidate parsed tuples into dict
