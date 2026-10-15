@@ -526,6 +526,7 @@ column_aliases:
     tx_designator: Permanent_Designator
     pre_direction: Permanent_Directional_Prefix
     street_name: Permanent_Street_Name
+    streetname: Permanent_Street_Name
     street_type: Permanent_Street_Type
     post_direction: Permanent_Directional_Suffix
     cd_unit_type: Permanent_Unit_Type

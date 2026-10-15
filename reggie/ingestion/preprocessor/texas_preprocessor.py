@@ -309,6 +309,13 @@ class PreprocessTexas(Preprocessor):
                 "Mailing_City",
                 "Mailing_State",
                 "Mailing_Zipcode",
+                # 2026-05-20 file has yet more changes
+                # to the way address fields are split up.
+                # Seems most of the street data pieces are
+                # now in a unified "streetname" field
+                "Permanent_Directional_Prefix",
+                "Permanent_Street_Type",
+                "Permanent_Directional_Suffix",
             ]:
                 if col not in df_voter.columns:
                     df_voter[col] = np.nan
