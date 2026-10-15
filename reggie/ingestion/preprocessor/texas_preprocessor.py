@@ -327,7 +327,9 @@ class PreprocessTexas(Preprocessor):
                     "street_name_only"
                 ]
                 parsed_addresses = df_voter["Permanent_Street_Name"].map(
-                    lambda a: self.parse_and_map_address(a, street_parse_config)
+                    lambda a: self.parse_and_map_address(
+                        a, street_parse_config
+                    ) if isinstance(a, str) else {}
                 )
                 df_voter.drop(columns=["Permanent_Street_Name"], inplace=True)
                 df_voter = pd.concat(
