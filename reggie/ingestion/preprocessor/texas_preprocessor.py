@@ -141,8 +141,9 @@ class PreprocessTexas(Preprocessor):
                 file_len = i["obj"].seek(SEEK_END)
                 i["obj"].seek(SEEK_SET)
                 if ("count" not in i["name"]) and (file_len != 0):
-                    # Check length for every file
-                    line_length = len(i["obj"].readline())
+                    # Check length for every file, ignoring whether
+                    # lines end in "\n" or "\r\n" (CRLF seen in 2026).
+                    line_length = len(i["obj"].readline().splitlines()[0]) + 1
                     logging.info(
                         f"File: {i['name']} has line_length {line_length}"
                     )
