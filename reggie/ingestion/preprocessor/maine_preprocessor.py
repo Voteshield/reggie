@@ -203,14 +203,14 @@ class PreprocessMaine(Preprocessor):
                 ].str.split("/", expand=True)
                 cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
 
-        # there are several entries in the cancelled file, that have an active
-        # status in the main file
-
-        voter_df = keep_most_recent_record(
-            voters_df=voter_df, cancelled_df=cancelled_df
-        )
+            # there are several entries in the cancelled file, that have an active
+            # status in the main file
+            voter_df = keep_most_recent_record(
+                voters_df=voter_df, cancelled_df=cancelled_df
+            )
 
         del cancelled_df
+
         unnamed_cols = voter_df.columns[
             voter_df.columns.str.contains("Unnamed")
         ]
