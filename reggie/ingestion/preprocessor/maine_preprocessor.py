@@ -147,9 +147,17 @@ class PreprocessMaine(Preprocessor):
                 new_hist = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
+                # Oct 2026 file has 1 history file with new column names,
+                # so rename and drop in order to match old style, so we can concat them
+                new_hist.rename(
+                    columns=self.config["rename_hist_columns"], inplace=True
+                )
+                new_hist.drop(
+                    columns=["VPH_ISSUED_BALLOT"], inplace=True, errors="ignore"
+                )
                 logging.info(f"concatenating {file['name']}")
                 hist_df = pd.concat([hist_df, new_hist])
-            elif "cancelled" or "cxl" in file["name"].lower():
+            elif ("cancelled" in file["name"].lower()) or ("cxl" in file["name"].lower()):
                 # Note: the cancelled file does not have a county column
                 logging.info(f"cancelled file found: {file['name']}")
 
@@ -195,14 +203,14 @@ class PreprocessMaine(Preprocessor):
                 ].str.split("/", expand=True)
                 cancelled_df.drop(columns=["MONTH", "DAY"], inplace=True)
 
-        # there are several entries in the cancelled file, that have an active
-        # status in the main file
-
-        voter_df = keep_most_recent_record(
-            voters_df=voter_df, cancelled_df=cancelled_df
-        )
+            # there are several entries in the cancelled file, that have an active
+            # status in the main file
+            voter_df = keep_most_recent_record(
+                voters_df=voter_df, cancelled_df=cancelled_df
+            )
 
         del cancelled_df
+
         unnamed_cols = voter_df.columns[
             voter_df.columns.str.contains("Unnamed")
         ]

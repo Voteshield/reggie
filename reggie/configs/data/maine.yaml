@@ -1,5 +1,7 @@
-#Maine has 2 Voter Files and 1 History File
-
+# Maine file package has typically contained 2 voter files and multiple history files.
+#
+# As of Oct 2026, Maine has consolidated the 2 voter files (active/inactive, cancelled)
+# into a single voter file, with all voters of all statuses.
 
 file_type: .txt
 delimiter: '|'
@@ -99,6 +101,16 @@ hist_columns:
   - ELECTION CATEGORY
   - TOWN NAME WHERE VOTED
   - BALLOT TYPE
+# History files changed in Oct 2026
+# (new files only, but we still have old-style files in the package too)
+rename_hist_columns:
+  VOTER_REC_NUM: VOTER ID
+  VPH_ELECT_DATE: ELECTION DATE
+  VPH_ELECT_NAME: ELECTION NAME
+  ELECT_TYPE: ELECTION TYPE
+  ELECT_CAT: ELECTION CATEGORY
+  VPH_MUNI: TOWN NAME WHERE VOTED
+  VPH_BALLOT_TYPE: BALLOT TYPE
 #Cancelled file has a different column naming system than the main file, below
 # are the cancelled file columns, with their main file equivalent for renaming
 cancelled_columns:
@@ -254,7 +266,7 @@ ordered_columns:
   - KCB
   - ACF
   - DT CHG
-    
+
 # In June 2026 Maine renamed some columns, this is the old to new dict
 rename_columns:
   REG_MUNI: REG TOWN
@@ -291,6 +303,10 @@ rename_columns:
   ELIG_DATE: DT EFFECT
   MAIL_ZIP4: MAIL ZIP4
   DES: DESIGNATE
+  # These ones changed further in Oct 2026
+  STATUS_REASON: REASON
+  DT_OTHER_CHG: DT CHG
+
 county_codes:
   Androscoggin: 01and
   Aroostook: 02aro
