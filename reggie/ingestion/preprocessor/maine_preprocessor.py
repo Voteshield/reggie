@@ -147,6 +147,16 @@ class PreprocessMaine(Preprocessor):
                 new_hist = self.read_csv_count_error_lines(
                     file["obj"], sep="|", dtype="str", on_bad_lines="warn"
                 )
+                # Oct 2026 file has 1 history file with new column names,
+                # so rename and drop in order to match old style, so we can concat them
+                new_hist.rename(
+                    columns=self.config["rename_hist_columns"], inplace=True
+                )
+
+                new_hist.drop(
+                    columns=["VPH_ISSUED_BALLOT"], inplace=True, errors="ignore"
+                    )
+
                 logging.info(f"concatenating {file['name']}")
                 hist_df = pd.concat([hist_df, new_hist])
             elif "cancelled" or "cxl" in file["name"].lower():
