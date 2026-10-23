@@ -152,14 +152,12 @@ class PreprocessMaine(Preprocessor):
                 new_hist.rename(
                     columns=self.config["rename_hist_columns"], inplace=True
                 )
-
                 new_hist.drop(
                     columns=["VPH_ISSUED_BALLOT"], inplace=True, errors="ignore"
-                    )
-
+                )
                 logging.info(f"concatenating {file['name']}")
                 hist_df = pd.concat([hist_df, new_hist])
-            elif "cancelled" or "cxl" in file["name"].lower():
+            elif ("cancelled" in file["name"].lower()) or ("cxl" in file["name"].lower()):
                 # Note: the cancelled file does not have a county column
                 logging.info(f"cancelled file found: {file['name']}")
 

@@ -1,5 +1,7 @@
-#Maine has 2 Voter Files and 1 History File
-
+# Maine file package has typically contained 2 voter files and multiple history files.
+#
+# As of Oct 2026, Maine has consolidated the 2 voter files (active/inactive, cancelled)
+# into a single voter file, with all voters of all statuses.
 
 file_type: .txt
 delimiter: '|'
