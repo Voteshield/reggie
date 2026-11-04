@@ -6,7 +6,6 @@ from datetime import datetime
 from io import StringIO
 
 import numpy as np
-import pandas as pd
 
 from reggie.ingestion.download import (
     Preprocessor,
@@ -73,38 +72,42 @@ class PreprocessMississippi(Preprocessor):
         del voter_file, hist_file
         gc.collect()
 
-
         # No birth date or party in the voter file, add dummy columns
         voter_df[self.config["birthday_identifier"]] = np.nan
         voter_df[self.config["party_identifier"]] = np.nan
 
         self.column_check(list(voter_df.columns))
 
+        voter_df = self.config.coerce_strings(voter_df)
+        voter_df = self.config.coerce_dates(voter_df)
+
+        # Rows without an election are dropped before coercion, which would
+        # turn missing values into the string "nan"
         hist_df = hist_df.dropna(subset=["ELECTION NAME", "ELECTION DATE"])
-        hist_df["ELECTION DATE"] = pd.to_datetime(
-            hist_df["ELECTION DATE"],
-            format=self.config["date_format"],
-            errors="coerce",
+        hist_df = self.config.coerce_strings(
+            hist_df, col_list="hist_columns_types"
         )
-        hist_df = hist_df.dropna(subset=["ELECTION DATE"])
+        hist_df = self.config.coerce_dates(
+            hist_df, col_list="hist_columns_types"
+        )
         hist_df = hist_df.sort_values("ELECTION DATE")
 
-        hist_df["combined_name"] = (
-            hist_df["ELECTION NAME"]
-            .str.strip()
-            .str.split()
-            .str.join("_")
-            .str.lower()
-            + "_"
-            + hist_df["ELECTION DATE"].dt.strftime("%m/%d/%Y")
-        )
-        hist_df["POLITICAL PARTY"] = hist_df["POLITICAL PARTY"].str.strip()
+        hist_df["combined_name"] = hist_df["ELECTION NAME"].str.replace(
+            " ", "_"
+        ) + hist_df["ELECTION DATE"].dt.strftime("_%m/%d/%Y")
 
+        voter_df = voter_df.set_index(self.config["voter_id"], drop=False)
+        voter_groups = hist_df.groupby(self.config["voter_id"])
+        voter_df["all_history"] = voter_groups["combined_name"].apply(list)
+        voter_df["party_history"] = voter_groups["POLITICAL PARTY"].apply(list)
+        del voter_groups
+        gc.collect()
+
+        # hist_df is already sorted by date, so unique() is in date order
         sorted_codes = hist_df["combined_name"].unique().tolist()
-        sorted_codes.sort(
-            key=lambda x: datetime.strptime(x.split("_")[-1], "%m/%d/%Y")
-        )
         counts = hist_df["combined_name"].value_counts()
+        del hist_df
+        gc.collect()
 
         sorted_codes_dict = {
             k: {
@@ -121,15 +124,9 @@ class PreprocessMississippi(Preprocessor):
             else:
                 return np.nan
 
-        voter_df = voter_df.set_index(self.config["voter_id"], drop=False)
-        voter_groups = hist_df.groupby(self.config["voter_id"])
-        voter_df["all_history"] = voter_groups["combined_name"].apply(list)
         voter_df["sparse_history"] = voter_df["all_history"].map(
             insert_code_bin
         )
-        voter_df["party_history"] = voter_groups["POLITICAL PARTY"].apply(list)
-        del hist_df, voter_groups
-        gc.collect()
 
         expected_cols = (
             self.config["ordered_columns"]
@@ -137,9 +134,6 @@ class PreprocessMississippi(Preprocessor):
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         voter_df = voter_df[expected_cols]
-
-        voter_df = self.config.coerce_strings(voter_df)
-        voter_df = self.config.coerce_dates(voter_df)
 
         # Check the file for all the proper locales
         self.locale_check(

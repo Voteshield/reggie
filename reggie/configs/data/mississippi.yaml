@@ -45,7 +45,6 @@ registration_date_identifier: EFFECTIVE_REGN_DATE
 
 
 ###############################
-# Todo: check across files
 date_format: '%m/%d/%Y'
 
 
