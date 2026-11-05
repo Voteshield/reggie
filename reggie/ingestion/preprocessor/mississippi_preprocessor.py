@@ -1,6 +1,7 @@
 import datetime
 import gc
 import json
+import logging
 
 from datetime import datetime
 from io import StringIO
@@ -35,19 +36,23 @@ class PreprocessMississippi(Preprocessor):
         self.processed_file = None
 
     def execute(self):
+        logging.info("downloading and unpacking the raw file")
         if self.raw_s3_file is not None:
             self.main_file = self.s3_download()
 
         new_files = self.unpack_files(
             file_obj=self.main_file, compression="unzip"
         )
+        logging.info("unpacked {} files".format(len(new_files)))
 
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        # Names vary, e.g. "...Weekly Distribution_<user>_<date>_<n>VotingHistory.csv"
-        # and "<date> Statewide Voting History Weekly Distribution.csv", so
-        # spaces are removed before matching
+        # Names vary, e.g. "Weekly Distribution_<user>_<date>_<n>.csv",
+        # "<date> Statewide Voter File Weekly Distribution.csv", and
+        # "<name> Statewide <date>_<user>_<date>_<n>.csv", with the history
+        # file containing "VotingHistory" or "Voting History". Spaces are
+        # removed before matching
         hist_file = [
             n
             for n in new_files
@@ -56,9 +61,17 @@ class PreprocessMississippi(Preprocessor):
         voter_file = [
             n
             for n in new_files
-            if "weeklydistribution" in n["name"].lower().replace(" ", "")
-            and n is not hist_file
+            if n is not hist_file
+            and any(
+                s in n["name"].lower().replace(" ", "")
+                for s in ["weeklydistribution", "statewide"]
+            )
         ][0]
+        logging.info(
+            "voter file {}, history file {}".format(
+                voter_file["name"], hist_file["name"]
+            )
+        )
         del new_files
 
         voter_df = self.read_csv_count_error_lines(
@@ -71,19 +84,37 @@ class PreprocessMississippi(Preprocessor):
         hist_df = drop_unnamed_columns(hist_df)
         del voter_file, hist_file
         gc.collect()
+        logging.info(
+            "Read {} voter rows and {} history rows".format(
+                voter_df.shape[0], hist_df.shape[0]
+            )
+        )
 
+        logging.info(
+            "preparing the voter file"
+        )
         # No birth date or party in the voter file, add dummy columns
         voter_df[self.config["birthday_identifier"]] = np.nan
         voter_df[self.config["party_identifier"]] = np.nan
 
         self.column_check(list(voter_df.columns))
+        logging.info("voter column check passed")
 
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
+        logging.info("coerced voter columns")
 
+        logging.info(
+            "Mississippi step 5/8: preparing the history file (dropping rows "
+            "without an election, coercion, sorting by date)"
+        )
         # Rows without an election are dropped before coercion, which would
         # turn missing values into the string "nan"
         hist_df = hist_df.dropna(subset=["ELECTION NAME", "ELECTION DATE"])
+        # A missing party is recorded as no party, as in Arizona 2
+        hist_df["POLITICAL PARTY"] = hist_df["POLITICAL PARTY"].fillna(
+            self.config["no_party_affiliation"]
+        )
         hist_df = self.config.coerce_strings(
             hist_df, col_list="hist_columns_types"
         )
@@ -91,7 +122,16 @@ class PreprocessMississippi(Preprocessor):
             hist_df, col_list="hist_columns_types"
         )
         hist_df = hist_df.sort_values("ELECTION DATE")
+        logging.info(
+            "coerced history columns, {} history rows".format(
+                hist_df.shape[0]
+            )
+        )
 
+        logging.info(
+            "Mississippi step 6/8: building each voter's history (election "
+            "names, grouping by voter, election index)"
+        )
         hist_df["combined_name"] = hist_df["ELECTION NAME"].str.replace(
             " ", "_"
         ) + hist_df["ELECTION DATE"].dt.strftime("_%m/%d/%Y")
@@ -102,6 +142,11 @@ class PreprocessMississippi(Preprocessor):
         voter_df["party_history"] = voter_groups["POLITICAL PARTY"].apply(list)
         del voter_groups
         gc.collect()
+        logging.info(
+            "built history for {} voters".format(
+                voter_df["all_history"].notnull().sum()
+            )
+        )
 
         # hist_df is already sorted by date, so unique() is in date order
         sorted_codes = hist_df["combined_name"].unique().tolist()
@@ -128,24 +173,37 @@ class PreprocessMississippi(Preprocessor):
             insert_code_bin
         )
 
+        logging.info(
+            "ordering columns and checking locales"
+        )
         expected_cols = (
             self.config["ordered_columns"]
             + self.config["ordered_generated_columns"]
         )
         voter_df = self.reconcile_columns(voter_df, expected_cols)
         voter_df = voter_df[expected_cols]
+        # The voter id was also the index, which made its label ambiguous
+        voter_df = voter_df.reset_index(drop=True)
 
         # Check the file for all the proper locales
         self.locale_check(
             set(voter_df[self.config["primary_locale_identifier"]]),
         )
+        logging.info("locale check done")
 
+        logging.info(
+            "building metadata and the processed file"
+        )
         self.meta = {
             "message": "mississippi_{}".format(datetime.now().isoformat()),
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-
+        print(sorted_codes_dict)
+        import pandas as pd
+        pd.set_option("display.max_columns", None)
+        print(voter_df)
+        raise ValueError("stopping before write")
         csv_obj = voter_df.to_csv(encoding="utf-8", index=False)
         del voter_df
         gc.collect()

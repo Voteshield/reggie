@@ -42,6 +42,7 @@ precinct_identifier: PRECINCT_CODE
 birthday_identifier: birthday_identifier
 
 registration_date_identifier: EFFECTIVE_REGN_DATE
+last_voted_date_identifier: DATE_VOTED
 
 
 ###############################
@@ -58,10 +59,23 @@ voter_status_active:
 voter_status_inactive:
   - Inactive
 
+# Purged voters are off the rolls
+voter_status_cancelled: Purged
+not_registered_voter_status_set:
+  - Purged
+
 
 ###############################
 # No party data in the file, so this is a dummy column added during preprocessing
 party_identifier: party_identifier
+
+# Party values come from the history file, which is lowercased during preprocessing
+democratic_party: democrat
+republican_party: republican
+other: all other parties
+# Fills the dummy party column in Inspector summaries and missing history
+# parties. Lowercase to match the coerced history values
+no_party_affiliation: 'null'
 
 
 ###############################
