@@ -103,15 +103,21 @@ class PreprocessMississippi(Preprocessor):
         voter_df = self.config.coerce_strings(voter_df)
         voter_df = self.config.coerce_dates(voter_df)
         logging.info("coerced voter columns")
+        logging.info(
+            "status values: {}".format(
+                voter_df[self.config["voter_status"]]
+                .value_counts(dropna=False)
+                .to_dict()
+            )
+        )
 
         logging.info(
-            "Mississippi step 5/8: preparing the history file (dropping rows "
-            "without an election, coercion, sorting by date)"
+            "preparing the history file"
         )
         # Rows without an election are dropped before coercion, which would
         # turn missing values into the string "nan"
         hist_df = hist_df.dropna(subset=["ELECTION NAME", "ELECTION DATE"])
-        # A missing party is recorded as no party, as in Arizona 2
+        # A missing party is recorded as no party, a la az2
         hist_df["POLITICAL PARTY"] = hist_df["POLITICAL PARTY"].fillna(
             self.config["no_party_affiliation"]
         )
@@ -129,8 +135,7 @@ class PreprocessMississippi(Preprocessor):
         )
 
         logging.info(
-            "Mississippi step 6/8: building each voter's history (election "
-            "names, grouping by voter, election index)"
+            "building voter history"
         )
         hist_df["combined_name"] = hist_df["ELECTION NAME"].str.replace(
             " ", "_"
@@ -148,7 +153,6 @@ class PreprocessMississippi(Preprocessor):
             )
         )
 
-        # hist_df is already sorted by date, so unique() is in date order
         sorted_codes = hist_df["combined_name"].unique().tolist()
         counts = hist_df["combined_name"].value_counts()
         del hist_df
