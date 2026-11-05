@@ -199,11 +199,7 @@ class PreprocessMississippi(Preprocessor):
             "array_encoding": json.dumps(sorted_codes_dict),
             "array_decoding": json.dumps(sorted_codes),
         }
-        print(sorted_codes_dict)
-        import pandas as pd
-        pd.set_option("display.max_columns", None)
-        print(voter_df)
-        raise ValueError("stopping before write")
+
         csv_obj = voter_df.to_csv(encoding="utf-8", index=False)
         del voter_df
         gc.collect()
