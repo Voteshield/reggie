@@ -48,25 +48,14 @@ class PreprocessMississippi(Preprocessor):
         if not self.ignore_checks:
             self.file_check(len(new_files))
 
-        # Names vary, e.g. "Weekly Distribution_<user>_<date>_<n>.csv",
-        # "<date> Statewide Voter File Weekly Distribution.csv", and
-        # "<name> Statewide <date>_<user>_<date>_<n>.csv", with the history
-        # file containing "VotingHistory" or "Voting History". Spaces are
-        # removed before matching
+        # the history file always contains "VotingHistory" or "Voting History"
+        # the other file is assumed to be the voter file. 
         hist_file = [
             n
             for n in new_files
             if "votinghistory" in n["name"].lower().replace(" ", "")
         ][0]
-        voter_file = [
-            n
-            for n in new_files
-            if n is not hist_file
-            and any(
-                s in n["name"].lower().replace(" ", "")
-                for s in ["weeklydistribution", "statewide"]
-            )
-        ][0]
+        voter_file = [n for n in new_files if n is not hist_file][0]
         logging.info(
             "voter file {}, history file {}".format(
                 voter_file["name"], hist_file["name"]
@@ -97,6 +86,8 @@ class PreprocessMississippi(Preprocessor):
         voter_df[self.config["birthday_identifier"]] = np.nan
         voter_df[self.config["party_identifier"]] = np.nan
 
+        if "IPD" not in voter_df.columns:
+            voter_df["IPD"] = np.nan
         self.column_check(list(voter_df.columns))
         logging.info("voter column check passed")
 
