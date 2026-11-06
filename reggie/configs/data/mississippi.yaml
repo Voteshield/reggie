@@ -1,0 +1,290 @@
+# Mississippi voter file.
+# The voter ID column is labeled "Mapping Value" in the file.
+# No birth date or party data in the voter file.
+# Vote history is a separate file with one row per voter and election.
+# The US and MS columns only ever hold the literal values "US" and "MS".
+
+
+###############################
+# State name and abbreviation
+state: mississippi
+abbreviation: ms
+
+# Not used but good to have a record of
+file_type: .csv
+delimiter: ','
+source: boe
+file_class: voter_file
+
+format:
+  separate_hist: true
+  segmented_files: true
+
+has_headers: true
+fixed_width: false
+
+# Used in "file_check" during raw file processing
+expected_number_of_files: 2
+
+
+###############################
+# Standard column names
+
+voter_id: Mapping Value
+
+county_identifier: RES_COUNTY
+primary_locale_identifier: RES_COUNTY
+numeric_primary_locale: false
+
+precinct_identifier: PRECINCT_CODE
+
+# No birth date in the file, so this is a dummy column added during preprocessing
+birthday_identifier: birthday_identifier
+
+registration_date_identifier: EFFECTIVE_REGN_DATE
+last_voted_date_identifier: DATE_VOTED
+
+
+###############################
+date_format: '%m/%d/%Y'
+
+
+###############################
+# The column that has voter status.
+voter_status: STATUS
+
+voter_status_active:
+  - Active
+
+voter_status_inactive:
+  - Inactive
+
+# Purged voters are off the rolls
+voter_status_cancelled: Purged
+not_registered_voter_status_set:
+  - Purged
+
+
+###############################
+# No party data in the file, so this is a dummy column added during preprocessing
+party_identifier: party_identifier
+
+# Party values come from the history file, which is lowercased during preprocessing
+democratic_party: democrat
+republican_party: republican
+other: all other parties
+# Fills the dummy party column in Inspector summaries and missing history
+# parties. Lowercase to match the coerced history values
+no_party_affiliation: 'null'
+
+
+###############################
+# A list of which demographics columns are available in this state.
+demographic_fields_available:
+  - status
+
+
+###############################
+# Used to define the compound change_type "name" changes.
+name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - SUFFIX
+
+standard_name_fields:
+  - LAST_NAME
+  - FIRST_NAME
+  - MIDDLE_NAME
+
+# Used to define the compound change_type "address" changes.
+address_fields:
+  - RESIDENTIAL_ADDRESS
+  - HOUSE_NUM
+  - PRE-DIRECTION
+  - STREET_NAME
+  - STREET_TYPE
+  - POST-DIRECTION
+  - RES_CITY
+  - RES_STATE
+  - RES_ZIP_CODE
+  - MAILING_ADDRESS
+  - MAIL_CITY
+  - MAIL_STATE
+  - MAIL_ZIP_CODE
+
+street_address_fields:
+  - HOUSE_NUM
+  - PRE-DIRECTION
+  - STREET_NAME
+  - STREET_TYPE
+  - POST-DIRECTION
+  - RES_CITY
+
+
+###############################
+# Columns in the voter file, plus the dummy birthday and party columns
+columns:
+  Mapping Value: text
+  FIRST_NAME: text
+  MIDDLE_NAME: text
+  LAST_NAME: text
+  SUFFIX: text
+  RESIDENTIAL_ADDRESS: text
+  HOUSE_NUM: text
+  STREET_NAME: text
+  STREET_TYPE: text
+  PRE-DIRECTION: text
+  POST-DIRECTION: text
+  RES_CITY: text
+  RES_STATE: text
+  RES_ZIP_CODE: text
+  RES_COUNTY: text
+  PRECINCT_CODE: text
+  PRECINCT_NAME: text
+  MAILING_ADDRESS: text
+  MAIL_CITY: text
+  MAIL_STATE: text
+  MAIL_ZIP_CODE: text
+  EFFECTIVE_REGN_DATE: date
+  STATUS: text
+  DATE_VOTED: date
+  US: text
+  MS: text
+  CONG: text
+  SC: text
+  PSC: text
+  TC: text
+  DA: text
+  SEN: text
+  REP: text
+  CA: text
+  CHC: text
+  CIR: text
+  CNT: text
+  LEV: text
+  COCT: text
+  JUD: text
+  SCHC: text
+  SCIR: text
+  SUP: text
+  SUPR: text
+  EC: text
+  JC: text
+  JCJ: text
+  CON: text
+  MUN: text
+  WARD: text
+  WARDP: text
+  MP: text
+  SCHD: text
+  SCHB: text
+  SBAL: text
+  FIRE: text
+  FCD: text
+  WSD: text
+  IPD: text
+  birthday_identifier: date
+  party_identifier: text
+
+# Same columns as above, just listed in the order they appear in the file.
+ordered_columns:
+  - Mapping Value
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - SUFFIX
+  - RESIDENTIAL_ADDRESS
+  - HOUSE_NUM
+  - STREET_NAME
+  - STREET_TYPE
+  - PRE-DIRECTION
+  - POST-DIRECTION
+  - RES_CITY
+  - RES_STATE
+  - RES_ZIP_CODE
+  - RES_COUNTY
+  - PRECINCT_CODE
+  - PRECINCT_NAME
+  - MAILING_ADDRESS
+  - MAIL_CITY
+  - MAIL_STATE
+  - MAIL_ZIP_CODE
+  - EFFECTIVE_REGN_DATE
+  - STATUS
+  - DATE_VOTED
+  - US
+  - MS
+  - CONG
+  - SC
+  - PSC
+  - TC
+  - DA
+  - SEN
+  - REP
+  - CA
+  - CHC
+  - CIR
+  - CNT
+  - LEV
+  - COCT
+  - JUD
+  - SCHC
+  - SCIR
+  - SUP
+  - SUPR
+  - EC
+  - JC
+  - JCJ
+  - CON
+  - MUN
+  - WARD
+  - WARDP
+  - MP
+  - SCHD
+  - SCHB
+  - SBAL
+  - FIRE
+  - FCD
+  - WSD
+  - IPD
+  - birthday_identifier
+  - party_identifier
+
+
+###############################
+# History file columns
+hist_columns:
+  - Mapping Value
+  - FIRST_NAME
+  - MIDDLE_NAME
+  - LAST_NAME
+  - SUFFIX
+  - ELECTION NAME
+  - ELECTION TYPE
+  - ELECTION DATE
+  - POLITICAL PARTY
+
+hist_columns_types:
+  Mapping Value: text
+  FIRST_NAME: text
+  MIDDLE_NAME: text
+  LAST_NAME: text
+  SUFFIX: text
+  ELECTION NAME: text
+  ELECTION TYPE: text
+  ELECTION DATE: date
+  POLITICAL PARTY: text
+
+
+###############################
+# History columns generated from the history file
+generated_columns:
+  all_history: text[]
+  sparse_history: int[]
+  party_history: text[]
+
+ordered_generated_columns:
+  - all_history
+  - sparse_history
+  - party_history
