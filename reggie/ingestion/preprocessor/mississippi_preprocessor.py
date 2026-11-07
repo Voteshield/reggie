@@ -112,12 +112,28 @@ class PreprocessMississippi(Preprocessor):
         hist_df["POLITICAL PARTY"] = hist_df["POLITICAL PARTY"].fillna(
             self.config["no_party_affiliation"]
         )
+        raw_election_dates = hist_df["ELECTION DATE"].copy()
         hist_df = self.config.coerce_strings(
             hist_df, col_list="hist_columns_types"
         )
         hist_df = self.config.coerce_dates(
             hist_df, col_list="hist_columns_types"
         )
+        # Coercion turns dates it cannot read, or that are out of range, into
+        # nulls. Those rows are malformed, and would make a null election id
+        unreadable_dates = hist_df["ELECTION DATE"].isnull()
+        if unreadable_dates.any():
+            logging.warning(
+                "dropping {} history rows with an election date that could "
+                "not be read: {}".format(
+                    unreadable_dates.sum(),
+                    raw_election_dates[unreadable_dates]
+                    .value_counts()
+                    .head(20)
+                    .to_dict(),
+                )
+            )
+            hist_df = hist_df[~unreadable_dates]
         hist_df = hist_df.sort_values("ELECTION DATE")
         logging.info(
             "coerced history columns, {} history rows".format(
