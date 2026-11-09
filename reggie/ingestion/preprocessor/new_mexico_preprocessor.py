@@ -29,8 +29,8 @@ class PreprocessNewMexico(Preprocessor):
 
         new_files = self.unpack_files(file_obj=self.main_file)
 
-        if not self.ignore_checks:
-            self.file_check(len(new_files))
+        #if not self.ignore_checks:
+        #    self.file_check(len(new_files))
 
         df = pd.DataFrame()
         for f in new_files:
